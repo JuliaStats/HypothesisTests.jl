@@ -24,8 +24,8 @@
 
 load("Distributions")
 
-module MannWhitneyU
-load("Rmath")
+module Wilcoxon
+include("/usr/local/julia/extras/Rmath.jl")
 using Distributions
 
 export mannwhitneyu, TWO_TAILED, LEFT_TAILED, RIGHT_TAILED
@@ -83,7 +83,6 @@ function mannwhitneyu{S <: Real, T <: Real}(x::Vector{S}, y::Vector{T}, tail::In
 		end
 	end
 
-	minrank = min(ranks)
 	U = sum(ranks[1:n]) - n*(n+1)/2
 	
 	if n_total <= 50 && tieadj == 0
@@ -102,12 +101,12 @@ function mannwhitneyu{S <: Real, T <: Real}(x::Vector{S}, y::Vector{T}, tail::In
 		end
 	elseif n_total <= 10
 		# Compute exact p-value by enumerating all possible ranks in the tied data
-		minrank = min(ranks)
 		le = 0
 		gr = 0
 		tot = 0
+		k = n*(n+1)/2
 		for comb in @task combinations(ranks, n)
-			Up = sum(comb[1:n]) - n*(n+1)/2 - minrank
+			Up = sum(comb[1:n]) - k
 			tot += 1
 			le += Up <= U
 			gr += Up >= U
@@ -117,7 +116,7 @@ function mannwhitneyu{S <: Real, T <: Real}(x::Vector{S}, y::Vector{T}, tail::In
 		elseif tail == RIGHT_TAILED
 			p = gr/tot
 		else
-			p = 2*min([le, gr]/tot)
+			p = 2 * min([le, gr]/tot)
 		end
 	else
 		# Compute approximate p-value
@@ -133,7 +132,43 @@ function mannwhitneyu{S <: Real, T <: Real}(x::Vector{S}, y::Vector{T}, tail::In
 	end
 	return (p, U)
 end
-mannwhitneyu{S <: Real, T <: Real}(x::Vector{S}, y::Vector{T}) =
-	mannwhitneyu(x, y, TWO_TAILED)
+
+# Wilcoxon signed rank test
+function signrank{S <: Real}(x::Vector{S}, tail::Int)
+	n = length(x)
+
+	(ranks, tieadj) = tiedrank(x)
+	w = sum(abs(ranks) .* sign(ranks))
+	
+	if n <= 50 && tieadj == 0
+		# Compute exact p-value using method from Rmath, which is fast but cannot account
+		# for ties in the data
+		if tail == LEFT_TAILED
+			p = psignrank(w, n, true)
+		elseif tail == RIGHT_TAILED
+			p = psignrank(w - 1, n, false)
+		else
+			if w < 0
+				p = 2 * psignrank(w, n, true)
+			else
+				p = 2 * psignrank(w - 1, n, false)
+			end
+		end
+	else
+		# Compute approximate p-value
+		d = Normal(n * (n + 1)/4,
+			sqrt(n * (n + 1) * (2 * n + 1) / 24 - tieadj / 48))
+		if tail == LEFT_TAILED
+			p = cdf(d, w + 1/2)
+		elseif tail == RIGHT_TAILED
+			p = cdf(d, -w - 1/2)
+		else
+			p = 2 * (w < n * (n + 1)/4 ? cdf(d, w + 1/2) : ccdf(d, w - 1/2))
+		end
+	end
+	return (p, w)
+end
+signrank{S <: Real, T <: Real}(x::Vector{S}, y::Vector{T}) =
+	signrank(x - y, TWO_TAILED)
 
 end
