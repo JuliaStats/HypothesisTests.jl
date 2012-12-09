@@ -138,7 +138,8 @@ function signrank{S <: Real}(x::Vector{S}, tail::Int)
 	n = length(x)
 
 	(ranks, tieadj) = tiedrank(x)
-	w = sum(abs(ranks) .* sign(ranks))
+	absranks = abs(ranks)
+	w = sum(absranks .* sign(ranks))
 	
 	if n <= 50 && tieadj == 0
 		# Compute exact p-value using method from Rmath, which is fast but cannot account
@@ -153,6 +154,30 @@ function signrank{S <: Real}(x::Vector{S}, tail::Int)
 			else
 				p = 2 * psignrank(w - 1, n, false)
 			end
+		end
+	elseif n <= 15
+		# Compute exact p-value by enumerating all possible signs in the tied data
+		le = 0
+		gr = 0
+		tot = 2^n
+		for i = 0:tot-1
+			# Interpret bits of i as signs to generate wp for all possible sign
+			# combinations
+			x = i
+			wp = 0
+			for j = 1:n
+				wp += ((x & 1 == 0) * 2 - 1) * absranks[j]
+				x >>= 1
+			end
+			le += wp <= w
+			gr += wp >= w
+		end
+		if tail == LEFT_TAILED
+			p = le/tot
+		elseif tail == RIGHT_TAILED
+			p = gr/tot
+		else
+			p = 2 * min([le, gr]/tot)
 		end
 	else
 		# Compute approximate p-value
