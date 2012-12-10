@@ -27,15 +27,22 @@ load("Distributions")
 module Wilcoxon
 include("/usr/local/julia/extras/Rmath.jl")
 using Distributions
+import Base.repl_show
 
-export mannwhitneyu, TWO_TAILED, LEFT_TAILED, RIGHT_TAILED
+export MannWhitneyUTest, ExactMannWhitneyUTest, ApproximateMannWhitneyUTest,
+	SignedRankTest, ExactSignedRankTest, ApproximateSignedRankTest,
+	test_statistic, p_value, left_p_value, right_p_value
 
-const TWO_TAILED = 0
-const LEFT_TAILED = 1
-const RIGHT_TAILED = 2
+## EXACT MANN-WHITNEY U TEST
 
-# order (aka, rank), resolving ties using the mean rank and computing adjustment
-function tiedrank(v::AbstractArray)
+abstract MannWhitneyUTest
+type ExactMannWhitneyUTest <: MannWhitneyUTest
+	U::Float64
+	p_value::Float64
+end
+
+# Tied rank from Base, modified to compute the adjustment for ties
+function tiedrank_adj(v::AbstractArray)
     n     = length(v)
     place = order(v)
     ord   = Array(Float64, n)
@@ -62,138 +69,277 @@ function tiedrank(v::AbstractArray)
         i = j + 1
     end
 
-    return (ord, tieadj)
+    (ord, tieadj)
 end
 
-# Mann-Whitney U test
-function mannwhitneyu{S <: Real, T <: Real}(x::Vector{S}, y::Vector{T}, tail::Int)
+# Enumerate all possible Mann-Whitney U results for a given vector, determining left-
+# and right-tailed p values
+function mwu_enumerate{S <: Real}(nx::Int, ny::Int, U::Float64, ranks::Vector{S})
+	# Get the other U if inverted by mwu_stats
+	n = min(nx, ny)
+	if ny > nx
+		U = nx*ny - U
+	end
+	le = 0
+	gr = 0
+	tot = 0
+	k = n*(n+1)/2
+	for comb in @task combinations(ranks, n)
+		Up = sum(comb) - k
+		tot += 1
+		le += Up <= U
+		gr += Up >= U
+	end
+	(le/tot, gr/tot)
+end
+
+p_value{S <: Real}(U::Real, ranks::Vector{S}, tieadj::Int, nx::Int, ny::Int, ::Type{ExactMannWhitneyUTest}) =
+	if tieadj == 0
+		# Compute exact p-value using method from Rmath, which is fast but cannot account for ties
+		if U < nx * ny / 2
+			2 * pwilcox(U, nx, ny, true)
+		else
+			2 * pwilcox(U - 1, nx, ny, false)
+		end
+	else
+		# Compute exact p-value by enumerating all possible ranks in the tied data
+		min(1, 2 * min(mwu_enumerate(nx, ny, U, ranks)))
+	end
+left_p_value{S <: Real}(U::Real, ranks::Vector{S}, tieadj::Int, nx::Int, ny::Int, ::Type{ExactMannWhitneyUTest}) =
+	tieadj == 0 ? pwilcox(U, nx, ny, true) : mwu_enumerate(nx, ny, U, ranks)[1]
+right_p_value{S <: Real}(U::Real, ranks::Vector{S}, tieadj::Int, nx::Int, ny::Int, ::Type{ExactMannWhitneyUTest}) =
+	tieadj == 0 ? pwilcox(U - 1, nx, ny, false) : mwu_enumerate(nx, ny, U, ranks)[2]
+
+## APPROXIMATE MANN-WHITNEY U TEST
+
+type ApproximateMannWhitneyUTest <: MannWhitneyUTest
+	U::Float64
+	p_value::Float64
+end
+
+# Get mean and sigma for null distribution of approximate Mann-Whitney U test (without continuity correction)
+mwu_z(U::Real, tieadj::Int, nx::Int, ny::Int) =
+	(U - nx * ny / 2, sqrt((nx * ny * (nx + ny + 1 - tieadj / ((nx + ny) * (nx + ny - 1)))) / 12))
+
+let d = Normal()
+	function p_value{S <: Real}(U::Real, ranks::Vector{S}, tieadj::Int, nx::Int, ny::Int, ::Type{ApproximateMannWhitneyUTest})
+		(mu, sigma) = mwu_z(U, tieadj, nx, ny)
+		2 * ccdf(d, abs(mu - 0.5 * sign(mu))/sigma)
+	end
+	function left_p_value{S <: Real}(U::Real, ranks::Vector{S}, tieadj::Int, nx::Int, ny::Int, ::Type{ApproximateMannWhitneyUTest})
+		(mu, sigma) = mwu_z(U, tieadj, nx, ny)
+		cdf(d, (mu + 0.5)/sigma)
+	end
+	function right_p_value{S <: Real}(U::Real, ranks::Vector{S}, tieadj::Int, nx::Int, ny::Int, ::Type{ApproximateMannWhitneyUTest})
+		(mu, sigma) = mwu_z(U, tieadj, nx, ny)
+		ccdf(d, (mu - 0.5)/sigma)
+	end
+end
+
+## COMMON MANN-WHITNEY U
+
+# Get U, ranks, and tie adjustment for Mann-Whitney U test
+function mwu_stats{S <: Real, T <: Real}(x::Vector{S}, y::Vector{T})
 	nx = length(x)
 	ny = length(y)
-	n_total = nx + ny
-	if nx < ny
-		(ranks, tieadj) = tiedrank([x, y])
-		n = nx
+	if nx <= ny
+		(ranks, tieadj) = tiedrank_adj([x, y])
+		U = sum(ranks[1:nx]) - nx*(nx+1)/2
 	else
-		(ranks, tieadj) = tiedrank([y, x])
-		n = ny
-		if tail == LEFT_TAILED
-			tail = RIGHT_TAILED
-		elseif tail == RIGHT_TAILED
-			tail = LEFT_TAILED
+		(ranks, tieadj) = tiedrank_adj([y, x])
+		U = nx*ny - sum(ranks[1:ny]) + ny*(ny+1)/2
+	end
+	(U, ranks, tieadj, nx, ny)
+end
+
+# Constructors
+for t in (:ExactMannWhitneyUTest, :ApproximateMannWhitneyUTest)
+	@eval begin
+		function $(t){S <: Real, T <: Real}(x::Vector{S}, y::Vector{T})
+			(U, ranks, tieadj, nx, ny) = mwu_stats(x, y)
+			p = p_value(U, ranks, tieadj, nx, ny, $(t))
+			$(t)(U, p)
 		end
 	end
+end
 
-	U = sum(ranks[1:n]) - n*(n+1)/2
-	
-	if n_total <= 50 && tieadj == 0
-		# Compute exact p-value using method from Rmath, which is fast but cannot account
-		# for ties in the data
-		if tail == LEFT_TAILED
-			p = pwilcox(U, nx, ny, true)
-		elseif tail == RIGHT_TAILED
-			p = pwilcox(U - 1, nx, ny, false)
-		else
-			if U < nx * ny / 2
-				p = 2 * pwilcox(U, nx, ny, true)
+# Repl pretty-print
+function repl_show{T <: MannWhitneyUTest}(io::IO, test::T)
+	test_type = isa(test, ExactMannWhitneyUTest) ? "Exact" : "Approximate"
+	print(io, "$test_type Mann-Whitney U test
+
+U = $(test.U), p-value = $(test.p_value)")
+end
+
+# Test statistic and p-values
+test_statistic{S <: Real, T <: Real, U <: MannWhitneyUTest}(x::Vector{S}, y::Vector{T}, ::Type{U}) =
+	mwu_stats(x, y)[1]
+for fn in (:p_value, :left_p_value, :right_p_value)
+	@eval begin
+		$(fn){S <: Real, T <: Real, U <: MannWhitneyUTest}(x::Vector{S}, y::Vector{T}, ::Type{U}) =
+			$(fn)(mwu_stats(x, y)..., U)
+	end
+end
+
+# Automatic exact/normal selection
+for fn in (:p_value, :left_p_value, :right_p_value, :test_statistic)
+	@eval begin
+		function $(fn){S <: Real, T <: Real}(x::Vector{S}, y::Vector{T}, ::Type{MannWhitneyUTest})
+			(U, ranks, tieadj, nx, ny) = mwu_stats(x, y)
+			if nx + ny <= 10 || (nx + ny <= 50 && tieadj == 0)
+				$(fn)(U, ranks, tieadj, nx, ny, ExactMannWhitneyUTest)
 			else
-				p = 2 * pwilcox(U - 1, nx, ny, false)
+				$(fn)(U, ranks, tieadj, nx, ny, ApproximateMannWhitneyUTest)
 			end
 		end
-	elseif n_total <= 10
+	end
+end
+
+## EXACT WILCOXON SIGNED RANK TEST
+
+abstract SignedRankTest
+type ExactSignedRankTest <: SignedRankTest
+	W::Float64
+	p_value::Float64
+end
+
+# Enumerate all possible Mann-Whitney U results for a given vector, determining left-
+# and right-tailed p values
+function signrank_enumerate{T <: Real}(W::Real, ranks::Vector{T})
+	le = 0
+	gr = 0
+	n = length(ranks)
+	tot = 2^n
+	for i = 0:tot-1
+		# Interpret bits of i as signs to generate wp for all possible sign combinations
+		Wp = 0
+		x = i
+		j = 1
+		while x != 0
+			Wp += (x & 1)*ranks[j]
+			j += 1
+			x >>= 1
+		end
+		le += Wp <= W
+		gr += Wp >= W
+	end
+	(le/tot, gr/tot)
+end
+
+p_value{T <: Real}(W::Real, ranks::Vector{T}, n::Int, tieadj::Int, ::Type{ExactSignedRankTest}) =
+	if tieadj == 0 && length(ranks) == n
+		# Compute exact p-value using method from Rmath, which is fast but cannot account for ties
+		if W <= n * (n + 1)/4
+			p = 2 * psignrank(W, n, true)
+		else
+			p = 2 * psignrank(W - 1, n, false)
+		end
+	else
 		# Compute exact p-value by enumerating all possible ranks in the tied data
-		le = 0
-		gr = 0
-		tot = 0
-		k = n*(n+1)/2
-		for comb in @task combinations(ranks, n)
-			Up = sum(comb[1:n]) - k
-			tot += 1
-			le += Up <= U
-			gr += Up >= U
-		end
-		if tail == LEFT_TAILED
-			p = le/tot
-		elseif tail == RIGHT_TAILED
-			p = gr/tot
-		else
-			p = 2 * min([le, gr]/tot)
-		end
-	else
-		# Compute approximate p-value
-		d = Normal(nx * ny / 2,
-			sqrt((nx * ny * (n_total + 1 - tieadj / (n_total * (n_total - 1)))) / 12))
-		if tail == LEFT_TAILED
-			p = cdf(d, U + 1/2)
-		elseif tail == RIGHT_TAILED
-			p = ccdf(d, U - 1/2)
-		else
-			p = 2 * (U < nx * ny / 2 ? cdf(d, U + 1/2) : ccdf(d, U - 1/2))
-		end
+		min(2 * min(signrank_enumerate(W, ranks)...), 1)
 	end
-	return (p, U)
+left_p_value{S <: Real}(W::Real, ranks::Vector{S}, n::Int, tieadj::Int, ::Type{ExactSignedRankTest}) =
+	tieadj == 0 ? psignrank(W, n, true) : signrank_enumerate(W, ranks)[1]
+right_p_value{S <: Real}(W::Real, ranks::Vector{S}, n::Int, tieadj::Int, ::Type{ExactSignedRankTest}) =
+	tieadj == 0 ? psignrank(W - 1, n, false) : signrank_enumerate(W, ranks)[2]
+
+## APPROXIMATE SIGNED RANK TEST
+
+type ApproximateSignedRankTest <: SignedRankTest
+	W::Float64
+	p_value::Float64
 end
 
-# Wilcoxon signed rank test
-function signrank{S <: Real}(x::Vector{S}, tail::Int)
-	n = length(x)
+# Get mean and sigma for null distribution of approximate signed rank test (without continuity correction)
+signrank_z(W::Real, n::Int, tieadj::Int) =
+	(W - n * (n + 1)/4, sqrt(n * (n + 1) * (2 * n + 1) / 24 - tieadj / 48))
 
-	(ranks, tieadj) = tiedrank(x)
-	absranks = abs(ranks)
-	w = sum(absranks .* sign(ranks))
-	
-	if n <= 50 && tieadj == 0
-		# Compute exact p-value using method from Rmath, which is fast but cannot account
-		# for ties in the data
-		if tail == LEFT_TAILED
-			p = psignrank(w, n, true)
-		elseif tail == RIGHT_TAILED
-			p = psignrank(w - 1, n, false)
-		else
-			if w < 0
-				p = 2 * psignrank(w, n, true)
+let d = Normal()
+	function p_value{S <: Real}(W::Real, ranks::Vector{S}, n::Int, tieadj::Int, ::Type{ApproximateSignedRankTest})
+		if length(ranks) == 0
+			return 1
+		end
+		(mu, sigma) = signrank_z(W, length(ranks), tieadj)
+		2 * ccdf(d, abs(mu - 0.5 * sign(mu))/sigma)
+	end
+	function left_p_value{S <: Real}(W::Real, ranks::Vector{S}, n::Int, tieadj::Int, ::Type{ApproximateSignedRankTest})
+		if length(ranks) == 0
+			return 1
+		end
+		(mu, sigma) = signrank_z(W, length(ranks), tieadj)
+		cdf(d, (mu + 0.5)/sigma)
+	end
+	function right_p_value{S <: Real}(W::Real, ranks::Vector{S}, n::Int, tieadj::Int, ::Type{ApproximateSignedRankTest})
+		if length(ranks) == 0
+			return 1
+		end
+		(mu, sigma) = signrank_z(W, length(ranks), tieadj)
+		ccdf(d, (mu - 0.5)/sigma)
+	end
+end
+
+## COMMON SIGNED RANK
+
+# Get W and absolute ranks for signed rank test
+function signrank_stats{S <: Real}(x::Vector{S})
+	nonzero_x = x[x .!= 0]
+	(ranks, tieadj) = tiedrank_adj(abs(nonzero_x))
+	W = 0.0
+	for i = 1:length(nonzero_x)
+		if nonzero_x[i] > 0
+			W += ranks[i]
+		end
+	end
+	(W, ranks, length(x), tieadj)
+end
+
+# Constructors
+for t in (:ExactSignedRankTest, :ApproximateSignedRankTest)
+	@eval begin
+		function $(t){S <: Real}(x::Vector{S})
+			(W, ranks, n, tieadj) = signrank_stats(x)
+			p = p_value(W, ranks, n, tieadj, $(t))
+			$(t)(W, p)
+		end
+
+		$(t){S <: Real, T <: Real}(x::Vector{S}, y::Vector{T}) = $(t)(x - y)
+	end
+end
+
+# Repl pretty-print
+function repl_show{T <: SignedRankTest}(io::IO, test::T)
+	test_type = isa(test, ExactSignedRankTest) ? "Exact" : "Approximate"
+	print(io, "$test_type Wilcoxon Signed Rank test
+
+W = $(test.W), p-value = $(test.p_value)")
+end
+
+# Test statistic and p-values
+test_statistic{S <: Real, U <: SignedRankTest}(x::Vector{S}, ::Type{U}) = signrank_stats(x)[1]
+test_statistic{S <: Real, T <: Real, U <: SignedRankTest}(x::Vector{S}, y::Vector{T}, ::Type{U}) =
+	signrank_stats(x - y)[1]
+for fn in (:p_value, :left_p_value, :right_p_value)
+	@eval begin
+		$(fn){S <: Real, U <: SignedRankTest}(x::Vector{S}, ::Type{U}) =
+			$(fn)(signrank_stats(x)..., U)
+		$(fn){S <: Real, T <: Real, U <: SignedRankTest}(x::Vector{S}, y::Vector{T}, ::Type{U}) =
+			$(fn)(signrank_stats(x - y)..., U)
+	end
+end
+
+# Automatic exact/normal selection
+for fn in (:p_value, :left_p_value, :right_p_value, :test_statistic)
+	@eval begin
+		function $(fn){S <: Real}(x::Vector{S}, ::Type{SignedRankTest})
+			(W, ranks, n, tieadj) = signrank_stats(x)
+			if nx + ny <= 15 || (nx + ny <= 50 && tieadj == 0 &&  length(ranks) == n)
+				$(fn)(W, ranks, n, tieadj, ExactSignedRankTest)
 			else
-				p = 2 * psignrank(w - 1, n, false)
+				$(fn)(W, ranks, n, tieadj, ApproximateMannWhitneyUTest)
 			end
 		end
-	elseif n <= 15
-		# Compute exact p-value by enumerating all possible signs in the tied data
-		le = 0
-		gr = 0
-		tot = 2^n
-		for i = 0:tot-1
-			# Interpret bits of i as signs to generate wp for all possible sign
-			# combinations
-			x = i
-			wp = 0
-			for j = 1:n
-				wp += ((x & 1 == 0) * 2 - 1) * absranks[j]
-				x >>= 1
-			end
-			le += wp <= w
-			gr += wp >= w
-		end
-		if tail == LEFT_TAILED
-			p = le/tot
-		elseif tail == RIGHT_TAILED
-			p = gr/tot
-		else
-			p = 2 * min([le, gr]/tot)
-		end
-	else
-		# Compute approximate p-value
-		d = Normal(n * (n + 1)/4,
-			sqrt(n * (n + 1) * (2 * n + 1) / 24 - tieadj / 48))
-		if tail == LEFT_TAILED
-			p = cdf(d, w + 1/2)
-		elseif tail == RIGHT_TAILED
-			p = cdf(d, -w - 1/2)
-		else
-			p = 2 * (w < n * (n + 1)/4 ? cdf(d, w + 1/2) : ccdf(d, w - 1/2))
-		end
+		$(fn){S <: Real, T <: Real}(x::Vector{S}, y::Vector{S}, ::Type{SignedRankTest}) =
+			$(fn)(x - y, SignedRankTest)
 	end
-	return (p, w)
 end
-signrank{S <: Real, T <: Real}(x::Vector{S}, y::Vector{T}) =
-	signrank(x - y, TWO_TAILED)
-
 end
