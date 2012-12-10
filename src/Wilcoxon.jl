@@ -226,9 +226,12 @@ function signrank_enumerate{T <: Real}(W::Real, ranks::Vector{T})
 	(le/tot, gr/tot)
 end
 
-p_value{T <: Real}(W::Real, ranks::Vector{T}, n::Int, tieadj::Int, ::Type{ExactSignedRankTest}) =
-	if tieadj == 0 && length(ranks) == n
+p_value{T <: Real}(W::Real, ranks::Vector{T}, tieadj::Int, ::Type{ExactSignedRankTest}) = 
+	if length(ranks) == 0
+		1
+	elseif tieadj == 0
 		# Compute exact p-value using method from Rmath, which is fast but cannot account for ties
+		n = length(ranks)
 		if W <= n * (n + 1)/4
 			p = 2 * psignrank(W, n, true)
 		else
@@ -238,10 +241,10 @@ p_value{T <: Real}(W::Real, ranks::Vector{T}, n::Int, tieadj::Int, ::Type{ExactS
 		# Compute exact p-value by enumerating all possible ranks in the tied data
 		min(2 * min(signrank_enumerate(W, ranks)...), 1)
 	end
-left_p_value{S <: Real}(W::Real, ranks::Vector{S}, n::Int, tieadj::Int, ::Type{ExactSignedRankTest}) =
-	tieadj == 0 ? psignrank(W, n, true) : signrank_enumerate(W, ranks)[1]
-right_p_value{S <: Real}(W::Real, ranks::Vector{S}, n::Int, tieadj::Int, ::Type{ExactSignedRankTest}) =
-	tieadj == 0 ? psignrank(W - 1, n, false) : signrank_enumerate(W, ranks)[2]
+left_p_value{S <: Real}(W::Real, ranks::Vector{S}, tieadj::Int, ::Type{ExactSignedRankTest}) =
+	length(ranks) == 0 ? 1 : tieadj == 0 ? psignrank(W, length(ranks), true) : signrank_enumerate(W, ranks)[1]
+right_p_value{S <: Real}(W::Real, ranks::Vector{S}, tieadj::Int, ::Type{ExactSignedRankTest}) =
+	length(ranks) == 0 ? 1 : tieadj == 0 ? psignrank(W - 1, length(ranks), false) : signrank_enumerate(W, ranks)[2]
 
 ## APPROXIMATE SIGNED RANK TEST
 
@@ -255,21 +258,21 @@ signrank_z(W::Real, n::Int, tieadj::Int) =
 	(W - n * (n + 1)/4, sqrt(n * (n + 1) * (2 * n + 1) / 24 - tieadj / 48))
 
 let d = Normal()
-	function p_value{S <: Real}(W::Real, ranks::Vector{S}, n::Int, tieadj::Int, ::Type{ApproximateSignedRankTest})
+	function p_value{S <: Real}(W::Real, ranks::Vector{S}, tieadj::Int, ::Type{ApproximateSignedRankTest})
 		if length(ranks) == 0
 			return 1
 		end
 		(mu, sigma) = signrank_z(W, length(ranks), tieadj)
 		2 * ccdf(d, abs(mu - 0.5 * sign(mu))/sigma)
 	end
-	function left_p_value{S <: Real}(W::Real, ranks::Vector{S}, n::Int, tieadj::Int, ::Type{ApproximateSignedRankTest})
+	function left_p_value{S <: Real}(W::Real, ranks::Vector{S}, tieadj::Int, ::Type{ApproximateSignedRankTest})
 		if length(ranks) == 0
 			return 1
 		end
 		(mu, sigma) = signrank_z(W, length(ranks), tieadj)
 		cdf(d, (mu + 0.5)/sigma)
 	end
-	function right_p_value{S <: Real}(W::Real, ranks::Vector{S}, n::Int, tieadj::Int, ::Type{ApproximateSignedRankTest})
+	function right_p_value{S <: Real}(W::Real, ranks::Vector{S}, tieadj::Int, ::Type{ApproximateSignedRankTest})
 		if length(ranks) == 0
 			return 1
 		end
@@ -290,15 +293,15 @@ function signrank_stats{S <: Real}(x::Vector{S})
 			W += ranks[i]
 		end
 	end
-	(W, ranks, length(x), tieadj)
+	(W, ranks, tieadj)
 end
 
 # Constructors
 for t in (:ExactSignedRankTest, :ApproximateSignedRankTest)
 	@eval begin
 		function $(t){S <: Real}(x::Vector{S})
-			(W, ranks, n, tieadj) = signrank_stats(x)
-			p = p_value(W, ranks, n, tieadj, $(t))
+			(W, ranks, tieadj) = signrank_stats(x)
+			p = p_value(W, ranks, tieadj, $(t))
 			$(t)(W, p)
 		end
 
