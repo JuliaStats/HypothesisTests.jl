@@ -22,24 +22,17 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-load("Distributions")
-
-module Wilcoxon
-include("/usr/local/julia/extras/Rmath.jl")
-using Distributions
-import Base.repl_show
-
 export MannWhitneyUTest, ExactMannWhitneyUTest, ApproximateMannWhitneyUTest,
-	SignedRankTest, ExactSignedRankTest, ApproximateSignedRankTest,
-	test_statistic, p_value, left_p_value, right_p_value
+	SignedRankTest, ExactSignedRankTest, ApproximateSignedRankTest
 
 ## EXACT MANN-WHITNEY U TEST
 
-abstract MannWhitneyUTest
+abstract MannWhitneyUTest <: HypothesisTest
 type ExactMannWhitneyUTest <: MannWhitneyUTest
 	U::Float64
 	p_value::Float64
 end
+test_name(::Type{ExactMannWhitneyUTest}) = "Exact Mann-Whitney U test"
 
 # Tied rank from Base, modified to compute the adjustment for ties
 function tiedrank_adj(v::AbstractArray)
@@ -93,7 +86,7 @@ function mwu_enumerate{S <: Real}(nx::Int, ny::Int, U::Float64, ranks::Vector{S}
 	(le/tot, gr/tot)
 end
 
-p_value{S <: Real}(U::Real, ranks::Vector{S}, tieadj::Int, nx::Int, ny::Int, ::Type{ExactMannWhitneyUTest}) =
+p_value{S <: Real}(::Type{ExactMannWhitneyUTest}, U::Real, ranks::Vector{S}, tieadj::Int, nx::Int, ny::Int) =
 	if tieadj == 0
 		# Compute exact p-value using method from Rmath, which is fast but cannot account for ties
 		if U < nx * ny / 2
@@ -105,9 +98,9 @@ p_value{S <: Real}(U::Real, ranks::Vector{S}, tieadj::Int, nx::Int, ny::Int, ::T
 		# Compute exact p-value by enumerating all possible ranks in the tied data
 		min(1, 2 * min(mwu_enumerate(nx, ny, U, ranks)))
 	end
-left_p_value{S <: Real}(U::Real, ranks::Vector{S}, tieadj::Int, nx::Int, ny::Int, ::Type{ExactMannWhitneyUTest}) =
+left_p_value{S <: Real}(::Type{ExactMannWhitneyUTest}, U::Real, ranks::Vector{S}, tieadj::Int, nx::Int, ny::Int) =
 	tieadj == 0 ? pwilcox(U, nx, ny, true) : mwu_enumerate(nx, ny, U, ranks)[1]
-right_p_value{S <: Real}(U::Real, ranks::Vector{S}, tieadj::Int, nx::Int, ny::Int, ::Type{ExactMannWhitneyUTest}) =
+right_p_value{S <: Real}(::Type{ExactMannWhitneyUTest}, U::Real, ranks::Vector{S}, tieadj::Int, nx::Int, ny::Int) =
 	tieadj == 0 ? pwilcox(U - 1, nx, ny, false) : mwu_enumerate(nx, ny, U, ranks)[2]
 
 ## APPROXIMATE MANN-WHITNEY U TEST
@@ -116,21 +109,22 @@ type ApproximateMannWhitneyUTest <: MannWhitneyUTest
 	U::Float64
 	p_value::Float64
 end
+test_name(::Type{ApproximateMannWhitneyUTest}) = "Approximate Mann-Whitney U test"
 
 # Get mean and sigma for null distribution of approximate Mann-Whitney U test (without continuity correction)
 mwu_z(U::Real, tieadj::Int, nx::Int, ny::Int) =
 	(U - nx * ny / 2, sqrt((nx * ny * (nx + ny + 1 - tieadj / ((nx + ny) * (nx + ny - 1)))) / 12))
 
 let d = Normal()
-	function p_value{S <: Real}(U::Real, ranks::Vector{S}, tieadj::Int, nx::Int, ny::Int, ::Type{ApproximateMannWhitneyUTest})
+	function p_value{S <: Real}(::Type{ApproximateMannWhitneyUTest}, U::Real, ranks::Vector{S}, tieadj::Int, nx::Int, ny::Int)
 		(mu, sigma) = mwu_z(U, tieadj, nx, ny)
 		2 * ccdf(d, abs(mu - 0.5 * sign(mu))/sigma)
 	end
-	function left_p_value{S <: Real}(U::Real, ranks::Vector{S}, tieadj::Int, nx::Int, ny::Int, ::Type{ApproximateMannWhitneyUTest})
+	function left_p_value{S <: Real}(::Type{ApproximateMannWhitneyUTest}, U::Real, ranks::Vector{S}, tieadj::Int, nx::Int, ny::Int)
 		(mu, sigma) = mwu_z(U, tieadj, nx, ny)
 		cdf(d, (mu + 0.5)/sigma)
 	end
-	function right_p_value{S <: Real}(U::Real, ranks::Vector{S}, tieadj::Int, nx::Int, ny::Int, ::Type{ApproximateMannWhitneyUTest})
+	function right_p_value{S <: Real}(::Type{ApproximateMannWhitneyUTest}, U::Real, ranks::Vector{S}, tieadj::Int, nx::Int, ny::Int)
 		(mu, sigma) = mwu_z(U, tieadj, nx, ny)
 		ccdf(d, (mu - 0.5)/sigma)
 	end
@@ -157,39 +151,31 @@ for t in (:ExactMannWhitneyUTest, :ApproximateMannWhitneyUTest)
 	@eval begin
 		function $(t){S <: Real, T <: Real}(x::Vector{S}, y::Vector{T})
 			(U, ranks, tieadj, nx, ny) = mwu_stats(x, y)
-			p = p_value(U, ranks, tieadj, nx, ny, $(t))
+			p = p_value($(t), U, ranks, tieadj, nx, ny)
 			$(t)(U, p)
 		end
 	end
 end
 
-# Repl pretty-print
-function repl_show{T <: MannWhitneyUTest}(io::IO, test::T)
-	test_type = isa(test, ExactMannWhitneyUTest) ? "Exact" : "Approximate"
-	print(io, "$test_type Mann-Whitney U test
-
-U = $(test.U), p-value = $(test.p_value)")
-end
-
 # Test statistic and p-values
-test_statistic{S <: Real, T <: Real, U <: MannWhitneyUTest}(x::Vector{S}, y::Vector{T}, ::Type{U}) =
+test_statistic{S <: Real, T <: Real, U <: MannWhitneyUTest}(::Type{U}, x::Vector{S}, y::Vector{T}) =
 	mwu_stats(x, y)[1]
 for fn in (:p_value, :left_p_value, :right_p_value)
 	@eval begin
-		$(fn){S <: Real, T <: Real, U <: MannWhitneyUTest}(x::Vector{S}, y::Vector{T}, ::Type{U}) =
-			$(fn)(mwu_stats(x, y)..., U)
+		$(fn){S <: Real, T <: Real, U <: MannWhitneyUTest}(::Type{U}, x::Vector{S}, y::Vector{T}) =
+			$(fn)(U, mwu_stats(x, y)...)
 	end
 end
 
 # Automatic exact/normal selection
 for fn in (:p_value, :left_p_value, :right_p_value, :test_statistic)
 	@eval begin
-		function $(fn){S <: Real, T <: Real}(x::Vector{S}, y::Vector{T}, ::Type{MannWhitneyUTest})
+		function $(fn){S <: Real, T <: Real}(::Type{MannWhitneyUTest}, x::Vector{S}, y::Vector{T})
 			(U, ranks, tieadj, nx, ny) = mwu_stats(x, y)
 			if nx + ny <= 10 || (nx + ny <= 50 && tieadj == 0)
-				$(fn)(U, ranks, tieadj, nx, ny, ExactMannWhitneyUTest)
+				$(fn)(ExactMannWhitneyUTest, U, ranks, tieadj, nx, ny)
 			else
-				$(fn)(U, ranks, tieadj, nx, ny, ApproximateMannWhitneyUTest)
+				$(fn)(ApproximateMannWhitneyUTest, U, ranks, tieadj, nx, ny)
 			end
 		end
 	end
@@ -197,11 +183,12 @@ end
 
 ## EXACT WILCOXON SIGNED RANK TEST
 
-abstract SignedRankTest
+abstract SignedRankTest <: HypothesisTest
 type ExactSignedRankTest <: SignedRankTest
 	W::Float64
 	p_value::Float64
 end
+test_name(::Type{ExactSignedRankTest}) = "Exact Wilcoxon signed rank test"
 
 # Enumerate all possible Mann-Whitney U results for a given vector, determining left-
 # and right-tailed p values
@@ -226,7 +213,7 @@ function signrank_enumerate{T <: Real}(W::Real, ranks::Vector{T})
 	(le/tot, gr/tot)
 end
 
-p_value{T <: Real}(W::Real, ranks::Vector{T}, tieadj::Int, ::Type{ExactSignedRankTest}) = 
+p_value{T <: Real}(::Type{ExactSignedRankTest}, W::Real, ranks::Vector{T}, tieadj::Int) = 
 	if length(ranks) == 0
 		1
 	elseif tieadj == 0
@@ -241,9 +228,9 @@ p_value{T <: Real}(W::Real, ranks::Vector{T}, tieadj::Int, ::Type{ExactSignedRan
 		# Compute exact p-value by enumerating all possible ranks in the tied data
 		min(2 * min(signrank_enumerate(W, ranks)...), 1)
 	end
-left_p_value{S <: Real}(W::Real, ranks::Vector{S}, tieadj::Int, ::Type{ExactSignedRankTest}) =
+left_p_value{S <: Real}(::Type{ExactSignedRankTest}, W::Real, ranks::Vector{S}, tieadj::Int) =
 	length(ranks) == 0 ? 1 : tieadj == 0 ? psignrank(W, length(ranks), true) : signrank_enumerate(W, ranks)[1]
-right_p_value{S <: Real}(W::Real, ranks::Vector{S}, tieadj::Int, ::Type{ExactSignedRankTest}) =
+right_p_value{S <: Real}(::Type{ExactSignedRankTest}, W::Real, ranks::Vector{S}, tieadj::Int) =
 	length(ranks) == 0 ? 1 : tieadj == 0 ? psignrank(W - 1, length(ranks), false) : signrank_enumerate(W, ranks)[2]
 
 ## APPROXIMATE SIGNED RANK TEST
@@ -252,27 +239,28 @@ type ApproximateSignedRankTest <: SignedRankTest
 	W::Float64
 	p_value::Float64
 end
+test_name(::Type{ApproximateSignedRankTest}) = "Approximate Wilcoxon signed rank test"
 
 # Get mean and sigma for null distribution of approximate signed rank test (without continuity correction)
 signrank_z(W::Real, n::Int, tieadj::Int) =
 	(W - n * (n + 1)/4, sqrt(n * (n + 1) * (2 * n + 1) / 24 - tieadj / 48))
 
 let d = Normal()
-	function p_value{S <: Real}(W::Real, ranks::Vector{S}, tieadj::Int, ::Type{ApproximateSignedRankTest})
+	function p_value{S <: Real}(::Type{ApproximateSignedRankTest}, W::Real, ranks::Vector{S}, tieadj::Int)
 		if length(ranks) == 0
 			return 1
 		end
 		(mu, sigma) = signrank_z(W, length(ranks), tieadj)
 		2 * ccdf(d, abs(mu - 0.5 * sign(mu))/sigma)
 	end
-	function left_p_value{S <: Real}(W::Real, ranks::Vector{S}, tieadj::Int, ::Type{ApproximateSignedRankTest})
+	function left_p_value{S <: Real}(::Type{ApproximateSignedRankTest}, W::Real, ranks::Vector{S}, tieadj::Int)
 		if length(ranks) == 0
 			return 1
 		end
 		(mu, sigma) = signrank_z(W, length(ranks), tieadj)
 		cdf(d, (mu + 0.5)/sigma)
 	end
-	function right_p_value{S <: Real}(W::Real, ranks::Vector{S}, tieadj::Int, ::Type{ApproximateSignedRankTest})
+	function right_p_value{S <: Real}(::Type{ApproximateSignedRankTest}, W::Real, ranks::Vector{S}, tieadj::Int)
 		if length(ranks) == 0
 			return 1
 		end
@@ -301,7 +289,7 @@ for t in (:ExactSignedRankTest, :ApproximateSignedRankTest)
 	@eval begin
 		function $(t){S <: Real}(x::Vector{S})
 			(W, ranks, tieadj) = signrank_stats(x)
-			p = p_value(W, ranks, tieadj, $(t))
+			p = p_value($(t), W, ranks, tieadj)
 			$(t)(W, p)
 		end
 
@@ -309,40 +297,31 @@ for t in (:ExactSignedRankTest, :ApproximateSignedRankTest)
 	end
 end
 
-# Repl pretty-print
-function repl_show{T <: SignedRankTest}(io::IO, test::T)
-	test_type = isa(test, ExactSignedRankTest) ? "Exact" : "Approximate"
-	print(io, "$test_type Wilcoxon Signed Rank test
-
-W = $(test.W), p-value = $(test.p_value)")
-end
-
 # Test statistic and p-values
-test_statistic{S <: Real, U <: SignedRankTest}(x::Vector{S}, ::Type{U}) = signrank_stats(x)[1]
-test_statistic{S <: Real, T <: Real, U <: SignedRankTest}(x::Vector{S}, y::Vector{T}, ::Type{U}) =
+test_statistic{S <: Real, U <: SignedRankTest}(::Type{U}, x::Vector{S}) = signrank_stats(x)[1]
+test_statistic{S <: Real, T <: Real, U <: SignedRankTest}(::Type{U}, x::Vector{S}, y::Vector{T}) =
 	signrank_stats(x - y)[1]
 for fn in (:p_value, :left_p_value, :right_p_value)
 	@eval begin
-		$(fn){S <: Real, U <: SignedRankTest}(x::Vector{S}, ::Type{U}) =
-			$(fn)(signrank_stats(x)..., U)
-		$(fn){S <: Real, T <: Real, U <: SignedRankTest}(x::Vector{S}, y::Vector{T}, ::Type{U}) =
-			$(fn)(signrank_stats(x - y)..., U)
+		$(fn){S <: Real, U <: SignedRankTest}(::Type{U}, x::Vector{S}) =
+			$(fn)(U, signrank_stats(x)...)
+		$(fn){S <: Real, T <: Real, U <: SignedRankTest}(::Type{U}, x::Vector{S}, y::Vector{T}) =
+			$(fn)(U, signrank_stats(x - y)...)
 	end
 end
 
 # Automatic exact/normal selection
 for fn in (:p_value, :left_p_value, :right_p_value, :test_statistic)
 	@eval begin
-		function $(fn){S <: Real}(x::Vector{S}, ::Type{SignedRankTest})
+		function $(fn){S <: Real}(::Type{SignedRankTest}, x::Vector{S})
 			(W, ranks, n, tieadj) = signrank_stats(x)
 			if nx + ny <= 15 || (nx + ny <= 50 && tieadj == 0 &&  length(ranks) == n)
-				$(fn)(W, ranks, n, tieadj, ExactSignedRankTest)
+				$(fn)(ExactSignedRankTest, W, ranks, n, tieadj)
 			else
-				$(fn)(W, ranks, n, tieadj, ApproximateMannWhitneyUTest)
+				$(fn)(ApproximateMannWhitneyUTest, W, ranks, n, tieadj)
 			end
 		end
-		$(fn){S <: Real, T <: Real}(x::Vector{S}, y::Vector{S}, ::Type{SignedRankTest}) =
+		$(fn){S <: Real, T <: Real}(::Type{SignedRankTest}, x::Vector{S}, y::Vector{S}) =
 			$(fn)(x - y, SignedRankTest)
 	end
-end
 end
