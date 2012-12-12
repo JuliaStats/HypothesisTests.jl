@@ -34,7 +34,6 @@ export test_name, test_statistic, p_value, left_p_value, right_p_value
 
 # Repl pretty-print
 function repl_show{T <: HypothesisTest}(io::IO, test::T)
-	test_type = isa(test, ExactMannWhitneyUTest) ? "Exact" : "Approximate"
 	print(io, "$(test_name(T))\n\n")
 	n = length(T.names)
 	for i  = 1:n
