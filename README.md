@@ -1,8 +1,44 @@
-Wilcoxon.jl
+HypothesisTests.jl
 ===========
 
-This package implements the Wilcoxon signed rank test and rank sum (Mann-Whitney U) test in Julia.
+This package implements several hypothesis tests in Julia.
 
-The rank sum test (```mannwhitneyu```) uses the ```pwilcox``` function from [Rmath](http://www.r-bloggers.com/julia-functions-for-the-rmath-library/) to compute exact p-values when there are <= 50 samples and no tied ranks. If there are tied ranks and <= 10 samples, the test computes the exact p value by enumerating all possible combinations. In all other cases, the test generates a p value using the normal approximation, adjusting the variance for ties.
+## Quick start
 
-The signed rank test (```signrank```) uses the ```psignrank``` function from [Rmath](http://www.r-bloggers.com/julia-functions-for-the-rmath-library/) to compute exact p-values when there are <= 50 samples and no tied ranks. If there are tied ranks and <= 15 samples, the test computes the exact p value by enumerating all possible combinations of signs. For larger samples, or samples with tied ranks, the function uses the normal approximation, adjusting the variance for ties.
+To compute p-values:
+
+```julia
+p_value(MannWhitneyUTest, x, y)
+p_value(SignedRankTest, x, y)
+p_value(SignedRankTest, x)
+p_value(RayleighTest, complex_numbers)
+p_value(RayleighTest, angles_in_radians)
+left_p_value(MannWhitneyUTest, x, y)
+right_p_value(SignedRankTest, x, y)
+```
+
+To compute test statistics:
+
+```julia
+test_statistic(MannWhitneyUTest, x, y)
+```
+
+To show test statistics and p-values:
+
+```julia
+MannWhitneyUTest(x, y)
+SignedRankTest(x, y)
+RayleighTest(x)
+```
+
+## Implementation notes
+
+The rank sum test implementation (```MannWhitneyUTest```) uses the ```pwilcox``` function from [Rmath](http://www.r-bloggers.com/julia-functions-for-the-rmath-library/) to compute exact p-values when there are <= 50 samples and no tied ranks. If there are tied ranks and <= 10 samples, the test computes the exact p value by enumerating all possible combinations. In all other cases, the test generates a p value using the normal approximation, adjusting the variance for ties.
+
+The signed rank test implementation (```SignedRankTest```) uses the ```psignrank``` function from [Rmath](http://www.r-bloggers.com/julia-functions-for-the-rmath-library/) to compute exact p-values when there are <= 50 samples and no tied ranks. If there are tied ranks and <= 15 samples, the test computes the exact p value by enumerating all possible combinations of signs. For larger samples, or samples with tied ranks, the function uses the normal approximation, adjusting the variance for ties.
+
+The Rayleigh test implementation (```RayleighTest```) uses the formula from Fisher, 1993 to compute the p-value.
+
+## Credits
+
+API suggested by [https://github.com/johnmyleswhite](John Myles White).
