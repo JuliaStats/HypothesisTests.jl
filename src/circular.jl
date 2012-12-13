@@ -2,8 +2,8 @@
 # Rayleigh test of randomness against a unimodal alternative
 #
 # For reference see:
-# Statistical Analysis of Circular Data. Cambridge: Cambridge University
-# Press, 1995.
+# N.I. Fisher, Statistical Analysis of Circular Data. Cambridge: Cambridge 
+# University Press, 1995.
 #
 # Copyright (C) 2012   Simon Kornblith
 #
@@ -38,10 +38,10 @@ test_name(::Type{RayleighTest}) = "Rayleigh test"
 
 # Complex numbers
 test_statistic{S <: Complex}(::Type{RayleighTest}, samples::Vector{S}) =
-	abs(sum(samples./abs(samples)))^2/length(samples)
+	float64(abs(sum(samples./abs(samples))))^2/length(samples)
 # Angles (in radians)
 test_statistic{S <: Real}(::Type{RayleighTest}, theta::Vector{S}) =
-	abs(sum(exp(im*theta)))^2/length(theta)
+	float64(abs(sum(exp(im*theta))))^2/length(theta)
 
 # Z given
 function p_value(::Type{RayleighTest}, Z::Float64, n::Int)
@@ -57,9 +57,9 @@ p_value{S <: Number}(::Type{RayleighTest}, samples::Vector{S}) =
 
 function RayleighTest{S <: Number}(samples::Vector{S})
 	if isa(eltype(samples), Complex)
-		s = abs(sum(samples./abs(samples)))
+		s = float64(abs(sum(samples./abs(samples))))
 	else
-		s = abs(sum(exp(im*samples)))
+		s = float64(abs(sum(exp(im*samples))))
 	end
 	n = length(samples)
 	Z = s^2/n
