@@ -46,7 +46,7 @@ function repl_show{T <: HypothesisTest}(io::IO, test::T)
 	end
 end
 
-load("HypothesisTests/src/wilcoxon.jl")
 load("HypothesisTests/src/circular.jl")
-
+load("HypothesisTests/src/wilcoxon.jl")
+load("HypothesisTests/src/t.jl")
 end
