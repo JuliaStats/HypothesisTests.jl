@@ -27,11 +27,5 @@ wind_direction_12pm =
 @test abs(p_value(FisherTLinearAssociation, wind_direction_6am, wind_direction_12pm) - 0.01) < 0.01
 
 # Jammaladak, 2001 example 8.1
-theta = [356, 97, 211, 232, 343, 292, 157,
-	302, 335, 302, 324, 85, 324, 340,
-	157, 238, 254, 146, 232, 122, 329]*pi/180
-phi = [119, 162, 221, 259, 270, 29, 97,
-	292, 40, 313, 94, 45, 47, 108,
-	221, 270, 119, 248, 270, 45, 23]*pi/180
-@test abs(test_statistic(JammaladakCircularCorrelation, theta, phi) - 0.2704648) < 1e-7
-abs(p_value(JammaladakCircularCorrelation, theta, phi) - 0.2247383) < 1e-7
+@test abs(test_statistic(JammaladakCircularCorrelation, wind_direction_6am, wind_direction_12pm) - 0.2704648) < 1e-7
+@test abs(p_value(JammaladakCircularCorrelation, wind_direction_6am, wind_direction_12pm) - 0.2247383) < 1e-7

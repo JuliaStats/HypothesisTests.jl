@@ -213,7 +213,7 @@ end
 
 let dist = Normal()
 	p_value{S <: Real, T <: Real}(::Type{JammaladakCircularCorrelation}, alpha::Vector{S}, beta::Vector{T}) =
-		ccdf(dist, abs(jammaladak_Z(alpha, beta)))
+		2*ccdf(dist, abs(jammaladak_Z(alpha, beta)))
 	left_p_value{S <: Real, T <: Real}(::Type{JammaladakCircularCorrelation}, alpha::Vector{S}, beta::Vector{T}) =
 		cdf(dist, jammaladak_Z(alpha, beta))
 	right_p_value{S <: Real, T <: Real}(::Type{JammaladakCircularCorrelation}, alpha::Vector{S}, beta::Vector{T}) =
