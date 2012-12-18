@@ -313,15 +313,13 @@ end
 # Automatic exact/normal selection
 for fn in (:p_value, :left_p_value, :right_p_value, :test_statistic)
 	@eval begin
-		function $(fn){S <: Real}(::Type{SignedRankTest}, x::Vector{S})
-			(W, ranks, n, tieadj) = signrank_stats(x)
-			if nx + ny <= 15 || (nx + ny <= 50 && tieadj == 0 &&  length(ranks) == n)
-				$(fn)(ExactSignedRankTest, W, ranks, n, tieadj)
+		function $(fn){S <: Real}(::Type{SignedRankTest}, W::Real, ranks::Vector{S}, tieadj::Int)
+			n = length(ranks)
+			if n <= 15 || (n <= 50 && tieadj == 0)
+				$(fn)(ExactSignedRankTest, W, ranks, tieadj)
 			else
-				$(fn)(ApproximateMannWhitneyUTest, W, ranks, n, tieadj)
+				$(fn)(ApproximateSignedRankTest, W, ranks, tieadj)
 			end
 		end
-		$(fn){S <: Real, T <: Real}(::Type{SignedRankTest}, x::Vector{S}, y::Vector{S}) =
-			$(fn)(x - y, SignedRankTest)
 	end
 end

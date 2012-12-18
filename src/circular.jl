@@ -6,7 +6,7 @@
 #     circular data. Biometrika, 70(2), 327–332. doi:10.2307/2335547
 # Fisher, N. I. Statistical Analysis of Circular Data. Cambridge:
 #     Cambridge University Press, 1995.
-# Jammmaladak, S. R. & Sengupta, A. Topics in circular statistics
+# Jammalamadaka, S. R. & SenGupta, A. Topics in circular statistics
 #     vol. 5.  World Scientific, 2001.
 #
 # Copyright (C) 2012   Simon Kornblith
@@ -195,7 +195,7 @@ end
 FisherTLinearAssociation{S <: Number, T <: Number}(theta::Vector{S}, phi::Vector{T}) =
 	FisherTLinearAssociation(test_statistic(FisherTLinearAssociation, theta, phi), p_value(FisherTLinearAssociation, theta, phi))
 
-## JAMMALADAK's CIRCULAR CORRELATION
+## JAMMALAMADAKA'S CIRCULAR CORRELATION
 
 type JammalamadakaCircularCorrelation
 	r::Float64
@@ -224,12 +224,11 @@ function jammalamadaka_Z{S <: Real, T <: Real}(alpha::Vector{S}, beta::Vector{T}
 end
 
 let dist = Normal()
-	global p_value, left_p_value, right_p_value
-	p_value(::Type{JammalamadakaCircularCorrelation}, args...) =
+	p_value{S <: Real, T <: Real}(::Type{JammalamadakaCircularCorrelation}, args...) =
 		2*ccdf(dist, abs(jammalamadaka_Z(args...)[1]))
-	left_p_value(::Type{JammalamadakaCircularCorrelation}, args...) =
+	left_p_value{S <: Real, T <: Real}(::Type{JammalamadakaCircularCorrelation}, alpha::Vector{S}, beta::Vector{T}) =
 		cdf(dist, jammalamadaka_Z(args...)[1])
-	right_p_value(::Type{JammalamadakaCircularCorrelation}, args...) =
+	right_p_value{S <: Real, T <: Real}(::Type{JammalamadakaCircularCorrelation}, alpha::Vector{S}, beta::Vector{T}) =
 		ccdf(dist, jammalamadaka_Z(args...)[1])
 
 	function JammalamadakaCircularCorrelation{S <: Real, T <: Real}(alpha::Vector{S}, beta::Vector{T})
