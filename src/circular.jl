@@ -6,6 +6,8 @@
 #     circular data. Biometrika, 70(2), 327–332. doi:10.2307/2335547
 # Fisher, N. I. Statistical Analysis of Circular Data. Cambridge:
 #     Cambridge University Press, 1995.
+# Jammmaladak, S. R. & Sengupta, A. Topics in circular statistics
+#     vol. 5.  World Scientific, 2001.
 #
 # Copyright (C) 2012   Simon Kornblith
 #
@@ -28,7 +30,7 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-export RayleighTest, TLinearAssociation
+export RayleighTest, FisherTLinearAssociation, JammaladakCircularCorrelation
 
 ## RAYLEIGH TEST OF UNIFORMITY AGAINST AN UNSPECIFIED UNIMODAL ALTERNATIVE
 
@@ -70,17 +72,13 @@ function RayleighTest{S <: Number}(samples::Vector{S})
 	RayleighTest(s/n, Z, p)
 end
 
-## TEST OF T-LINEAR CIRCULAR-CIRCULAR ASSOCIATION
+## N.I. FISHER'S TEST OF T-LINEAR CIRCULAR-CIRCULAR ASSOCIATION
 
-type TLinearAssociation <: HypothesisTest
+type FisherTLinearAssociation <: HypothesisTest
 	rho_t::Float64
 	p_value::Float64
 end
-test_name(::Type{TLinearAssociation}) = "T-linear test of circular-circular association"
-
-check_same_length(x::Vector, y::Vector) = if length(x) != length(y)
-		error("Vectors must be the same length")
-	end
+test_name(::Type{FisherTLinearAssociation}) = "T-linear test of circular-circular association"
 
 # Calculate T from Fisher, 1993
 function tlinear_T{S <: Real, T <: Real}(theta::Vector{S}, phi::Vector{T})
@@ -121,7 +119,7 @@ function tlinear_Z{S <: Real, T <: Real}(rho_t::FloatingPoint, theta::Vector{S},
 end
 
 # Angles (in radians)
-function test_statistic{S <: Real, T <: Real}(::Type{TLinearAssociation}, theta::Vector{S}, phi::Vector{T})
+function test_statistic{S <: Real, T <: Real}(::Type{FisherTLinearAssociation}, theta::Vector{S}, phi::Vector{T})
 	check_same_length(theta, phi)
 	# Notation drawn from Fisher, 1993
 	n = length(theta)
@@ -137,7 +135,7 @@ for (fn, transform, comparison, distfn) in ((:p_value, :abs, :>, :ccdf),
 	                                         (:left_p_value, :+, :<, :cdf),
 	                                         (:right_p_value, :+, :>, :ccdf))
 	@eval begin
-		function $(fn){S <: Real, T <: Real}(::Type{TLinearAssociation}, theta::Vector{S}, phi::Vector{T}, uniformly_distributed::Bool...)
+		function $(fn){S <: Real, T <: Real}(::Type{FisherTLinearAssociation}, theta::Vector{S}, phi::Vector{T}, uniformly_distributed::Bool...)
 			check_same_length(theta, phi)
 			n = length(theta)
 			if n == 0
@@ -171,7 +169,7 @@ for (fn, transform, comparison, distfn) in ((:p_value, :abs, :>, :ccdf),
 				# know whether the distributions of theta and phi are uniform. Otherwise,
 				# the provided p-values are not conservative.
 
-				rho_t = test_statistic(TLinearAssociation, theta, phi)
+				rho_t = test_statistic(FisherTLinearAssociation, theta, phi)
 
 				# "If either distribution has a mean resultant length 0...the statistic has
 				# approximately a double exponential distribution with density 1/2*exp(-abs(x))
@@ -183,13 +181,55 @@ for (fn, transform, comparison, distfn) in ((:p_value, :abs, :>, :ccdf),
 	end
 end
 
+FisherTLinearAssociation{S <: Number, T <: Number}(theta::Vector{S}, phi::Vector{T}) =
+	FisherTLinearAssociation(test_statistic(FisherTLinearAssociation, theta, phi), p_value(FisherTLinearAssociation, theta, phi))
+
+## JAMMALADAK's CIRCULAR CORRELATION
+
+type JammaladakCircularCorrelation
+	r::Float64
+	p_value::Float64
+end
+
+test_statistic{S <: Real, T <: Real}(::Type{JammaladakCircularCorrelation}, alpha::Vector{S}, beta::Vector{T}) = 
+	test_statistic(JammaladakCircularCorrelation, alpha, beta, angle(sum(exp(im*alpha))), angle(sum(exp(im*beta))))
+
+function test_statistic{S <: Real, T <: Real}(::Type{JammaladakCircularCorrelation}, alpha::Vector{S}, beta::Vector{T}, alpha_bar::Real, beta_bar::Real)
+	check_same_length(alpha, beta)
+	sum(sin(alpha - alpha_bar).*sin(beta - beta_bar))/sqrt(sum(sin(alpha - alpha_bar).^2)*sum(sin(beta - beta_bar).^2))
+end
+
+function jammaladak_Z{S <: Real, T <: Real}(alpha::Vector{S}, beta::Vector{T})
+	check_same_length(alpha, beta)
+	alpha_bar = angle(sum(exp(im*alpha)))
+	beta_bar = angle(sum(exp(im*beta)))
+	sin2_alpha = sin(alpha - alpha_bar).^2
+	sin2_beta = sin(beta - beta_bar).^2
+	lambda_20 = mean(sin2_alpha)
+	lambda_02 = mean(sin2_beta)
+	lambda_22 = mean(sin2_alpha.*sin2_beta)
+	sqrt(length(alpha)*lambda_20*lambda_02/lambda_22)*test_statistic(JammaladakCircularCorrelation, alpha, beta, alpha_bar, beta_bar)
+end
+
+let dist = Normal()
+	p_value{S <: Real, T <: Real}(::Type{JammaladakCircularCorrelation}, alpha::Vector{S}, beta::Vector{T}) =
+		ccdf(dist, abs(jammaladak_Z(alpha, beta)))
+	left_p_value{S <: Real, T <: Real}(::Type{JammaladakCircularCorrelation}, alpha::Vector{S}, beta::Vector{T}) =
+		cdf(dist, jammaladak_Z(alpha, beta))
+	right_p_value{S <: Real, T <: Real}(::Type{JammaladakCircularCorrelation}, alpha::Vector{S}, beta::Vector{T}) =
+		ccdf(dist, jammaladak_Z(alpha, beta))
+end
+
+## GENERAL
+
+check_same_length(x::Vector, y::Vector) = if length(x) != length(y)
+		error("Vectors must be the same length")
+	end
+
 # Complex numbers
 for fn in (:test_statistic, :p_value, :left_p_value, :right_p_value)
 	@eval begin
-		$(fn){S <: Complex, T <: Complex}(::Type{TLinearAssociation}, x::Vector{S}, y::Vector{T}) =
-			$(fn)(TLinearAssociation, angle(x), angle(y))
+		$(fn){S <: Complex, T <: Complex}(T::Union(Type{FisherTLinearAssociation}, Type{JammaladakCircularCorrelation}), x::Vector{S}, y::Vector{T}) =
+			$(fn)(T, angle(x), angle(y))
 	end
 end
-
-TLinearAssociation{S <: Number, T <: Number}(theta::Vector{S}, phi::Vector{T}) =
-	TLinearAssociation(test_statistic(TLinearAssociation, theta, phi), p_value(TLinearAssociation, theta, phi))
