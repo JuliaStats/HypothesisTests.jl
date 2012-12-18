@@ -30,7 +30,7 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-export RayleighTest, FisherTLinearAssociation, JammaladakCircularCorrelation
+export RayleighTest, FisherTLinearAssociation, JammalamadakaCircularCorrelation
 
 ## RAYLEIGH TEST OF UNIFORMITY AGAINST AN UNSPECIFIED UNIMODAL ALTERNATIVE
 
@@ -145,14 +145,22 @@ for (fn, transform, comparison, distfn) in ((:p_value, :abs, :>, :ccdf),
 				# distribution is uniform, use a permutation test.
 				
 				# "For n < 25, use a randomisation test based on the quantity T = AB - CD"
-				T = $(transform)(tlinear_T(theta, phi))
+				ct = cos(theta)
+				st = sin(theta)
+				cp = cos(phi)
+				sp = sin(phi)
+				T = sum(ct.*cp)*sum(st.*sp)-sum(ct.*sp)*sum(st.*cp)
 				greater = 0
 
 				if n <= 8
 					# Exact permutation test
 					nperms = factorial(n)
+					indices = [1:n]
 					for i = 1:nperms
-						greater += $(comparison)($(transform)(tlinear_T(nthperm(theta, i), phi)), T)
+						tp = nthperm(indices, i)
+						ctp = ct[tp]
+						stp = st[tp]
+						greater += $(comparison)($(transform)(sum(ctp.*cp)*sum(stp.*sp)-sum(ctp.*sp)*sum(stp.*cp)), T)
 					end
 					return greater / nperms
 				end
@@ -161,7 +169,10 @@ for (fn, transform, comparison, distfn) in ((:p_value, :abs, :>, :ccdf),
 				const nperms = 10000
 				thetap = copy(theta)
 				for i = 1:nperms
-					greater += $(comparison)($(transform)(tlinear_T(shuffle!(thetap), phi)), T)
+					tp = randperm(n)
+					ctp = ct[tp]
+					stp = st[tp]
+					greater += $(comparison)($(transform)(sum(ctp.*cp)*sum(stp.*sp)-sum(ctp.*sp)*sum(stp.*cp)), T)
 				end
 				return greater / nperms
 			else
@@ -186,20 +197,20 @@ FisherTLinearAssociation{S <: Number, T <: Number}(theta::Vector{S}, phi::Vector
 
 ## JAMMALADAK's CIRCULAR CORRELATION
 
-type JammaladakCircularCorrelation
+type JammalamadakaCircularCorrelation
 	r::Float64
 	p_value::Float64
 end
 
-test_statistic{S <: Real, T <: Real}(::Type{JammaladakCircularCorrelation}, alpha::Vector{S}, beta::Vector{T}) = 
-	test_statistic(JammaladakCircularCorrelation, alpha, beta, angle(sum(exp(im*alpha))), angle(sum(exp(im*beta))))
+test_statistic{S <: Real, T <: Real}(::Type{JammalamadakaCircularCorrelation}, alpha::Vector{S}, beta::Vector{T}) = 
+	test_statistic(JammalamadakaCircularCorrelation, alpha, beta, angle(sum(exp(im*alpha))), angle(sum(exp(im*beta))))
 
-function test_statistic{S <: Real, T <: Real}(::Type{JammaladakCircularCorrelation}, alpha::Vector{S}, beta::Vector{T}, alpha_bar::Real, beta_bar::Real)
+function test_statistic{S <: Real, T <: Real}(::Type{JammalamadakaCircularCorrelation}, alpha::Vector{S}, beta::Vector{T}, alpha_bar::Real, beta_bar::Real)
 	check_same_length(alpha, beta)
 	sum(sin(alpha - alpha_bar).*sin(beta - beta_bar))/sqrt(sum(sin(alpha - alpha_bar).^2)*sum(sin(beta - beta_bar).^2))
 end
 
-function jammaladak_Z{S <: Real, T <: Real}(alpha::Vector{S}, beta::Vector{T})
+function jammalamadaka_Z{S <: Real, T <: Real}(alpha::Vector{S}, beta::Vector{T})
 	check_same_length(alpha, beta)
 	alpha_bar = angle(sum(exp(im*alpha)))
 	beta_bar = angle(sum(exp(im*beta)))
@@ -208,17 +219,25 @@ function jammaladak_Z{S <: Real, T <: Real}(alpha::Vector{S}, beta::Vector{T})
 	lambda_20 = mean(sin2_alpha)
 	lambda_02 = mean(sin2_beta)
 	lambda_22 = mean(sin2_alpha.*sin2_beta)
-	sqrt(length(alpha)*lambda_20*lambda_02/lambda_22)*test_statistic(JammaladakCircularCorrelation, alpha, beta, alpha_bar, beta_bar)
+	r = test_statistic(JammalamadakaCircularCorrelation, alpha, beta, alpha_bar, beta_bar)
+	(sqrt(length(alpha)*lambda_20*lambda_02/lambda_22)*r, r)
 end
 
 let dist = Normal()
-	p_value{S <: Real, T <: Real}(::Type{JammaladakCircularCorrelation}, alpha::Vector{S}, beta::Vector{T}) =
-		2*ccdf(dist, abs(jammaladak_Z(alpha, beta)))
-	left_p_value{S <: Real, T <: Real}(::Type{JammaladakCircularCorrelation}, alpha::Vector{S}, beta::Vector{T}) =
-		cdf(dist, jammaladak_Z(alpha, beta))
-	right_p_value{S <: Real, T <: Real}(::Type{JammaladakCircularCorrelation}, alpha::Vector{S}, beta::Vector{T}) =
-		ccdf(dist, jammaladak_Z(alpha, beta))
+	p_value{S <: Real, T <: Real}(::Type{JammalamadakaCircularCorrelation}, args...) =
+		2*ccdf(dist, abs(jammalamadaka_Z(args...)[1]))
+	left_p_value{S <: Real, T <: Real}(::Type{JammalamadakaCircularCorrelation}, alpha::Vector{S}, beta::Vector{T}) =
+		cdf(dist, jammalamadaka_Z(args...)[1])
+	right_p_value{S <: Real, T <: Real}(::Type{JammalamadakaCircularCorrelation}, alpha::Vector{S}, beta::Vector{T}) =
+		ccdf(dist, jammalamadaka_Z(args...)[1])
+
+	function JammalamadakaCircularCorrelation{S <: Real, T <: Real}(alpha::Vector{S}, beta::Vector{T})
+		(Z, r) = jammalamadaka_Z(alpha, beta)
+		JammalamadakaCircularCorrelation(r, 2*ccdf(dist, abs(Z)))
+	end
 end
+JammalamadakaCircularCorrelation{S <: Complex, T <: Complex}(alpha::Vector{S}, beta::Vector{T}) =
+	JammalamadakaCircularCorrelation(angle(alpha), angle(beta))
 
 ## GENERAL
 
@@ -229,7 +248,7 @@ check_same_length(x::Vector, y::Vector) = if length(x) != length(y)
 # Complex numbers
 for fn in (:test_statistic, :p_value, :left_p_value, :right_p_value)
 	@eval begin
-		$(fn){S <: Complex, T <: Complex}(T::Union(Type{FisherTLinearAssociation}, Type{JammaladakCircularCorrelation}), x::Vector{S}, y::Vector{T}) =
+		$(fn){S <: Complex, T <: Complex}(T::Union(Type{FisherTLinearAssociation}, Type{JammalamadakaCircularCorrelation}), x::Vector{S}, y::Vector{T}) =
 			$(fn)(T, angle(x), angle(y))
 	end
 end
