@@ -22,7 +22,7 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-load("Distributions")
+require("Distributions")
 
 module HypothesisTests
 include("$JULIA_HOME/../../extras/Rmath.jl")

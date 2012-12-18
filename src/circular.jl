@@ -4,7 +4,7 @@
 # For reference see:
 # Fisher, N. I., & Lee, A. J. (1983). A correlation coefficient for
 #     circular data. Biometrika, 70(2), 327–332. doi:10.2307/2335547
-# Fisher, N. I., Statistical Analysis of Circular Data. Cambridge:
+# Fisher, N. I. Statistical Analysis of Circular Data. Cambridge:
 #     Cambridge University Press, 1995.
 #
 # Copyright (C) 2012   Simon Kornblith
@@ -92,26 +92,32 @@ function tlinear_T{S <: Real, T <: Real}(theta::Vector{S}, phi::Vector{T})
 end
 
 # For large samples, compute the distribution and statistic of T
-function tlinear_large_sample_dist_and_stat{S <: Real, T <: Real}(theta::Vector{S}, phi::Vector{T})
-	rho_t = test_statistic(TLinearAssociation, theta, phi)
+function tlinear_Z{S <: Real, T <: Real}(rho_t::FloatingPoint, theta::Vector{S}, phi::Vector{T})
+	n = length(theta)
 	theta_resultant = sum(exp(im*theta))
 	phi_resultant = sum(exp(im*phi))
-	if abs(theta_resultant) <= eps() || abs(phi_resultant) <= eps()
-		# "If either distribution has a mean resultant length 0...the statistic has
-		# approximately a double exponential distribution with density 1/2*exp(-abs(x))
-		return (Laplace(), rho_t)
-	end
+	theta_resultant_angle = angle(theta_resultant)
+	phi_resultant_angle = angle(phi_resultant)
+	alpha_2_theta = mean(cos(2*(theta-theta_resultant_angle)))
+	beta_2_theta = mean(sin(2*(theta-theta_resultant_angle)))
+	alpha_2_phi = mean(cos(2*(phi-phi_resultant_angle)))
+	beta_2_phi = mean(sin(2*(phi-phi_resultant_angle)))
+	U_theta = (1-alpha_2_theta^2-beta_2_theta^2)/2
+	U_phi = (1-alpha_2_phi^2-beta_2_phi^2)/2
+	V_theta = (abs2(theta_resultant)/n^2)*(1-alpha_2_theta)
+	V_phi = (abs2(phi_resultant)/n^2)*(1-alpha_2_phi)
+	sqrt(n)*U_theta*U_phi*rho_t/sqrt(V_theta*V_phi)
 
-	alpha_2_theta = mean(cos(2*(theta-angle(theta_resultant))))
-	beta_2_theta = mean(sin(2*(theta-angle(theta_resultant))))
-	alpha_2_phi = mean(cos(2*(phi-angle(phi_resultant))))
-	beta_2_phi = mean(sin(2*(phi-angle(phi_resultant))))
-	U_theta = (1-alpha_2_theta^2-beta_2_theta^2)
-	U_phi = (1-alpha_2_phi^2-beta_2_phi^2)
-	V_theta = abs(theta_resultant/n)^2*(1-alpha_2_theta)
-	V_phi = abs(phi_resultant/n)^2*(1-alpha_2_phi)
-	Z = sqrt(n)*U_theta*U_phi*rho_t/sqrt(V_theta*V_phi)
-	(Normal(), Z)
+	# Alternative computational strategy from Fisher and Lee (1983)
+	# a1 = [mean(cos(theta)), mean(cos(phi))]
+	# b1 = [mean(sin(theta)), mean(sin(phi))]
+	# a2 = [mean(cos(2*(theta))), mean(cos(2*(phi)))]
+	# b2 = [mean(sin(2*(theta))), mean(sin(2*(phi)))]
+	
+	# mu = (1-a2.^2-b2.^2)/2
+	# A = a1.^2 + b1.^2 + a2.*b1.^2 - a1.^2.*a2 - 2a1.*b1.*b2
+
+	# Z = sqrt(n)*prod(mu)*rho_t/sqrt(prod(A))
 end
 
 # Angles (in radians)
@@ -131,10 +137,15 @@ for (fn, transform, comparison, distfn) in ((:p_value, :abs, :>, :ccdf),
 	                                         (:left_p_value, :+, :<, :cdf),
 	                                         (:right_p_value, :+, :>, :ccdf))
 	@eval begin
-		function $(fn){S <: Real, T <: Real}(::Type{TLinearAssociation}, theta::Vector{S}, phi::Vector{T})
+		function $(fn){S <: Real, T <: Real}(::Type{TLinearAssociation}, theta::Vector{S}, phi::Vector{T}, uniformly_distributed::Bool...)
 			check_same_length(theta, phi)
 			n = length(theta)
-			if n < 25
+			if n == 0
+				return NaN
+			elseif n < 25 || length(uniformly_distributed) == 0
+				# If the number of samples is small, or if we don't know whether the 
+				# distribution is uniform, use a permutation test.
+				
 				# "For n < 25, use a randomisation test based on the quantity T = AB - CD"
 				T = $(transform)(tlinear_T(theta, phi))
 				greater = 0
@@ -142,7 +153,7 @@ for (fn, transform, comparison, distfn) in ((:p_value, :abs, :>, :ccdf),
 				if n <= 8
 					# Exact permutation test
 					nperms = factorial(n)
-					for i = 1:maxn
+					for i = 1:nperms
 						greater += $(comparison)($(transform)(tlinear_T(nthperm(theta, i), phi)), T)
 					end
 					return greater / nperms
@@ -155,10 +166,19 @@ for (fn, transform, comparison, distfn) in ((:p_value, :abs, :>, :ccdf),
 					greater += $(comparison)($(transform)(tlinear_T(shuffle!(thetap), phi)), T)
 				end
 				return greater / nperms
-			end
+			else
+				# Use approximate distribution of test statistic. This only works if we
+				# know whether the distributions of theta and phi are uniform. Otherwise,
+				# the provided p-values are not conservative.
 
-			(dist, stat) = tlinear_large_sample_dist_and_stat(theta, phi)
-			p = 2 * $(distfn)(dist, $(transform)(stat))
+				rho_t = test_statistic(TLinearAssociation, theta, phi)
+
+				# "If either distribution has a mean resultant length 0...the statistic has
+				# approximately a double exponential distribution with density 1/2*exp(-abs(x))
+				(dist, stat) = uniformly_distributed[1] ? (Laplace(), n*rho_t) :
+					(Normal(), tlinear_Z(rho_t, theta, phi))
+				p = 2 * $(distfn)(dist, $(transform)(stat))
+			end
 		end
 	end
 end
@@ -167,7 +187,7 @@ end
 for fn in (:test_statistic, :p_value, :left_p_value, :right_p_value)
 	@eval begin
 		$(fn){S <: Complex, T <: Complex}(::Type{TLinearAssociation}, x::Vector{S}, y::Vector{T}) =
-			$(fn)(angle(x), angle(y))
+			$(fn)(TLinearAssociation, angle(x), angle(y))
 	end
 end
 
