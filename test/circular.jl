@@ -27,5 +27,5 @@ wind_direction_12pm =
 @test abs(p_value(FisherTLinearAssociation, wind_direction_6am, wind_direction_12pm) - 0.01) < 0.01
 
 # Jammaladak, 2001 example 8.1
-@test abs(test_statistic(JammaladakCircularCorrelation, wind_direction_6am, wind_direction_12pm) - 0.2704648) < 1e-7
-@test abs(p_value(JammaladakCircularCorrelation, wind_direction_6am, wind_direction_12pm) - 0.2247383) < 1e-7
+@test abs(test_statistic(JammalamadakaCircularCorrelation, wind_direction_6am, wind_direction_12pm) - 0.2704648) < 1e-7
+@test abs(p_value(JammalamadakaCircularCorrelation, wind_direction_6am, wind_direction_12pm) - 0.2247383) < 1e-7

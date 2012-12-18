@@ -224,11 +224,12 @@ function jammalamadaka_Z{S <: Real, T <: Real}(alpha::Vector{S}, beta::Vector{T}
 end
 
 let dist = Normal()
-	p_value{S <: Real, T <: Real}(::Type{JammalamadakaCircularCorrelation}, args...) =
+	global p_value, left_p_value, right_p_value
+	p_value(::Type{JammalamadakaCircularCorrelation}, args...) =
 		2*ccdf(dist, abs(jammalamadaka_Z(args...)[1]))
-	left_p_value{S <: Real, T <: Real}(::Type{JammalamadakaCircularCorrelation}, alpha::Vector{S}, beta::Vector{T}) =
+	left_p_value(::Type{JammalamadakaCircularCorrelation}, args...) =
 		cdf(dist, jammalamadaka_Z(args...)[1])
-	right_p_value{S <: Real, T <: Real}(::Type{JammalamadakaCircularCorrelation}, alpha::Vector{S}, beta::Vector{T}) =
+	right_p_value(::Type{JammalamadakaCircularCorrelation}, args...) =
 		ccdf(dist, jammalamadaka_Z(args...)[1])
 
 	function JammalamadakaCircularCorrelation{S <: Real, T <: Real}(alpha::Vector{S}, beta::Vector{T})
