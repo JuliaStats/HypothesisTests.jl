@@ -128,7 +128,7 @@ test_statistic{T <: Real, S <: Real}(::Type{UnequalVarianceTTest}, x::Vector{T},
     (mean(x) - mean(y))/sd(UnequalVarianceTTest, length(x), var(x), length(y), var(y))
 
 df(::Type{UnequalVarianceTTest}, nx::Int, varx::Real, ny::Int, vary::Real) = 
-    (varx/nx + vary/ny)^2/((varx/nx)^2/(nx - 1) + (vary/ny)^2/(ny - 1))
+    varx == vary == 0 ? nx + ny - 2 : (varx/nx + vary/ny)^2/((varx/nx)^2/(nx - 1) + (vary/ny)^2/(ny - 1))
 df{T <: Real, S <: Real}(::Type{UnequalVarianceTTest}, x::Vector{T}, y::Vector{S}) =
     df(UnequalVarianceTTest, length(x), var(x), length(y), var(y))
 
