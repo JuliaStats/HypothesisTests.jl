@@ -1,5 +1,5 @@
-# Wilcoxon.jl
-# Wilcoxon rank sum (Mann-Whitney U) and signed rank tests in Julia
+# HypothesisTests.jl
+# Hypothesis tests in Julia
 #
 # Copyright (C) 2012   Simon Kornblith
 #
@@ -22,15 +22,12 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-require("Distributions")
-
 module HypothesisTests
-include("$JULIA_HOME/../../extras/Rmath.jl")
-using Distributions
+using Distributions, Rmath
 import Base.repl_show
 
 abstract HypothesisTest
-export test_name, test_statistic, p_value, left_p_value, right_p_value
+export testname, pvalue, leftpvalue, rightpvalue
 
 # Repl pretty-print
 function repl_show{T <: HypothesisTest}(io::IO, test::T)
@@ -46,7 +43,7 @@ function repl_show{T <: HypothesisTest}(io::IO, test::T)
 	end
 end
 
-load("HypothesisTests/src/circular.jl")
-load("HypothesisTests/src/wilcoxon.jl")
-load("HypothesisTests/src/t.jl")
+include("circular.jl")
+include("wilcoxon.jl")
+include("t.jl")
 end
