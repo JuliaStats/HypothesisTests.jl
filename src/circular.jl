@@ -34,72 +34,75 @@ export RayleighTest, FisherTLinearAssociation, JammalamadakaCircularCorrelation
 
 ## RAYLEIGH TEST OF UNIFORMITY AGAINST AN UNSPECIFIED UNIMODAL ALTERNATIVE
 
-type RayleighTest <: HypothesisTest
+immutable RayleighTest <: HypothesisTest
 	Rbar::Float64
-	Z::Float64
-	p_value::Float64
+	n::Int
 end
-test_name(::Type{RayleighTest}) = "Rayleigh test"
-
-# Complex numbers
-test_statistic{S <: Complex}(::Type{RayleighTest}, samples::Vector{S}) =
-	float64(abs(sum(samples./abs(samples))))^2/length(samples)
-# Angles (in radians)
-test_statistic{S <: Real}(::Type{RayleighTest}, theta::Vector{S}) =
-	float64(abs(sum(exp(im*theta))))^2/length(theta)
-
-# Z given
-function p_value(::Type{RayleighTest}, Z::Float64, n::Int)
-	if n < 1e6
-		p = exp(-Z)*(1+(2*Z-Z^2)/(4*n)-(24*Z - 132*Z^2 + 76*Z^3 - 9*Z^4)/(288*n^2))
-	else	# Avoid overflow
-		p = exp(-Z)
-	end
-	p
-end
-p_value{S <: Number}(::Type{RayleighTest}, samples::Vector{S}) =
-	p_value(RayleighTest, test_statistic(RayleighTest, samples), length(samples))
-
-function RayleighTest{S <: Number}(samples::Vector{S})
-	if isa(eltype(samples), Complex)
-		s = float64(abs(sum(samples./abs(samples))))
-	else
-		s = float64(abs(sum(exp(im*samples))))
-	end
+function RayleighTest{S <: Complex}(samples::Vector{S})
+	s = float64(abs(sum(samples./abs(samples))))
 	n = length(samples)
-	Z = s^2/n
-	p = p_value(RayleighTest, Z, length(samples))
-	RayleighTest(s/n, Z, p)
+	Rbar = s/n
+	RayleighTest(Rbar, n)
+end
+function RayleighTest{S <: Real}(samples::Vector{S})
+	s = float64(abs(sum(exp(im*samples))))
+	n = length(samples)
+	Rbar = s/n
+	RayleighTest(Rbar, n)
+end
+
+testname(::RayleighTest) = "Rayleigh test"
+
+function pvalue(x::RayleighTest)
+	Z = x.Rbar^2 * x.n
+	x.n > 1e6 ? exp(-Z) : 
+		exp(-Z)*(1+(2*Z-Z^2)/(4*x.n)-(24*Z - 132*Z^2 + 76*Z^3 - 9*Z^4)/(288*x.n^2))
 end
 
 ## N.I. FISHER'S TEST OF T-LINEAR CIRCULAR-CIRCULAR ASSOCIATION
 
-type FisherTLinearAssociation <: HypothesisTest
+immutable FisherTLinearAssociation{S <: Real, T <: Real} <: HypothesisTest
 	rho_t::Float64
-	p_value::Float64
+	theta::Vector{S}
+	phi::Vector{T}
+	uniformly_distributed::Union(Bool, Nothing)
 end
-test_name(::Type{FisherTLinearAssociation}) = "T-linear test of circular-circular association"
+function FisherTLinearAssociation{S <: Real, T <: Real}(theta::Vector{S},
+		phi::Vector{T}, uniformly_distributed::Union(Bool, Nothing))
+	check_same_length(theta, phi)
 
-# Calculate T from Fisher, 1993
-function tlinear_T{S <: Real, T <: Real}(theta::Vector{S}, phi::Vector{T})
 	A = sum(cos(theta).*cos(phi))
 	B = sum(sin(theta).*sin(phi))
 	C = sum(cos(theta).*sin(phi))
 	D = sum(sin(theta).*cos(phi))
-	A*B-C*D
+	T = A*B-C*D
+
+	# Notation drawn from Fisher, 1993
+	n = length(theta)
+	E = sum(cos(2*theta))
+	F = sum(sin(2*theta))
+	G = sum(cos(2*phi))
+	H = sum(sin(2*phi))
+	rho_t = 4*T/sqrt((n^2 - E^2 - F^2)*(n^2-G^2-H^2))
+	FisherTLinearAssociation(rho_t, theta, phi, uniformly_distributed)
 end
+FisherTLinearAssociation{S <: Real, T <: Real}(theta::Vector{S},
+		phi::Vector{T}) = FisherTLinearAssociation(theta, phi, nothing)
+
+testname(::FisherTLinearAssociation) =
+	"T-linear test of circular-circular association"
 
 # For large samples, compute the distribution and statistic of T
-function tlinear_Z{S <: Real, T <: Real}(rho_t::FloatingPoint, theta::Vector{S}, phi::Vector{T})
-	n = length(theta)
-	theta_resultant = sum(exp(im*theta))
-	phi_resultant = sum(exp(im*phi))
+function tlinear_Z(x::FisherTLinearAssociation)
+	n = length(x.theta)
+	theta_resultant = sum(exp(im*x.theta))
+	phi_resultant = sum(exp(im*x.phi))
 	theta_resultant_angle = angle(theta_resultant)
 	phi_resultant_angle = angle(phi_resultant)
-	alpha_2_theta = mean(cos(2*(theta-theta_resultant_angle)))
-	beta_2_theta = mean(sin(2*(theta-theta_resultant_angle)))
-	alpha_2_phi = mean(cos(2*(phi-phi_resultant_angle)))
-	beta_2_phi = mean(sin(2*(phi-phi_resultant_angle)))
+	alpha_2_theta = mean(cos(2*(x.theta-theta_resultant_angle)))
+	beta_2_theta = mean(sin(2*(x.theta-theta_resultant_angle)))
+	alpha_2_phi = mean(cos(2*(x.phi-phi_resultant_angle)))
+	beta_2_phi = mean(sin(2*(x.phi-phi_resultant_angle)))
 	U_theta = (1-alpha_2_theta^2-beta_2_theta^2)/2
 	U_phi = (1-alpha_2_phi^2-beta_2_phi^2)/2
 	V_theta = (abs2(theta_resultant)/n^2)*(1-alpha_2_theta)
@@ -118,37 +121,24 @@ function tlinear_Z{S <: Real, T <: Real}(rho_t::FloatingPoint, theta::Vector{S},
 	# Z = sqrt(n)*prod(mu)*rho_t/sqrt(prod(A))
 end
 
-# Angles (in radians)
-function test_statistic{S <: Real, T <: Real}(::Type{FisherTLinearAssociation}, theta::Vector{S}, phi::Vector{T})
-	check_same_length(theta, phi)
-	# Notation drawn from Fisher, 1993
-	n = length(theta)
-	E = sum(cos(2*theta))
-	F = sum(sin(2*theta))
-	G = sum(cos(2*phi))
-	H = sum(sin(2*phi))
-	4*tlinear_T(theta, phi)/sqrt((n^2 - E^2 - F^2)*(n^2-G^2-H^2))
-end
-
 # p-values
-for (fn, transform, comparison, distfn) in ((:p_value, :abs, :>, :ccdf),
-	                                         (:left_p_value, :+, :<, :cdf),
-	                                         (:right_p_value, :+, :>, :ccdf))
+for (fn, transform, comparison, distfn) in ((:pvalue, :abs, :>, :ccdf),
+	                                         (:leftpvalue, :+, :<, :cdf),
+	                                         (:rightpvalue, :+, :>, :ccdf))
 	@eval begin
-		function $(fn){S <: Real, T <: Real}(::Type{FisherTLinearAssociation}, theta::Vector{S}, phi::Vector{T}, uniformly_distributed::Bool...)
-			check_same_length(theta, phi)
-			n = length(theta)
+		function $(fn)(x::FisherTLinearAssociation)
+			n = length(x.theta)
 			if n == 0
 				return NaN
-			elseif n < 25 || length(uniformly_distributed) == 0
+			elseif n < 25 || x.uniformly_distributed == nothing
 				# If the number of samples is small, or if we don't know whether the 
 				# distribution is uniform, use a permutation test.
 				
 				# "For n < 25, use a randomisation test based on the quantity T = AB - CD"
-				ct = cos(theta)
-				st = sin(theta)
-				cp = cos(phi)
-				sp = sin(phi)
+				ct = cos(x.theta)
+				st = sin(x.theta)
+				cp = cos(x.phi)
+				sp = sin(x.phi)
 				T = sum(ct.*cp)*sum(st.*sp)-sum(ct.*sp)*sum(st.*cp)
 				greater = 0
 
@@ -167,7 +157,7 @@ for (fn, transform, comparison, distfn) in ((:p_value, :abs, :>, :ccdf),
 
 				# Approximate permutation test
 				const nperms = 10000
-				thetap = copy(theta)
+				thetap = copy(x.theta)
 				for i = 1:nperms
 					tp = randperm(n)
 					ctp = ct[tp]
@@ -180,64 +170,41 @@ for (fn, transform, comparison, distfn) in ((:p_value, :abs, :>, :ccdf),
 				# know whether the distributions of theta and phi are uniform. Otherwise,
 				# the provided p-values are not conservative.
 
-				rho_t = test_statistic(FisherTLinearAssociation, theta, phi)
-
 				# "If either distribution has a mean resultant length 0...the statistic has
-				# approximately a double exponential distribution with density 1/2*exp(-abs(x))
-				(dist, stat) = uniformly_distributed[1] ? (Laplace(), n*rho_t) :
-					(Normal(), tlinear_Z(rho_t, theta, phi))
+				# approximately a double exponential distribution with density 1/2*exp(-abs(x))""
+				(dist, stat) = x.uniformly_distributed ? (Laplace(), n*x.rho_t) :
+					(Normal(), tlinear_Z(x.rho_t, x.theta, x.phi))
 				p = 2 * $(distfn)(dist, $(transform)(stat))
 			end
 		end
 	end
 end
 
-FisherTLinearAssociation{S <: Number, T <: Number}(theta::Vector{S}, phi::Vector{T}) =
-	FisherTLinearAssociation(test_statistic(FisherTLinearAssociation, theta, phi), p_value(FisherTLinearAssociation, theta, phi))
-
 ## JAMMALAMADAKA'S CIRCULAR CORRELATION
 
-type JammalamadakaCircularCorrelation
+immutable JammalamadakaCircularCorrelation <: HypothesisTest
 	r::Float64
-	p_value::Float64
+	Z::Float64
 end
-
-test_statistic{S <: Real, T <: Real}(::Type{JammalamadakaCircularCorrelation}, alpha::Vector{S}, beta::Vector{T}) = 
-	test_statistic(JammalamadakaCircularCorrelation, alpha, beta, angle(sum(exp(im*alpha))), angle(sum(exp(im*beta))))
-
-function test_statistic{S <: Real, T <: Real}(::Type{JammalamadakaCircularCorrelation}, alpha::Vector{S}, beta::Vector{T}, alpha_bar::Real, beta_bar::Real)
-	check_same_length(alpha, beta)
-	sum(sin(alpha - alpha_bar).*sin(beta - beta_bar))/sqrt(sum(sin(alpha - alpha_bar).^2)*sum(sin(beta - beta_bar).^2))
-end
-
-function jammalamadaka_Z{S <: Real, T <: Real}(alpha::Vector{S}, beta::Vector{T})
+function JammalamadakaCircularCorrelation{S <: Real, T <: Real}(alpha::Vector{S}, beta::Vector{T})
 	check_same_length(alpha, beta)
 	alpha_bar = angle(sum(exp(im*alpha)))
 	beta_bar = angle(sum(exp(im*beta)))
+	r = sum(sin(alpha - alpha_bar).*sin(beta - beta_bar))/sqrt(sum(sin(alpha - alpha_bar).^2)*sum(sin(beta - beta_bar).^2))
+
 	sin2_alpha = sin(alpha - alpha_bar).^2
 	sin2_beta = sin(beta - beta_bar).^2
 	lambda_20 = mean(sin2_alpha)
 	lambda_02 = mean(sin2_beta)
 	lambda_22 = mean(sin2_alpha.*sin2_beta)
-	r = test_statistic(JammalamadakaCircularCorrelation, alpha, beta, alpha_bar, beta_bar)
-	(sqrt(length(alpha)*lambda_20*lambda_02/lambda_22)*r, r)
+	Z = sqrt(length(alpha)*lambda_20*lambda_02/lambda_22)*r
+
+	JammalamadakaCircularCorrelation(r, Z)
 end
 
-let dist = Normal()
-	p_value{S <: Real, T <: Real}(::Type{JammalamadakaCircularCorrelation}, args...) =
-		2*ccdf(dist, abs(jammalamadaka_Z(args...)[1]))
-	left_p_value{S <: Real, T <: Real}(::Type{JammalamadakaCircularCorrelation}, alpha::Vector{S}, beta::Vector{T}) =
-		cdf(dist, jammalamadaka_Z(args...)[1])
-	right_p_value{S <: Real, T <: Real}(::Type{JammalamadakaCircularCorrelation}, alpha::Vector{S}, beta::Vector{T}) =
-		ccdf(dist, jammalamadaka_Z(args...)[1])
-
-	function JammalamadakaCircularCorrelation{S <: Real, T <: Real}(alpha::Vector{S}, beta::Vector{T})
-		(Z, r) = jammalamadaka_Z(alpha, beta)
-		JammalamadakaCircularCorrelation(r, 2*ccdf(dist, abs(Z)))
-	end
-end
-JammalamadakaCircularCorrelation{S <: Complex, T <: Complex}(alpha::Vector{S}, beta::Vector{T}) =
-	JammalamadakaCircularCorrelation(angle(alpha), angle(beta))
+pvalue(x::JammalamadakaCircularCorrelation) = min(1, 2*ccdf(Normal(), abs(x.Z)))
+leftpvalue(x::JammalamadakaCircularCorrelation) = cdf(Normal(), x.Z)
+rightpvalue(x::JammalamadakaCircularCorrelation) = ccdf(Normal(), x.Z)
 
 ## GENERAL
 
@@ -246,9 +213,9 @@ check_same_length(x::Vector, y::Vector) = if length(x) != length(y)
 	end
 
 # Complex numbers
-for fn in (:test_statistic, :p_value, :left_p_value, :right_p_value)
+for fn in (:JammalamadakaCircularCorrelation, :FisherTLinearAssociation)
 	@eval begin
-		$(fn){S <: Complex, T <: Complex}(T::Union(Type{FisherTLinearAssociation}, Type{JammalamadakaCircularCorrelation}), x::Vector{S}, y::Vector{T}) =
-			$(fn)(T, angle(x), angle(y))
+		$(fn){S <: Complex, T <: Complex}(x::Vector{S}, y::Vector{T}) =
+			$(fn)(angle(x), angle(y))
 	end
 end
