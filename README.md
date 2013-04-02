@@ -5,30 +5,27 @@ This package implements several hypothesis tests in Julia.
 
 ## Quick start
 
-To compute p-values:
+Some examples:
 
 ```julia
-p_value(MannWhitneyUTest, x, y)
-p_value(SignedRankTest, x, y)
-p_value(SignedRankTest, x)
-p_value(RayleighTest, complex_numbers)
-p_value(RayleighTest, angles_in_radians)
-left_p_value(MannWhitneyUTest, x, y)
-right_p_value(SignedRankTest, x, y)
-```
+using HypothesisTests
 
-To compute test statistics:
+pvalue(OneSampleTTest(x))
+leftpvalue(OneSampleTTest(x))
+rightpvalue(OneSampleTTest(x))
+OneSampleTTest(x).t
+OneSampleTTest(x).df
 
-```julia
-test_statistic(MannWhitneyUTest, x, y)
-```
+pvalue(OneSampleTTest(x, y))
+pvalue(EqualVarianceTTest(x, y))
+pvalue(UnequalVarianceTTest(x, y))
 
-To show test statistics and p-values:
+pvalue(MannWhitneyUTest(x, y))
+pvalue(SignedRankTest(x, y))
+pvalue(SignedRankTest(x))
 
-```julia
-MannWhitneyUTest(x, y)
-SignedRankTest(x, y)
-RayleighTest(x)
+pvalue(RayleighTest(complex_numbers))
+pvalue(RayleighTest(angles_in_radians))
 ```
 
 ## Implementation notes
@@ -41,4 +38,4 @@ RayleighTest(x)
 
 ## Credits
 
-API suggested by [John Myles White](https://github.com/johnmyleswhite).
+Original API suggested by [John Myles White](https://github.com/johnmyleswhite).
