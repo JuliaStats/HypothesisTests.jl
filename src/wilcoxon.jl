@@ -128,23 +128,35 @@ function mwuenumerate(x::ExactMannWhitneyUTest)
     (le/tot, gr/tot)
 end
 
-pvalue(x::ExactMannWhitneyUTest) =
+pvalue(x::ExactMannWhitneyUTest; tail=:both) =
     if x.tie_adjustment == 0
         # Compute exact p-value using method from Rmath, which is fast but
         # cannot account for ties
-        if x.U < x.nx * x.ny / 2
-            2 * pwilcox(x.U, x.nx, x.ny, true)
+        if tail == :both
+            if x.U < x.nx * x.ny / 2
+                2 * pwilcox(x.U, x.nx, x.ny, true)
+            else
+                2 * pwilcox(x.U - 1, x.nx, x.ny, false)
+            end
+        elseif tail == :left
+            pwilcox(x.U, x.nx, x.ny, true)
+        elseif tail == :right
+            pwilcox(x.U - 1, x.nx, x.ny, false)
         else
-            2 * pwilcox(x.U - 1, x.nx, x.ny, false)
+            error("tail=$(tail) is invalid")
         end
     else
         # Compute exact p-value by enumerating possible ranks in the tied data
-        min(1, 2 * min(mwuenumerate(x)))
+        if tail == :both
+            min(1, 2 * min(mwuenumerate(x)))
+        elseif tail == :left
+            mwuenumerate(x)[1]
+        elseif tail == :right
+            mwuenumerate(x)[2]
+        else
+            error("tail=$(tail) is invalid")
+        end
     end
-leftpvalue(x::ExactMannWhitneyUTest) = x.tie_adjustment == 0 ?
-    pwilcox(x.U, x.nx, x.ny, true) : mwuenumerate(x)[1]
-rightpvalue(x::ExactMannWhitneyUTest) = x.tie_adjustment == 0 ?
-    pwilcox(x.U - 1, x.nx, x.ny, false) : mwuenumerate(x)[2]
 
 ## APPROXIMATE MANN-WHITNEY U TEST
 
@@ -167,12 +179,18 @@ ApproximateMannWhitneyUTest{S <: Real, T <: Real}(x::Vector{S}, y::Vector{T}) =
 testname(::Type{ApproximateMannWhitneyUTest}) =
     "Approximate Mann-Whitney U test"
 
-pvalue(x::Union(ApproximateMannWhitneyUTest, ApproximateSignedRankTest)) =
-    x.mu == x.sigma == 0 ? 1 : 2 * ccdf(Normal(), abs(x.mu - 0.5 * sign(x.mu))/x.sigma)
-leftpvalue(x::Union(ApproximateMannWhitneyUTest, ApproximateSignedRankTest)) =
-     x.mu == x.sigma == 0 ? 1 : cdf(Normal(), (x.mu + 0.5)/x.sigma)
-rightpvalue(x::Union(ApproximateMannWhitneyUTest, ApproximateSignedRankTest)) =
-     x.mu == x.sigma == 0 ? 1 : ccdf(Normal(), (x.mu - 0.5)/x.sigma)
+pvalue(x::Union(ApproximateMannWhitneyUTest, ApproximateSignedRankTest); tail=:both) =
+    if x.mu == x.sigma == 0
+        1
+    else
+        if tail == :both
+            2 * ccdf(Normal(), abs(x.mu - 0.5 * sign(x.mu))/x.sigma)
+        elseif tail == :left
+            cdf(Normal(), (x.mu + 0.5)/x.sigma)
+        elseif tail == :right
+            ccdf(Normal(), (x.mu - 0.5)/x.sigma)
+        end
+    end
 
 ## COMMON SIGNED RANK
 
@@ -240,27 +258,34 @@ function signedrankenumerate(x::ExactSignedRankTest)
     (le/tot, gr/tot)
 end
 
-pvalue(x::ExactSignedRankTest) = 
+pvalue(x::ExactSignedRankTest; tail=:both) = 
     if length(x.ranks) == 0
         1
     elseif x.tie_adjustment == 0
         # Compute exact p-value using method from Rmath, which is fast but cannot account for ties
         n = length(x.ranks)
-        if x.W <= n * (n + 1)/4
-            p = 2 * psignrank(x.W, n, true)
-        else
-            p = 2 * psignrank(x.W - 1, n, false)
+        if tail == :both
+            if x.W <= n * (n + 1)/4
+                p = 2 * psignrank(x.W, n, true)
+            else
+                p = 2 * psignrank(x.W - 1, n, false)
+            end
+        elseif tail == :left
+            psignrank(x.W, length(x.ranks), true)
+        elseif tail == :right
+            psignrank(x.W - 1, length(x.ranks), false)
         end
     else
         # Compute exact p-value by enumerating all possible ranks in the tied data
-        min(1, 2 * min(signedrankenumerate(x)))
+        if tail == :both
+            min(1, 2 * min(signedrankenumerate(x)))
+        elseif tail == :left
+            singedrankenumerate(x.W, x.ranks)[1]
+        elseif tail == :right
+            signedrankenumerate(x.W, x.ranks)[2]
+        end
     end
-leftpvalue(x::ExactSignedRankTest) = length(x.ranks) == 0 ? 1 :
-    x.tie_adjustment == 0 ? psignrank(x.W, length(x.ranks), true) :
-    sigedrankenumerate(x.W, x.ranks)[1]
-rightpvalue(x::ExactSignedRankTest) = length(x.ranks) == 0 ? 1 :
-    x.tie_adjustment == 0 ? psignrank(x.W - 1, length(x.ranks), false) :
-    signedrankenumerate(x.W, x.ranks)[2]
+    
 
 ## APPROXIMATE SIGNED RANK TEST
 

@@ -25,34 +25,53 @@
 export OneSampleTTest, TwoSampleTTest, EqualVarianceTTest,
     UnequalVarianceTTest
 
-abstract TTest
+abstract TTest <: HypothesisTest
 abstract TwoSampleTTest <: TTest
 
-function pvalue(x::TTest)
-    dist = TDist(x.df)
-    2 * min(ccdf(dist, x.t), cdf(dist, x.t))
+pvalue(x::TTest; tail=:both) = pvalue(TDist(x.df), x.t; tail=tail)
+
+function ci(x::TTest, alpha::Float64; tail=:both)
+    if alpha <= 0 || alpha >= 1
+        error("alpha $alpha not in range (0, 1)")
+    end
+
+    alpha = min(alpha, 1-alpha)
+
+    if tail == :both
+        alpha /= 2
+    end
+
+    q = quantile(TDist(x.df), alpha)
+
+    if tail == :both
+        ((x.t+q)*x.s, (x.t-q)*x.s)
+    elseif tail == :left
+        (-Inf, (x.t-q)*x.s)
+    elseif tail == :right
+        ((x.t+q)*x.s, Inf)
+    else
+        error("tail=$(tail) is invalid")
+    end
 end
-leftpvalue(x::TTest) = cdf(TDist(x.df), x.t)
-rightpvalue(x::TTest) = ccdf(TDist(x.df), x.t)
 
 ## ONE SAMPLE T-TEST
 
 immutable OneSampleTTest{T <: Real, S <: Real} <: TTest
     t::Float64
     df::T
-    mu::S
+    mu0::S
     s::Float64
 end
-function OneSampleTTest{T <: Real}(v::Vector{T}, mu::Real)
+function OneSampleTTest{T <: Real}(v::Vector{T}, mu0::Real)
     s = std(v)/sqrt(length(v))
-    OneSampleTTest((mean(v)-mu)/s, length(v)-1, mu, s)
+    OneSampleTTest((mean(v)-mu0)/s, length(v)-1, mu0, s)
 end
 function OneSampleTTest{T <: Real, S <: Real}(x::Vector{T}, y::Vector{S},
-                                              mu::Real)
+                                              mu0::Real)
     if length(x) != length(y)
         error("x and y must be the same length")
     end
-    OneSampleTTest(x - y, mu)
+    OneSampleTTest(x - y, mu0)
 end
 OneSampleTTest{T <: Real}(t::Float64, df::T) = OneSampleTTest(t, df, 0, 1)
 OneSampleTTest{T <: Real}(v::Vector{T}) = OneSampleTTest(v, 0)

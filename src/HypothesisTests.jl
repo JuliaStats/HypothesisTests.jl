@@ -26,8 +26,23 @@ module HypothesisTests
 using Distributions, Rmath
 import Base.repl_show
 
+export testname, pvalue, ci
 abstract HypothesisTest
-export testname, pvalue, leftpvalue, rightpvalue
+
+# Basic function for finding a p-value given a distribution and tail
+pvalue(dist::Distributions.Distribution, x::Number; tail=:both) = 
+	if tail == :both
+		2 * min(cdf(dist, x), ccdf(dist, x), 0.5)
+	elseif tail == :left
+		cdf(dist, x)
+	elseif tail == :right
+		ccdf(dist, x)
+	else
+		error("tail=$(tail) is invalid")
+	end
+
+# Default alpha is 0.05
+ci(t::HypothesisTest; tail=:both) = ci(t, 0.05; tail=tail)
 
 # Repl pretty-print
 function repl_show{T <: HypothesisTest}(io::IO, test::T)

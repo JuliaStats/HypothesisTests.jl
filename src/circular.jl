@@ -125,57 +125,46 @@ end
 for (fn, transform, comparison, distfn) in ((:pvalue, :abs, :>, :ccdf),
 	                                         (:leftpvalue, :+, :<, :cdf),
 	                                         (:rightpvalue, :+, :>, :ccdf))
-	@eval begin
-		function $(fn)(x::FisherTLinearAssociation)
-			n = length(x.theta)
-			if n == 0
-				return NaN
-			elseif n < 25 || x.uniformly_distributed == nothing
-				# If the number of samples is small, or if we don't know whether the 
-				# distribution is uniform, use a permutation test.
-				
-				# "For n < 25, use a randomisation test based on the quantity T = AB - CD"
-				ct = cos(x.theta)
-				st = sin(x.theta)
-				cp = cos(x.phi)
-				sp = sin(x.phi)
-				T = sum(ct.*cp)*sum(st.*sp)-sum(ct.*sp)*sum(st.*cp)
-				greater = 0
+	function pvalue(x::FisherTLinearAssociation; tail=:both)
+		n = length(x.theta)
+		if n == 0
+			return NaN
+		elseif n < 25 || x.uniformly_distributed == nothing
+			# If the number of samples is small, or if we don't know whether the 
+			# distribution is uniform, use a permutation test.
+			
+			# "For n < 25, use a randomisation test based on the quantity T = AB - CD"
+			ct = cos(x.theta)
+			st = sin(x.theta)
+			cp = cos(x.phi)
+			sp = sin(x.phi)
+			T = sum(ct.*cp)*sum(st.*sp)-sum(ct.*sp)*sum(st.*cp)
+			greater = 0
 
-				if n <= 8
-					# Exact permutation test
-					nperms = factorial(n)
-					indices = [1:n]
-					for i = 1:nperms
-						tp = nthperm(indices, i)
-						ctp = ct[tp]
-						stp = st[tp]
-						greater += $(comparison)($(transform)(sum(ctp.*cp)*sum(stp.*sp)-sum(ctp.*sp)*sum(stp.*cp)), T)
-					end
-					return greater / nperms
-				end
-
-				# Approximate permutation test
-				const nperms = 10000
-				thetap = copy(x.theta)
-				for i = 1:nperms
-					tp = randperm(n)
-					ctp = ct[tp]
-					stp = st[tp]
-					greater += $(comparison)($(transform)(sum(ctp.*cp)*sum(stp.*sp)-sum(ctp.*sp)*sum(stp.*cp)), T)
-				end
-				return greater / nperms
-			else
-				# Use approximate distribution of test statistic. This only works if we
-				# know whether the distributions of theta and phi are uniform. Otherwise,
-				# the provided p-values are not conservative.
-
-				# "If either distribution has a mean resultant length 0...the statistic has
-				# approximately a double exponential distribution with density 1/2*exp(-abs(x))""
-				(dist, stat) = x.uniformly_distributed ? (Laplace(), n*x.rho_t) :
-					(Normal(), tlinear_Z(x.rho_t, x.theta, x.phi))
-				p = 2 * $(distfn)(dist, $(transform)(stat))
+			exact = n <= 8
+			nperms = exact ? factorial(n) : 10000
+			indices = [1:n]
+			for i = 1:nperms
+				tp = exact ? nthperm(indices, i) : randperm(n)
+				ctp = ct[tp]
+				stp = st[tp]
+				Tp = sum(ctp.*cp)*sum(stp.*sp)-sum(ctp.*sp)*sum(stp.*cp)
+				greater += tail == :both ? abs(Tp) > T :
+				           tail == :left ? Tp < T :
+				           tail == :right ? Tp > T :
+				           error("tail=$(tail) is invalid")
 			end
+			greater / nperms
+		else
+			# Use approximate distribution of test statistic. This only works if we
+			# know whether the distributions of theta and phi are uniform. Otherwise,
+			# the provided p-values are not conservative.
+
+			# "If either distribution has a mean resultant length 0...the statistic has
+			# approximately a double exponential distribution with density 1/2*exp(-abs(x))""
+			(dist, stat) = x.uniformly_distributed ? (Laplace(), n*x.rho_t) :
+				(Normal(), tlinear_Z(x.rho_t, x.theta, x.phi))
+			return pvalue(dist, stat; tail=tail)
 		end
 	end
 end
@@ -202,9 +191,7 @@ function JammalamadakaCircularCorrelation{S <: Real, T <: Real}(alpha::Vector{S}
 	JammalamadakaCircularCorrelation(r, Z)
 end
 
-pvalue(x::JammalamadakaCircularCorrelation) = min(1, 2*ccdf(Normal(), abs(x.Z)))
-leftpvalue(x::JammalamadakaCircularCorrelation) = cdf(Normal(), x.Z)
-rightpvalue(x::JammalamadakaCircularCorrelation) = ccdf(Normal(), x.Z)
+pvalue(x::JammalamadakaCircularCorrelation; tail=:both) = pvalue(Normal(), x.Z; tail=tail)
 
 ## GENERAL
 
