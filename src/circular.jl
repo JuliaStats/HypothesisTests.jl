@@ -195,10 +195,6 @@ pvalue(x::JammalamadakaCircularCorrelation; tail=:both) = pvalue(Normal(), x.Z; 
 
 ## GENERAL
 
-check_same_length(x::Vector, y::Vector) = if length(x) != length(y)
-		error("Vectors must be the same length")
-	end
-
 # Complex numbers
 for fn in (:JammalamadakaCircularCorrelation, :FisherTLinearAssociation)
 	@eval begin

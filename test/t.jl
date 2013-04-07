@@ -10,6 +10,9 @@ tst = OneSampleTTest([-5:10])
 @test abs(pvalue(tst; tail=:left) - 0.9735) <= 1e-4
 @test abs(pvalue(tst; tail=:right) - 0.0265) <= 1e-4
 
+tst = OneSampleTTest(mean([-5:10]), std([-5:10]), 16)
+@test abs(pvalue(tst) - 0.0530) <= 1e-4
+
 @test all(abs([ci(tst)...] - [-0.0369, 5.0369]) .<= 1e-4)
 @test all(abs([ci(tst, 0.1)...] - [0.4135, 4.5865]) .<= 1e-4)
 c = ci(tst; tail=:left)

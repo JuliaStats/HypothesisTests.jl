@@ -30,7 +30,7 @@ abstract TwoSampleTTest <: TTest
 
 pvalue(x::TTest; tail=:both) = pvalue(TDist(x.df), x.t; tail=tail)
 
-function ci(x::TTest, alpha::Float64; tail=:both)
+function ci(x::TTest, alpha::Float64=0.05; tail=:both)
     if alpha <= 0 || alpha >= 1
         error("alpha $alpha not in range (0, 1)")
     end
@@ -56,27 +56,21 @@ end
 
 ## ONE SAMPLE T-TEST
 
-immutable OneSampleTTest{T <: Real, S <: Real} <: TTest
+immutable OneSampleTTest{T <: Real} <: TTest
     t::Float64
     df::T
-    mu0::S
     s::Float64
 end
-function OneSampleTTest{T <: Real}(v::Vector{T}, mu0::Real)
-    s = std(v)/sqrt(length(v))
-    OneSampleTTest((mean(v)-mu0)/s, length(v)-1, mu0, s)
+function OneSampleTTest(xbar::Real, stdev::Real, n::Int; mu0::Real=0)
+    s = stdev/sqrt(n)
+    OneSampleTTest((xbar-mu0)/s, n-1, s)
 end
-function OneSampleTTest{T <: Real, S <: Real}(x::Vector{T}, y::Vector{S},
-                                              mu0::Real)
-    if length(x) != length(y)
-        error("x and y must be the same length")
-    end
-    OneSampleTTest(x - y, mu0)
+OneSampleTTest{T <: Real}(v::Vector{T}; kwargs...) =
+    OneSampleTTest(mean(v), std(v), length(v); kwargs...) 
+function OneSampleTTest{T <: Real, S <: Real}(x::Vector{T}, y::Vector{S}; kwargs...)
+    check_same_length(x, y)
+    OneSampleTTest(x - y; kwargs...)
 end
-OneSampleTTest{T <: Real}(t::Float64, df::T) = OneSampleTTest(t, df, 0, 1)
-OneSampleTTest{T <: Real}(v::Vector{T}) = OneSampleTTest(v, 0)
-OneSampleTTest{T <: Real, S <: Real}(x::Vector{T}, y::Vector{S}) =
-    OneSampleTTest(x, y, 0)
 testname(::OneSampleTTest) = "One sample t-test"
 
 ## EQUAL VARIANCE T-TEST

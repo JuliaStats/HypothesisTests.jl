@@ -29,6 +29,10 @@ import Base.repl_show
 export testname, pvalue, ci
 abstract HypothesisTest
 
+check_same_length(x::Vector, y::Vector) = if length(x) != length(y)
+		error("Vectors must be the same length")
+	end
+
 # Basic function for finding a p-value given a distribution and tail
 pvalue(dist::Distributions.Distribution, x::Number; tail=:both) = 
 	if tail == :both
@@ -40,9 +44,6 @@ pvalue(dist::Distributions.Distribution, x::Number; tail=:both) =
 	else
 		error("tail=$(tail) is invalid")
 	end
-
-# Default alpha is 0.05
-ci(t::HypothesisTest; tail=:both) = ci(t, 0.05; tail=tail)
 
 # Repl pretty-print
 function repl_show{T <: HypothesisTest}(io::IO, test::T)
