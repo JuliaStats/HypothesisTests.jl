@@ -1,4 +1,4 @@
-using HypothesisTests, Test
+using HypothesisTests, Base.Test
 
 ## MANN-WHITNEY U
 
@@ -28,6 +28,10 @@ using HypothesisTests, Test
 @test abs(pvalue(ApproximateMannWhitneyUTest([1:10], [1:5, ones(5)])) - 0.0076) <= 1e-4
 @test abs(pvalue(ApproximateMannWhitneyUTest([1:5, ones(5)], [1:10])) - 0.0076) <= 1e-4
 
+# Tests for automatic selection
+@test abs(pvalue(MannWhitneyUTest([1:10], [2.1:2:21])) - 0.0232) <= 1e-4
+@test abs(pvalue(MannWhitneyUTest([1:10], [2:11])) - 0.4948) <= 1e-4
+
 ## WILCOXON SIGNED RANK
 
 # Basic exact test
@@ -55,3 +59,7 @@ using HypothesisTests, Test
 @test abs(pvalue(ApproximateSignedRankTest([2:11], [1:10])) - 0.001904) <= 1e-6
 @test abs(pvalue(ApproximateSignedRankTest([1:10], [1:5, ones(5)])) - 0.05906) <= 1e-5
 @test abs(pvalue(ApproximateSignedRankTest([1:5, ones(5)], [1:10])) - 0.05906) <= 1e-5
+
+# Tests for automatic selection
+@test abs(pvalue(SignedRankTest([1:10], [2:2:20])) - 0.0020) <= 1e-4
+@test abs(pvalue(SignedRankTest([1:10], [2:11])) - 0.0020) <= 1e-4

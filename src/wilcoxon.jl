@@ -85,11 +85,11 @@ end
 
 # Automatic exact/normal selection
 function MannWhitneyUTest{S <: Real, T <: Real}(x::Vector{S}, y::Vector{T})
-    stats = mwustats(x, y)
+    (U, ranks, tieadj, nx, ny) = mwustats(x, y)
     if nx + ny <= 10 || (nx + ny <= 50 && tieadj == 0)
-        ExactMannWhitneyUTest(stats...)
+        ExactMannWhitneyUTest(U, ranks, tieadj, nx, ny)
     else
-        ApproximateMannWhitneyUTest(stats...)
+        ApproximateMannWhitneyUTest(U, ranks, tieadj, nx, ny)
     end
 end
 
@@ -210,7 +210,7 @@ end
 
 # Automatic exact/normal selection
 function SignedRankTest{T <: Real}(x::Vector{T})
-    (W, ranks, tie_adjustment) = signedrankstats(x, ranks)
+    (W, ranks, tie_adjustment) = signedrankstats(x)
     n = length(ranks)
     if n <= 15 || (n <= 50 && tieadj == 0)
         ExactSignedRankTest(W, ranks, tie_adjustment)
