@@ -1,4 +1,4 @@
-using HypothesisTests, Test
+using HypothesisTests, Base.Test
 
 # Fisher, 1995 example 4.11
 @test abs(pvalue(RayleighTest(0.2370, 60)) - 0.034) <= 0.001

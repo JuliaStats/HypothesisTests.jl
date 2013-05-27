@@ -23,7 +23,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 module HypothesisTests
-using Distributions, Rmath
+using Distributions
 import Base.repl_show
 
 export testname, pvalue, ci

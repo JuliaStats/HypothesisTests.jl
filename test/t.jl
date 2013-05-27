@@ -1,4 +1,4 @@
-using HypothesisTests, Test
+using HypothesisTests, Base.Test
 
 ## ONE SAMPLE T-TEST
 
