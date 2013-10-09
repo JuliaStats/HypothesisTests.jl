@@ -59,6 +59,7 @@ function repl_show{T <: HypothesisTest}(io::IO, test::T)
 	end
 end
 
+include("binomial.jl")
 include("circular.jl")
 include("wilcoxon.jl")
 include("t.jl")

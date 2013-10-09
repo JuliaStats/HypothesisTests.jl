@@ -23,7 +23,40 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 export MannWhitneyUTest, ExactMannWhitneyUTest, ApproximateMannWhitneyUTest,
-    SignedRankTest, ExactSignedRankTest, ApproximateSignedRankTest
+    SignedRankTest, ExactSignedRankTest, ApproximateSignedRankTest,
+    SignTest
+
+# PROBABILITY FUNCTIONS
+macro libRmath_deferred_free(base)
+    libcall = symbol(string(base, "_free"))
+    func = symbol(string(base, "_deferred_free"))
+    quote
+        let gc_tracking_obj = []
+            global $func
+            function $libcall(x::Vector{None})
+                gc_tracking_obj = []
+                ccall(($(string(libcall)),:libRmath), Void, ())
+            end
+            function $func()
+                if !isa(gc_tracking_obj, Bool)
+                    finalizer(gc_tracking_obj, $libcall)
+                    gc_tracking_obj = false
+                end
+            end
+        end
+    end
+end
+
+@libRmath_deferred_free signrank
+function psignrank(q::Number, p1::Number, lower_tail::Bool, log_p::Bool=false)
+    signrank_deferred_free()
+    ccall((:psignrank,:libRmath), Float64, (Float64,Float64,Int32,Int32), q, p1, lower_tail, log_p)
+end
+@libRmath_deferred_free wilcox
+function pwilcox(q::Number, p1::Number, p2::Number, lower_tail::Bool, log_p::Bool=false)
+    wilcox_deferred_free()
+    ccall((:pwilcox,:libRmath), Float64, (Float64,Float64,Float64,Int32,Int32), q, p1, p2, lower_tail, log_p)
+end
 
 # RMATH WRAPPERS
 macro rmath_deferred_free(base)
@@ -155,7 +188,7 @@ function mwuenumerate(x::ExactMannWhitneyUTest)
     gr = 0
     tot = 0
     k = n*(n+1)/2
-    for comb in @task combinations(x.ranks, n)
+    for comb in combinations(x.ranks, n)
         Up = sum(comb) - k
         tot += 1
         le += Up <= x.U
