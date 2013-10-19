@@ -217,7 +217,7 @@ pvalue(x::ExactMannWhitneyUTest; tail=:both) =
     else
         # Compute exact p-value by enumerating possible ranks in the tied data
         if tail == :both
-            min(1, 2 * min(mwuenumerate(x)))
+            min(1, 2 * minimum(mwuenumerate(x)))
         elseif tail == :left
             mwuenumerate(x)[1]
         elseif tail == :right
@@ -347,7 +347,7 @@ pvalue(x::ExactSignedRankTest; tail=:both) =
     else
         # Compute exact p-value by enumerating all possible ranks in the tied data
         if tail == :both
-            min(1, 2 * min(signedrankenumerate(x)))
+            min(1, 2 * minimum(signedrankenumerate(x)))
         elseif tail == :left
             singedrankenumerate(x.W, x.ranks)[1]
         elseif tail == :right
