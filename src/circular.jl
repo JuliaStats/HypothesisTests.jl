@@ -67,8 +67,8 @@ immutable FisherTLinearAssociation{S <: Real, T <: Real} <: HypothesisTest
 	phi::Vector{T}
 	uniformly_distributed::Union(Bool, Nothing)
 end
-function FisherTLinearAssociation{S <: Real, T <: Real}(theta::Vector{S},
-		phi::Vector{T}, uniformly_distributed::Union(Bool, Nothing))
+function FisherTLinearAssociation{Stheta <: Real, Sphi <: Real}(theta::Vector{Stheta},
+		phi::Vector{Sphi}, uniformly_distributed::Union(Bool, Nothing))
 	check_same_length(theta, phi)
 
 	A = sum(cos(theta).*cos(phi))
