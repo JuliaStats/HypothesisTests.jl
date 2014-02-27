@@ -26,6 +26,8 @@ export MannWhitneyUTest, ExactMannWhitneyUTest, ApproximateMannWhitneyUTest,
     SignedRankTest, ExactSignedRankTest, ApproximateSignedRankTest,
     SignTest
 
+const libRmath = VERSION >= v"0.3.0-" ? "libRmath-julia" : "libRmath"
+
 # PROBABILITY FUNCTIONS
 macro libRmath_deferred_free(base)
     libcall = symbol(string(base, "_free"))
@@ -35,7 +37,7 @@ macro libRmath_deferred_free(base)
             global $func
             function $libcall(x::Vector{None})
                 gc_tracking_obj = []
-                ccall(($(string(libcall)),:libRmath), Void, ())
+                ccall(($(string(libcall)),libRmath), Void, ())
             end
             function $func()
                 if !isa(gc_tracking_obj, Bool)
@@ -50,12 +52,12 @@ end
 @libRmath_deferred_free signrank
 function psignrank(q::Number, p1::Number, lower_tail::Bool, log_p::Bool=false)
     signrank_deferred_free()
-    ccall((:psignrank,:libRmath), Float64, (Float64,Float64,Int32,Int32), q, p1, lower_tail, log_p)
+    ccall((:psignrank,libRmath), Float64, (Float64,Float64,Int32,Int32), q, p1, lower_tail, log_p)
 end
 @libRmath_deferred_free wilcox
 function pwilcox(q::Number, p1::Number, p2::Number, lower_tail::Bool, log_p::Bool=false)
     wilcox_deferred_free()
-    ccall((:pwilcox,:libRmath), Float64, (Float64,Float64,Float64,Int32,Int32), q, p1, p2, lower_tail, log_p)
+    ccall((:pwilcox,libRmath), Float64, (Float64,Float64,Float64,Int32,Int32), q, p1, p2, lower_tail, log_p)
 end
 
 # RMATH WRAPPERS
@@ -67,7 +69,7 @@ macro rmath_deferred_free(base)
             global $func
             function $libcall(x::Vector{None})
                 gc_tracking_obj = []
-                ccall(($(string(libcall)),:libRmath), Void, ())
+                ccall(($(string(libcall)),libRmath), Void, ())
             end
             function $func()
                 if !isa(gc_tracking_obj, Bool)
@@ -83,14 +85,14 @@ end
 function psignrank(q::Number, p1::Number, lower_tail::Bool,
                    log_p::Bool=false)
     signrank_deferred_free()
-    ccall((:psignrank,:libRmath), Float64, (Float64,Float64,Int32,Int32), q, p1,
+    ccall((:psignrank,libRmath), Float64, (Float64,Float64,Int32,Int32), q, p1,
           lower_tail, log_p)
 end
 @rmath_deferred_free(wilcox)
 function pwilcox(q::Number, p1::Number, p2::Number, lower_tail::Bool,
                  log_p::Bool=false)
     wilcox_deferred_free()
-    ccall((:pwilcox,:libRmath), Float64, (Float64,Float64,Float64,Int32,Int32),
+    ccall((:pwilcox,libRmath), Float64, (Float64,Float64,Float64,Int32,Int32),
           q, p1, p2, lower_tail, log_p)
 end
 
