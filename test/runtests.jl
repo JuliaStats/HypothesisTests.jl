@@ -1,3 +1,5 @@
+include("binomial.jl")
+include("circular.jl")
+include("fisher.jl")
 include("t.jl")
 include("wilcoxon.jl")
-include("circular.jl")

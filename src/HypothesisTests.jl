@@ -62,19 +62,22 @@ function check_alpha(alpha::Float64)
 end
 
 # Pretty-print
-function Base.show{T <: HypothesisTest}(io::IO, test::T)
-	print(io, "$(testname(test))\n\n")
+function Base.show{T<:HypothesisTest}(io::IO, test::T)
+	print(io, testname(test))
 	fieldidx = find(Bool[t<:Number for t in T.types])
-	lengths = [length(string(T.names[i])) for i in fieldidx]
-	maxlen = maximum(lengths)
+	if !isempty(fieldidx)
+		print(io, "\n\n")
+		lengths = [length(string(T.names[i])) for i in fieldidx]
+		maxlen = maximum(lengths)
 
-	for i = 1:length(fieldidx)
-		name = T.names[fieldidx[i]]
-		print(io, repeat(" ", maxlen-lengths[i]),
-		          replace(string(name), "_", " "),
-		          " = $(getfield(test, name))")
-		if i != length(fieldidx)
-			print(io, "\n")
+		for i = 1:length(fieldidx)
+			name = T.names[fieldidx[i]]
+			print(io, repeat(" ", maxlen-lengths[i]),
+			          replace(string(name), "_", " "),
+			          " = $(getfield(test, name))")
+			if i != length(fieldidx)
+				print(io, "\n")
+			end
 		end
 	end
 
@@ -92,8 +95,9 @@ function Base.show{T <: HypothesisTest}(io::IO, test::T)
 	end
 end
 
-include("circular.jl")
-include("wilcoxon.jl")
-include("t.jl")
 include("binomial.jl")
+include("circular.jl")
+include("fisher.jl")
+include("t.jl")
+include("wilcoxon.jl")
 end
