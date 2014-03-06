@@ -64,15 +64,16 @@ end
 # Pretty-print
 function Base.show{T <: HypothesisTest}(io::IO, test::T)
 	print(io, "$(testname(test))\n\n")
-	lengths = [length(string(name)) for name in T.names]
+	fieldidx = find(Bool[t<:Number for t in T.types])
+	lengths = [length(string(T.names[i])) for i in fieldidx]
 	maxlen = maximum(lengths)
 
-	for i  = 1:length(T.names)
-		name = T.names[i]
+	for i = 1:length(fieldidx)
+		name = T.names[fieldidx[i]]
 		print(io, repeat(" ", maxlen-lengths[i]),
 		          replace(string(name), "_", " "),
 		          " = $(getfield(test, name))")
-		if i != length(T.names)
+		if i != length(fieldidx)
 			print(io, "\n")
 		end
 	end
