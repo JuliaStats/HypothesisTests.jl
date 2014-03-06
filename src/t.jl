@@ -31,12 +31,7 @@ abstract TwoSampleTTest <: TTest
 pvalue(x::TTest; tail=:both) = pvalue(TDist(x.df), x.t; tail=tail)
 
 function ci(x::TTest, alpha::Float64=0.05; tail=:both)
-    if alpha <= 0 || alpha >= 1
-        error("alpha $alpha not in range (0, 1)")
-    end
-
-    alpha = min(alpha, 1-alpha)
-
+    check_alpha(alpha)
     if tail == :both
         alpha /= 2
     end

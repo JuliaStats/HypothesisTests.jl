@@ -24,7 +24,6 @@
 
 module HypothesisTests
 using Distributions
-import Base.repl_show
 
 export testname, pvalue, ci
 abstract HypothesisTest
@@ -34,9 +33,9 @@ check_same_length(x::Vector, y::Vector) = if length(x) != length(y)
 	end
 
 # Basic function for finding a p-value given a distribution and tail
-pvalue(dist::Distributions.Distribution, x::Number; tail=:both) = 
+pvalue(dist::ContinuousUnivariateDistribution, x::Number; tail=:both) = 
 	if tail == :both
-		2 * min(cdf(dist, x), ccdf(dist, x), 0.5)
+		min(2 * min(cdf(dist, x), ccdf(dist, x)), 1.0)
 	elseif tail == :left
 		cdf(dist, x)
 	elseif tail == :right
@@ -45,21 +44,55 @@ pvalue(dist::Distributions.Distribution, x::Number; tail=:both) =
 		error("tail=$(tail) is invalid")
 	end
 
-# Repl pretty-print
-function repl_show{T <: HypothesisTest}(io::IO, test::T)
-	print(io, "$(test_name(T))\n\n")
-	n = length(T.names)
-	for i  = 1:n
+pvalue(dist::DiscreteUnivariateDistribution, x::Number; tail=:both) = 
+	if tail == :both
+		min(2 * min(ccdf(dist, x-1), cdf(dist, x)), 1.0)
+	elseif tail == :left
+		cdf(dist, x)
+	elseif tail == :right
+		ccdf(dist, x-1)
+	else
+		error("tail=$(tail) is invalid")
+	end
+
+function check_alpha(alpha::Float64)
+    if alpha <= 0 || alpha >= 0.5
+        error("alpha $alpha not in range (0, 0.5)")
+    end
+end
+
+# Pretty-print
+function Base.show{T <: HypothesisTest}(io::IO, test::T)
+	print(io, "$(testname(test))\n\n")
+	lengths = [length(string(name)) for name in T.names]
+	maxlen = maximum(lengths)
+
+	for i  = 1:length(T.names)
 		name = T.names[i]
-		print(io, replace(string(name), "_", " "))
-		print(io, " = $(getfield(test, name))")
-		if i != n
-			print(io, ", ")
+		print(io, repeat(" ", maxlen-lengths[i]),
+		          replace(string(name), "_", " "),
+		          " = $(getfield(test, name))")
+		if i != length(T.names)
+			print(io, "\n")
 		end
+	end
+
+	has_pval = applicable(pvalue, test)
+	has_ci = applicable(ci, test)
+	if has_pval || has_ci
+		println(io)
+	end
+	if has_pval
+		print(io, "\nTwo-sided p-value:\n    p = $(pvalue(test; tail=:both))")
+	end
+	if has_ci
+		confint = ci(test)
+		print(io, "\n95% confidence interval:\n    $confint")
 	end
 end
 
 include("circular.jl")
 include("wilcoxon.jl")
 include("t.jl")
+include("binomial.jl")
 end

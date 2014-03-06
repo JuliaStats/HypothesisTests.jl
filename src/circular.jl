@@ -191,6 +191,8 @@ function JammalamadakaCircularCorrelation{S <: Real, T <: Real}(alpha::Vector{S}
 	JammalamadakaCircularCorrelation(r, Z)
 end
 
+testname(::JammalamadakaCircularCorrelation) = "Jammalamadaka circular correlation"
+
 pvalue(x::JammalamadakaCircularCorrelation; tail=:both) = pvalue(Normal(), x.Z; tail=tail)
 
 ## GENERAL
