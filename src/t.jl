@@ -51,20 +51,20 @@ end
 
 ## ONE SAMPLE T-TEST
 
-immutable OneSampleTTest{T <: Real} <: TTest
+immutable OneSampleTTest{T<:Real} <: TTest
     t::Float64
     df::T
     s::Float64
 end
-function OneSampleTTest(xbar::Real, stdev::Real, n::Int; mu0::Real=0)
+function OneSampleTTest(xbar::Real, stdev::Real, n::Int, mu0::Real=0)
     s = stdev/sqrt(n)
     OneSampleTTest((xbar-mu0)/s, n-1, s)
 end
-OneSampleTTest{T <: Real}(v::Vector{T}; kwargs...) =
-    OneSampleTTest(mean(v), std(v), length(v); kwargs...) 
-function OneSampleTTest{T <: Real, S <: Real}(x::Vector{T}, y::Vector{S}; kwargs...)
+OneSampleTTest{T<:Real}(v::AbstractVector{T}, mu0::Real=0) =
+    OneSampleTTest(mean(v), std(v), length(v)) 
+function OneSampleTTest{T<:Real, S<:Real}(x::AbstractVector{T}, y::AbstractVector{S}, mu0::Real=0)
     check_same_length(x, y)
-    OneSampleTTest(x - y; kwargs...)
+    OneSampleTTest(x - y, mu0)
 end
 testname(::OneSampleTTest) = "One sample t-test"
 
@@ -75,7 +75,7 @@ immutable EqualVarianceTTest <: TwoSampleTTest
     df::Int
     s::Float64
 end
-function EqualVarianceTTest{T <: Real, S <: Real}(x::Vector{T}, y::Vector{S})
+function EqualVarianceTTest{T<:Real,S<:Real}(x::AbstractVector{T}, y::AbstractVector{S})
     s = sqrt(((length(x)-1) * var(x) + (length(y)-1) * var(y)) /
         (length(x)+length(y)-2) * (1/length(x)+1/length(y)))
     EqualVarianceTTest((mean(x) - mean(y))/s, length(x) + length(y) - 2, s)
@@ -90,7 +90,7 @@ immutable UnequalVarianceTTest <: TwoSampleTTest
     df::Float64
     s::Float64
 end
-function UnequalVarianceTTest{T <: Real, S <: Real}(x::Vector{T}, y::Vector{S})
+function UnequalVarianceTTest{T<:Real,S<:Real}(x::AbstractVector{T}, y::AbstractVector{S})
     nx = length(x)
     ny = length(y)
     varx = var(x)

@@ -141,7 +141,7 @@ end
 ## COMMON MANN-WHITNEY U
 
 # Get U, ranks, and tie adjustment for Mann-Whitney U test
-function mwustats{S <: Real, T <: Real}(x::Vector{S}, y::Vector{T})
+function mwustats{S<:Real,T<:Real}(x::AbstractVector{S}, y::AbstractVector{T})
     nx = length(x)
     ny = length(y)
     if nx <= ny
@@ -155,7 +155,7 @@ function mwustats{S <: Real, T <: Real}(x::Vector{S}, y::Vector{T})
 end
 
 # Automatic exact/normal selection
-function MannWhitneyUTest{S <: Real, T <: Real}(x::Vector{S}, y::Vector{T})
+function MannWhitneyUTest{S<:Real,T<:Real}(x::AbstractVector{S}, y::AbstractVector{T})
     (U, ranks, tieadj, nx, ny) = mwustats(x, y)
     if nx + ny <= 10 || (nx + ny <= 50 && tieadj == 0)
         ExactMannWhitneyUTest(U, ranks, tieadj, nx, ny)
@@ -166,14 +166,14 @@ end
 
 ## EXACT MANN-WHITNEY U TEST
 
-immutable ExactMannWhitneyUTest{T <: Real} <: HypothesisTest
+immutable ExactMannWhitneyUTest{T<:Real} <: HypothesisTest
     U::Float64
     ranks::Vector{T}
     tie_adjustment::Float64
     nx::Int
     ny::Int
 end
-ExactMannWhitneyUTest{S <: Real, T <: Real}(x::Vector{S}, y::Vector{T}) =
+ExactMannWhitneyUTest{S<:Real,T<:Real}(x::AbstractVector{S}, y::AbstractVector{T}) =
     ExactMannWhitneyUTest(mwustats(x, y)...)
 
 testname(::ExactMannWhitneyUTest) = "Exact Mann-Whitney U test"
@@ -237,14 +237,14 @@ immutable ApproximateMannWhitneyUTest <: HypothesisTest
     mu::Float64
     sigma::Float64
 end
-function ApproximateMannWhitneyUTest(U::Real, ::Vector, tie_adjustment::Real,
+function ApproximateMannWhitneyUTest(U::Real, ::AbstractVector, tie_adjustment::Real,
                                      nx::Int, ny::Int)
     mu = U - nx * ny / 2
     sigma = sqrt((nx * ny * (nx + ny + 1 - tie_adjustment /
         ((nx + ny) * (nx + ny - 1)))) / 12)
     ApproximateMannWhitneyUTest(U, tie_adjustment, mu, sigma)
 end
-ApproximateMannWhitneyUTest{S <: Real, T <: Real}(x::Vector{S}, y::Vector{T}) =
+ApproximateMannWhitneyUTest{S<:Real,T<:Real}(x::AbstractVector{S}, y::AbstractVector{T}) =
     ApproximateMannWhitneyUTest(mwustats(x, y)...)
 
 testname(::Type{ApproximateMannWhitneyUTest}) =
@@ -266,7 +266,7 @@ pvalue(x::Union(ApproximateMannWhitneyUTest, ApproximateSignedRankTest); tail=:b
 ## COMMON SIGNED RANK
 
 # Get W and absolute ranks for signed rank test
-function signedrankstats{S <: Real}(x::Vector{S})
+function signedrankstats{S<:Real}(x::AbstractVector{S})
    nonzero_x = x[x .!= 0]
    (ranks, tieadj) = tiedrank_adj(abs(nonzero_x))
    W = 0.0
@@ -280,7 +280,7 @@ end
 
 
 # Automatic exact/normal selection
-function SignedRankTest{T <: Real}(x::Vector{T})
+function SignedRankTest{T<:Real}(x::AbstractVector{T})
     (W, ranks, tie_adjustment) = signedrankstats(x)
     n = length(ranks)
     if n <= 15 || (n <= 50 && tieadj == 0)
@@ -289,7 +289,7 @@ function SignedRankTest{T <: Real}(x::Vector{T})
         ApproximateSignedRankTest(W, tie_adjustment, n)
     end
 end
-SignedRankTest{T <: Real, S <: Real}(x::Vector{T}, y::Vector{S}) =
+SignedRankTest{T<:Real,S<:Real}(x::AbstractVector{T}, y::AbstractVector{S}) =
     SignedRankTest(x - y)
 
 ## EXACT WILCOXON SIGNED RANK TEST
@@ -299,9 +299,9 @@ immutable ExactSignedRankTest{T <: Real} <: HypothesisTest
     ranks::Vector{T}
     tie_adjustment::Float64
 end
-ExactSignedRankTest{S <: Real, T <: Real}(x::Vector{S}, y::Vector{T}) =
+ExactSignedRankTest{S<:Real,T<:Real}(x::AbstractVector{S}, y::AbstractVector{T}) =
     ExactSignedRankTest(x - y)
-ExactSignedRankTest{T <: Real}(x::Vector{T}) =
+ExactSignedRankTest{T<:Real}(x::AbstractVector{T}) =
     ExactSignedRankTest(signedrankstats(x)...)
 
 testname(::ExactSignedRankTest) = "Exact Wilcoxon signed rank test"
@@ -363,9 +363,9 @@ pvalue(x::ExactSignedRankTest; tail=:both) =
 ApproximateSignedRankTest(W::Float64, tie_adjustment::Float64, n::Int) =
     ApproximateSignedRankTest(W, tie_adjustment, W - n * (n + 1)/4,
         sqrt(n * (n + 1) * (2 * n + 1) / 24 - tie_adjustment / 48))
-ApproximateSignedRankTest{S <: Real, T <: Real}(x::Vector{S}, y::Vector{T}) =
+ApproximateSignedRankTest{S<:Real,T<:Real}(x::AbstractVector{S}, y::AbstractVector{T}) =
     ApproximateSignedRankTest(x - y)
-function ApproximateSignedRankTest{T <: Real}(x::Vector{T})
+function ApproximateSignedRankTest{T<:Real}(x::AbstractVector{T})
     (W, ranks, tie_adjustment) = signedrankstats(x)
     ApproximateSignedRankTest(W, tie_adjustment, length(ranks))
 end
