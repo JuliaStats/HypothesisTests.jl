@@ -65,6 +65,8 @@ end
 
 SignTest{T<:Real}(x::AbstractVector{T}, median::Real=0) =
 	SignTest(median, sum(x .> median), sum(x .!= median))
-SignTest{T<:Real, S<:Real}(x::AbstractVector{T}, y::AbstractVector{S}) = SignTest(0, x - y)
+SignTest{T<:Real, S<:Real}(x::AbstractVector{T}, y::AbstractVector{S}) = SignTest(x - y, 0)
+
+pvalue(x::SignTest; tail=:both) = pvalue(Binomial(x.n, 0.5), x.x; tail=tail)
 
 testname(::SignTest) = "Sign test"
