@@ -247,7 +247,7 @@ end
 ApproximateMannWhitneyUTest{S<:Real,T<:Real}(x::AbstractVector{S}, y::AbstractVector{T}) =
     ApproximateMannWhitneyUTest(mwustats(x, y)...)
 
-testname(::Type{ApproximateMannWhitneyUTest}) =
+testname(::ApproximateMannWhitneyUTest) =
     "Approximate Mann-Whitney U test"
 
 pvalue(x::Union(ApproximateMannWhitneyUTest, ApproximateSignedRankTest); tail=:both) =
@@ -370,4 +370,4 @@ function ApproximateSignedRankTest{T<:Real}(x::AbstractVector{T})
     ApproximateSignedRankTest(W, tie_adjustment, length(ranks))
 end
 
-testname(::Type{ApproximateSignedRankTest}) = "Approximate Wilcoxon signed rank test"
+testname(::ApproximateSignedRankTest) = "Approximate Wilcoxon signed rank test"

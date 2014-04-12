@@ -104,4 +104,4 @@ function UnequalVarianceTTest{T<:Real,S<:Real}(x::AbstractVector{T}, y::Abstract
         s)
 end
 
-testname(::EqualVarianceTTest) = "Unequal variance t-test"
+testname(::UnequalVarianceTTest) = "Unequal variance t-test"

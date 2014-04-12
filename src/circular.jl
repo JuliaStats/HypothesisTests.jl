@@ -179,10 +179,10 @@ function JammalamadakaCircularCorrelation{S <: Real, T <: Real}(alpha::Vector{S}
 	check_same_length(alpha, beta)
 	alpha_bar = angle(sum(exp(im*alpha)))
 	beta_bar = angle(sum(exp(im*beta)))
-	r = sum(sin(alpha - alpha_bar).*sin(beta - beta_bar))/sqrt(sum(sin(alpha - alpha_bar).^2)*sum(sin(beta - beta_bar).^2))
+	r = sum(sin(alpha .- alpha_bar).*sin(beta .- beta_bar))/sqrt(sum(sin(alpha .- alpha_bar).^2)*sum(sin(beta .- beta_bar).^2))
 
-	sin2_alpha = sin(alpha - alpha_bar).^2
-	sin2_beta = sin(beta - beta_bar).^2
+	sin2_alpha = sin(alpha .- alpha_bar).^2
+	sin2_beta = sin(beta .- beta_bar).^2
 	lambda_20 = mean(sin2_alpha)
 	lambda_02 = mean(sin2_beta)
 	lambda_22 = mean(sin2_alpha.*sin2_beta)

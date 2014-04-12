@@ -87,7 +87,7 @@ function Base.show{T<:HypothesisTest}(io::IO, test::T)
 		println(io)
 	end
 	if has_pval
-		print(io, "\nTwo-sided p-value:\n    p = $(pvalue(test; tail=:both))")
+		print(io, "\nTwo-sided p-value:\n    p = $(pvalue(test))")
 	end
 	if has_ci
 		confint = ci(test)
