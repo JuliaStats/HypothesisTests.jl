@@ -64,7 +64,7 @@ function ci(x::BinomialTest, alpha::Float64=0.05; tail=:both, method=:clopper_pe
         else
             error("method=$(method) is not implemented yet")
         end
-    else 
+    else
         error("tail=$(tail) is invalid")
     end
 end
@@ -114,12 +114,30 @@ immutable SignTest <: HypothesisTest
 	median::Float64
 	x::Int
 	n::Int
+	data
 end
 
 SignTest{T<:Real}(x::AbstractVector{T}, median::Real=0) =
-	SignTest(float64(median), sum(x .> median), sum(x .!= median))
+	SignTest(float64(median), sum(x .> median), sum(x .!= median), sort(x))
 SignTest{T<:Real, S<:Real}(x::AbstractVector{T}, y::AbstractVector{S}) = SignTest(x - y, 0.0)
 
 pvalue(x::SignTest; tail=:both) = pvalue(Binomial(x.n, 0.5), x.x; tail=tail)
 
 testname(::SignTest) = "Sign test"
+
+function ci(x::SignTest, alpha::Float64=0.05; tail=:both)
+	check_alpha(alpha)
+
+	if tail == :left
+		q = quantile(Binomial(x.n, 0.5), alpha)
+		(x.data[q+1], x.median)
+	elseif tail == :right
+		q = quantile(Binomial(x.n, 0.5), alpha)
+		(x.median, x.data[end-q])
+	elseif tail == :both
+		q = quantile(Binomial(x.n, 0.5), alpha/2)
+		(x.data[q+1], x.data[end-q])
+	else
+		error("tail=$(tail) is invalid")
+	end
+end
