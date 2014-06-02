@@ -142,13 +142,21 @@ for (fn, transform, comparison, distfn) in ((:pvalue, :abs, :>, :ccdf),
 			greater = 0
 
 			exact = n <= 8
-			nperms = exact ? factorial(n) : 10000
+			nperms = exact ? factorial(n) : 100000
 			indices = [1:n]
 			for i = 1:nperms
-				tp = exact ? nthperm(indices, i) : randperm(n)
-				ctp = ct[tp]
-				stp = st[tp]
-				Tp = sum(ctp.*cp)*sum(stp.*sp)-sum(ctp.*sp)*sum(stp.*cp)
+				tp = exact ? nthperm(indices, i) : shuffle!(indices)
+				a = 0.0
+				b = 0.0
+				c = 0.0
+				d = 0.0
+				for j = 1:n
+					a += ct[tp[j]]*cp[j]
+					b += st[tp[j]]*sp[j]
+					c += ct[tp[j]]*sp[j]
+					d += st[tp[j]]*cp[j]
+				end
+				Tp = a*b-c*d
 				greater += tail == :both ? abs(Tp) > T :
 				           tail == :left ? Tp < T :
 				           tail == :right ? Tp > T :
