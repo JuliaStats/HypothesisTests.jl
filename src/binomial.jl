@@ -40,20 +40,73 @@ BinomialTest(x::AbstractVector{Bool}, p=0.5) =
 testname(::BinomialTest) = "Binomial test"
 pvalue(x::BinomialTest; tail=:both) = pvalue(Binomial(x.n, x.p), x.x; tail=tail)
 
-# Clopper-Pearson interval
-function ci(x::BinomialTest, alpha::Float64=0.05; tail=:both)
+
+# Confidence interval
+
+function ci(x::BinomialTest, alpha::Float64=0.05; tail=:both, method=:clopper_pearson)
     check_alpha(alpha)
 
-    if tail == :both
-        (quantile(Beta(x.x, x.n - x.x + 1), alpha/2), quantile(Beta(x.x + 1, x.n - x.x), 1-alpha/2))
-    elseif tail == :left
-        (0.0, quantile(Beta(x.x + 1, x.n - x.x), 1-alpha))
+    if tail == :left
+        (0.0, ci(x, alpha*2, method=method)[2])
     elseif tail == :right
-        (quantile(Beta(x.x, x.n - x.x + 1), alpha), 1.0)
-    else
+        (ci(x, alpha*2, method=method)[1], 1.0)
+    elseif tail == :both
+        if method == :clopper_pearson
+            ci_clopper_pearson(x, alpha)
+        elseif method == :wald
+	    ci_wald(x, alpha)
+        elseif method == :wilson
+            ci_wilson(x, alpha)
+	elseif method == :jeffrey
+	    ci_jeffrey(x, alpha)
+	elseif method == :agresti_coull
+	    ci_agresti_coull(x, alpha)
+        else
+            error("method=$(method) is not implemented yet")
+        end
+    else 
         error("tail=$(tail) is invalid")
     end
 end
+
+# Clopper-Pearson interval
+function ci_clopper_pearson(x::BinomialTest, alpha::Float64=0.05)
+    (quantile(Beta(x.x, x.n - x.x + 1), alpha/2), quantile(Beta(x.x + 1, x.n - x.x), 1-alpha/2))
+end
+
+# Wald interval / normal approximation interval
+function ci_wald(x::BinomialTest, alpha::Float64=0.05)
+    μ = x.x / x.n
+    σ = sqrt(μ*(1-μ)/x.n)
+    (quantile(Normal(μ, σ), alpha/2), quantile(Normal(μ, σ), 1-alpha/2))
+end
+
+# Jeffreys interval
+function ci_jeffrey(x::BinomialTest, alpha::Float64=0.05)
+    (quantile(Beta(x.x + 1/2, x.n - x.x + 1/2), alpha/2), quantile(Beta(x.x + 1/2, x.n - x.x + 1/2), 1-alpha/2))
+end
+
+# Agresti-Coull interval
+function ci_agresti_coull(x::BinomialTest, alpha::Float64=0.05)
+    q = quantile(Normal(), 1-alpha/2)
+    n = x.n + q^2
+    μ = (x.x + q^2/2)/n
+    σ = sqrt(μ*(1-μ)/n)
+    (μ-q*σ, μ+q*σ)
+end
+
+# Wilson score interval
+function ci_wilson(x::BinomialTest, alpha::Float64=0.05)
+    q = quantile(Normal(), 1-alpha/2)
+    p = x.x / x.n
+    denominator = 1 + q^2/x.n
+    μ = p + q^2/(2*x.n)
+    μ /= denominator
+    σ = sqrt(p*(1-p)/x.n + q^2/(4x.n^2))
+    σ /= denominator
+    (μ-q*σ, μ+q*σ)
+end
+
 
 ## SIGN TEST
 
