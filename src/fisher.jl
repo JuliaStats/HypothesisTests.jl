@@ -35,43 +35,75 @@ immutable FisherExactTest <: HypothesisTest
 	d::Int
 end
 
+# TODO(cs): describe fisher in more detail (checks odds ratio)
+# TODO(cs): confidence interval for odds ratio
+# TODO(cs): Implement Blaker test
 testname(::FisherExactTest) = "Fisher's exact test"
 population_param_of_interest(x::FisherExactTest) = ("Odds ratio", 1, x.a/x.c/x.b*x.d) # parameter of interest: name, value under h0, point estimate
 
 function show_params(io::IO, x::FisherExactTest, ident="")
 	println(io, ident, "contingency table:")
-	Base.print_matrix(io, [x.a x.b; x.c x.d], typemax(Int), typemax(Int), repeat(ident, 2))
+	Base.print_matrix(io, [x.a x.b; x.c x.d], (typemax(Int), typemax(Int)), repeat(ident, 2))
 	println(io)
 end
 
-function pvalue(x::FisherExactTest; tail=:both)
+# DOC: for tail=:both there exist multiple ``method``s for computing a pvalue and thus for the corresponding ci.
+function pvalue(x::FisherExactTest; tail=:both, method=:central)
+	if tail == :both && method != :central
+		if method == :minlike
+			pvalue_both_minlike(x)
+		else
+			error("method=$(method) is not implemented yet")
+		end
+	else
+		pvalue(Hypergeometric(x.a + x.b, x.c + x.d, x.a + x.c), x.a, tail=tail)
+	end
+end
+
+function pvalue_both_minlike(x::FisherExactTest)
 	a, b, c, d = x.a, x.b, x.c, x.d
 
-	if tail == :both
-		if a + c > b + d
-			a, b, c, d = b, a, d, c
-		end
-		if a/c > b/d
-			a, b, c, d = c, d, a, b
-		end
-		dist = Hypergeometric(a+b, c+d, a+c)
-
-		p = pdf(dist, a)
-		v = nextfloat(p)
-		if a != 0
-			p += cdf(dist, a-1)
-		end
-
-		# Add p-values of all tables in other tail equally or less probable
-		for i = a+c:-1:a+1
-			curp = pdf(dist, i)
-			if curp > v
-				break
-			end
-			p += curp
-		end
-		p
-	else
-		pvalue(Hypergeometric(a+b, c+d, a+c), a, tail=tail)
+	if a + c > b + d
+		a, b, c, d = b, a, d, c
 	end
+	if a/c > b/d
+		a, b, c, d = c, d, a, b
+	end
+	dist = Hypergeometric(a+b, c+d, a+c)
+
+	p = pdf(dist, a)
+	v = nextfloat(p)
+	if a != 0
+		p += cdf(dist, a-1)
+	end
+
+	# Add p-values of all tables in other tail equally or less probable
+	for i = a+c:-1:a+1
+		curp = pdf(dist, i)
+		if curp > v
+			break
+		end
+		p += curp
+	end
+	p
+end
+
+# confidence interval by inversion for central p-value
+function ci_WIP(x::FisherExactTest, alpha::Float64=0.05; tail=:both, method=:central)
+    check_alpha(alpha)
+
+    if tail == :left
+        (0.0, ci(x, alpha*2, method=:central)[2])
+    elseif tail == :right
+        (ci(x, alpha*2, method=:central)[1], inf)
+    elseif tail == :both
+	# needs noncentral hypergeometric distribution
+        if method == :central
+			error("method=$(method) is not implemented yet")
+        else
+            error("method=$(method) is not implemented yet")
+        end
+    else
+        error("tail=$(tail) is invalid")
+    end
 end
