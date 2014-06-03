@@ -33,7 +33,7 @@ Confidence Interval for Binomial Proportions
    Compute a confidence interval with coverage 1-``alpha`` for a binomial proportion 
    using one of the following methods. Possible values for ``method`` are:
 
-   - Clopper-Pearson interval ``:clopper_pearson`` (default): This interval is  based on the binomial 
+   - Clopper-Pearson interval ``:clopper_pearson`` (default): This interval is based on the binomial 
      distribution. The empirical coverage is never less than the nominal coverage of 
      1-``alpha``; it is usually too conservative.
    - Wald interval ``:wald`` (normal approximation interval): This interval relies on 
@@ -53,3 +53,19 @@ Confidence Interval for Binomial Proportions
 
    - Brown, L.D., Cai, T.T., and DasGupta, A. Interval estimation for a binomial proportion. 
      Statistical Science, 16(2):101–117, 2001. 
+
+.. _ci_fisher:
+
+Confidence Interval for Fisher exact test
+----------------------------------------------
+
+.. function:: ci(x::FisherExactTest, alpha::Float64=0.05; tail=:both, method=:central)
+
+   Compute a confidence interval with coverage 1-``alpha`` by inverting the ``:central`` p-value.
+
+   References:
+
+   - Gibbons, J.D, Pratt, J.W. P-values: Interpretation and Methodology
+     American Statistican, 29(1):20-25, 1975.
+   - Fay, M.P. Supplementary material to Confidence intervals that match Fisher’s exact or Blaker’s exact tests.
+     Biostatistics, 0(0):1-13, 2009.

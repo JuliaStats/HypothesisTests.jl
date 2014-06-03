@@ -25,53 +25,143 @@
 export FisherExactTest
 
 immutable FisherExactTest <: HypothesisTest
-	# Format:
-	#    X1  X2
-	# Y1  a  b
-	# Y2  c  d
-	a::Int
-	b::Int
-	c::Int
-	d::Int
+    # Format:
+    # X1  X2
+    # Y1  a  b
+    # Y2  c  d
+    a::Int
+    b::Int
+    c::Int
+    d::Int
+
+    # conditional maximum likehood estimate of odd ratio
+    ω::Float64
+
+    function FisherExactTest(a::Int, b::Int, c::Int, d::Int)
+        ω = cond_mle_odds_ratio(a, b, c, d)
+        new(a, b, c, d, ω)
+    end
 end
 
 testname(::FisherExactTest) = "Fisher's exact test"
-population_param_of_interest(x::FisherExactTest) = ("Odds ratio", 1, x.a/x.c/x.b*x.d) # parameter of interest: name, value under h0, point estimate
+population_param_of_interest(x::FisherExactTest) = ("Odds ratio", 1.0, x.ω) # parameter of interest: name, value under h0, point estimate
 
 function show_params(io::IO, x::FisherExactTest, ident="")
-	println(io, ident, "contingency table:")
-	Base.print_matrix(io, [x.a x.b; x.c x.d], (typemax(Int), typemax(Int)), repeat(ident, 2))
-	println(io)
+    println(io, ident, "contingency table:")
+    Base.print_matrix(io, [x.a x.b; x.c x.d], (typemax(Int), typemax(Int)), repeat(ident, 2))
+    println(io)
 end
 
-function pvalue(x::FisherExactTest; tail=:both)
-	a, b, c, d = x.a, x.b, x.c, x.d
-
-	if tail == :both
-		if a + c > b + d
-			a, b, c, d = b, a, d, c
-		end
-		if a/c > b/d
-			a, b, c, d = c, d, a, b
-		end
-		dist = Hypergeometric(a+b, c+d, a+c)
-
-		p = pdf(dist, a)
-		v = nextfloat(p)
-		if a != 0
-			p += cdf(dist, a-1)
-		end
-
-		# Add p-values of all tables in other tail equally or less probable
-		for i = a+c:-1:a+1
-			curp = pdf(dist, i)
-			if curp > v
-				break
-			end
-			p += curp
-		end
-		p
-	else
-		pvalue(Hypergeometric(a+b, c+d, a+c), a, tail=tail)
-	end
+# DOC: for tail=:both there exist multiple ``method``s for computing a pvalue and the corresponding ci.
+function pvalue(x::FisherExactTest; tail=:both, method=:central)
+    if tail == :both && method != :central
+        if method == :minlike
+            pvalue_both_minlike(x)
+        else
+            error("method=$(method) is not implemented yet")
+        end
+    else
+        pvalue(Hypergeometric(x.a + x.b, x.c + x.d, x.a + x.c), x.a, tail=tail)
+    end
 end
+
+function pvalue_both_minlike(x::FisherExactTest, ω::Float64=1.0)
+    a, b, c, d = reorder(x.a, x.b, x.c, x.d)
+
+    dist = FisherNoncentralHypergeometric(a+b, c+d, a+c, ω)
+
+    p = pdf(dist, a)
+    v = nextfloat(p)
+    if a != 0
+        p += cdf(dist, a-1)
+    end
+
+    # Add p-values of all tables in other tail equally or less probable
+    for i = a+c:-1:a+1
+        curp = pdf(dist, i)
+        if curp > v
+            break
+        end
+        p += curp
+    end
+    p
+end
+
+# confidence interval by inversion of p-value
+function ci(x::FisherExactTest, alpha::Float64=0.05; tail=:both, method=:central)
+    check_alpha(alpha)
+    dist(ω) = FisherNoncentralHypergeometric(x.a+x.b, x.c+x.d, x.a+x.c, ω)
+    obj(ω) = pvalue(dist(ω), x.a, tail=tail) - alpha
+
+    if tail == :left # upper bound
+        if (x.a == maximum(dist(1.0)))
+            (0.0, Inf)
+        else
+            (0.0, fzero(obj, find_brackets(obj)...))
+        end
+    elseif tail == :right # lower bound
+        if (x.a == minimum(dist(1.0)))
+            (0.0, Inf)
+        else
+            (fzero(obj, find_brackets(obj)...), Inf)
+        end
+    elseif tail == :both
+        if method == :central
+            (ci(x, alpha/2; tail=:right)[1], ci(x, alpha/2; tail=:left)[2])
+        else
+            error("method=$(method) is not implemented yet")
+        end
+    else
+        error("tail=$(tail) is invalid")
+    end
+end
+
+## helpers
+
+function reorder(a,b,c,d)
+    if a + c > b + d
+        a, b, c, d = b, a, d, c
+    end
+    if a/c > b/d
+        a, b, c, d = c, d, a, b
+    end
+    (a, b, c, d)
+end
+
+# find values x_lower and x_upper, s.t. f(x_lower) < 0 and f(x_upper) > 0 or vice versa
+function find_brackets(f::Function, x_init::Float64=1.0)
+    f_init = f(x_init)
+
+    if f_init > f(x_init+eps())
+        find_brackets(x->-f(x), x_init)
+    else
+        x_upper, x_lower = x_init, x_init
+        if f_init > 0.0
+            while  f(x_lower) > 0.0
+                x_lower /= 2
+            end
+        else
+            while  f(x_upper) < 0.0
+                x_upper *= 2
+            end
+        end
+        (x_lower, x_upper)
+    end
+end
+
+# find odds ratio ω that maximizes the (conditional) likelihood;
+# since the mode and mean of Fisher's Noncentral Hypergeometric distribution
+# coincide, this is equivalent to find ω, s.t., mean(dist(ω)) = a
+function cond_mle_odds_ratio(a::Int, b::Int, c::Int, d::Int)
+    dist(ω) = FisherNoncentralHypergeometric(a+b, c+d, a+c, ω)
+
+    if (a == minimum(dist(1.0)))
+        0.0
+    elseif a == maximum(dist(1.0))
+        Inf
+    else
+        obj(ω) = mean(dist(ω))-a
+        fzero(obj, find_brackets(obj)...)
+    end
+end
+

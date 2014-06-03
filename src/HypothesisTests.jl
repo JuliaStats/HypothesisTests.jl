@@ -23,37 +23,39 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 module HypothesisTests
+
 using Distributions
+using Roots
 
 export testname, pvalue, ci
 abstract HypothesisTest
 
 check_same_length(x::Vector, y::Vector) = if length(x) != length(y)
-		error("Vectors must be the same length")
-	end
+    error("Vectors must be the same length")
+end
 
 # Basic function for finding a p-value given a distribution and tail
 pvalue(dist::ContinuousUnivariateDistribution, x::Number; tail=:both) = 
-	if tail == :both
-		min(2 * min(cdf(dist, x), ccdf(dist, x)), 1.0)
-	elseif tail == :left
-		cdf(dist, x)
-	elseif tail == :right
-		ccdf(dist, x)
-	else
-		error("tail=$(tail) is invalid")
-	end
+    if tail == :both
+        min(2 * min(cdf(dist, x), ccdf(dist, x)), 1.0)
+    elseif tail == :left
+        cdf(dist, x)
+    elseif tail == :right
+        ccdf(dist, x)
+    else
+        error("tail=$(tail) is invalid")
+    end
 
 pvalue(dist::DiscreteUnivariateDistribution, x::Number; tail=:both) = 
-	if tail == :both
-		min(2 * min(ccdf(dist, x-1), cdf(dist, x)), 1.0)
-	elseif tail == :left
-		cdf(dist, x)
-	elseif tail == :right
-		ccdf(dist, x-1)
-	else
-		error("tail=$(tail) is invalid")
-	end
+    if tail == :both
+        min(2 * min(ccdf(dist, x-1), cdf(dist, x)), 1.0)
+    elseif tail == :left
+        cdf(dist, x)
+    elseif tail == :right
+        ccdf(dist, x-1)
+    else
+        error("tail=$(tail) is invalid")
+    end
 
 function check_alpha(alpha::Float64)
     if alpha <= 0 || alpha >= 0.5
@@ -62,63 +64,63 @@ function check_alpha(alpha::Float64)
 end
 
 function significance{T<:Real}(p_val::T)
-	if p_val > 0.05
-		"not signficant"
-	elseif p_val < 0.001
-		"extremely significant"
-	elseif  p_val < 0.01
-		"very significant"
-	else
-		"significant"
-	end
+    if p_val > 0.05
+        "not signficant"
+    elseif p_val < 0.001
+        "extremely significant"
+    elseif  p_val < 0.01
+        "very significant"
+    else
+        "significant"
+    end
 end
 
 # Pretty-print
 function Base.show{T<:HypothesisTest}(io::IO, test::T)
-	println(io, testname(test))
-	println(io, repeat("-", length(testname(test))))
+    println(io, testname(test))
+    println(io, repeat("-", length(testname(test))))
 
-	# population details
-	has_ci = applicable(ci, test)
-	(param_name, param_under_h0, param_estimate) = population_param_of_interest(test)
-	println(io, "Population details:")
-	println(io, "    parameter of interest:   $param_name")
-	println(io, "    value under h_0:         $param_under_h0")
-	println(io, "    point estimate:          $param_estimate")
-	if has_ci
+    # population details
+    has_ci = applicable(ci, test)
+    (param_name, param_under_h0, param_estimate) = population_param_of_interest(test)
+    println(io, "Population details:")
+    println(io, "    parameter of interest:   $param_name")
+    println(io, "    value under h_0:         $param_under_h0")
+    println(io, "    point estimate:          $param_estimate")
+    if has_ci
         println(io, "    95% confidence interval: $(ci(test))")
-	end
-	println(io)
+    end
+    println(io)
 
-	# test summary
-	p = pvalue(test)
-	outcome = if p > 0.05 "fail to reject" else "reject" end
-	println(io, "Test summary:")
-	println(io, "    outcome with 95% confidence: $outcome h_0")
-	println(io, "    two-sided p-value:           $p ($(significance(p)))")
-	println(io)
+    # test summary
+    p = pvalue(test)
+    outcome = if p > 0.05 "fail to reject" else "reject" end
+    println(io, "Test summary:")
+    println(io, "    outcome with 95% confidence: $outcome h_0")
+    println(io, "    two-sided p-value:           $p ($(significance(p)))")
+    println(io)
 
-	# further details
-	println(io, "Details:")
-	show_params(io, test, "    ")
+    # further details
+    println(io, "Details:")
+    show_params(io, test, "    ")
 end
 
 # parameter of interest: name, value under h0, point estimate
 population_param_of_interest{T<:HypothesisTest}(test::T) = ("not implemented yet", NaN, NaN)
 
 function show_params{T<:HypothesisTest}(io::IO, test::T, ident="")
-	fieldidx = find(Bool[t<:Number for t in T.types])
-	if !isempty(fieldidx)
-		lengths = [length(string(T.names[i])) for i in fieldidx]
-		maxlen = maximum(lengths)
+    fieldidx = find(Bool[t<:Number for t in T.types])
+    if !isempty(fieldidx)
+        lengths = [length(string(T.names[i])) for i in fieldidx]
+        maxlen = maximum(lengths)
 
-		for i = 1:length(fieldidx)
-			name = T.names[fieldidx[i]]
-			println(io, ident, repeat(" ", maxlen-lengths[i]),
-			          replace(string(name), "_", " "),
-			          " = $(getfield(test, name))")
-		end
-	end
+        for i = 1:length(fieldidx)
+            name = T.names[fieldidx[i]]
+            println(io, ident, repeat(" ", maxlen-lengths[i]),
+                      replace(string(name), "_", " "),
+                      " = $(getfield(test, name))")
+        end
+    end
 end
 
 include("common.jl")
