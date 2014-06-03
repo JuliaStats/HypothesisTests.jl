@@ -47,9 +47,25 @@ x = [55, 58, 61, 61, 62, 62, 62, 63, 63, 64, 66, 68, 68, 69, 69, 69, 70, 71, 72,
 @test_approx_eq pvalue(SignTest(x, 70)) 0.004425048828125003
 @test_approx_eq pvalue(SignTest(x, 70), tail=:left) 0.0022125244140625013
 @test_approx_eq pvalue(SignTest(x, 70), tail=:right) 0.9996356964111328
+@test_approx_eq [ci(SignTest(x, 70))...] [62,69]
+@test_approx_eq [ci(SignTest(x, 70), 0.0002)...] [61,71]
 show(IOBuffer(), SignTest(x, 70))
 
 x = [9, 2, 7, 5]
 y = [7, 2, 6, 4]
 @test_approx_eq pvalue(SignTest(x, y)) 0.25
+@test_approx_eq [ci(SignTest(x, y))...] [0,2]
 show(IOBuffer(), SignTest(x, y))
+
+# www.stat.umn.edu/geyer/old03/5102/notes/rank.pdf
+x = [-4.7, 3.7, 22.4, 13.6, 8.7, 9.1, -7.8, 10.8, 15.6, 23.5, 14.4, 20.2, 6.5, 10.1, -6.9]
+@test_approx_eq pvalue(SignTest(x)) 0.03515625
+@test_approx_eq pvalue(SignTest(x), tail=:left) 0.996307373046875
+@test_approx_eq pvalue(SignTest(x), tail=:right) 0.017578125000000007 
+@test_approx_eq [ci(SignTest(x), 1-0.99995)...] [-7.8,23.5]
+@test_approx_eq [ci(SignTest(x), 1-0.9999)...] [-6.9,22.4]
+@test_approx_eq [ci(SignTest(x), 1-0.993)...] [-4.7,20.2]
+@test_approx_eq [ci(SignTest(x), 1-0.965)...] [3.7,15.6]
+@test_approx_eq [ci(SignTest(x), 1-0.882)...] [6.5,14.4]
+@test_approx_eq [ci(SignTest(x), 1-0.7)...] [8.7,13.6]
+@test_approx_eq [ci(SignTest(x), 1-0.6)...] [9.1,10.8]
