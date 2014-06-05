@@ -177,6 +177,14 @@ ExactMannWhitneyUTest{S<:Real,T<:Real}(x::AbstractVector{S}, y::AbstractVector{T
     ExactMannWhitneyUTest(mwustats(x, y)...)
 
 testname(::ExactMannWhitneyUTest) = "Exact Mann-Whitney U test"
+population_param_of_interest(x::ExactMannWhitneyUTest) = ("Location parameter", 0, NaN) # parameter of interest: name, value under h0, point estimate
+
+function show_params(io::IO, x::ExactMannWhitneyUTest, ident)
+    println(io, ident, "number of observations in each group: ", [x.nx, x.ny])
+    println(io, ident, "Mann-Whitney-U statistic:             ", x.U)
+    println(io, ident, "rank sums:                            ", [sum(x.ranks[1:x.nx]), sum(x.ranks[x.nx+1:end])])
+    println(io, ident, "adjustment for ties:                  ", x.tie_adjustment)
+end
 
 # Enumerate all possible Mann-Whitney U results for a given vector,
 # determining left-and right-tailed p values
@@ -236,19 +244,28 @@ immutable ApproximateMannWhitneyUTest <: HypothesisTest
     tie_adjustment::Float64
     mu::Float64
     sigma::Float64
+    nx::Int
+    ny::Int
 end
 function ApproximateMannWhitneyUTest(U::Real, ::AbstractVector, tie_adjustment::Real,
                                      nx::Int, ny::Int)
     mu = U - nx * ny / 2
     sigma = sqrt((nx * ny * (nx + ny + 1 - tie_adjustment /
         ((nx + ny) * (nx + ny - 1)))) / 12)
-    ApproximateMannWhitneyUTest(U, tie_adjustment, mu, sigma)
+    ApproximateMannWhitneyUTest(U, tie_adjustment, mu, sigma, nx, ny)
 end
 ApproximateMannWhitneyUTest{S<:Real,T<:Real}(x::AbstractVector{S}, y::AbstractVector{T}) =
     ApproximateMannWhitneyUTest(mwustats(x, y)...)
 
-testname(::ApproximateMannWhitneyUTest) =
-    "Approximate Mann-Whitney U test"
+testname(::ApproximateMannWhitneyUTest) = "Approximate Mann-Whitney U test"
+population_param_of_interest(x::ApproximateMannWhitneyUTest) = ("Location parameter", 0, NaN) # parameter of interest: name, value under h0, point estimate
+
+function show_params(io::IO, x::ApproximateMannWhitneyUTest, ident)
+    println(io, ident, "number of observations in each group: ", [x.nx, x.ny])
+    println(io, ident, "Mann-Whitney-U statistic:             ", x.U)
+    println(io, ident, "normal approximation (μ, σ):          ", (x.mu, x.sigma))
+    println(io, ident, "adjustment for ties:                  ", x.tie_adjustment)
+end
 
 pvalue(x::Union(ApproximateMannWhitneyUTest, ApproximateSignedRankTest); tail=:both) =
     if x.mu == x.sigma == 0
@@ -284,7 +301,7 @@ function SignedRankTest{T<:Real}(x::AbstractVector{T})
     (W, ranks, tie_adjustment) = signedrankstats(x)
     n = length(ranks)
     if n <= 15 || (n <= 50 && tieadj == 0)
-        ExactSignedRankTest(W, ranks, tie_adjustment)
+        ExactSignedRankTest(W, ranks, tie_adjustment, median(x))
     else
         ApproximateSignedRankTest(W, tie_adjustment, n)
     end
@@ -298,13 +315,20 @@ immutable ExactSignedRankTest{T <: Real} <: HypothesisTest
     W::Float64
     ranks::Vector{T}
     tie_adjustment::Float64
+    median::Float64
 end
 ExactSignedRankTest{S<:Real,T<:Real}(x::AbstractVector{S}, y::AbstractVector{T}) =
     ExactSignedRankTest(x - y)
 ExactSignedRankTest{T<:Real}(x::AbstractVector{T}) =
-    ExactSignedRankTest(signedrankstats(x)...)
+    ExactSignedRankTest(signedrankstats(x)..., median(x))
 
 testname(::ExactSignedRankTest) = "Exact Wilcoxon signed rank test"
+population_param_of_interest(x::ExactSignedRankTest) = ("Location parameter (pseudomedian)", 0, x.median) # parameter of interest: name, value under h0, point estimate
+
+function show_params(io::IO, x::ExactSignedRankTest, ident)
+    println(io, ident, "number of observations: ", length(x.ranks))
+    println(io, ident, "adjustment for ties:    ", x.tie_adjustment)
+end
 
 # Enumerate all possible Mann-Whitney U results for a given vector, determining left-
 # and right-tailed p values

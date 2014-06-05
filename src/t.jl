@@ -25,83 +25,120 @@
 export OneSampleTTest, TwoSampleTTest, EqualVarianceTTest,
     UnequalVarianceTTest
 
+# FIXME(cs): https://github.com/JuliaLang/julia/issues/4935
 abstract TTest <: HypothesisTest
 abstract TwoSampleTTest <: TTest
 
 pvalue(x::TTest; tail=:both) = pvalue(TDist(x.df), x.t; tail=tail)
 
+# confidence interval by inversion
 function ci(x::TTest, alpha::Float64=0.05; tail=:both)
     check_alpha(alpha)
-    if tail == :both
-        alpha /= 2
-    end
 
-    q = quantile(TDist(x.df), alpha)
-
-    if tail == :both
-        ((x.t+q)*x.s, (x.t-q)*x.s)
-    elseif tail == :left
-        (-Inf, (x.t-q)*x.s)
+    if tail == :left
+        (-Inf, ci(x, alpha*2)[2])
     elseif tail == :right
-        ((x.t+q)*x.s, Inf)
+        (ci(x, alpha*2)[1], Inf)
+    elseif tail == :both
+        q = quantile(TDist(x.df), 1-alpha/2)
+        (x.xbar-q*x.stderr, x.xbar+q*x.stderr)
     else
         error("tail=$(tail) is invalid")
     end
 end
 
+
 ## ONE SAMPLE T-TEST
 
-immutable OneSampleTTest{T<:Real} <: TTest
-    t::Float64
-    df::T
-    s::Float64
+immutable OneSampleTTest <: TTest
+    n::Int       # number of observations
+    xbar::Real   # estimated mean
+    df::Int      # degrees of freedom
+    stderr::Real # empirical standard error
+    t::Real      # t-statistic
+    μ0::Real     # mean under h_0
 end
-function OneSampleTTest(xbar::Real, stdev::Real, n::Int, mu0::Real=0)
-    s = stdev/sqrt(n)
-    OneSampleTTest((xbar-mu0)/s, n-1, s)
-end
-OneSampleTTest{T<:Real}(v::AbstractVector{T}, mu0::Real=0) =
-    OneSampleTTest(mean(v), std(v), length(v)) 
-function OneSampleTTest{T<:Real, S<:Real}(x::AbstractVector{T}, y::AbstractVector{S}, mu0::Real=0)
-    check_same_length(x, y)
-    OneSampleTTest(x - y, mu0)
-end
-testname(::OneSampleTTest) = "One sample t-test"
 
-## EQUAL VARIANCE T-TEST
+testname(::OneSampleTTest) = "One sample t-test"
+population_param_of_interest(x::OneSampleTTest) = ("Mean", x.μ0, x.xbar) # parameter of interest: name, value under h0, point estimate
+
+function show_params(io::IO, x::OneSampleTTest, ident="")
+    println(io, ident, "number of observations:   $(x.n)")
+    println(io, ident, "t-statistic:              $(x.t)")
+    println(io, ident, "degrees of freedom:       $(x.df)")
+    println(io, ident, "empirical standard error: $(x.stderr)")
+end
+
+function OneSampleTTest(xbar::Real, stddev::Real, n::Int, μ0::Real=0)
+    stderr = stddev/sqrt(n)
+    t = (xbar-μ0)/stderr
+    df = n-1
+    OneSampleTTest(n, xbar, df, stderr, t, μ0)
+end
+
+OneSampleTTest{T<:Real}(v::AbstractVector{T}, μ0::Real=0) = OneSampleTTest(mean(v), std(v), length(v), μ0)
+
+function OneSampleTTest{T<:Real, S<:Real}(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0)
+    check_same_length(x, y)
+
+    OneSampleTTest(x - y, μ0)
+end
+
+
+## TWO SAMPLE T-TEST (EQUAL VARIANCE)
 
 immutable EqualVarianceTTest <: TwoSampleTTest
-    t::Float64
-    df::Int
-    s::Float64
-end
-function EqualVarianceTTest{T<:Real,S<:Real}(x::AbstractVector{T}, y::AbstractVector{S})
-    s = sqrt(((length(x)-1) * var(x) + (length(y)-1) * var(y)) /
-        (length(x)+length(y)-2) * (1/length(x)+1/length(y)))
-    EqualVarianceTTest((mean(x) - mean(y))/s, length(x) + length(y) - 2, s)
+    n_x::Int     # number of observations
+    n_y::Int     # number of observations
+    xbar::Real   # estimated mean difference
+    df::Int      # degrees of freedom
+    stderr::Real # empirical standard error
+    t::Real      # t-statistic
+    μ0::Real     # mean difference under h_0
 end
 
-testname(::EqualVarianceTTest) = "Equal variance t-test"
+function show_params(io::IO, x::TwoSampleTTest, ident="")
+    println(io, ident, "number of observations:   [$(x.n_x),$(x.n_y)]")
+    println(io, ident, "t-statistic:              $(x.t)")
+    println(io, ident, "degrees of freedom:       $(x.df)")
+    println(io, ident, "empirical standard error: $(x.stderr)")
+end
 
-## UNEQUAL VARIANCE T-TEST
+testname(::EqualVarianceTTest) = "Two sample t-test (equal variance)"
+population_param_of_interest(x::TwoSampleTTest) = ("Mean difference", x.μ0, x.xbar) # parameter of interest: name, value under h0, point estimate
+
+function EqualVarianceTTest{T<:Real,S<:Real}(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0)
+    nx, ny = length(x), length(y)
+    xbar = mean(x) - mean(y)
+    stddev = sqrt(((nx - 1) * var(x) + (ny - 1) * var(y)) / (nx + ny - 2))
+    stderr = stddev * sqrt(1/nx + 1/ny)
+    t = (xbar - μ0) / stderr
+    df = nx + ny - 2
+    EqualVarianceTTest(nx, ny, xbar, df, stderr, t, μ0)
+end
+
+
+## TWO SAMPLE T-TEST (UNEQUAL VARIANCE)
 
 immutable UnequalVarianceTTest <: TwoSampleTTest
-    t::Float64
-    df::Float64
-    s::Float64
-end
-function UnequalVarianceTTest{T<:Real,S<:Real}(x::AbstractVector{T}, y::AbstractVector{S})
-    nx = length(x)
-    ny = length(y)
-    varx = var(x)
-    vary = var(y)
-    
-    s = sqrt(varx/nx + vary/ny)
-    UnequalVarianceTTest((mean(x) - mean(y))/s,
-        varx == vary == 0
-        ? nx + ny - 2
-        : (varx/nx + vary/ny)^2/((varx/nx)^2/(nx - 1) + (vary/ny)^2/(ny - 1)),
-        s)
+    n_x::Int     # number of observations
+    n_y::Int     # number of observations
+    xbar::Real   # estimated mean
+    df::Real     # degrees of freedom
+    stderr::Real # empirical standard error
+    t::Real      # t-statistic
+    μ0::Real     # mean under h_0
 end
 
-testname(::UnequalVarianceTTest) = "Unequal variance t-test"
+testname(::UnequalVarianceTTest) = "Two sample t-test (unequal variance)"
+
+function UnequalVarianceTTest{T<:Real,S<:Real}(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0)
+    nx, ny = length(x), length(y)
+    xbar = mean(x)-mean(y)
+    varx, vary = var(x), var(y)
+    stderr = sqrt(varx/nx + vary/ny)
+    t = (xbar-μ0)/stderr
+    df = (varx / nx + vary / ny)^2 / ((varx / nx)^2 / (nx - 1) + (vary / ny)^2 / (ny - 1))
+    UnequalVarianceTTest(nx, ny, xbar, df, stderr, t, μ0)
+end
+

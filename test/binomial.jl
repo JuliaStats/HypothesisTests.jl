@@ -1,44 +1,46 @@
 using HypothesisTests, Base.Test
 
-@test_approx_eq pvalue(BinomialTest(26, 78)) 0.004334880883507431
-@test_approx_eq pvalue(BinomialTest(26, 78), tail=:left) 0.002167440441753716
-@test_approx_eq pvalue(BinomialTest(26, 78), tail=:right) 0.9989844298129187
-@test_approx_eq [ci(BinomialTest(26, 78))...] [0.23058523962930383,0.4491666887959782]
-@test_approx_eq [ci(BinomialTest(26, 78), tail=:left)...] [0.0,0.4313047758370174]
-@test_approx_eq [ci(BinomialTest(26, 78), tail=:right)...] [0.2451709633730693,1.0]
-@test_approx_eq [ci(BinomialTest(26, 78), method=:wald)...] [0.22871819521037956,0.43794847145628707]
-@test_approx_eq [ci(BinomialTest(26, 78), tail=:left, method=:wald)...] [0.0,0.42112912485444692]
-@test_approx_eq [ci(BinomialTest(26, 78), tail=:right, method=:wald)...] [0.24553754181221971,1.0]
-@test_approx_eq [ci(BinomialTest(26, 78), method=:wilson)...] [0.23872670036358601,0.44358590287381217]
-@test_approx_eq [ci(BinomialTest(26, 78), tail=:left, method=:wilson)...] [0.0,0.42541288951088108]
-@test_approx_eq [ci(BinomialTest(26, 78), tail=:right, method=:wilson)...] [0.25242832328277831,1.0]
-@test_approx_eq [ci(BinomialTest(26, 78), method=:jeffrey)...] [0.23626570247518358,0.44251318323879296]
-@test_approx_eq [ci(BinomialTest(26, 78), tail=:left, method=:jeffrey)...] [0.0,0.42466492683653623]
-@test_approx_eq [ci(BinomialTest(26, 78), tail=:right, method=:jeffrey)...] [0.25098836986261724,1.0]
-@test_approx_eq [ci(BinomialTest(26, 78), method=:agresti_coull)...] [0.2384423809121706,0.44387022232522744]
-@test_approx_eq [ci(BinomialTest(26, 78), tail=:left, method=:agresti_coull)...] [0.0,0.42558712894362222]
-@test_approx_eq [ci(BinomialTest(26, 78), tail=:right, method=:agresti_coull)...] [0.25225408385003706,1.0]
-show(IOBuffer(), BinomialTest(26, 78))
+t = BinomialTest(26, 78)
+@test_approx_eq pvalue(t) 0.004334880883507431
+@test_approx_eq pvalue(t, tail=:left) 0.002167440441753716
+@test_approx_eq pvalue(t, tail=:right) 0.9989844298129187
+@test_approx_eq [ci(t)...] [0.23058523962930383,0.4491666887959782]
+@test_approx_eq [ci(t, tail=:left)...] [0.0,0.4313047758370174]
+@test_approx_eq [ci(t, tail=:right)...] [0.2451709633730693,1.0]
+@test_approx_eq [ci(t, method=:wald)...] [0.22871819521037956,0.43794847145628707]
+@test_approx_eq [ci(t, tail=:left, method=:wald)...] [0.0,0.42112912485444692]
+@test_approx_eq [ci(t, tail=:right, method=:wald)...] [0.24553754181221971,1.0]
+@test_approx_eq [ci(t, method=:wilson)...] [0.23872670036358601,0.44358590287381217]
+@test_approx_eq [ci(t, tail=:left, method=:wilson)...] [0.0,0.42541288951088108]
+@test_approx_eq [ci(t, tail=:right, method=:wilson)...] [0.25242832328277831,1.0]
+@test_approx_eq [ci(t, method=:jeffrey)...] [0.23626570247518358,0.44251318323879296]
+@test_approx_eq [ci(t, tail=:left, method=:jeffrey)...] [0.0,0.42466492683653623]
+@test_approx_eq [ci(t, tail=:right, method=:jeffrey)...] [0.25098836986261724,1.0]
+@test_approx_eq [ci(t, method=:agresti_coull)...] [0.2384423809121706,0.44387022232522744]
+@test_approx_eq [ci(t, tail=:left, method=:agresti_coull)...] [0.0,0.42558712894362222]
+@test_approx_eq [ci(t, tail=:right, method=:agresti_coull)...] [0.25225408385003706,1.0]
+show(IOBuffer(), t)
 
-@test_approx_eq pvalue(BinomialTest([trues(6), falses(3)])) 0.5078125000000002
-@test_approx_eq pvalue(BinomialTest([trues(6), falses(3)]), tail=:left) 0.91015625
-@test_approx_eq pvalue(BinomialTest([trues(6), falses(3)]), tail=:right) 0.2539062500000001
-@test_approx_eq [ci(BinomialTest([trues(6), falses(3)]))...] [0.2992950562085405,0.9251453685803082]
-@test_approx_eq [ci(BinomialTest([trues(6), falses(3)]), tail=:left)...] [0.0,0.9022531865607242]
-@test_approx_eq [ci(BinomialTest([trues(6), falses(3)]), tail=:right)...] [0.3449413659437032,1.0]
-@test_approx_eq [ci(BinomialTest([trues(6), falses(3)]), method=:wald)...] [0.35868803903340479,0.97464529429992841]
-@test_approx_eq [ci(BinomialTest([trues(6), falses(3)]), tail=:left, method=:wald)...] [0.0,0.92513047859481645]
-@test_approx_eq [ci(BinomialTest([trues(6), falses(3)]), tail=:right, method=:wald)...] [0.40820285473851681,1.0]
-@test_approx_eq [ci(BinomialTest([trues(6), falses(3)]), method=:wilson)...] [0.35420213558039609,0.87941618161308899]
-@test_approx_eq [ci(BinomialTest([trues(6), falses(3)]), tail=:left, method=:wilson)...] [0.0,0.85802909820500495]
-@test_approx_eq [ci(BinomialTest([trues(6), falses(3)]), tail=:right, method=:wilson)...] [0.39825972868840931,1.0]
-@test_approx_eq [ci(BinomialTest([trues(6), falses(3)]), method=:jeffrey)...] [0.34779179347226591,0.89578677833922582]
-@test_approx_eq [ci(BinomialTest([trues(6), falses(3)]), tail=:left, method=:jeffrey)...] [0.0,0.86830830610561005]
-@test_approx_eq [ci(BinomialTest([trues(6), falses(3)]), tail=:right, method=:jeffrey)...] [0.39604343455469687,1.0]
-@test_approx_eq [ci(BinomialTest([trues(6), falses(3)]), method=:agresti_coull)...] [0.350905767251112,0.88271254994237336]
-@test_approx_eq [ci(BinomialTest([trues(6), falses(3)]), tail=:left, method=:agresti_coull)...] [0.0,0.86049746046629294]
-@test_approx_eq [ci(BinomialTest([trues(6), falses(3)]), tail=:right, method=:agresti_coull)...] [0.39579136642712159,1.0]
-show(IOBuffer(), BinomialTest([trues(6), falses(3)]))
+t = BinomialTest([trues(6), falses(3)])
+@test_approx_eq pvalue(t) 0.5078125000000002
+@test_approx_eq pvalue(t, tail=:left) 0.91015625
+@test_approx_eq pvalue(t, tail=:right) 0.2539062500000001
+@test_approx_eq [ci(t)...] [0.2992950562085405,0.9251453685803082]
+@test_approx_eq [ci(t, tail=:left)...] [0.0,0.9022531865607242]
+@test_approx_eq [ci(t, tail=:right)...] [0.3449413659437032,1.0]
+@test_approx_eq [ci(t, method=:wald)...] [0.35868803903340479,0.97464529429992841]
+@test_approx_eq [ci(t, tail=:left, method=:wald)...] [0.0,0.92513047859481645]
+@test_approx_eq [ci(t, tail=:right, method=:wald)...] [0.40820285473851681,1.0]
+@test_approx_eq [ci(t, method=:wilson)...] [0.35420213558039609,0.87941618161308899]
+@test_approx_eq [ci(t, tail=:left, method=:wilson)...] [0.0,0.85802909820500495]
+@test_approx_eq [ci(t, tail=:right, method=:wilson)...] [0.39825972868840931,1.0]
+@test_approx_eq [ci(t, method=:jeffrey)...] [0.34779179347226591,0.89578677833922582]
+@test_approx_eq [ci(t, tail=:left, method=:jeffrey)...] [0.0,0.86830830610561005]
+@test_approx_eq [ci(t, tail=:right, method=:jeffrey)...] [0.39604343455469687,1.0]
+@test_approx_eq [ci(t, method=:agresti_coull)...] [0.350905767251112,0.88271254994237336]
+@test_approx_eq [ci(t, tail=:left, method=:agresti_coull)...] [0.0,0.86049746046629294]
+@test_approx_eq [ci(t, tail=:right, method=:agresti_coull)...] [0.39579136642712159,1.0]
+show(IOBuffer(), t)
 
 x = [55, 58, 61, 61, 62, 62, 62, 63, 63, 64, 66, 68, 68, 69, 69, 69, 70, 71, 72, 72]
 @test_approx_eq pvalue(SignTest(x)) 1.907348632812499e-6
@@ -69,3 +71,4 @@ x = [-4.7, 3.7, 22.4, 13.6, 8.7, 9.1, -7.8, 10.8, 15.6, 23.5, 14.4, 20.2, 6.5, 1
 @test_approx_eq [ci(SignTest(x), 1-0.882)...] [6.5,14.4]
 @test_approx_eq [ci(SignTest(x), 1-0.7)...] [8.7,13.6]
 @test_approx_eq [ci(SignTest(x), 1-0.6)...] [9.1,10.8]
+show(IOBuffer(), SignTest(x))

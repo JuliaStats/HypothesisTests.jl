@@ -38,8 +38,14 @@ BinomialTest(x::AbstractVector{Bool}, p=0.5) =
 	BinomialTest(sum(x), length(x), float64(p))
 
 testname(::BinomialTest) = "Binomial test"
-pvalue(x::BinomialTest; tail=:both) = pvalue(Binomial(x.n, x.p), x.x; tail=tail)
+population_param_of_interest(x::BinomialTest) = ("Probability of success", x.p, x.x/x.n) # parameter of interest: name, value under h0, point estimate
 
+function show_params(io::IO, x::BinomialTest, ident="")
+    println(io, ident, "number of observations: $(x.n)")
+    println(io, ident, "number of successes:    $(x.x)")
+end
+
+pvalue(x::BinomialTest; tail=:both) = pvalue(Binomial(x.n, x.p), x.x; tail=tail)
 
 # Confidence interval
 
@@ -54,13 +60,13 @@ function ci(x::BinomialTest, alpha::Float64=0.05; tail=:both, method=:clopper_pe
         if method == :clopper_pearson
             ci_clopper_pearson(x, alpha)
         elseif method == :wald
-	    ci_wald(x, alpha)
+            ci_wald(x, alpha)
         elseif method == :wilson
             ci_wilson(x, alpha)
-	elseif method == :jeffrey
-	    ci_jeffrey(x, alpha)
-	elseif method == :agresti_coull
-	    ci_agresti_coull(x, alpha)
+        elseif method == :jeffrey
+            ci_jeffrey(x, alpha)
+        elseif method == :agresti_coull
+            ci_agresti_coull(x, alpha)
         else
             error("method=$(method) is not implemented yet")
         end
@@ -69,7 +75,7 @@ function ci(x::BinomialTest, alpha::Float64=0.05; tail=:both, method=:clopper_pe
     end
 end
 
-# Clopper-Pearson interval
+# Clopper-Pearson interval (confidence interval by inversion)
 function ci_clopper_pearson(x::BinomialTest, alpha::Float64=0.05)
     (quantile(Beta(x.x, x.n - x.x + 1), alpha/2), quantile(Beta(x.x + 1, x.n - x.x), 1-alpha/2))
 end
@@ -121,10 +127,21 @@ SignTest{T<:Real}(x::AbstractVector{T}, median::Real=0) =
 	SignTest(float64(median), sum(x .> median), sum(x .!= median), sort(x))
 SignTest{T<:Real, S<:Real}(x::AbstractVector{T}, y::AbstractVector{S}) = SignTest(x - y, 0.0)
 
+testname(::SignTest) = "Sign Test"
+population_param_of_interest(x::SignTest) = ("Median", x.median, median(x.data)) # parameter of interest: name, value under h0, point estimate
+
+function show_params(io::IO, x::SignTest, ident="")
+    text1 = "number of observations:"
+    text2 = "observations larger than $(x.median): "
+    maxlen = length(text2)
+    
+    println(io, ident, text1, repeat(" ", maxlen-length(text1)), x.n)
+    println(io, ident, text2, x.x)
+end
+
 pvalue(x::SignTest; tail=:both) = pvalue(Binomial(x.n, 0.5), x.x; tail=tail)
 
-testname(::SignTest) = "Sign test"
-
+# confidence interval by inversion
 function ci(x::SignTest, alpha::Float64=0.05; tail=:both)
 	check_alpha(alpha)
 

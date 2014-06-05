@@ -61,37 +61,63 @@ function check_alpha(alpha::Float64)
     end
 end
 
+function significance{T<:Real}(p_val::T)
+	if p_val > 0.05
+		"not signficant"
+	elseif p_val < 0.001
+		"extremely significant"
+	elseif  p_val < 0.01
+		"very significant"
+	else
+		"significant"
+	end
+end
+
 # Pretty-print
 function Base.show{T<:HypothesisTest}(io::IO, test::T)
-	print(io, testname(test))
+	println(io, testname(test))
+	println(io, repeat("-", length(testname(test))))
+
+	# population details
+	has_ci = applicable(ci, test)
+	(param_name, param_under_h0, param_estimate) = population_param_of_interest(test)
+	println(io, "Population details:")
+	println(io, "    parameter of interest:   $param_name")
+	println(io, "    value under h_0:         $param_under_h0")
+	println(io, "    point estimate:          $param_estimate")
+	if has_ci
+        println(io, "    95% confidence interval: $(ci(test))")
+	end
+	println(io)
+
+	# test summary
+	p = pvalue(test)
+	outcome = if p > 0.05 "fail to reject" else "reject" end
+	println(io, "Test summary:")
+	println(io, "    outcome with 95% confidence: $outcome h_0")
+	println(io, "    two-sided p-value:           $p ($(significance(p)))")
+	println(io)
+
+	# further details
+	println(io, "Details:")
+	show_params(io, test, "    ")
+end
+
+# parameter of interest: name, value under h0, point estimate
+population_param_of_interest{T<:HypothesisTest}(test::T) = ("not implemented yet", NaN, NaN)
+
+function show_params{T<:HypothesisTest}(io::IO, test::T, ident="")
 	fieldidx = find(Bool[t<:Number for t in T.types])
 	if !isempty(fieldidx)
-		print(io, "\n\n")
 		lengths = [length(string(T.names[i])) for i in fieldidx]
 		maxlen = maximum(lengths)
 
 		for i = 1:length(fieldidx)
 			name = T.names[fieldidx[i]]
-			print(io, repeat(" ", maxlen-lengths[i]),
+			println(io, ident, repeat(" ", maxlen-lengths[i]),
 			          replace(string(name), "_", " "),
 			          " = $(getfield(test, name))")
-			if i != length(fieldidx)
-				print(io, "\n")
-			end
 		end
-	end
-
-	has_pval = applicable(pvalue, test)
-	has_ci = applicable(ci, test)
-	if has_pval || has_ci
-		println(io)
-	end
-	if has_pval
-		print(io, "\nTwo-sided p-value:\n    p = $(pvalue(test))")
-	end
-	if has_ci
-		confint = ci(test)
-		print(io, "\n95% confidence interval:\n    $confint")
 	end
 end
 
