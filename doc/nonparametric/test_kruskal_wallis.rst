@@ -16,8 +16,12 @@ Kruskal-Wallis rank sum test
         H &= \frac{12}{n(n+1)} \sum_{g \in \mathcal{G}} \frac{R_g^2}{n_g} - 3(n+1)\\
         C &= 1-\frac{1}{n^3-n}\sum_{t \in \mathcal{T}} (t^3-t),
 
-    where :math:`\mathcal{T}` is the set of the counts of tied values
-    at each tied position, :math:`n_g` is the number of observations and 
-    :math:`R_g` is the rank sum in group g.
+    where :math:`\mathcal{T}` is the set of the counts of tied values at each tied position, :math:`n_g` is the number of observations and 
+    :math:`R_g` is the rank sum in group g. See references for further details.
 
     Implements: :ref:`pvalue<pvalue>`
+
+    References:
+
+    - Meyer, J.P, Seaman, M.A., Expanded tables of critical values for the Kruskal-Wallis H statistic. 
+      Paper presented at the annual meeting of the American Educational Research Association, San Francisco, April 2006.
