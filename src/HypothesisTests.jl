@@ -98,6 +98,7 @@ end
 include("binomial.jl")
 include("circular.jl")
 include("fisher.jl")
+include("kruskal_wallis.jl")
 include("t.jl")
 include("wilcoxon.jl")
 end

@@ -1,3 +1,5 @@
+.. _test_mann_whitney:
+
 Mann Whitney U test
 =============================================
 
