@@ -25,7 +25,6 @@
 export OneSampleTTest, TwoSampleTTest, EqualVarianceTTest,
     UnequalVarianceTTest
 
-# FIXME(cs): https://github.com/JuliaLang/julia/issues/4935
 abstract TTest <: HypothesisTest
 abstract TwoSampleTTest <: TTest
 

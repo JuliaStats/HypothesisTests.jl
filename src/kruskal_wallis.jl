@@ -25,7 +25,7 @@
 export KruskalWallisTest
 
 immutable KruskalWallisTest <: HypothesisTest
-    n_i::Vector{Int}         # number of observation in each group
+    n_i::Vector{Int}         # number of observations in each group
     df::Int                  # degrees of freedom
     R_i::Vector{Int}         # rank sums
     H::Float64               # test statistic: chi-square statistic

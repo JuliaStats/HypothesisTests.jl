@@ -28,5 +28,4 @@ t = HypothesisTests.KruskalWallisTest(city1, city2, city3, city4)
 @test_approx_eq t.H 16.028783253379856
 @test_approx_eq t.tie_adjustment 0.9969565217391304
 @test_approx_eq pvalue(t) 0.0011186794961869423
-println(t)
 show(IOBuffer(), t)
