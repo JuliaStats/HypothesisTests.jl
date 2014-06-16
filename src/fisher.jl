@@ -36,6 +36,14 @@ immutable FisherExactTest <: HypothesisTest
 end
 
 testname(::FisherExactTest) = "Fisher's exact test"
+population_param_of_interest(x::FisherExactTest) = ("Odds ratio", 1, x.a/x.c/x.b*x.d) # parameter of interest: name, value under h0, point estimate
+
+function show_params(io::IO, x::FisherExactTest, ident="")
+	println(io, ident, "contingency table:")
+	Base.print_matrix(io, [x.a x.b; x.c x.d], typemax(Int), typemax(Int), repeat(ident, 2))
+	println(io)
+end
+
 function pvalue(x::FisherExactTest; tail=:both)
 	a, b, c, d = x.a, x.b, x.c, x.d
 
@@ -66,16 +74,4 @@ function pvalue(x::FisherExactTest; tail=:both)
 	else
 		pvalue(Hypergeometric(a+b, c+d, a+c), a, tail=tail)
 	end
-end
-
-function Base.show(io::IO, x::FisherExactTest)
-	a, b, c, d = x.a, x.b, x.c, x.d
-	print(io, testname(x), "\n\nContingency table:\n")
-	Base.print_matrix(io, [a b; c d], typemax(Int), typemax(Int), "    ")
-	print(io, """\n\n
-Two-sided p-value:
-    p = $(pvalue(x))
-
-Odds ratio:
-    $(a/c/b*d)""")
 end

@@ -25,13 +25,37 @@
 export KruskalWallisTest
 
 immutable KruskalWallisTest <: HypothesisTest
-    n_i::Vector{Int}         # number of observation in each group
+    n_i::Vector{Int}         # number of observations in each group
     df::Int                  # degrees of freedom
     R_i::Vector{Int}         # rank sums
     H::Float64               # test statistic: chi-square statistic
     tie_adjustment::Float64  # adjustment for ties
 end
 
+function KruskalWallisTest{T<:Real}(groups::AbstractVector{T}...) 
+    (H, R_i, tieadj, n_i) = kwstats(groups...)
+    if length(groups)<=3 && any(n_i .< 6)
+        warn("This test is only asymptotically correct and might be inaccurate for the given group size")
+    end
+    df = length(groups) - 1
+    KruskalWallisTest(n_i, df, R_i, H, tieadj)
+end
+
+testname(::KruskalWallisTest) = "Kruskal-Wallis rank sum test (chi-square approximation)"
+population_param_of_interest(x::KruskalWallisTest) = ("Location parameters", "all equal", NaN) # parameter of interest: name, value under h0, point estimate
+
+function show_params(io::IO, x::KruskalWallisTest, ident)
+    println(io, ident, "number of observation in each group: ", x.n_i)
+    println(io, ident, "χ²-statistic:                        ", x.H)
+    println(io, ident, "rank sums:                           ", x.R_i)
+    println(io, ident, "degrees of freedom:                  ", x.df)
+    println(io, ident, "adjustment for ties:                 ", x.tie_adjustment)
+end
+
+pvalue(x::KruskalWallisTest) = pvalue(Chisq(x.df), x.H; tail=:right)
+
+
+## helper
 
 # Get H, rank sums, and tie adjustment for Kruskal-Wallis test
 function kwstats{T<:Real}(groups::AbstractVector{T}...)
@@ -56,16 +80,3 @@ function kwstats{T<:Real}(groups::AbstractVector{T}...)
 
     (H, R_i, C, n_i)
 end
-
-function KruskalWallisTest{T<:Real}(groups::AbstractVector{T}...) 
-    (H, R_i, tieadj, n_i) = kwstats(groups...)
-    if length(groups)<=3 && any(n_i .< 6)
-        warn("This test is only asymptotically correct and might be inaccurate for the given group size")
-    end
-    df = length(groups) - 1
-    KruskalWallisTest(n_i, df, R_i, H, tieadj)
-end
-    
-testname(::KruskalWallisTest) = "Kruskal-Wallis rank sum test (chi-square approximation)"
-
-pvalue(x::KruskalWallisTest) = pvalue(Chisq(x.df), x.H; tail=:right)

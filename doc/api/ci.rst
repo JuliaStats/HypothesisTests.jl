@@ -5,11 +5,22 @@ Confidence Interval
 
 .. function:: ci(test::HypothesisTest, alpha=0.05; tail=:both)
 
-    Compute a confidence interval with coverage 1-``alpha``.
+    Compute a confidence interval C with coverage 1-``alpha``.
 
     If ``tail`` is ``:both`` (default), then a two-sided confidence
     interval is returned. If ``tail`` is ``:left`` or
     ``:right``, then a one-sided confidence interval is returned
+
+    .. note::
+      Most of the implemented confidence intervals are *strongly consistent*, that is, the
+      confidence interval with coverage 1-``alpha`` does not contain the test statistic
+      under :math:`h_0` if and only if the corresponding test rejects the null hypothesis
+      :math:`h_0: \theta=\theta_0`:
+
+      .. math::
+        C (x, 1 − \alpha) = \{\theta : p_\theta (x) > \alpha\},
+
+      where :math:`p_\theta` is the :ref:`p-value<pvalue>` of the corresponding test.
 
 
 .. _ci_binomial:

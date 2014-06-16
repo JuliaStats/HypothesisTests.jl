@@ -1,4 +1,4 @@
-Signed rank test
+Wilcoxon signed rank test
 =============================================
 
 .. function:: SignedRankTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real})

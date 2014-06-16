@@ -35,8 +35,8 @@ export RayleighTest, FisherTLinearAssociation, JammalamadakaCircularCorrelation
 ## RAYLEIGH TEST OF UNIFORMITY AGAINST AN UNSPECIFIED UNIMODAL ALTERNATIVE
 
 immutable RayleighTest <: HypothesisTest
-	Rbar::Float64
-	n::Int
+	Rbar::Float64 # mean resultant length
+	n::Int        # number of observations
 end
 function RayleighTest{S <: Complex}(samples::Vector{S})
 	s = float64(abs(sum(samples./abs(samples))))
@@ -52,6 +52,12 @@ function RayleighTest{S <: Real}(samples::Vector{S})
 end
 
 testname(::RayleighTest) = "Rayleigh test"
+population_param_of_interest(x::RayleighTest) = ("Mean resultant length", 0, x.Rbar) # parameter of interest: name, value under h0, point estimate
+
+function show_params(io::IO, x::RayleighTest, ident="")
+    println(io, ident, "number of observations: $(x.n)")
+    println(io, ident, "test statistic:         $(x.Rbar^2 * x.n)")
+end
 
 function pvalue(x::RayleighTest)
 	Z = x.Rbar^2 * x.n
@@ -62,10 +68,10 @@ end
 ## N.I. FISHER'S TEST OF T-LINEAR CIRCULAR-CIRCULAR ASSOCIATION
 
 immutable FisherTLinearAssociation{S <: Real, T <: Real} <: HypothesisTest
-	rho_t::Float64
-	theta::Vector{S}
-	phi::Vector{T}
-	uniformly_distributed::Union(Bool, Nothing)
+	rho_t::Float64                              # circular correlation coefficient
+	theta::Vector{S}                            # radians of group 1
+	phi::Vector{T}                              # radians of group 2
+	uniformly_distributed::Union(Bool, Nothing) # is distribution of theta and phi uniform?
 end
 function FisherTLinearAssociation{Stheta <: Real, Sphi <: Real}(theta::Vector{Stheta},
 		phi::Vector{Sphi}, uniformly_distributed::Union(Bool, Nothing))
@@ -91,6 +97,10 @@ FisherTLinearAssociation{S <: Real, T <: Real}(theta::Vector{S},
 
 testname(::FisherTLinearAssociation) =
 	"T-linear test of circular-circular association"
+population_param_of_interest(x::FisherTLinearAssociation) = ("Circular correlation coefficient", 0, x.rho_t) # parameter of interest: name, value under h0, point estimate
+function show_params(io::IO, x::FisherTLinearAssociation, ident="")
+    println(io, ident, "number of observations: [$(length(x.theta)),$(length(x.phi))]")
+end
 
 # For large samples, compute the distribution and statistic of T
 function tlinear_Z(x::FisherTLinearAssociation)
@@ -180,11 +190,12 @@ end
 ## JAMMALAMADAKA'S CIRCULAR CORRELATION
 
 immutable JammalamadakaCircularCorrelation <: HypothesisTest
-	r::Float64
-	Z::Float64
+	r::Float64  # circular-circular correlation coefficient
+	Z::Float64  # test statistic
 end
 function JammalamadakaCircularCorrelation{S <: Real, T <: Real}(alpha::Vector{S}, beta::Vector{T})
 	check_same_length(alpha, beta)
+	# calculate sample mean directions
 	alpha_bar = angle(sum(exp(im*alpha)))
 	beta_bar = angle(sum(exp(im*beta)))
 	r = sum(sin(alpha .- alpha_bar).*sin(beta .- beta_bar))/sqrt(sum(sin(alpha .- alpha_bar).^2)*sum(sin(beta .- beta_bar).^2))
@@ -200,6 +211,10 @@ function JammalamadakaCircularCorrelation{S <: Real, T <: Real}(alpha::Vector{S}
 end
 
 testname(::JammalamadakaCircularCorrelation) = "Jammalamadaka circular correlation"
+population_param_of_interest(x::JammalamadakaCircularCorrelation) = ("Circular-circular correlation coefficient", 0, x.r) # parameter of interest: name, value under h0, point estimate
+function show_params(io::IO, x::JammalamadakaCircularCorrelation, ident="")
+    println(io, ident, "test statistic: $(x.Z)")
+end
 
 pvalue(x::JammalamadakaCircularCorrelation; tail=:both) = pvalue(Normal(), x.Z; tail=tail)
 
