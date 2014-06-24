@@ -40,7 +40,7 @@ population_param_of_interest(x::FisherExactTest) = ("Odds ratio", 1, x.a/x.c/x.b
 
 function show_params(io::IO, x::FisherExactTest, ident="")
 	println(io, ident, "contingency table:")
-	Base.print_matrix(io, [x.a x.b; x.c x.d], typemax(Int), typemax(Int), repeat(ident, 2))
+	Base.print_matrix(io, [x.a x.b; x.c x.d], (typemax(Int), typemax(Int)), repeat(ident, 2))
 	println(io)
 end
 
