@@ -71,15 +71,16 @@ function bstats{T<:Real,S<:Real}(X::AbstractMatrix{T}, Y::AbstractMatrix{S}, ker
     X, Y = X[randperm(n),:], Y[randperm(n),:]
 
     n2::Int = floor(n / blocksize)
-    hh = zeros(n2, 1)
+    hh = zeros(n2)
+    tmp = zeros(n2)
     for i = 1:blocksize
-        idx1 = ((n2*(i-1))+1):(n2*i)
+        offset1 = n2*(i-1)
         for j = (i+1):blocksize
-            idx2 = ((n2*(j-1))+1):(n2*j)
-            hh += kernel(X[idx1,:], X[idx2,:])
-            hh += kernel(Y[idx1,:], Y[idx2,:])
-            hh -= kernel(X[idx1,:], Y[idx2,:])
-            hh -= kernel(Y[idx1,:], X[idx2,:])
+            offset2 = n2*(j-1)
+            broadcast!(+, hh, hh, kernel(tmp, X, offset1, X, offset2))
+            broadcast!(+, hh, hh, kernel(tmp, Y, offset1, Y, offset2))
+            broadcast!(-, hh, hh, kernel(tmp, X, offset1, Y, offset2))
+            broadcast!(-, hh, hh, kernel(tmp, Y, offset1, X, offset2))
         end
     end
     MMD = mean(hh)
@@ -100,8 +101,38 @@ function check_blocksize(blocksize::Int, n::Int)
 end
 
 # point-wise evaluated kernel functions
-l1norm(X::AbstractMatrix, Y::AbstractMatrix) = sum(abs(X-Y),2)
-l2norm2(X::AbstractMatrix, Y::AbstractMatrix) = sum((X-Y).^2,2)
-rbf(X::AbstractMatrix, Y::AbstractMatrix; sigma::Float64=1.0) = full(exp(-l2norm2(X, Y)/(2*sigma^2)))
-laplace(X::AbstractMatrix, Y::AbstractMatrix; sigma::Float64=1.0) = full(exp(-l1norm(X, Y)/(2*sigma^2)))
-linear(X::AbstractMatrix, Y::AbstractMatrix; sigma::Float64=1.0) = full(sum(X.*Y,2))
+function l1norm(out::AbstractVector, X::AbstractMatrix, Xoffset::Int, Y::AbstractMatrix, Yoffset::Int)
+    fill!(out, 0.)
+    for j = 1:size(X, 2), i = 1:length(out)
+        out[i] += abs(X[Xoffset+i, j] - Y[Yoffset+i, j])
+    end
+    out
+end
+function l2norm2(out::AbstractVector, X::AbstractMatrix, Xoffset::Int, Y::AbstractMatrix, Yoffset::Int)
+    fill!(out, 0.)
+    for j = 1:size(X, 2), i = 1:length(out)
+        out[i] += abs2(X[Xoffset+i, j] - Y[Yoffset+i, j])
+    end
+    out
+end
+function rbf(out::AbstractVector, X::AbstractMatrix, Xoffset::Int, Y::AbstractMatrix, Yoffset::Int; sigma::Float64=1.0)
+    l2norm2(out, X, Xoffset, Y, Yoffset)
+    for i = 1:length(out)
+        out[i] = exp(-out[i]/(2*sigma^2))
+    end
+    out
+end
+function laplace(out::AbstractVector, X::AbstractMatrix, Xoffset::Int, Y::AbstractMatrix, Yoffset::Int; sigma::Float64=1.0)
+    l1norm(out, X, Xoffset, Y, Yoffset)
+    for i = 1:length(out)
+        out[i] = exp(-out[i]/(2*sigma^2))
+    end
+    out
+end
+function linear(out::AbstractVector, X::AbstractMatrix, Xoffset::Int, Y::AbstractMatrix, Yoffset::Int)
+    fill!(out, 0.)
+    for j = 1:size(X, 2), i = 1:length(out)
+        out[i] += X[Xoffset+i, j] * Y[Yoffset+i, j]
+    end
+    out
+end
