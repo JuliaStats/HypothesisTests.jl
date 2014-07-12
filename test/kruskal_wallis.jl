@@ -29,3 +29,16 @@ t = HypothesisTests.KruskalWallisTest(city1, city2, city3, city4)
 @test_approx_eq t.tie_adjustment 0.9969565217391304
 @test_approx_eq pvalue(t) 0.0011186794961869423
 show(IOBuffer(), t)
+
+# example with non-integer rank sum
+t1 = [1.2,1.9,2.1]
+t2 = [3.4,1.9,5.6]
+t3 = [1.3,4.4,9.9]
+t = KruskalWallisTest(t1, t2, t3)
+@test t.n_i == [length(t1), length(t2), length(t3)]
+@test t.df == 2
+@test t.R_i ==  [9.5, 17.5, 18.0]
+@test_approx_eq t.H 2.039215686274513
+@test_approx_eq t.tie_adjustment 0.9916666666666667
+@test_approx_eq pvalue(t) 0.3607363776845705
+show(IOBuffer(), t)

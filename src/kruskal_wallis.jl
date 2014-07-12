@@ -27,7 +27,7 @@ export KruskalWallisTest
 immutable KruskalWallisTest <: HypothesisTest
     n_i::Vector{Int}         # number of observations in each group
     df::Int                  # degrees of freedom
-    R_i::Vector{Int}         # rank sums
+    R_i::Vector{Float64}     # rank sums
     H::Float64               # test statistic: chi-square statistic
     tie_adjustment::Float64  # adjustment for ties
 end
@@ -67,7 +67,7 @@ function kwstats{T<:Real}(groups::AbstractVector{T}...)
     C = 1-tieadj/(n^3 - n)
 
     # compute rank sums
-    R_i = Array(Int, length(groups))
+    R_i = Array(Float64, length(groups))
     n_end = 0
     for i=1:length(groups)
         R_i[i] = sum(ranks[n_end+1:n_end+n_i[i]])
