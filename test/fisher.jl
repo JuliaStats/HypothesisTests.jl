@@ -35,3 +35,7 @@ t = HypothesisTests.FisherExactTest(2, 31, 136, 15532)
 @test_approx_eq HypothesisTests.pvalue(t; tail=:left) 0.9970112864705307
 @test_approx_eq HypothesisTests.pvalue(t; tail=:right) 0.03390271476034175
 show(IOBuffer(), t)
+
+t = HypothesisTests.FisherExactTest(1, 1, 1, 1)
+@test HypothesisTests.pvalue(t, tail=:both) <= 1
+show(IOBuffer(), t)
