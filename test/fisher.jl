@@ -103,3 +103,7 @@ t = HypothesisTests.FisherExactTest(4, 1, 20, 1)
 @test_approx_eq [ci(t; method=:central)...] [0.002430190787475382, 19.59477744071154]
 #@test_approx_eq [ci(t; method=:minlike)...] [0.005, 9.5943]
 show(IOBuffer(), t)
+
+t = HypothesisTests.FisherExactTest(1, 1, 1, 1)
+@test HypothesisTests.pvalue(t, tail=:both) <= 1
+show(IOBuffer(), t)
