@@ -56,13 +56,16 @@ end
 function pvalue(x::FisherExactTest; tail=:both, method=:central)
     if tail == :both && method != :central
         if method == :minlike
-            pvalue_both_minlike(x)
+            p = pvalue_both_minlike(x)
         else
             error("method=$(method) is not implemented yet")
         end
     else
-        pvalue(Hypergeometric(x.a + x.b, x.c + x.d, x.a + x.c), x.a, tail=tail)
+        p = pvalue(Hypergeometric(x.a + x.b, x.c + x.d, x.a + x.c), x.a, tail=tail)
     end
+    p = max(min(p, 1.0), 0.0)
+    
+    return p
 end
 
 function pvalue_both_minlike(x::FisherExactTest, ω::Float64=1.0)
