@@ -70,8 +70,12 @@ function pvalue(x::FisherExactTest; tail=:both)
 			end
 			p += curp
 		end
-		p
 	else
-		pvalue(Hypergeometric(a+b, c+d, a+c), a, tail=tail)
+		p = pvalue(Hypergeometric(a+b, c+d, a+c), a, tail=tail)
 	end
+
+    # Enforce bounds [0, 1] if numeric imprecision becomes relevant
+    p = max(min(p, 1.0), 0.0)
+    
+    return p
 end
