@@ -9,6 +9,7 @@ parametric counterparts. The package contains the following nonparametric tests:
 
    nonparametric/test_binomial
    nonparametric/test_fisher_exact
+   nonparametric/test_kolmogorov_smirnov
    nonparametric/test_kruskal_wallis
    nonparametric/test_mann_whitney_u
    nonparametric/test_sign
