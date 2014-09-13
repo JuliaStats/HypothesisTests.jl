@@ -2,6 +2,7 @@ HypothesisTests.jl
 ===========
 
 [![Build Status](https://travis-ci.org/JuliaStats/HypothesisTests.jl.png?branch=master)](https://travis-ci.org/JuliaStats/HypothesisTests.jl)
+[![HypothesisTests](http://pkg.julialang.org/badges/HypothesisTests_release.svg)](http://pkg.julialang.org/?pkg=HypothesisTests&ver=release)
 
 This package implements several hypothesis tests in Julia.
 
