@@ -38,9 +38,8 @@ population_param_of_interest(x::KSTest) = ("Supremum of CDF differences", 0.0, x
 function ksstats{T<:Real}(x::AbstractVector{T}, d::UnivariateDistribution)
     n = length(x)
     cdfs = cdf(d, sort(x))
-    cdf_diffs = [[0:n-1] / n - cdfs..., [1:n] / n - cdfs...]
-    δp = max(cdf_diffs...)
-    δn = -min(cdf_diffs...)
+    δp = maximum([1:n] / n - cdfs)
+    δn = -minimum([0:n-1] / n - cdfs)
     δ = max(δn, δp)
     (n, δ, δp, δn)
 end
@@ -51,7 +50,7 @@ immutable ExactOneSampleKSTest <: ExactKSTest
     n::Int      # number of observations
     δ::Float64  # supremum of CDF differences
     δp::Float64 # supremum of the positive CDF differences
-    δn::Float64 # suproemum of the negative CDF differences
+    δn::Float64 # supremum of the negative CDF differences
 end
 
 function ExactOneSampleKSTest{T<:Real}(x::AbstractVector{T}, d::UnivariateDistribution)
@@ -165,8 +164,8 @@ function ksstats{T<:Real, S<:Real}(x::AbstractVector{T}, y::AbstractVector{S})
     sort_idx = sortperm([x, y])
     pdf_diffs = [ones(n_x)/n_x, -ones(n_y)/n_y][sort_idx]
     cdf_diffs = cumsum(pdf_diffs)
-    δp = max(cdf_diffs...)
-    δn = -min(cdf_diffs...)
+    δp = maximum(cdf_diffs)
+    δn = -minimum(cdf_diffs)
     δ = max(δp, δn)
     (n_x, n_y, δ, δp, δn)
 end
