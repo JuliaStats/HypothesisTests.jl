@@ -25,35 +25,16 @@
 const libRmath = VERSION >= v"0.3.0-" ? "libRmath-julia" : "libRmath"
 
 # PROBABILITY FUNCTIONS
-macro libRmath_deferred_free(base)
-    libcall = symbol(string(base, "_free"))
-    func = symbol(string(base, "_deferred_free"))
-    quote
-        let gc_tracking_obj = []
-            global $func
-            function $libcall(x::Vector{None})
-                gc_tracking_obj = []
-                ccall(($(string(libcall)),libRmath), Void, ())
-            end
-            function $func()
-                if !isa(gc_tracking_obj, Bool)
-                    finalizer(gc_tracking_obj, $libcall)
-                    gc_tracking_obj = false
-                end
-            end
-        end
-    end
-end
 
 # RMATH WRAPPERS
 macro rmath_deferred_free(base)
     libcall = symbol(string(base, "_free"))
     func = symbol(string(base, "_deferred_free"))
     quote
-        let gc_tracking_obj = []
+        let gc_tracking_obj = Union()[]
             global $func
-            function $libcall(x::Vector{None})
-                gc_tracking_obj = []
+            function $libcall(x::Vector{Union()})
+                gc_tracking_obj = Union()[]
                 ccall(($(string(libcall)),libRmath), Void, ())
             end
             function $func()

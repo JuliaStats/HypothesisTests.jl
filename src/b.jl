@@ -37,7 +37,7 @@ function BTest{T<:Real, S<:Real}(X::AbstractMatrix{T}, Y::AbstractMatrix{S}; ker
     check_blocksize(blocksize, n)
     check_same_size(X, Y)
 
-    if !in(kernel, {:rbf, :laplace, :linear})
+    if !in(kernel, [:rbf, :laplace, :linear])
         throw(ArgumentError("kernel=$(kernel) is not implemented yet"))
     end
 
