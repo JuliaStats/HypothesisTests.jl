@@ -4,7 +4,7 @@ T-test
 .. function:: OneSampleTTest(v::AbstractVector{T<:Real}, mu0::Real=0)
 
     Perform a one sample t-test of the null hypothesis that the data
-    in vector ``v`` comes from a distribution with ``mu0`` against
+    in vector ``v`` comes from a distribution with mean ``mu0`` against
     the alternative hypothesis that the distribution does not have mean
     ``mu0``.
 
