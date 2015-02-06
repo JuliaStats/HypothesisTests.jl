@@ -75,7 +75,7 @@ function pvalue(x::ExactKSTest; tail=:both)
     elseif tail == :both
         pvalue(KSDist(x.n), x.δ; tail=:right)
     else
-        error("tail=$(tail) is invalid")
+        throw(ArgumentError("tail=$(tail) is invalid"))
     end
 end
 
@@ -112,7 +112,7 @@ function pvalue(x::ApproximateOneSampleKSTest; tail=:both)
     elseif tail == :both
         pvalue(Kolmogorov(), sqrt(x.n)*x.δ; tail=:right)
     else
-        error("tail=$(tail) is invalid")
+        throw(ArgumentError("tail=$(tail) is invalid"))
     end
 end
 
@@ -154,7 +154,7 @@ function pvalue(x::ApproximateTwoSampleKSTest; tail=:both)
     elseif tail == :both
         pvalue(Kolmogorov(), sqrt(n)*x.δ; tail=:right)
     else
-        error("tail=$(tail) is invalid")
+        throw(ArgumentError("tail=$(tail) is invalid"))
     end
 end
 

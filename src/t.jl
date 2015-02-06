@@ -42,7 +42,7 @@ function ci(x::TTest, alpha::Float64=0.05; tail=:both)
         q = quantile(TDist(x.df), 1-alpha/2)
         (x.xbar-q*x.stderr, x.xbar+q*x.stderr)
     else
-        error("tail=$(tail) is invalid")
+        throw(ArgumentError("tail=$(tail) is invalid"))
     end
 end
 

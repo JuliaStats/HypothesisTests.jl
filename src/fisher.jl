@@ -58,7 +58,7 @@ function pvalue(x::FisherExactTest; tail=:both, method=:central)
         if method == :minlike
             p = pvalue_both_minlike(x)
         else
-            error("method=$(method) is not implemented yet")
+            throw(ArgumentError("method=$(method) is not implemented yet"))
         end
     else
         p = pvalue(Hypergeometric(x.a + x.b, x.c + x.d, x.a + x.c), x.a, tail=tail)
@@ -112,10 +112,10 @@ function ci(x::FisherExactTest, alpha::Float64=0.05; tail=:both, method=:central
         if method == :central
             (ci(x, alpha/2; tail=:right)[1], ci(x, alpha/2; tail=:left)[2])
         else
-            error("method=$(method) is not implemented yet")
+            throw(ArgumentError("method=$(method) is not implemented yet"))
         end
     else
-        error("tail=$(tail) is invalid")
+        throw(ArgumentError("tail=$(tail) is invalid"))
     end
 end
 
