@@ -1,8 +1,8 @@
 HypothesisTests.jl
 ===========
 
-[![Build Status](https://travis-ci.org/JuliaStats/HypothesisTests.jl.png?branch=master)](https://travis-ci.org/JuliaStats/HypothesisTests.jl)
-[![Coverage Status](https://coveralls.io/repos/JuliaStats/HypothesisTests.jl/badge.png?branch=master)](https://coveralls.io/r/JuliaStats/HypothesisTests.jl?branch=master)
+[![Build Status](https://travis-ci.org/JuliaStats/HypothesisTests.jl.svg?branch=master)](https://travis-ci.org/JuliaStats/HypothesisTests.jl)
+[![Coverage Status](https://coveralls.io/repos/JuliaStats/HypothesisTests.jl/badge.svg?branch=master)](https://coveralls.io/r/JuliaStats/HypothesisTests.jl?branch=master)
 [![HypothesisTests](http://pkg.julialang.org/badges/HypothesisTests_release.svg)](http://pkg.julialang.org/?pkg=HypothesisTests&ver=release)
 
 This package implements several hypothesis tests in Julia.
