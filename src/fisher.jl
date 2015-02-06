@@ -135,16 +135,16 @@ end
 function find_brackets(f::Function, x_init::Float64=1.0)
     f_init = f(x_init)
 
-    if f_init > f(x_init+eps())
-        find_brackets(x->-f(x), x_init)
+    if f_init > f(x_init + 1.0)
+        find_brackets(x -> -f(x), x_init)
     else
-        x_upper, x_lower = x_init, x_init
+        x_upper = x_lower = x_init
         if f_init > 0.0
-            while  f(x_lower) > 0.0
+            while x_lower > eps(0.0) && f(x_lower) > 0.0
                 x_lower /= 2
             end
         else
-            while  f(x_upper) < 0.0
+            while f(x_upper) < 0.0
                 x_upper *= 2
             end
         end
