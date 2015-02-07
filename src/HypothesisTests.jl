@@ -31,7 +31,7 @@ export testname, pvalue, ci
 abstract HypothesisTest
 
 check_same_length(x::Vector, y::Vector) = if length(x) != length(y)
-    error("Vectors must be the same length")
+    throw(DimensionMismatch("Vectors must be the same length"))
 end
 
 # Basic function for finding a p-value given a distribution and tail
@@ -43,7 +43,7 @@ pvalue(dist::ContinuousUnivariateDistribution, x::Number; tail=:both) =
     elseif tail == :right
         ccdf(dist, x)
     else
-        error("tail=$(tail) is invalid")
+        throw(ArgumentError("tail=$(tail) is invalid"))
     end
 
 pvalue(dist::DiscreteUnivariateDistribution, x::Number; tail=:both) = 
@@ -54,12 +54,12 @@ pvalue(dist::DiscreteUnivariateDistribution, x::Number; tail=:both) =
     elseif tail == :right
         ccdf(dist, x-1)
     else
-        error("tail=$(tail) is invalid")
+        throw(ArgumentError("tail=$(tail) is invalid"))
     end
 
 function check_alpha(alpha::Float64)
     if alpha <= 0 || alpha >= 0.5
-        error("alpha $alpha not in range (0, 0.5)")
+        throw(ArgumentError("alpha $alpha not in range (0, 0.5)"))
     end
 end
 

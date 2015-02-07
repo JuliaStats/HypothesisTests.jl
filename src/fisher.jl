@@ -58,7 +58,7 @@ function pvalue(x::FisherExactTest; tail=:both, method=:central)
         if method == :minlike
             p = pvalue_both_minlike(x)
         else
-            error("method=$(method) is not implemented yet")
+            throw(ArgumentError("method=$(method) is not implemented yet"))
         end
     else
         p = pvalue(Hypergeometric(x.a + x.b, x.c + x.d, x.a + x.c), x.a, tail=tail)
@@ -112,10 +112,10 @@ function ci(x::FisherExactTest, alpha::Float64=0.05; tail=:both, method=:central
         if method == :central
             (ci(x, alpha/2; tail=:right)[1], ci(x, alpha/2; tail=:left)[2])
         else
-            error("method=$(method) is not implemented yet")
+            throw(ArgumentError("method=$(method) is not implemented yet"))
         end
     else
-        error("tail=$(tail) is invalid")
+        throw(ArgumentError("tail=$(tail) is invalid"))
     end
 end
 
@@ -135,16 +135,16 @@ end
 function find_brackets(f::Function, x_init::Float64=1.0)
     f_init = f(x_init)
 
-    if f_init > f(x_init+eps())
-        find_brackets(x->-f(x), x_init)
+    if f_init > f(x_init + 1.0)
+        find_brackets(x -> -f(x), x_init)
     else
-        x_upper, x_lower = x_init, x_init
+        x_upper = x_lower = x_init
         if f_init > 0.0
-            while  f(x_lower) > 0.0
+            while x_lower > eps(0.0) && f(x_lower) > 0.0
                 x_lower /= 2
             end
         else
-            while  f(x_upper) < 0.0
+            while f(x_upper) < 0.0
                 x_upper *= 2
             end
         end

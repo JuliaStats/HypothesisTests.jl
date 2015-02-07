@@ -68,10 +68,10 @@ function ci(x::BinomialTest, alpha::Float64=0.05; tail=:both, method=:clopper_pe
         elseif method == :agresti_coull
             ci_agresti_coull(x, alpha)
         else
-            error("method=$(method) is not implemented yet")
+            throw(ArgumentError("method=$(method) is not implemented yet"))
         end
     else
-        error("tail=$(tail) is invalid")
+        throw(ArgumentError("tail=$(tail) is invalid"))
     end
 end
 
@@ -155,6 +155,6 @@ function ci(x::SignTest, alpha::Float64=0.05; tail=:both)
 		q = quantile(Binomial(x.n, 0.5), alpha/2)
 		(x.data[q+1], x.data[end-q])
 	else
-		error("tail=$(tail) is invalid")
+		throw(ArgumentError("tail=$(tail) is invalid"))
 	end
 end

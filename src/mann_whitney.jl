@@ -110,7 +110,7 @@ function pvalue(x::ExactMannWhitneyUTest; tail=:both)
         elseif tail == :right
             pwilcox(x.U - 1, x.nx, x.ny, false)
         else
-            error("tail=$(tail) is invalid")
+            throw(ArgumentError("tail=$(tail) is invalid"))
         end
     else
         # Compute exact p-value by enumerating possible ranks in the tied data
@@ -121,7 +121,7 @@ function pvalue(x::ExactMannWhitneyUTest; tail=:both)
         elseif tail == :right
             mwuenumerate(x)[2]
         else
-            error("tail=$(tail) is invalid")
+            throw(ArgumentError("tail=$(tail) is invalid"))
         end
     end
 end

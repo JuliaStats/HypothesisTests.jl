@@ -170,7 +170,7 @@ for (fn, transform, comparison, distfn) in ((:pvalue, :abs, :>, :ccdf),
 				greater += tail == :both ? abs(Tp) > T :
 				           tail == :left ? Tp < T :
 				           tail == :right ? Tp > T :
-				           error("tail=$(tail) is invalid")
+				           throw(ArgumentError("tail=$(tail) is invalid"))
 			end
 			greater / nperms
 		else
