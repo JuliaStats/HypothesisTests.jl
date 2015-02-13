@@ -65,7 +65,7 @@ end
 
 function significance{T<:Real}(p_val::T)
     if p_val > 0.05
-        "not signficant"
+        "not significant"
     elseif p_val < 0.001
         "extremely significant"
     elseif  p_val < 0.01
