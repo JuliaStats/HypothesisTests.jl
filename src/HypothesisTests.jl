@@ -26,6 +26,7 @@ module HypothesisTests
 
 using Distributions
 using Roots
+using StatsBase
 
 export testname, pvalue, ci
 abstract HypothesisTest
@@ -133,4 +134,5 @@ include("kruskal_wallis.jl")
 include("mann_whitney.jl")
 include("t.jl")
 include("wilcoxon.jl")
+include("power_divergence.jl")
 end
