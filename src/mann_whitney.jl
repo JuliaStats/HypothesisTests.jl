@@ -41,10 +41,10 @@ function mwustats{S<:Real,T<:Real}(x::AbstractVector{S}, y::AbstractVector{T})
     nx = length(x)
     ny = length(y)
     if nx <= ny
-        (ranks, tieadj) = tiedrank_adj([x, y])
+        (ranks, tieadj) = tiedrank_adj([x; y])
         U = sum(ranks[1:nx]) - nx*(nx+1)/2
     else
-        (ranks, tieadj) = tiedrank_adj([y, x])
+        (ranks, tieadj) = tiedrank_adj([y; x])
         U = nx*ny - sum(ranks[1:ny]) + ny*(ny+1)/2
     end
     (U, ranks, tieadj, nx, ny, median(x)-median(y))

@@ -38,8 +38,8 @@ population_param_of_interest(x::KSTest) = ("Supremum of CDF differences", 0.0, x
 function ksstats{T<:Real}(x::AbstractVector{T}, d::UnivariateDistribution)
     n = length(x)
     cdfs = cdf(d, sort(x))
-    δp = maximum([1:n] / n - cdfs)
-    δn = -minimum([0:n-1] / n - cdfs)
+    δp = maximum((1:n) / n - cdfs)
+    δn = -minimum((0:n-1) / n - cdfs)
     δ = max(δn, δp)
     (n, δ, δp, δn)
 end
@@ -130,7 +130,7 @@ end
 
 function ApproximateTwoSampleKSTest{T<:Real, S<:Real}(x::AbstractVector{T}, y::AbstractVector{S})
     n_x, n_y = length(x), length(y)
-    if n_x+n_y > length(unique([x,y]))
+    if n_x+n_y > length(unique([x; y]))
         warn("This test is inaccurate with ties")
     end
 
@@ -161,8 +161,8 @@ end
 # compute supremum of differences between empirical cdfs.
 function ksstats{T<:Real, S<:Real}(x::AbstractVector{T}, y::AbstractVector{S})
     n_x, n_y = length(x), length(y)
-    sort_idx = sortperm([x, y])
-    pdf_diffs = [ones(n_x)/n_x, -ones(n_y)/n_y][sort_idx]
+    sort_idx = sortperm([x; y])
+    pdf_diffs = [ones(n_x)/n_x; -ones(n_y)/n_y][sort_idx]
     cdf_diffs = cumsum(pdf_diffs)
     δp = maximum(cdf_diffs)
     δn = -minimum(cdf_diffs)

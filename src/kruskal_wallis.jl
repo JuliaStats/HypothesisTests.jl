@@ -63,7 +63,7 @@ function kwstats{T<:Real}(groups::AbstractVector{T}...)
     n = sum(n_i)
 
     # get ranks and adjustment for ties
-    (ranks, tieadj) = tiedrank_adj([groups...])
+    (ranks, tieadj) = tiedrank_adj([groups...;])
     C = 1-tieadj/(n^3 - n)
 
     # compute rank sums

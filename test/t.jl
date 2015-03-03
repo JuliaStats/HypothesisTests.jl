@@ -3,19 +3,19 @@ using HypothesisTests, Base.Test
 ## ONE SAMPLE T-TEST
 
 # One sample
-@test pvalue(OneSampleTTest([-5:5])) == 1
+@test pvalue(OneSampleTTest(-5:5)) == 1
 
-tst = OneSampleTTest([-5:10])
+tst = OneSampleTTest(-5:10)
 @test abs(pvalue(tst) - 0.0530) <= 1e-4
 @test abs(pvalue(tst; tail=:left) - 0.9735) <= 1e-4
 @test abs(pvalue(tst; tail=:right) - 0.0265) <= 1e-4
 show(IOBuffer(), tst)
 
-tst = OneSampleTTest(mean([-5:10]), std([-5:10]), 16)
+tst = OneSampleTTest(mean(-5:10), std(-5:10), 16)
 @test abs(pvalue(tst) - 0.0530) <= 1e-4
 
-@test all(abs([ci(tst)...] - [-0.0369, 5.0369]) .<= 1e-4)
-@test all(abs([ci(tst, 0.1)...] - [0.4135, 4.5865]) .<= 1e-4)
+@test all(abs([ci(tst)...;] - [-0.0369, 5.0369]) .<= 1e-4)
+@test all(abs([ci(tst, 0.1)...;] - [0.4135, 4.5865]) .<= 1e-4)
 c = ci(tst; tail=:left)
 @test c[1] == -Inf
 @test abs(c[2] - 4.5865) .<= 1e-4
@@ -24,7 +24,7 @@ c = ci(tst; tail=:right)
 @test c[2] == Inf
 show(IOBuffer(), tst)
 
-tst = OneSampleTTest([-10:5])
+tst = OneSampleTTest(-10:5)
 @test abs(pvalue(tst) - 0.0530) <= 1e-4
 @test abs(pvalue(tst; tail=:left) - 0.0265) <= 1e-4
 @test abs(pvalue(tst; tail=:right) - 0.9735) <= 1e-4

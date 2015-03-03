@@ -153,7 +153,7 @@ for (fn, transform, comparison, distfn) in ((:pvalue, :abs, :>, :ccdf),
 
 			exact = n <= 8
 			nperms = exact ? factorial(n) : 100000
-			indices = [1:n]
+			indices = [1:n;]
 			for i = 1:nperms
 				tp = exact ? nthperm(indices, i) : shuffle!(indices)
 				a = 0.0

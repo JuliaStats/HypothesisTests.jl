@@ -21,7 +21,7 @@ t = BinomialTest(26, 78)
 @test_approx_eq [ci(t, tail=:right, method=:agresti_coull)...] [0.25225408385003706,1.0]
 show(IOBuffer(), t)
 
-t = BinomialTest([trues(6), falses(3)])
+t = BinomialTest([trues(6); falses(3)])
 @test_approx_eq pvalue(t) 0.5078125000000002
 @test_approx_eq pvalue(t, tail=:left) 0.91015625
 @test_approx_eq pvalue(t, tail=:right) 0.2539062500000001

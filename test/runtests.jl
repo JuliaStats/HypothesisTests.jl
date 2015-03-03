@@ -1,5 +1,3 @@
-push!(LOAD_PATH, "src")
-
 include("b.jl")
 include("binomial.jl")
 include("circular.jl")

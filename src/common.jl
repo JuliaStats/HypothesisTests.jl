@@ -49,11 +49,11 @@ end
 
 ## COMMON FUNCTIONS
 
-# Tied rank from Base, modified to compute the adjustment for ties
-function tiedrank_adj(v::AbstractArray)
+# Tied ranking, also computing the adjustment for ties
+# sum(n^3-n) where n is the number of ties for each data point
+function tiedrank_adj!(ord::AbstractVector, v::AbstractArray)
     n     = length(v)
     place = sortperm(v)
-    ord   = Array(Float64, n)
     tieadj = 0.0
 
     i = 1
@@ -79,3 +79,5 @@ function tiedrank_adj(v::AbstractArray)
 
     (ord, tieadj)
 end
+
+tiedrank_adj(v::AbstractArray) = tiedrank_adj!(Array(Float64, length(v)), v)

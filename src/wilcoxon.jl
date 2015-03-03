@@ -44,11 +44,11 @@ function signedrankstats{S<:Real}(x::AbstractVector{S})
    (ranks, tieadj) = tiedrank_adj(abs(nonzero_x))
    W = 0.0
    for i = 1:length(nonzero_x)
-           if nonzero_x[i] > 0
-                   W += ranks[i]
-           end
+       if nonzero_x[i] > 0
+           W += ranks[i]
+       end
    end
-   (W, ranks, [nonzero_x .> 0], tieadj, length(x), median(x))
+   (W, ranks, nonzero_x .> 0, tieadj, length(x), median(x))
 end
 
 
