@@ -6,3 +6,4 @@ Parametric tests
 
    parametric/test_b
    parametric/test_t
+   parametric/power_divergence_test
