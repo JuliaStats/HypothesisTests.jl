@@ -1,5 +1,7 @@
 export PowerDivergenceTest, ChisqTest, MultinomialLRT
 
+typealias Levels{T} @compat(Tuple{UnitRange{T},UnitRange{T}})
+
 function boundproportion{T<:Real}(x::T)
   max(min(x,1),0)
 end
@@ -254,7 +256,7 @@ end
 #convenience functions
 
 #PDT
-function PowerDivergenceTest{T<: Integer, U<: FloatingPoint}(x::AbstractVector{T}, y::AbstractVector{T}, levels::(Range1{T},Range1{T}); lambda::U=1.0)
+function PowerDivergenceTest{T<: Integer, U<: FloatingPoint}(x::AbstractVector{T}, y::AbstractVector{T}, levels::Levels{T}; lambda::U=1.0)
   d = counts(x,y,levels)
   PowerDivergenceTest(d,lambda=lambda)
 end
@@ -272,7 +274,7 @@ function ChisqTest{T<: Integer}(x::AbstractMatrix{T})
   PowerDivergenceTest(x,lambda=1.0)
 end
 
-function ChisqTest{T<: Integer}(x::AbstractVector{T}, y::AbstractVector{T}, levels::(Range1{T},Range1{T}))
+function ChisqTest{T<: Integer}(x::AbstractVector{T}, y::AbstractVector{T}, levels::Levels{T})
   d = counts(x,y,levels)
   PowerDivergenceTest(d,lambda=1.0)
 end
@@ -290,7 +292,7 @@ function MultinomialLRT{T<: Integer}(x::AbstractMatrix{T})
   PowerDivergenceTest(x,lambda=0.0)
 end
 
-function MultinomialLRT{T<: Integer}(x::AbstractVector{T}, y::AbstractVector{T}, levels::(Range1{T},Range1{T}))
+function MultinomialLRT{T<: Integer}(x::AbstractVector{T}, y::AbstractVector{T}, levels::Levels{T})
   d = counts(x,y,levels)
   PowerDivergenceTest(d,lambda=0.0)
 end

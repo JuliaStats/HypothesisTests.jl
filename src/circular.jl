@@ -39,13 +39,13 @@ immutable RayleighTest <: HypothesisTest
 	n::Int        # number of observations
 end
 function RayleighTest{S <: Complex}(samples::Vector{S})
-	s = float64(abs(sum(samples./abs(samples))))
+	s = @compat Float64(abs(sum(samples./abs(samples))))
 	n = length(samples)
 	Rbar = s/n
 	RayleighTest(Rbar, n)
 end
 function RayleighTest{S <: Real}(samples::Vector{S})
-	s = float64(abs(sum(exp(im*samples))))
+	s = @compat Float64(abs(sum(exp(im*samples))))
 	n = length(samples)
 	Rbar = s/n
 	RayleighTest(Rbar, n)

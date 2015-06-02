@@ -24,9 +24,7 @@
 
 module HypothesisTests
 
-using Distributions
-using Roots
-using StatsBase
+using Distributions, Roots, StatsBase, Compat
 
 export testname, pvalue, ci
 abstract HypothesisTest

@@ -35,7 +35,7 @@ immutable BinomialTest <: HypothesisTest
 end
 
 BinomialTest(x::AbstractVector{Bool}, p=0.5) =
-	BinomialTest(sum(x), length(x), float64(p))
+	BinomialTest(sum(x), length(x), p)
 
 testname(::BinomialTest) = "Binomial test"
 population_param_of_interest(x::BinomialTest) = ("Probability of success", x.p, x.x/x.n) # parameter of interest: name, value under h0, point estimate
@@ -124,7 +124,7 @@ immutable SignTest <: HypothesisTest
 end
 
 SignTest{T<:Real}(x::AbstractVector{T}, median::Real=0) =
-	SignTest(float64(median), sum(x .> median), sum(x .!= median), sort(x))
+	SignTest(median, sum(x .> median), sum(x .!= median), sort(x))
 SignTest{T<:Real, S<:Real}(x::AbstractVector{T}, y::AbstractVector{S}) = SignTest(x - y, 0.0)
 
 testname(::SignTest) = "Sign Test"
@@ -142,17 +142,17 @@ end
 pvalue(x::SignTest; tail=:both) = pvalue(Binomial(x.n, 0.5), x.x; tail=tail)
 
 # confidence interval by inversion
-function ci(x::SignTest, alpha::Float64=0.05; tail=:both)
+@compat function ci(x::SignTest, alpha::Float64=0.05; tail=:both)
 	check_alpha(alpha)
 
 	if tail == :left
-		q = quantile(Binomial(x.n, 0.5), alpha)
+		q = Int(quantile(Binomial(x.n, 0.5), alpha))
 		(x.data[q+1], x.median)
 	elseif tail == :right
-		q = quantile(Binomial(x.n, 0.5), alpha)
+		q = Int(quantile(Binomial(x.n, 0.5), alpha))
 		(x.median, x.data[end-q])
 	elseif tail == :both
-		q = quantile(Binomial(x.n, 0.5), alpha/2)
+		q = Int(quantile(Binomial(x.n, 0.5), alpha/2))
 		(x.data[q+1], x.data[end-q])
 	else
 		throw(ArgumentError("tail=$(tail) is invalid"))

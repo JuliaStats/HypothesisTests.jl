@@ -32,7 +32,7 @@ immutable BTest <: HypothesisTest
     stderr::Float64  # standard error
 end
 
-function BTest{T<:Real, S<:Real}(X::AbstractMatrix{T}, Y::AbstractMatrix{S}; kernel::Symbol=:rbf, blocksize::Int=int(floor(sqrt(size(X,1)))))
+function BTest{T<:Real, S<:Real}(X::AbstractMatrix{T}, Y::AbstractMatrix{S}; kernel::Symbol=:rbf, blocksize::Int=floor(Int, sqrt(size(X,1))))
     n = size(X,1)
     check_blocksize(blocksize, n)
     check_same_size(X, Y)
