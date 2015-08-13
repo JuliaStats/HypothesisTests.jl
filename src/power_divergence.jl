@@ -3,7 +3,7 @@ export PowerDivergenceTest, ChisqTest, MultinomialLRT
 typealias Levels{T} @compat(Tuple{UnitRange{T},UnitRange{T}})
 
 function boundproportion{T<:Real}(x::T)
-  max(min(x,1),0)
+  max(min(convert(Float64,x),1.0),0.0)
 end
 
 
@@ -50,10 +50,10 @@ function ci(x::PowerDivergenceTest, alpha::Float64=0.05; tail::Symbol=:both, met
   
   if tail == :left
     i = ci(x, alpha*2,method=method, GC=GC)
-    (Float64,Float64)[ (0.0, i[j][2]) for j in 1:m]
+    @compat Tuple{Float64,Float64}[ (0.0, i[j][2]) for j in 1:m]
   elseif tail == :right
     i = ci(x, alpha*2,method=method, GC=GC)
-    (Float64,Float64)[ (i[j][1], 1.0) for j in 1:m]
+    @compat Tuple{Float64,Float64}[ (i[j][1], 1.0) for j in 1:m]
   elseif tail == :both
     if method == :gold
       ci_gold(x,alpha,correct=correct,GC=GC)
@@ -74,7 +74,7 @@ end
 # Bootstrap
 function ci_bootstrap(x::PowerDivergenceTest,alpha::Float64, iters::Int64)
   m = mapslices(x -> quantile(x,[alpha/2,1-alpha/2]), rand(Multinomial(x.n,convert(Vector{Float64},x.thetahat)),iters)/x.n, 2)
-  (Float64,Float64)[ ( boundproportion(m[i,1]), boundproportion(m[i,2])) for i in 1:length(x.thetahat)]
+  @compat Tuple{Float64,Float64}[ ( boundproportion(m[i,1]), boundproportion(m[i,2])) for i in 1:length(x.thetahat)]
 end
 
 # Quesenberry, Hurst (1964)
@@ -84,7 +84,7 @@ function ci_quesenberry_hurst(x::PowerDivergenceTest,alpha::Float64; GC::Bool=tr
 
   u = (cv + 2*x.observed + sqrt(  cv * (cv + 4 * x.observed .* (x.n - x.observed)/x.n)))/( 2*(x.n + cv))
   l = (cv + 2*x.observed - sqrt(  cv * (cv + 4 * x.observed .* (x.n - x.observed)/x.n)))/( 2*(x.n + cv))
-  (Float64,Float64)[ (boundproportion(l[j]), boundproportion(u[j])) for j in 1:m] 
+  @compat Tuple{Float64,Float64}[ (boundproportion(l[j]), boundproportion(u[j])) for j in 1:m] 
 end
 
 # asymptotic simultaneous confidence interval 
@@ -95,7 +95,7 @@ function ci_gold(x::PowerDivergenceTest, alpha::Float64; correct::Bool=true, GC:
 
   u = [ x.thetahat[j] + sqrt(cv * x.thetahat[j]*(1-x.thetahat[j])/x.n) + (correct ? 1/(2*x.n) : 0 ) for j in 1:m]
   l = [ x.thetahat[j] - sqrt(cv * x.thetahat[j]*(1-x.thetahat[j])/x.n) - (correct ? 1/(2*x.n) : 0 ) for j in 1:m]
-  (Float64,Float64)[ (boundproportion(l[j]), boundproportion(u[j])) for j in 1:m] 
+  @compat Tuple{Float64,Float64}[ (boundproportion(l[j]), boundproportion(u[j])) for j in 1:m] 
 end
 
 # Simultaneous confidence interval
@@ -185,9 +185,9 @@ function ci_sison_glaz(x::PowerDivergenceTest, alpha::Float64; skew_correct::Boo
     out[i,5] = min(x.thetahat[i] + cn + onen,1)
   end
   if skew_correct
-    return( (Float64,Float64)[ (boundproportion(out[i,2]),boundproportion(out[i,3])) for i in 1:k] )
+    return( @compat Tuple{Float64,Float64}[ (boundproportion(out[i,2]),boundproportion(out[i,3])) for i in 1:k] )
   else
-    return( (Float64,Float64)[ (boundproportion(out[i,4]),boundproportion(out[i,5])) for i in 1:k] )
+    return( @compat Tuple{Float64,Float64}[ (boundproportion(out[i,4]),boundproportion(out[i,5])) for i in 1:k] )
   end
 end
 

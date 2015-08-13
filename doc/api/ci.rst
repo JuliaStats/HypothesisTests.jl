@@ -53,6 +53,31 @@ Confidence Interval for Binomial Proportions
 
    - Brown, L.D., Cai, T.T., and DasGupta, A. Interval estimation for a binomial proportion. 
      Statistical Science, 16(2):101–117, 2001. 
+     
+.. _ci_multinomial:
+
+Confidence Interval for Multinomial Proportions
+----------------------------------------------
+
+.. function:: ci(test::PowerDivergenceTest, alpha=0.05; tail=:both, method=:sison_glaz)
+
+   Compute a confidence interval with coverage 1-``alpha`` for multinomial proportions 
+   using one of the following methods. Possible values for ``method`` are:
+
+   - Sison, Glaz intervals ``:sison_glaz`` (default):
+   - Bootstrap intervals ``:bootstrap`` :
+   - Quesenberry, Hurst intervals ``:quesenberry_hurst`` :
+   - Gold intervals ``:gold`` (Asymptotic simultaneous intervals):
+   
+   References:
+
+    - Agresti, Alan. Categorical Data Analysis, 3rd Edition. Wiley, 2013. 
+    - Sison, C.P and Glaz, J. Simultaneous confidence intervals and sample size determination for multinomial proportions.  
+      Journal of the American Statistical Association, 90:366-369, 1995.
+    - Quesensberry, C.P. and Hurst, D.C. Large Sample Simultaneous Confidence Intervals for Multinational Proportions.
+      Technometrics, 6:191-195, 1964.
+    - Gold, R. Z. Tests Auxiliary to :math:`{\chi^{2}}` Tests in a Markov Chain. Annals of Mathematical Statistics, 30:56-74,
+      1963.
 
 .. _ci_fisher:
 

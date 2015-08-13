@@ -14,7 +14,7 @@ Power Divergence Test
     and ``y`` must be vectors of the same length. The contigency table is calculated using
     ``counts`` from ``Statsbase``. Then the power divergence test is performed of the null
     hypothesis that the joint distribution of the cell counts in a 2-dimensional contingency
-    table is teh product of the row and column marginals. 
+    table is the product of the row and column marginals. 
 
     The power divergence test is given by 
 
@@ -22,13 +22,13 @@ Power Divergence Test
 
       \dfrac{2}{\lambda(\lambda+1)}\sum_{i=1}^I \sum_{j=1}^J n_{ij}\left[(n_{ij}/\hat{n}_{ij})^\lambda -1\right]
 
-    where :math:`n_{ij}` is the cell count in the :math:`i`th row and :math:`j`th column and :math:`\lambda \in \mathbb{R}`.
+    where :math:`n_{ij}` is the cell count in the :math:`{i}` th row and :math:`{j}` th column and :math:`\lambda` is a real number.
     Note that when :math:`\lambda = 1`, this is equal to Pearson's chi-squared statistic, as :math`\lambda \to 0`, it converges
     to the likelihood ratio test statistic, as :math:`\lambda \to -1` it converges to the minimum discrimination information 
     statistic (Gokhale and Kullback 1978), for :math:`\lambda=-2` it equals Neyman modified chi-squared (Neyman 1949), and for 
     :math:`\lambda=-1/2` it equals the Freeman-Tukey statistic (Freeman and Tukey 1950). Under regulairty conditions, their
     asymptotic distributions are identical (see Drost et. al. 1989). The chis-squared null approximation works best for 
-    :math:`\lambda` near 2/3.  
+    :math:`\lambda` near :math:`{2/3}`.  
 
     Implements: :ref:`pvalue<pvalue>`, :ref:`ci<ci>`
 
