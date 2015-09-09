@@ -55,11 +55,11 @@ end
 
 immutable ExactMannWhitneyUTest{T<:Real} <: HypothesisTest
     U::Float64              # test statistic: Mann-Whitney-U statistic
-    ranks::Vector{T}        # ranks
+    ranks::Vector{Float64}  # ranks
     tie_adjustment::Float64 # adjustment for ties
     nx::Int                 # number of observations
     ny::Int
-    median::Float64         # sample median
+    median::T               # sample median
 end
 ExactMannWhitneyUTest{S<:Real,T<:Real}(x::AbstractVector{S}, y::AbstractVector{T}) =
     ExactMannWhitneyUTest(mwustats(x, y)...)

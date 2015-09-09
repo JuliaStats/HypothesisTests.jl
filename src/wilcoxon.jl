@@ -54,7 +54,7 @@ end
 
 ## EXACT WILCOXON SIGNED RANK TEST
 
-immutable ExactSignedRankTest{T <: Real} <: HypothesisTest
+immutable ExactSignedRankTest{T<:Real} <: HypothesisTest
     W::Float64              # test statistic: Wilcoxon rank-sum statistic
     ranks::Vector{T}        # ranks without ties (zero values)
     signs::BitArray{1}      # signs of input of ranks
@@ -132,7 +132,7 @@ end
 
 ## APPROXIMATE SIGNED RANK TEST
 
-immutable ApproximateSignedRankTest{T <: Real} <: HypothesisTest
+immutable ApproximateSignedRankTest{T<:Real} <: HypothesisTest
     W::Float64              # test statistic: Wilcoxon rank-sum statistic
     ranks::Vector{T}        # ranks without ties (zero values)
     signs::BitArray{1}      # signs of input of ranks
@@ -143,7 +143,7 @@ immutable ApproximateSignedRankTest{T <: Real} <: HypothesisTest
     sigma::Float64          # normal approximation: std
 end
 
-function ApproximateSignedRankTest{T <: Real} (W::Float64, ranks::Vector{T}, signs::BitArray{1}, tie_adjustment::Float64, n::Int, median::Float64)
+function ApproximateSignedRankTest{T<:Real}(W::Float64, ranks::Vector{T}, signs::BitArray{1}, tie_adjustment::Float64, n::Int, median::Float64)
     nz = length(ranks) # num non-zeros
     mu = W - nz * (nz + 1)/4
     std = sqrt(nz * (nz + 1) * (2 * nz + 1) / 24 - tie_adjustment / 48)

@@ -34,3 +34,6 @@ show(IOBuffer(), ApproximateMannWhitneyUTest([1:10;], [1:10;]))
 @test abs(pvalue(MannWhitneyUTest([1:10;], [2.1:2:21;])) - 0.0232) <= 1e-4
 @test abs(pvalue(MannWhitneyUTest([1:10;], [2:11;])) - 0.4948) <= 1e-4
 show(IOBuffer(), MannWhitneyUTest([1:10;], [2.1:2:21;]))
+
+# Issue #39
+@test abs(pvalue(ExactMannWhitneyUTest(Float32[1:10;], Float32[2:11;])) - 0.5096) <= 1e-4
