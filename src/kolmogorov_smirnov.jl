@@ -22,7 +22,7 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-export 
+export
     ExactOneSampleKSTest,
     ApproximateOneSampleKSTest, ApproximateTwoSampleKSTest
 
@@ -61,7 +61,7 @@ function ExactOneSampleKSTest{T<:Real}(x::AbstractVector{T}, d::UnivariateDistri
     ExactOneSampleKSTest(ksstats(x, d)...)
 end
 
-testname(::ExactOneSampleKSTest) = "Exact one sample Kolmorov-Smirnov test"
+testname(::ExactOneSampleKSTest) = "Exact one sample Kolmogorov-Smirnov test"
 
 function show_params(io::IO, x::ExactOneSampleKSTest, ident="")
     println(io, ident, "number of observations:   $(x.n)")
@@ -88,7 +88,7 @@ immutable ApproximateOneSampleKSTest <: ApproximateKSTest
     δn::Float64 # suproemum of the negative CDF differences
 end
 
-function ApproximateOneSampleKSTest{T<:Real}(x::AbstractVector{T}, d::UnivariateDistribution) 
+function ApproximateOneSampleKSTest{T<:Real}(x::AbstractVector{T}, d::UnivariateDistribution)
     if length(x) > length(unique(x))
         warn("This test is inaccurate with ties")
     end
@@ -96,7 +96,7 @@ function ApproximateOneSampleKSTest{T<:Real}(x::AbstractVector{T}, d::Univariate
     ApproximateOneSampleKSTest(ksstats(x, d)...)
 end
 
-testname(::ApproximateOneSampleKSTest) = "Approximate one sample Kolmorov-Smirnov test"
+testname(::ApproximateOneSampleKSTest) = "Approximate one sample Kolmogorov-Smirnov test"
 
 function show_params(io::IO, x::ApproximateOneSampleKSTest, ident="")
     println(io, ident, "number of observations:   $(x.n)")
@@ -137,7 +137,7 @@ function ApproximateTwoSampleKSTest{T<:Real, S<:Real}(x::AbstractVector{T}, y::A
     ApproximateTwoSampleKSTest(ksstats(x, y)...)
 end
 
-testname(::ApproximateTwoSampleKSTest) = "Approximate two sample Kolmorov-Smirnov test"
+testname(::ApproximateTwoSampleKSTest) = "Approximate two sample Kolmogorov-Smirnov test"
 
 function show_params(io::IO, x::ApproximateTwoSampleKSTest, ident="")
     n = x.n_x*x.n_y/(x.n_x+x.n_y)
