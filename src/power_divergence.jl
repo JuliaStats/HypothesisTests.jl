@@ -201,7 +201,7 @@ end
 
 # Under regularity conditions, their asymptotic distributions are all the same (Drost 1989)
 # Chi-squared null approximation works best for lambda near 2/3
-function PowerDivergenceTest{T<: Integer, U<: FloatingPoint}(x::AbstractMatrix{T}; lambda::U=1.0, theta0::Vector{U} = ones(length(x))/length(x))
+function PowerDivergenceTest{T<:Integer,U<:AbstractFloat}(x::AbstractMatrix{T}; lambda::U=1.0, theta0::Vector{U} = ones(length(x))/length(x))
 
   nrows, ncols = size(x)
   n = sum(x)
@@ -256,53 +256,53 @@ end
 #convenience functions
 
 #PDT
-function PowerDivergenceTest{T<: Integer, U<: FloatingPoint}(x::AbstractVector{T}, y::AbstractVector{T}, levels::Levels{T}; lambda::U=1.0)
+function PowerDivergenceTest{T<:Integer,U<:AbstractFloat}(x::AbstractVector{T}, y::AbstractVector{T}, levels::Levels{T}; lambda::U=1.0)
   d = counts(x,y,levels)
   PowerDivergenceTest(d,lambda=lambda)
 end
 
-function PowerDivergenceTest{T<: Integer, U<: FloatingPoint}(x::AbstractVector{T}, y::AbstractVector{T}, k::T; lambda::U=1.0)
+function PowerDivergenceTest{T<:Integer,U<:AbstractFloat}(x::AbstractVector{T}, y::AbstractVector{T}, k::T; lambda::U=1.0)
   d = counts(x,y,k)
   PowerDivergenceTest(d,lambda=lambda)
 end
 
-PowerDivergenceTest{T<: Integer, U<: FloatingPoint}(x::AbstractVector{T}; lambda::U=1.0, theta0::Vector{U} = ones(length(x))/length(x)) = 
+PowerDivergenceTest{T<:Integer,U<:AbstractFloat}(x::AbstractVector{T}; lambda::U=1.0, theta0::Vector{U} = ones(length(x))/length(x)) = 
   PowerDivergenceTest(reshape(x,length(x),1),lambda=lambda,theta0=theta0)
 
 #ChisqTest
-function ChisqTest{T<: Integer}(x::AbstractMatrix{T})
+function ChisqTest{T<:Integer}(x::AbstractMatrix{T})
   PowerDivergenceTest(x,lambda=1.0)
 end
 
-function ChisqTest{T<: Integer}(x::AbstractVector{T}, y::AbstractVector{T}, levels::Levels{T})
+function ChisqTest{T<:Integer}(x::AbstractVector{T}, y::AbstractVector{T}, levels::Levels{T})
   d = counts(x,y,levels)
   PowerDivergenceTest(d,lambda=1.0)
 end
 
-function ChisqTest{T<: Integer}(x::AbstractVector{T}, y::AbstractVector{T}, k::T)
+function ChisqTest{T<:Integer}(x::AbstractVector{T}, y::AbstractVector{T}, k::T)
   d = counts(x,y,k)
   PowerDivergenceTest(d,lambda=1.0)
 end
 
-ChisqTest{T<: Integer, U<: FloatingPoint}(x::AbstractVector{T}, theta0::Vector{U} = ones(length(x))/length(x)) = 
+ChisqTest{T<:Integer,U<:AbstractFloat}(x::AbstractVector{T}, theta0::Vector{U} = ones(length(x))/length(x)) = 
   PowerDivergenceTest(reshape(x,length(x),1), lambda=1.0, theta0 = theta0)
 
 #MultinomialLRT
-function MultinomialLRT{T<: Integer}(x::AbstractMatrix{T})
+function MultinomialLRT{T<:Integer}(x::AbstractMatrix{T})
   PowerDivergenceTest(x,lambda=0.0)
 end
 
-function MultinomialLRT{T<: Integer}(x::AbstractVector{T}, y::AbstractVector{T}, levels::Levels{T})
+function MultinomialLRT{T<:Integer}(x::AbstractVector{T}, y::AbstractVector{T}, levels::Levels{T})
   d = counts(x,y,levels)
   PowerDivergenceTest(d,lambda=0.0)
 end
 
-function MultinomialLRT{T<: Integer}(x::AbstractVector{T}, y::AbstractVector{T}, k::T)
+function MultinomialLRT{T<:Integer}(x::AbstractVector{T}, y::AbstractVector{T}, k::T)
   d = counts(x,y,k)
   PowerDivergenceTest(d,lambda=0.0)
 end
 
-MultinomialLRT{T<: Integer, U<: FloatingPoint}(x::AbstractVector{T}, theta0::Vector{U} = ones(length(x))/length(x)) = 
+MultinomialLRT{T<:Integer,U<:AbstractFloat}(x::AbstractVector{T}, theta0::Vector{U} = ones(length(x))/length(x)) = 
   PowerDivergenceTest(reshape(x,length(x),1), lambda=0.0, theta0 = theta0)
 
 function show_params(io::IO, x::PowerDivergenceTest, ident="")

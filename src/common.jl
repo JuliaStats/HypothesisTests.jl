@@ -31,10 +31,10 @@ macro rmath_deferred_free(base)
     libcall = symbol(string(base, "_free"))
     func = symbol(string(base, "_deferred_free"))
     quote
-        let gc_tracking_obj = Union()[]
+        let gc_tracking_obj = @compat(Union{})[]
             global $func
-            function $libcall(x::Vector{Union()})
-                gc_tracking_obj = Union()[]
+            function $libcall(x::Vector{@compat(Union{})})
+                gc_tracking_obj = @compat(Union{})[]
                 ccall(($(string(libcall)),libRmath), Void, ())
             end
             function $func()
