@@ -136,4 +136,5 @@ include("mann_whitney.jl")
 include("t.jl")
 include("wilcoxon.jl")
 include("power_divergence.jl")
+include("anderson_darling.jl")
 end
