@@ -40,6 +40,8 @@ function show_params(io::IO, x::OneSampleADTest, ident="")
     println(io, ident, "A² statistic:             $(x.A²)")
 end
 
+# Ralph B. D'Agostino, Goodness-of-Fit-Techniques, CRC Press, Jun 2, 1986
+# https://books.google.com/books?id=1BSEaGVBj5QC&pg=PA97, p.127
 function pvalue(x::OneSampleADTest)
     z = x.A²*(1.0 + .75/x.n + 2.25/x.n/x.n)
 
