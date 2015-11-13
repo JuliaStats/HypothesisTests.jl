@@ -29,13 +29,13 @@ samples = Any[
 ]
 
 t = KSampleADTest(samples...)
-@test_approx_eq_eps t.A²ₖₙ 8.3926 0.1^4
-@test_approx_eq_eps t.σₙ 1.2038 0.1^4
+@test_approx_eq_eps t.A²k 8.3926 0.1^4
+@test_approx_eq_eps t.σ 1.2038 0.1^4
 @test_approx_eq_eps pvalue(t) 0.0020 0.1^4
 
 t = KSampleADTest(samples..., modified = false)
-@test_approx_eq_eps t.A²ₖₙ 8.3559 0.1^4
-@test_approx_eq_eps t.σₙ 1.2038 0.1^4
+@test_approx_eq_eps t.A²k 8.3559 0.1^4
+@test_approx_eq_eps t.σ 1.2038 0.1^4
 @test_approx_eq_eps pvalue(t) 0.0021 0.1^4
 
 srand(31412455)

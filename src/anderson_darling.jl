@@ -72,12 +72,12 @@ end
 immutable KSampleADTest <: ADTest
     k::Int        # number of samples
     n::Int        # number of observations
-    σₙ::Float64   # variance A²ₖₙ
-    A²ₖₙ::Float64 # Anderson-Darling test statistic
+    σ::Float64   # variance A²k
+    A²k::Float64 # Anderson-Darling test statistic
 end
 
-function KSampleADTest{T<:Real}(x::AbstractVector{T}...; modified=true)
-    KSampleADTest(a2_ksample(x, modified)...)
+function KSampleADTest{T<:Real}(xs::AbstractVector{T}...; modified=true)
+    KSampleADTest(a2_ksample(xs, modified)...)
 end
 
 testname(::KSampleADTest) = "k-sample Anderson-Darling test"
@@ -85,20 +85,20 @@ testname(::KSampleADTest) = "k-sample Anderson-Darling test"
 function show_params(io::IO, x::KSampleADTest, ident="")
     println(io, ident, "number of samples:        $(x.k)")
     println(io, ident, "number of observations:   $(x.n)")
-    println(io, ident, "SD of A²ₖₙ:               $(x.σₙ)")
-    println(io, ident, "A²ₖₙ statistic:           $(x.A²ₖₙ)")
+    println(io, ident, "SD of A²k:               $(x.σ)")
+    println(io, ident, "A²k statistic:           $(x.A²k)")
 end
 
 function pvalue(x::KSampleADTest)
     m = x.k - 1
-    Tₖₙ = (x.A²ₖₙ - m) / x.σₙ
+    Tk = (x.A²k - m) / x.σ
     sig = [0.25, 0.1, 0.05, 0.025, 0.01]
     b0 = [0.675, 1.281, 1.645, 1.96, 2.326]
     b1 = [-0.245, 0.25, 0.678, 1.149, 1.822]
     b2 = [-0.105, -0.305, -0.362, -0.391, -0.396]
-    tₘ = b0 + b1 / sqrt(m) + b2 / m
-    f = CurveFit.poly_fit(tₘ, log(sig), 2)
-    exp(f[1] + f[2]*Tₖₙ + f[3]*Tₖₙ^2)
+    tm = b0 + b1 / sqrt(m) + b2 / m
+    f = CurveFit.poly_fit(tm, log(sig), 2)
+    exp(f[1] + f[2]*Tk + f[3]*Tk^2)
 end
 
 function a2_ksample(samples, modified=true)
@@ -114,42 +114,42 @@ function a2_ksample(samples, modified=true)
     L < 2 && error("Need more then 1 observation")
     any(map(l->l == 0, n)) && error("One of the samples is empty")
 
-    fᵢⱼ = zeros(Int, k, L)
+    fij = zeros(Int, k, L)
     for i in 1:k
         for s in samples[i]
-            fᵢⱼ[i, searchsortedfirst(Z⁺, s)] += 1
+            fij[i, searchsortedfirst(Z⁺, s)] += 1
         end
     end
 
-    A²ₖₙ = 0.
+    A²k = 0.
     if modified
         for i in 1:k
             inner = 0.
-            Mᵢⱼ = 0.
-            Bⱼ = 0.
+            Mij = 0.
+            Bj = 0.
             for j = 1:L
-                lⱼ = sum(fᵢⱼ[:,j])
-                Mᵢⱼ += fᵢⱼ[i, j]
-                Bⱼ += lⱼ
-                Mₐᵢⱼ = Mᵢⱼ - fᵢⱼ[i, j]/2.
-                Bₐⱼ = Bⱼ - lⱼ/2.
-                inner += lⱼ/N * (N*Mₐᵢⱼ-n[i]*Bₐⱼ)^2 / (Bₐⱼ*(N-Bₐⱼ) - N*lⱼ/4.)
+                lj = sum(fij[:,j])
+                Mij += fij[i, j]
+                Bj += lj
+                Maij = Mij - fij[i, j]/2.
+                Baj = Bj - lj/2.
+                inner += lj/N * (N*Maij-n[i]*Baj)^2 / (Baj*(N-Baj) - N*lj/4.)
             end
-            A²ₖₙ += inner / n[i]
+            A²k += inner / n[i]
         end
-        A²ₖₙ *= (N - 1.) / N
+        A²k *= (N - 1.) / N
     else
         for i in 1:k
             inner = 0.
-            Mᵢⱼ = 0.
-            Bⱼ = 0.
+            Mij = 0.
+            Bj = 0.
             for j = 1:L-1
-                lⱼ = sum(fᵢⱼ[:,j])
-                Mᵢⱼ += fᵢⱼ[i, j]
-                Bⱼ += lⱼ
-                inner += lⱼ/N * (N*Mᵢⱼ-n[i]*Bⱼ)^2 / (Bⱼ*(N-Bⱼ))
+                lj = sum(fij[:,j])
+                Mij += fij[i, j]
+                Bj += lj
+                inner += lj/N * (N*Mij-n[i]*Bj)^2 / (Bj*(N-Bj))
             end
-            A²ₖₙ += inner / n[i]
+            A²k += inner / n[i]
         end
     end
 
@@ -166,7 +166,7 @@ function a2_ksample(samples, modified=true)
     b = (2*g - 4)*k^2 + 8*h*k + (2*g - 14*h - 4)*H - 8*h + 4*g - 6
     c = (6*h + 2*g - 2)*k^2 + (4*h - 4*g + 6)*k + (2*h - 6)*H + 4*h
     d = (2*h + 6)*k^2 - 4*h*k
-    σ²ₙ = (a*N^3 + b*N^2 + c*N + d) / ((N - 1.) * (N - 2.) * (N - 3.))
+    σ²n = (a*N^3 + b*N^2 + c*N + d) / ((N - 1.) * (N - 2.) * (N - 3.))
 
-    (k, N, sqrt(σ²ₙ), A²ₖₙ)
+    (k, N, sqrt(σ²n), A²k)
 end
