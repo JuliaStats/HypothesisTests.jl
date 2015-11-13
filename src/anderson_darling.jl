@@ -40,8 +40,8 @@ function show_params(io::IO, x::OneSampleADTest, ident="")
     println(io, ident, "A² statistic:             $(x.A²)")
 end
 
-# Ralph B. D'Agostino, Goodness-of-Fit-Techniques, CRC Press, Jun 2, 1986
-# https://books.google.com/books?id=1BSEaGVBj5QC&pg=PA97, p.127
+### Ralph B. D'Agostino, Goodness-of-Fit-Techniques, CRC Press, Jun 2, 1986
+### https://books.google.com/books?id=1BSEaGVBj5QC&pg=PA97, p.127
 function pvalue(x::OneSampleADTest)
     z = x.A²*(1.0 + .75/x.n + 2.25/x.n/x.n)
 
@@ -66,68 +66,107 @@ function pvalue(x::OneSampleADTest)
 end
 
 
-# ### K-SAMPLE ANDERSON DARLING TEST
-# function a2_ksample(samples, ties=true)
-#     k = length(samples)
-#     k < 2 && error("Need at least two samples")
+## K-SAMPLE ANDERSON DARLING TEST
+### k-Sample Anderson-Darling Tests, F. W. Scholz; M. A. Stephens, Journal of the American Statistical Association, Vol. 82, No. 399. (Sep., 1987), pp. 918-924.
 
-#     n = map(length, samples)
-#     Z = sort(vcat(samples...))
-#     N = length(Z)
-#     Zstar = unique(Z)
+immutable KSampleADTest <: ADTest
+    k::Int        # number of samples
+    n::Int        # number of observations
+    σₙ::Float64   # variance A²ₖₙ
+    A²ₖₙ::Float64 # Anderson-Darling test statistic
+end
 
-#     length(Zstar) < 2 && error("Need more then 1 observation")
-#     any(n .== 0) && error("One of the samples is empty")
+function KSampleADTest{T<:Real}(x::AbstractVector{T}...; modified=true)
+    KSampleADTest(a2_ksample(x, modified)...)
+end
 
-#     A2kN = 0.
-#     if ties
-#         Zssl = map(i->searchsortedfirst(Z, i), Zstar) -1
-#         lj = N == length(Zstar) ? 1. : map(i->searchsortedlast(Z, i), Zstar) - Zssl
-#         Bj = Zssl + lj / 2.
-#         for i in 1:k
-#             smpl = sort(samples[i])
-#             ssr = map(i->searchsortedlast(smpl, i), Zstar)
-#             Mij = map(Float64, ssr)
-#             fij = ssr - (map(i->searchsortedfirst(smpl, i), Zstar)-1)
-#             Mij -= fij / 2.
-#             inner = (lj / N) .* (N * Mij - Bj * n[i]).^2 ./ (Bj .* (N - Bj) - N * lj / 4.)
-#             A2kN += sum(inner) / n[i]
-#         end
-#         A2kN *= (N - 1.) / N
-#     else
-#         0.0
-#         # lj = Z.searchsorted(Zstar[:-1], 'right') - Z.searchsorted(Zstar[:-1],
-#         #                                                       'left')
-#         # Bj = lj.cumsum()
-#         # for i in arange(0, k):
-#         #     s = np.sort(samples[i])
-#         #     Mij = s.searchsorted(Zstar[:-1], side='right')
-#         #     inner = lj / float(N) * (N * Mij - Bj * n[i])**2 / (Bj * (N - Bj))
-#         #     A2kN += inner.sum() / n[i]
-#     end
+testname(::KSampleADTest) = "k-sample Anderson-Darling test"
 
-#     h = sum(1./(1:N-1))
-#     H = sum(1./n)
-#     g = 0
-#     for l in 1:N-2
-#         inner = [1. / ((N - l) * m) for m in (l+1):(N-1)]
-#         g += sum(inner)
-#     end
+function show_params(io::IO, x::KSampleADTest, ident="")
+    println(io, ident, "number of samples:        $(x.k)")
+    println(io, ident, "number of observations:   $(x.n)")
+    println(io, ident, "SD of A²ₖₙ:               $(x.σₙ)")
+    println(io, ident, "A²ₖₙ statistic:           $(x.A²ₖₙ)")
+end
 
-#     a = (4*g - 6) * (k - 1) + (10 - 6*g)*H
-#     b = (2*g - 4)*k^2 + 8*h*k + (2*g - 14*h - 4)*H - 8*h + 4*g - 6
-#     c = (6*h + 2*g - 2)*k^2 + (4*h - 4*g + 6)*k + (2*h - 6)*H + 4*h
-#     d = (2*h + 6)*k^2 - 4*h*k
-#     var_kn = (a*N^3 + b*N^2 + c*N + d) / ((N - 1.) * (N - 2.) * (N - 3.))
-#     m = k - 1
-#     A2 = (A2kN - m) / sqrt(var_kn)
+function pvalue(x::KSampleADTest)
+    m = x.k - 1
+    Tₖₙ = (x.A²ₖₙ - m) / x.σₙ
+    sig = [0.25, 0.1, 0.05, 0.025, 0.01]
+    b0 = [0.675, 1.281, 1.645, 1.96, 2.326]
+    b1 = [-0.245, 0.25, 0.678, 1.149, 1.822]
+    b2 = [-0.105, -0.305, -0.362, -0.391, -0.396]
+    tₘ = b0 + b1 / sqrt(m) + b2 / m
+    f = CurveFit.poly_fit(tₘ, log(sig), 2)
+    exp(f[1] + f[2]*Tₖₙ + f[3]*Tₖₙ^2)
+end
 
-#     b0 = [0.675, 1.281, 1.645, 1.96, 2.326]
-#     b1 = [-0.245, 0.25, 0.678, 1.149, 1.822]
-#     b2 = [-0.105, -0.305, -0.362, -0.391, -0.396]
-#     critical = b0 + b1 / sqrt(m) + b2 / m
-#     f = poly_fit(critical, log([0.25, 0.1, 0.05, 0.025, 0.01]), 2)
-#     pf(x) = exp(f[1] + f[2]*x + f[3]*x^2)
+function a2_ksample(samples, modified=true)
+    k = length(samples)
+    k < 2 && error("Need at least two samples")
 
-#     return A2, critical, pf(A2)
-# end
+    n = map(length, samples)
+    Z = sort(vcat(samples...))
+    N = length(Z)
+    Z⁺ = unique(Z)
+    L = length(Z⁺)
+
+    L < 2 && error("Need more then 1 observation")
+    any(map(l->l == 0, n)) && error("One of the samples is empty")
+
+    fᵢⱼ = zeros(Int, k, L)
+    for i in 1:k
+        for s in samples[i]
+            fᵢⱼ[i, searchsortedfirst(Z⁺, s)] += 1
+        end
+    end
+
+    A²ₖₙ = 0.
+    if modified
+        for i in 1:k
+            inner = 0.
+            Mᵢⱼ = 0.
+            Bⱼ = 0.
+            for j = 1:L
+                lⱼ = sum(fᵢⱼ[:,j])
+                Mᵢⱼ += fᵢⱼ[i, j]
+                Bⱼ += lⱼ
+                Mₐᵢⱼ = Mᵢⱼ - fᵢⱼ[i, j]/2.
+                Bₐⱼ = Bⱼ - lⱼ/2.
+                inner += lⱼ/N * (N*Mₐᵢⱼ-n[i]*Bₐⱼ)^2 / (Bₐⱼ*(N-Bₐⱼ) - N*lⱼ/4.)
+            end
+            A²ₖₙ += inner / n[i]
+        end
+        A²ₖₙ *= (N - 1.) / N
+    else
+        for i in 1:k
+            inner = 0.
+            Mᵢⱼ = 0.
+            Bⱼ = 0.
+            for j = 1:L-1
+                lⱼ = sum(fᵢⱼ[:,j])
+                Mᵢⱼ += fᵢⱼ[i, j]
+                Bⱼ += lⱼ
+                inner += lⱼ/N * (N*Mᵢⱼ-n[i]*Bⱼ)^2 / (Bⱼ*(N-Bⱼ))
+            end
+            A²ₖₙ += inner / n[i]
+        end
+    end
+
+    H = sum(map(i->1./i, n))
+    h = sum(1./(1:N-1))
+    g = 0.
+    for i in 1:N-2
+        for j in i+1:N-1
+            g += 1. / ((N - i) * j)
+        end
+    end
+
+    a = (4*g - 6)*(k - 1) + (10 - 6*g)*H
+    b = (2*g - 4)*k^2 + 8*h*k + (2*g - 14*h - 4)*H - 8*h + 4*g - 6
+    c = (6*h + 2*g - 2)*k^2 + (4*h - 4*g + 6)*k + (2*h - 6)*H + 4*h
+    d = (2*h + 6)*k^2 - 4*h*k
+    σ²ₙ = (a*N^3 + b*N^2 + c*N + d) / ((N - 1.) * (N - 2.) * (N - 3.))
+
+    (k, N, sqrt(σ²ₙ), A²ₖₙ)
+end
