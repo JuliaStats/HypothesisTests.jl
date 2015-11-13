@@ -14,3 +14,4 @@ parametric counterparts. The package contains the following nonparametric tests:
    nonparametric/test_mann_whitney_u
    nonparametric/test_sign
    nonparametric/test_signed_rank
+   nonparametric/test_anderson_darling
