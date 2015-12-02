@@ -27,6 +27,7 @@ VERSION >= v"0.4.0-dev+6521" && __precompile__()
 module HypothesisTests
 
 using Distributions, Roots, StatsBase, Compat
+import CurveFit
 
 export testname, pvalue, ci
 abstract HypothesisTest
@@ -136,4 +137,5 @@ include("mann_whitney.jl")
 include("t.jl")
 include("wilcoxon.jl")
 include("power_divergence.jl")
+include("anderson_darling.jl")
 end
