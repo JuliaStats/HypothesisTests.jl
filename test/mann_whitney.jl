@@ -15,6 +15,12 @@ show(IOBuffer(), ExactMannWhitneyUTest([1:10;], [2.1:2:21;]))
 @test abs(pvalue(ExactMannWhitneyUTest([1:5; ones(5)], [1:10;])) - 0.0057) <= 1e-4
 show(IOBuffer(), ExactMannWhitneyUTest([1:10;], [1:10;]))
 
+#Exact with ties and unequal lengths
+@test abs(pvalue(ExactMannWhitneyUTest([1:10;], [2:2:24;])) - 0.0118) <= 1e-4
+@test abs(pvalue(ExactMannWhitneyUTest([2:2:24;], [1:10;])) - 0.0118) <= 1e-4
+show(IOBuffer(), ExactMannWhitneyUTest([1:10;], [2:2:24;]))
+
+
 # Approximate test
 @test abs(pvalue(ApproximateMannWhitneyUTest([1:10;], [2.1:2:21;])) - 0.0257) <= 1e-4
 @test abs(pvalue(ApproximateMannWhitneyUTest([2.1:2:21;], [1:10;])) - 0.0257) <= 1e-4

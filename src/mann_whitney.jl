@@ -79,8 +79,9 @@ end
 function mwuenumerate(x::ExactMannWhitneyUTest)
     # Get the other U if inverted by mwu_stats
     n = min(x.nx, x.ny)
+    U = x.U
     if x.ny > x.nx
-        U = x.nx*x.ny - U
+        U = x.nx*x.ny -x.U
     end
     le = 0
     gr = 0
@@ -89,8 +90,8 @@ function mwuenumerate(x::ExactMannWhitneyUTest)
     for comb in combinations(x.ranks, n)
         Up = sum(comb) - k
         tot += 1
-        le += Up <= x.U
-        gr += Up >= x.U
+        le += Up <= U
+        gr += Up >= U
     end
     (le/tot, gr/tot)
 end
