@@ -164,3 +164,5 @@ ChisqTest(x,y,(1:3,1:3))
 MultinomialLRT(x,y,3)
 MultinomialLRT(x,y,(1:3,1:3))
 
+# Issue #43 - large numbers caused overflow
+PowerDivergenceTest(rand(1_000_000+(1:10), 3, 3))
