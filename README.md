@@ -36,7 +36,3 @@ pvalue(SignedRankTest(x))
 ## Documentation
 
 Full documentation available at [Read the Docs](http://hypothesistestsjl.readthedocs.org/en/latest/index.html).
-
-## Credits
-
-Original API suggested by [John Myles White](https://github.com/johnmyleswhite).
