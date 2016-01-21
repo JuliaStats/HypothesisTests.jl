@@ -41,7 +41,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'HypothesisTests.jl'
-copyright = u'2014, Simon Kornblith'
+copyright = u'2014-2016, HypothesisTests.jl Contributors'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -184,7 +184,7 @@ latex_elements = {
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
   ('index', 'HypothesisTestsjl.tex', u'HypothesisTests.jl Documentation',
-   u'Simon Kornblith', 'manual'),
+   u'HypothesisTests.jl Contributors', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -214,7 +214,7 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'hypothesistestsjl', u'HypothesisTests.jl Documentation',
-     [u'Simon Kornblith'], 1)
+     [u'HypothesisTests.jl Contributors'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -228,7 +228,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   ('index', 'HypothesisTestsjl', u'HypothesisTests.jl Documentation',
-   u'Simon Kornblith', 'HypothesisTestsjl', 'One line description of project.',
+   u'HypothesisTests.jl Contributors', 'HypothesisTestsjl', 'One line description of project.',
    'Miscellaneous'),
 ]
 
