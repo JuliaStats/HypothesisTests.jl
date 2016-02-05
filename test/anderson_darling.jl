@@ -16,11 +16,11 @@ t = OneSampleADTest(x, Normal())
 
 x = rand(Cauchy(), n)
 t = OneSampleADTest(x, Normal())
-@test_approx_eq_eps t.A² 278.0190 0.1^4
+@test pvalue(t) < 1e-100
 
 x = rand(LogNormal(), n)
 t = OneSampleADTest(x, Normal())
-@test_approx_eq_eps t.A² 85.5217 0.1^4
+@test pvalue(t) < 1e-100
 
 # k-sample test
 samples = Any[
@@ -48,3 +48,5 @@ t = KSampleADTest(samples...)
 samples = Any[rand(Normal(), 50), rand(Normal(), 30), rand(Normal(), 20)]
 t = KSampleADTest(samples...)
 @test pvalue(t) > 0.05
+
+@test pvalue(OneSampleADTest(vcat(rand(Normal(),500), rand(Beta(2,2),500)), Beta(2,2))) == 0

@@ -12,11 +12,14 @@ function adstats{T<:Real}(x::AbstractVector{T}, d::UnivariateDistribution)
     y = sort(x)
     μ = mean(y)
     σ = std(y)
-    z = cdf(d, (y-μ)/σ)
-    i = 1:n
-    S = ((2*i-1.0)/n) .* (log(z[i])+log(1-z[n+1-i]))
-    S[isinf(S)] = 0. # remove infinity
-    A² = -n-sum(S)
+    A² = convert(typeof(μ), -n)
+    for i = 1:n
+        zi = (y[i] - μ)/σ
+        zni1 = (y[n - i + 1] - μ)/σ
+        lcdfz = logcdf(d, zi)
+        lccdfz = logccdf(d, zni1)
+        A² -= (2*i - 1)/n * (lcdfz + lccdfz)
+    end
     (n, μ, σ, A²)
 end
 
@@ -51,8 +54,10 @@ function pvalue(x::OneSampleADTest)
         1.0 - exp(-8.318+42.796z-59.938z^2)
     elseif .340 < z < .600
         exp(0.9177-4.279z-1.38z^2)
-    else
+    elseif z < 153.467
         exp(1.2937-5.709z+0.0186z^2)
+    else
+        0.0
     end
 end
 
