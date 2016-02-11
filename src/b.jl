@@ -61,6 +61,12 @@ function show_params(io::IO, x::BTest, ident)
 end
 
 pvalue(x::BTest) = pvalue(Normal(0, x.stderr), x.MMD; tail=:right) # check only if distance is larger than 0
+
+"""
+	ci(x::BTest, alpha::Float64=0.05) 
+
+	Compute a confidence interval C with coverage 1-alpha.
+"""
 ci(x::BTest, alpha::Float64=0.05) = (quantile(Normal(x.MMD, x.stderr), alpha/2), quantile(Normal(x.MMD, x.stderr), 1-alpha/2))
 
 ## helper
