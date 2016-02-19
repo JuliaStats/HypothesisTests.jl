@@ -37,6 +37,13 @@ end
 BinomialTest(x::AbstractVector{Bool}, p=0.5) =
 	BinomialTest(sum(x), length(x), p)
 
+"""
+```julia
+testname(::HypothesisTest)
+```
+
+Returns the string value. E.g. "Binomial test", "Sign Test"
+"""
 testname(::BinomialTest) = "Binomial test"
 population_param_of_interest(x::BinomialTest) = ("Probability of success", x.p, x.x/x.n) # parameter of interest: name, value under h0, point estimate
 
@@ -49,6 +56,17 @@ pvalue(x::BinomialTest; tail=:both) = pvalue(Binomial(x.n, x.p), x.x; tail=tail)
 
 # Confidence interval
 
+"""
+```julia
+function ci(x::HypothesisTest, alpha::Float64=0.05; tail=:both, method=:clopper_pearson)
+```
+Compute a confidence interval with coverage 1-alpha for multinomial proportions using one of the following methods. Possible values for method are:
+
+Sison, Glaz intervals :sison_glaz (default):
+Bootstrap intervals :bootstrap :
+Quesenberry, Hurst intervals :quesenberry_hurst :
+Gold intervals :gold (Asymptotic simultaneous intervals):
+"""
 function ci(x::BinomialTest, alpha::Float64=0.05; tail=:both, method=:clopper_pearson)
     check_alpha(alpha)
 
@@ -139,9 +157,26 @@ function show_params(io::IO, x::SignTest, ident="")
     println(io, ident, text2, x.x)
 end
 
+"""
+```julia
+pvalue(x::HypothesisTest; tail=:both)
+```
+
+Compute the p-value for a given significance test.
+
+If tail is :both (default), then the p-value for the two-sided test is returned. If tail is :left or :right, then a one-sided test is performed.
+"""
 pvalue(x::SignTest; tail=:both) = pvalue(Binomial(x.n, 0.5), x.x; tail=tail)
 
-# confidence interval by inversion
+"""
+```julia
+function ci(x::HypothesisTest, alpha::Float64=0.05; tail=:both)
+```
+
+Compute a confidence interval C with coverage 1-alpha.
+
+If tail is :both (default), then a two-sided confidence interval is returned. If tail is :left or :right, then a one-sided confidence interval is returned
+"""
 @compat function ci(x::SignTest, alpha::Float64=0.05; tail=:both)
 	check_alpha(alpha)
 
