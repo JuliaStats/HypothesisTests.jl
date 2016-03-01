@@ -34,3 +34,15 @@ show(IOBuffer(), ApproximateSignedRankTest([1:10;], [1:10;]))
 @test abs(pvalue(SignedRankTest([1:10;], [2:2:20;])) - 0.0020) <= 1e-4
 @test abs(pvalue(SignedRankTest([1:10;], [2:11;])) - 0.0020) <= 1e-4
 show(IOBuffer(), SignedRankTest([1:10;], [2:2:20;]))
+
+# One Sample tests
+# P-value computed using R wilcox.test
+@test abs(pvalue(SignedRankTest([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15] - 10.1)) - 0.09460449) <= 1e-4
+# P-value computed using R wilcox.test
+@test abs(pvalue(SignedRankTest([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16] - 10.1)) - 0.1928101) <= 1e-4
+
+# One Sample tests with ties
+# P-value computed using R package exactRankTests wilcox.exact
+@test abs(pvalue(SignedRankTest([1,2,3,4,5,6,7,10,10,10,10,10,13,14,15] - 10.1)) - 0.04052734) <= 1e-4
+# P-value computed using R wilcox.test
+@test abs(pvalue(SignedRankTest([1,2,3,4,5,6,7,10,10,10,10,10,13,14,15,16] - 10.1)) - 0.1021964) <= 1e-4
