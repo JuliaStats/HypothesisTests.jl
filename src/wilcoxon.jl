@@ -30,7 +30,7 @@ export SignedRankTest, ExactSignedRankTest, ApproximateSignedRankTest
 function SignedRankTest{T<:Real}(x::AbstractVector{T})
     (W, ranks, signs, tie_adjustment, n, median) = signedrankstats(x)
     n_nonzero = length(ranks)
-    if n_nonzero <= 15 || (n_nonzero <= 50 && tieadj == 0)
+    if n_nonzero <= 15 || (n_nonzero <= 50 && tie_adjustment == 0)
         ExactSignedRankTest(W, ranks, signs, tie_adjustment, n, median)
     else
         ApproximateSignedRankTest(W, ranks, signs, tie_adjustment, n, median)
