@@ -35,7 +35,6 @@ show(IOBuffer(), ApproximateSignedRankTest([1:10;], [1:10;]))
 @test abs(pvalue(SignedRankTest([1:10;], [2:11;])) - 0.0020) <= 1e-4
 show(IOBuffer(), SignedRankTest([1:10;], [2:2:20;]))
 
-<<<<<<< 4ae28a8eaa0388f913e1d34095c583fbf3422469
 # One Sample tests
 # P-value computed using R wilcox.test
 @test abs(pvalue(SignedRankTest([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15] - 10.1)) - 0.09460449) <= 1e-4

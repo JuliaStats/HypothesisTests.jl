@@ -54,9 +54,9 @@ end
 ## EXACT WILCOXON SIGNED RANK TEST
 
 immutable ExactSignedRankTest{T<:Real} <: HypothesisTest
-    vals::Vector            # original values
+    vals::Vector{T} # original values
     W::Float64              # test statistic: Wilcoxon rank-sum statistic
-    ranks::Vector{T}        # ranks without ties (zero values)
+    ranks::Vector{Float64}           # ranks without ties (zero values)
     signs::BitArray{1}      # signs of input of ranks
     tie_adjustment::Float64 # adjustment for ties
     n::Int                  # number of observations
@@ -129,15 +129,15 @@ function pvalue(x::ExactSignedRankTest; tail=:both)
     end
 end
 
-ci(x::ExactSignedRankTest, alpha::Float64=0.05; tail=:both) = calculate_ci(x.vals, alpha; tail=tail)
+ci(x::ExactSignedRankTest, alpha::Real=0.05; tail=:both) = calculate_ci(x.vals, alpha; tail=tail)
 
 
 ## APPROXIMATE SIGNED RANK TEST
 
 immutable ApproximateSignedRankTest{T<:Real} <: HypothesisTest
-    vals::Vector            # original values
+    vals::Vector{T} # original values
     W::Float64              # test statistic: Wilcoxon rank-sum statistic
-    ranks::Vector{T}        # ranks without ties (zero values)
+    ranks::Vector{Float64} # ranks without ties (zero values)
     signs::BitArray{1}      # signs of input of ranks
     tie_adjustment::Float64 # adjustment for ties
     n::Int                  # number of observations
@@ -182,9 +182,10 @@ function pvalue(x::ApproximateSignedRankTest; tail=:both)
     end
 end
 
-ci(x::ApproximateSignedRankTest, alpha::Float64=0.05; tail=:both) = calculate_ci(x.vals, alpha; tail=tail)
+ci(x::ApproximateSignedRankTest, alpha::Real=0.05; tail=:both) = calculate_ci(x.vals, alpha; tail=tail)
 
-function calculate_ci(x::AbstractVector, alpha::Float64=0.05; tail=:both)
+# implementation method inspired by these notes: http://www.stat.umn.edu/geyer/old03/5102/notes/rank.pdf
+function calculate_ci(x::AbstractVector, alpha::Real=0.05; tail=:both)
     check_alpha(alpha)
 
     if tail == :both
@@ -193,8 +194,8 @@ function calculate_ci(x::AbstractVector, alpha::Float64=0.05; tail=:both)
         c = 1 - 2 * alpha
     end
     n = length(x)
-    m = convert(Int, n * (n + 1) / 2)
-    k_range = 1:(m/2)
+    m = div(n * (n + 1), 2)
+    k_range = 1:div(m, 2)
     l = [1 - 2 * psignrank(i, n, true) for i in k_range]
     k = indmin(abs(l-c))
     vals = Float64[]
