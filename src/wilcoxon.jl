@@ -31,9 +31,9 @@ function SignedRankTest{T<:Real}(x::AbstractVector{T})
     (W, ranks, signs, tie_adjustment, n, median) = signedrankstats(x)
     n_nonzero = length(ranks)
     if n_nonzero <= 15 || (n_nonzero <= 50 && tie_adjustment == 0)
-        ExactSignedRankTest(W, ranks, signs, tie_adjustment, n, median)
+        ExactSignedRankTest(x, W, ranks, signs, tie_adjustment, n, median)
     else
-        ApproximateSignedRankTest(W, ranks, signs, tie_adjustment, n, median)
+        ApproximateSignedRankTest(x, W, ranks, signs, tie_adjustment, n, median)
     end
 end
 SignedRankTest{T<:Real,S<:Real}(x::AbstractVector{T}, y::AbstractVector{S}) = SignedRankTest(x - y)
@@ -51,19 +51,19 @@ function signedrankstats{S<:Real}(x::AbstractVector{S})
    (W, ranks, nonzero_x .> 0, tieadj, length(x), median(x))
 end
 
-
 ## EXACT WILCOXON SIGNED RANK TEST
 
 immutable ExactSignedRankTest{T<:Real} <: HypothesisTest
+    vals::Vector{T} # original values
     W::Float64              # test statistic: Wilcoxon rank-sum statistic
-    ranks::Vector{T}        # ranks without ties (zero values)
+    ranks::Vector{Float64}           # ranks without ties (zero values)
     signs::BitArray{1}      # signs of input of ranks
     tie_adjustment::Float64 # adjustment for ties
     n::Int                  # number of observations
     median::Float64         # sample median
 end
 ExactSignedRankTest{T<:Real}(x::AbstractVector{T}) =
-    ExactSignedRankTest(signedrankstats(x)...)
+    ExactSignedRankTest(x, signedrankstats(x)...)
 ExactSignedRankTest{S<:Real,T<:Real}(x::AbstractVector{S}, y::AbstractVector{T}) =
     ExactSignedRankTest(x - y)
 
@@ -100,7 +100,7 @@ function signedrankenumerate(x::ExactSignedRankTest)
     (le/tot, gr/tot)
 end
 
-function pvalue(x::ExactSignedRankTest; tail=:both) 
+function pvalue(x::ExactSignedRankTest; tail=:both)
     n = length(x.ranks)
     if n == 0
         1
@@ -129,12 +129,15 @@ function pvalue(x::ExactSignedRankTest; tail=:both)
     end
 end
 
+ci(x::ExactSignedRankTest, alpha::Real=0.05; tail=:both) = calculate_ci(x.vals, alpha; tail=tail)
+
 
 ## APPROXIMATE SIGNED RANK TEST
 
 immutable ApproximateSignedRankTest{T<:Real} <: HypothesisTest
+    vals::Vector{T} # original values
     W::Float64              # test statistic: Wilcoxon rank-sum statistic
-    ranks::Vector{T}        # ranks without ties (zero values)
+    ranks::Vector{Float64} # ranks without ties (zero values)
     signs::BitArray{1}      # signs of input of ranks
     tie_adjustment::Float64 # adjustment for ties
     n::Int                  # number of observations
@@ -143,14 +146,14 @@ immutable ApproximateSignedRankTest{T<:Real} <: HypothesisTest
     sigma::Float64          # normal approximation: std
 end
 
-function ApproximateSignedRankTest{T<:Real}(W::Float64, ranks::Vector{T}, signs::BitArray{1}, tie_adjustment::Float64, n::Int, median::Float64)
+function ApproximateSignedRankTest{T<:Real}(x::Vector, W::Float64, ranks::Vector{T}, signs::BitArray{1}, tie_adjustment::Float64, n::Int, median::Float64)
     nz = length(ranks) # num non-zeros
     mu = W - nz * (nz + 1)/4
     std = sqrt(nz * (nz + 1) * (2 * nz + 1) / 24 - tie_adjustment / 48)
-    ApproximateSignedRankTest(W, ranks, signs, tie_adjustment, n, median, mu, std)
+    ApproximateSignedRankTest(x, W, ranks, signs, tie_adjustment, n, median, mu, std)
 end
-ApproximateSignedRankTest{T<:Real}(x::AbstractVector{T}) = 
-    ApproximateSignedRankTest(signedrankstats(x)...)
+ApproximateSignedRankTest{T<:Real}(x::AbstractVector{T}) =
+    ApproximateSignedRankTest(x, signedrankstats(x)...)
 ApproximateSignedRankTest{S<:Real,T<:Real}(x::AbstractVector{S}, y::AbstractVector{T}) =
     ApproximateSignedRankTest(x - y)
 
@@ -165,7 +168,7 @@ function show_params(io::IO, x::ApproximateSignedRankTest, ident)
     println(io, ident, "normal approximation (μ, σ): ", (x.mu, x.sigma))
 end
 
-function pvalue(x::ApproximateSignedRankTest; tail=:both) 
+function pvalue(x::ApproximateSignedRankTest; tail=:both)
     if x.mu == x.sigma == 0
         1
     else
@@ -176,6 +179,44 @@ function pvalue(x::ApproximateSignedRankTest; tail=:both)
         elseif tail == :right
             ccdf(Normal(), (x.mu - 0.5)/x.sigma)
         end
+    end
+end
+
+ci(x::ApproximateSignedRankTest, alpha::Real=0.05; tail=:both) = calculate_ci(x.vals, alpha; tail=tail)
+
+# implementation method inspired by these notes: http://www.stat.umn.edu/geyer/old03/5102/notes/rank.pdf
+function calculate_ci(x::AbstractVector, alpha::Real=0.05; tail=:both)
+    check_alpha(alpha)
+
+    if tail == :both
+        c = 1 - alpha
+    else
+        c = 1 - 2 * alpha
+    end
+    n = length(x)
+    m = div(n * (n + 1), 2)
+    k_range = 1:div(m, 2)
+    l = [1 - 2 * psignrank(i, n, true) for i in k_range]
+    k = indmin(abs(l-c))
+    vals = Float64[]
+    enumerated = enumerate(x)
+    for (outer_index, outer_value) in enumerated
+        for (inner_index, inner_value) in enumerated
+            if outer_index > inner_index
+                continue
+            end
+            push!(vals, (inner_value + outer_value) / 2)
+        end
+    end
+    sort!(vals)
+    left = vals[k + 1]
+    right = vals[m - k]
+    if tail == :both
+        return (left, right)
+    elseif tail == :left
+        return (left, Inf)
+    elseif tail == :right
+        return (-Inf, right)
     end
 end
 
