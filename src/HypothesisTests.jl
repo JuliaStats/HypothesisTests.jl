@@ -37,7 +37,7 @@ check_same_length(x::Vector, y::Vector) = if length(x) != length(y)
 end
 
 # Basic function for finding a p-value given a distribution and tail
-pvalue(dist::ContinuousUnivariateDistribution, x::Number; tail=:both) = 
+pvalue(dist::ContinuousUnivariateDistribution, x::Number; tail=:both) =
     if tail == :both
         min(2 * min(cdf(dist, x), ccdf(dist, x)), 1.0)
     elseif tail == :left
@@ -48,7 +48,7 @@ pvalue(dist::ContinuousUnivariateDistribution, x::Number; tail=:both) =
         throw(ArgumentError("tail=$(tail) is invalid"))
     end
 
-pvalue(dist::DiscreteUnivariateDistribution, x::Number; tail=:both) = 
+pvalue(dist::DiscreteUnivariateDistribution, x::Number; tail=:both) =
     if tail == :both
         min(2 * min(ccdf(dist, x-1), cdf(dist, x)), 1.0)
     elseif tail == :left
@@ -138,4 +138,5 @@ include("t.jl")
 include("wilcoxon.jl")
 include("power_divergence.jl")
 include("anderson_darling.jl")
+include("spearman.jl")
 end
