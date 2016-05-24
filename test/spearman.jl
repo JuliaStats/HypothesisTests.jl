@@ -62,4 +62,6 @@ function diff_rho(x,y)
     corr.ρ - rho_with_ties(corr.S, corr.n, corr.xtiesadj, corr.ytiesadj)
 end
 
-@test_approx_eq mean(Float64[ diff_rho(rand(1:10,i), rand(1:10,i)) for i in 20:100 ]) 0.0
+for i in 20:100
+    @test_approx_eq_eps diff_rho(rand(1:10,i), rand(1:10,i)) 0.0 1e-10
+end
