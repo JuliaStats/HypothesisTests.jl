@@ -97,7 +97,7 @@ function spearman_P_exact(x::SpearmanCorrelationTest, tail)
 end
 
 function spearman_P_sampling(x::SpearmanCorrelationTest, tail)
-    # 360000 samples gives an se(P)=0.0005 for P < 0.1
+    # 360000 samples gives an se(P) < 0.0005 for P < 0.1
     X = copy(x.xrank)
     S_null = Float64[ spearman_S(shuffle!(X), x.yrank) for sample in 1:360000 ]
     P_from_null_S_values(S_null, x, tail)
@@ -108,17 +108,13 @@ end
 # Press WH, Teukolsky SA, Vetterling WT, Flannery BP.
 # Numerical recipes in C.
 # Cambridge: Cambridge university press; 1996.
-# Use estimated mean and std for the S null distribution as in:
-#
-# Press WH, Teukolsky SA, Vetterling WT, Flannery BP.
-# Numerical recipes in C.
-# Cambridge: Cambridge university press; 1996.
 function spearman_P_estimated(x::SpearmanCorrelationTest, tail)
-    a = (x.n^3 - x.n)
+    N = float(x.n)
+    a = (N^3 - N)
     # Numerical Recipes (14.6.6)
     S_null_mean = (a/6.) - (x.xtiesadj/12.) - (x.ytiesadj/12.)
     # Numerical Recipes (14.6.7)
-    S_null_std  = sqrt((((x.n-1)*(x.n^2)*((x.n+1)^2))/36) * (1-(x.xtiesadj/a)) * (1-(x.ytiesadj/a)))
+    S_null_std  = sqrt( ((N - 1.)/36.) * (1. - (x.xtiesadj/a) ) * (1. - (x.ytiesadj/a) ) ) * N * (N + 1.)
     zscore = (x.S - S_null_mean)/S_null_std
     # S is approximately normally distributed
     # S and ρ are inversely proportional
