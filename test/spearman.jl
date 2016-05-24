@@ -39,4 +39,27 @@ let x = collect(1:10),
     @test_approx_eq_eps HypothesisTests.pvalue(corr) 0.05443067 1e-8
 end
 
+# Using (N-1)N²(N+1)² overflows with N = 10153
+let x = rand(10153)
 
+    corr = SpearmanCorrelationTest(x,x)
+
+    @test_approx_eq corr.ρ 1.0
+    @test_approx_eq pvalue(corr) 0.0
+
+end
+
+# Test S value with ties
+
+function rho_with_ties(S,N,tx,ty) # S == D
+    # Equation (14.6.5) from Numerical Recipes for rho with ties
+    a=(N^3)-N
+    (1-((6/a)*(S+(tx/12)+(ty/12)))) / (sqrt(1-(tx/a))*sqrt(1-(ty/a)))
+end
+
+function diff_rho(x,y)
+    corr = SpearmanCorrelationTest(x, y)
+    corr.ρ - rho_with_ties(corr.S, corr.n, corr.xtiesadj, corr.ytiesadj)
+end
+
+@test_approx_eq mean(Float64[ diff_rho(rand(1:10,i), rand(1:10,i)) for i in 20:100 ]) 0.0
