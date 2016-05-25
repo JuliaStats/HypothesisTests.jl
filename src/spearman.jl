@@ -27,7 +27,7 @@ export CorrelationTest, SpearmanCorrelationTest
 abstract CorrelationTest <: HypothesisTest
 
 "Sum squared difference of ranks (midranks for ties)"
-spearman_S(xrank, yrank) = sumabs2(xrank .- yrank)
+spearman_S(xrank,yrank) = sumabs2(xrank .- yrank)
 
 immutable SpearmanCorrelationTest <: CorrelationTest
     # Tied ranking for x and y
@@ -43,19 +43,19 @@ immutable SpearmanCorrelationTest <: CorrelationTest
     # Spearman's ρ
     ρ::Float64
 
-    function SpearmanCorrelationTest(x, y)
+    function SpearmanCorrelationTest(x,y)
 
         n = length(x)
         (n != length(y)) && throw(ErrorException("x and y must have the same length"))
 
-        xrank, xtiesadj = HypothesisTests.tiedrank_adj(x)
-        yrank, ytiesadj = HypothesisTests.tiedrank_adj(y)
+        xrank,xtiesadj = HypothesisTests.tiedrank_adj(x)
+        yrank,ytiesadj = HypothesisTests.tiedrank_adj(y)
 
-        S = spearman_S(xrank, yrank)
+        S = spearman_S(xrank,yrank)
 
-        ρ = corspearman(x, y)
+        ρ = corspearman(x,y)
 
-        new(xrank, yrank, xtiesadj, ytiesadj, S, n, ρ)
+        new(xrank,yrank,xtiesadj,ytiesadj,S,n,ρ)
     end
 
 end
@@ -63,17 +63,17 @@ end
 testname(::SpearmanCorrelationTest) = "Spearman's rank correlation test"
 
 # parameter of interest: name, value under h0, point estimate
-population_param_of_interest(x::SpearmanCorrelationTest) = ("Spearman's ρ", 0.0, x.ρ)
+population_param_of_interest(x::SpearmanCorrelationTest) = ("Spearman's ρ",0.0,x.ρ)
 
-function show_params(io::IO, x::SpearmanCorrelationTest, ident)
-    println(io, ident, "Number of points:                    ", x.n)
-    println(io, ident, "Spearman's ρ:                        ", x.ρ)
-    println(io, ident, "S (Sum squared difference of ranks): ", x.S)
-    println(io, ident, "adjustment for ties in x:            ", x.xtiesadj)
-    println(io, ident, "adjustment for ties in y:            ", x.ytiesadj)
+function show_params(io::IO,x::SpearmanCorrelationTest,ident)
+    println(io,ident,"Number of points:                    ",x.n)
+    println(io,ident,"Spearman's ρ:                        ",x.ρ)
+    println(io,ident,"S (Sum squared difference of ranks): ",x.S)
+    println(io,ident,"adjustment for ties in x:            ",x.xtiesadj)
+    println(io,ident,"adjustment for ties in y:            ",x.ytiesadj)
 end
 
-function P_from_null_S_values(S_null, x::SpearmanCorrelationTest, tail)
+function P_from_null_S_values(S_null,x::SpearmanCorrelationTest,tail)
     S_null_mean = mean(S_null)
     # S is approximately normally distributed
     # S and ρ are inversely proportional
@@ -91,16 +91,16 @@ function P_from_null_S_values(S_null, x::SpearmanCorrelationTest, tail)
     end
 end
 
-function spearman_P_exact(x::SpearmanCorrelationTest, tail)
-    S_null = Float64[ spearman_S(perm, x.yrank) for perm in permutations(x.xrank) ]
-    P_from_null_S_values(S_null, x, tail)
+function spearman_P_exact(x::SpearmanCorrelationTest,tail)
+    S_null = Float64[ spearman_S(perm,x.yrank) for perm in permutations(x.xrank) ]
+    P_from_null_S_values(S_null,x,tail)
 end
 
-function spearman_P_sampling(x::SpearmanCorrelationTest, tail)
+function spearman_P_sampling(x::SpearmanCorrelationTest,tail)
     # 360000 samples gives an se(P) < 0.0005 for P < 0.1
     X = copy(x.xrank)
-    S_null = Float64[ spearman_S(shuffle!(X), x.yrank) for sample in 1:360000 ]
-    P_from_null_S_values(S_null, x, tail)
+    S_null = Float64[ spearman_S(shuffle!(X),x.yrank) for sample in 1:360000 ]
+    P_from_null_S_values(S_null,x,tail)
 end
 
 # Use estimated mean and std for the S null distribution as in:
@@ -108,7 +108,7 @@ end
 # Press WH, Teukolsky SA, Vetterling WT, Flannery BP.
 # Numerical recipes in C.
 # Cambridge: Cambridge university press; 1996.
-function spearman_P_estimated(x::SpearmanCorrelationTest, tail)
+function spearman_P_estimated(x::SpearmanCorrelationTest,tail)
     N = float(x.n)
     a = (N^3 - N)
     # Numerical Recipes (14.6.6)
@@ -119,11 +119,11 @@ function spearman_P_estimated(x::SpearmanCorrelationTest, tail)
     # S is approximately normally distributed
     # S and ρ are inversely proportional
     if tail == :both
-        cdf(Normal(), -abs(zscore)) + ccdf(Normal(), abs(zscore))
+        cdf(Normal(),-abs(zscore)) + ccdf(Normal(),abs(zscore))
     elseif tail == :right
-        cdf(Normal(),  zscore)
+        cdf(Normal(),zscore)
     elseif tail == :left
-        ccdf(Normal(), zscore)
+        ccdf(Normal(),zscore)
     else
         throw(ArgumentError("tail=$(tail) is invalid"))
     end
@@ -134,16 +134,16 @@ end
 # McDonald JH.
 # Handbook of biological statistics.
 # Baltimore, MD: Sparky House Publishing; 2009 Aug.
-function spearman_P_ttest(x::SpearmanCorrelationTest, tail)
+function spearman_P_ttest(x::SpearmanCorrelationTest,tail)
     ρ2 = x.ρ^2
     df = x.n-2
     t = sqrt((df*ρ2)/(1-ρ2))
     if tail == :both
-        cdf(TDist(df), -t) + ccdf(Normal(), t)
+        cdf(TDist(df),-t) + ccdf(Normal(),t)
     elseif tail == :right
-        ccdf(TDist(df), t)
+        ccdf(TDist(df),t)
     elseif tail == :left
-        cdf(TDist(df),  t)
+        cdf(TDist(df),t)
     else
         throw(ArgumentError("tail=$(tail) is invalid"))
     end
@@ -152,16 +152,16 @@ end
 function pvalue(x::SpearmanCorrelationTest; tail=:both, method=:estimated)
     if x.n <= 10
         # Exact P value using permutations
-        return( spearman_P_exact(x, tail) )
+        return(spearman_P_exact(x,tail))
     end
     if method == :sampling
-        return( spearman_P_sampling(x, tail) )
+        return(spearman_P_sampling(x,tail))
     elseif method == :exact
-        return( spearman_P_exact(x, tail) )
+        return(spearman_P_exact(x,tail))
     elseif method == :estimated
-        return( spearman_P_estimated(x, tail) )
+        return(spearman_P_estimated(x,tail))
     elseif method == :ttest
-        return( spearman_P_ttest(x, tail) )
+        return(spearman_P_ttest(x,tail))
     else
         throw(ArgumentError("method=$(method) is invalid"))
     end
