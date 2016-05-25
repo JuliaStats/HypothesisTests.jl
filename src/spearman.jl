@@ -46,7 +46,7 @@ immutable SpearmanCorrelationTest <: CorrelationTest
     function SpearmanCorrelationTest(x, y)
 
         n = length(x)
-        (n != length(y)) && throw(ErrorException("x and y must have the same length"))
+        @assert n==length(y) "Variables x and y must have the same length"
 
         xrank, xtiesadj = HypothesisTests.tiedrank_adj(x)
         yrank, ytiesadj = HypothesisTests.tiedrank_adj(y)
