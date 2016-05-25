@@ -73,7 +73,7 @@ function show_params(io::IO, x::SpearmanCorrelationTest, ident)
     println(io, ident, "adjustment for ties in y:            ", x.ytiesadj)
 end
 
-function P_from_null_S_values(S_null, x::SpearmanCorrelationTest, tail)
+function P_from_null_S_values(S_null, x::SpearmanCorrelationTest, tail::Symbol)
     S_null_mean = mean(S_null)
     # S is approximately normally distributed
     # S and ρ are inversely proportional
@@ -91,12 +91,12 @@ function P_from_null_S_values(S_null, x::SpearmanCorrelationTest, tail)
     end
 end
 
-function spearman_P_exact(x::SpearmanCorrelationTest, tail)
+function spearman_P_exact(x::SpearmanCorrelationTest, tail::Symbol)
     S_null = Float64[ spearman_S(perm, x.yrank) for perm in permutations(x.xrank) ]
     P_from_null_S_values(S_null, x, tail)
 end
 
-function spearman_P_sampling(x::SpearmanCorrelationTest, tail)
+function spearman_P_sampling(x::SpearmanCorrelationTest, tail::Symbol)
     # 360000 samples gives an se(P) < 0.0005 for P < 0.1
     X = copy(x.xrank)
     S_null = Float64[ spearman_S(shuffle!(X), x.yrank) for sample in 1:360000 ]
@@ -108,7 +108,7 @@ end
 # Press WH, Teukolsky SA, Vetterling WT, Flannery BP.
 # Numerical recipes in C.
 # Cambridge: Cambridge university press; 1996.
-function spearman_P_estimated(x::SpearmanCorrelationTest, tail)
+function spearman_P_estimated(x::SpearmanCorrelationTest, tail::Symbol)
     N = float(x.n)
     a = (N^3 - N)
     # Numerical Recipes (14.6.6)
@@ -134,7 +134,7 @@ end
 # McDonald JH.
 # Handbook of biological statistics.
 # Baltimore, MD: Sparky House Publishing; 2009 Aug.
-function spearman_P_ttest(x::SpearmanCorrelationTest, tail)
+function spearman_P_ttest(x::SpearmanCorrelationTest, tail::Symbol)
     ρ2 = x.ρ^2
     df = x.n-2
     t = sqrt((df*ρ2)/(1-ρ2))
@@ -149,7 +149,7 @@ function spearman_P_ttest(x::SpearmanCorrelationTest, tail)
     end
 end
 
-function pvalue(x::SpearmanCorrelationTest; tail=:both, method=:estimated)
+function pvalue(x::SpearmanCorrelationTest; tail::Symbol=:both, method::Symbol=:estimated)
     if x.n <= 10
         # Exact P value using permutations
         return(spearman_P_exact(x, tail))
