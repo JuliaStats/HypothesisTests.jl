@@ -141,29 +141,31 @@ function spearman_P_ttest(x::SpearmanCorrelationTest, tail::Symbol)
     if tail == :both
         cdf(TDist(df), -t) + ccdf(Normal(), t)
     elseif tail == :right
-        ccdf(TDist(df), t)
+        x.ρ > 0 ? ccdf(TDist(df), t) : cdf(TDist(df), t)
     elseif tail == :left
-        cdf(TDist(df), t)
+        x.ρ > 0 ? cdf(TDist(df), t) : ccdf(TDist(df), t)
     else
         throw(ArgumentError("tail=$(tail) is invalid"))
     end
 end
 
 function pvalue(x::SpearmanCorrelationTest; tail::Symbol=:both, method::Symbol=:estimated)
+    if method ∉ Set(Symbol[:sampling, :exact, :estimated, :ttest])
+            throw(ArgumentError("method=$(method) is invalid"))
+    end
     if x.n <= 10
         # Exact P value using permutations
         return(spearman_P_exact(x, tail))
-    end
-    if method == :sampling
-        return(spearman_P_sampling(x, tail))
-    elseif method == :exact
-        return(spearman_P_exact(x, tail))
-    elseif method == :estimated
-        return(spearman_P_estimated(x, tail))
-    elseif method == :ttest
-        return(spearman_P_ttest(x, tail))
     else
-        throw(ArgumentError("method=$(method) is invalid"))
+        if method == :sampling
+            return(spearman_P_sampling(x, tail))
+        elseif method == :exact
+            return(spearman_P_exact(x, tail))
+        elseif method == :estimated
+            return(spearman_P_estimated(x, tail))
+        elseif method == :ttest
+            return(spearman_P_ttest(x, tail))
+        end
     end
 end
 

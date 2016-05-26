@@ -11,6 +11,16 @@ let x = [44.4, 45.9, 41.9, 53.3, 44.7, 44.1],
     @test_approx_eq_eps HypothesisTests.pvalue(corr) 0.2417 0.0001
     @test_approx_eq_eps HypothesisTests.pvalue(corr, tail=:right) 0.1208 0.0001
     @test_approx_eq_eps HypothesisTests.pvalue(corr, tail=:left) 0.9125 0.0001
+
+    # Test throws
+    @test_throws AssertionError HypothesisTests.SpearmanCorrelationTest(x,y[1:5])
+
+    @test_throws ArgumentError HypothesisTests.pvalue(corr, tail=:greater, method=:exact)
+    @test_throws ArgumentError HypothesisTests.pvalue(corr, tail=:greater, method=:sampling)
+    @test_throws ArgumentError HypothesisTests.pvalue(corr, tail=:greater, method=:exact)
+    @test_throws ArgumentError HypothesisTests.pvalue(corr, tail=:greater, method=:ttest)
+
+    @test_throws ArgumentError HypothesisTests.pvalue(corr, tail=:right, method=:R)
 end
 
 show(IOBuffer(),
@@ -21,16 +31,23 @@ show(IOBuffer(),
 let x = collect(1:11),
     y = [6, 5, 4, 3, 2, 1, 7, 11, 10, 9, 8]
     # https://stat.ethz.ch/pipermail/r-devel/2009-February/052112.html
-    # correct P value 0.03044548
-
-    corr = HypothesisTests.SpearmanCorrelationTest(x, y)
+    # The correct P value is 0.03044548, R 3.2.5 gives 0.03036
 
     srand(12345) # Seed for method=:sampling
+
+    corr = HypothesisTests.SpearmanCorrelationTest(x, y)
 
     @test_approx_eq_eps HypothesisTests.pvalue(corr, tail=:right, method=:exact)     0.03044548 1e-8
     @test_approx_eq_eps HypothesisTests.pvalue(corr, tail=:right, method=:sampling)  0.030      1e-3
     @test_approx_eq_eps HypothesisTests.pvalue(corr, tail=:right, method=:estimated) 0.030      1e-3
     @test_approx_eq_eps HypothesisTests.pvalue(corr, tail=:right, method=:ttest)     0.03       1e-2
+
+    corr = HypothesisTests.SpearmanCorrelationTest(x, -y)
+
+    @test_approx_eq_eps HypothesisTests.pvalue(corr, tail=:left, method=:exact)      0.03044548 1e-8
+    @test_approx_eq_eps HypothesisTests.pvalue(corr, tail=:left, method=:sampling)   0.030      1e-3
+    @test_approx_eq_eps HypothesisTests.pvalue(corr, tail=:left, method=:estimated)  0.030      1e-3
+    @test_approx_eq_eps HypothesisTests.pvalue(corr, tail=:left, method=:ttest)      0.03       1e-2
 end
 
 let x = collect(1:10),
