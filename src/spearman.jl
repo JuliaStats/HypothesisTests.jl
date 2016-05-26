@@ -44,17 +44,12 @@ immutable SpearmanCorrelationTest <: CorrelationTest
     ρ::Float64
 
     function SpearmanCorrelationTest(x, y)
-
         n = length(x)
         @assert n==length(y) "Variables x and y must have the same length"
-
         xrank, xtiesadj = HypothesisTests.tiedrank_adj(x)
         yrank, ytiesadj = HypothesisTests.tiedrank_adj(y)
-
         S = spearman_S(xrank, yrank)
-
         ρ = corspearman(x, y)
-
         new(xrank, yrank, xtiesadj, ytiesadj, S, n, ρ)
     end
 
