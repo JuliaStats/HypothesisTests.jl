@@ -61,12 +61,13 @@ pvalue(x::BinomialTest; tail=:both) = pvalue(Binomial(x.n, x.p), x.x; tail=tail)
 ```julia
 function confint(x::HypothesisTest, alpha::Float64=0.05; tail=:both, method=:clopper_pearson)
 ```
-Compute a confidence interval with coverage 1-alpha for multinomial proportions using one of the following methods. Possible values for method are:
+Compute a confidence interval with coverage 1-alpha for binomial proportions using one of the following methods. Possible values for method are:
 
-Sison, Glaz intervals :sison_glaz (default):
-Bootstrap intervals :bootstrap :
-Quesenberry, Hurst intervals :quesenberry_hurst :
-Gold intervals :gold (Asymptotic simultaneous intervals):
+- Clopper-Pearson :clopper_pearson (default)
+- Agresti-Coull :agresti_coull
+- Jeffrey :jeffrey
+- Wald :wald
+- Wilson :wilson
 """
 function StatsBase.confint(x::BinomialTest, alpha::Float64=0.05; tail=:both, method=:clopper_pearson)
     check_alpha(alpha)
