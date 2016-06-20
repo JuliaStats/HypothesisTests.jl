@@ -95,7 +95,7 @@ function Base.show{T<:HypothesisTest}(io::IO, test::T)
     println(io)
 
     # test summary
-    p = pvalue(test)
+    p = pvalue(test, tail=:both)
     outcome = if p > 0.05 "fail to reject" else "reject" end
     println(io, "Test summary:")
     println(io, "    outcome with 95% confidence: $outcome h_0")
