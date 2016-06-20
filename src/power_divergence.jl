@@ -41,7 +41,7 @@ end
 # parameter of interest: name, value under h0, point estimate
 population_param_of_interest(x::PowerDivergenceTest) = ("Multinomial Probabilities", x.theta0, x.thetahat)
 
-pvalue(x::PowerDivergenceTest; tail=:right) = pvalue(Chisq(x.df),x.stat; tail=tail)
+pvalue(x::PowerDivergenceTest; tail=:both) = pvalue(Chisq(x.df),x.stat; tail=tail)
 
 function ci(x::PowerDivergenceTest, alpha::Float64=0.05; tail::Symbol=:both, method::Symbol=:sison_glaz, correct::Bool=true, bootstrap_iters::Int64=10000, GC::Bool=true)
   check_alpha(alpha)
