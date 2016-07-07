@@ -93,7 +93,16 @@ function pvalue(x::KSampleADTest)
     b1 = [-0.245, 0.25, 0.678, 1.149, 1.822]
     b2 = [-0.105, -0.305, -0.362, -0.391, -0.396]
     tm = b0 + b1 / sqrt(m) + b2 / m
-    f = CurveFit.poly_fit(tm, log(sig), 2)
+
+    # Fit a quadratic polynomial to tm and log(sig)
+    # Adapted from code by Paulo José Salz Jabardo
+    A = zeros(eltype(tm), 5, 3)
+    A[:,1] = 1.0
+    @inbounds for i = 1:2, k = 1:5
+        A[k,i+1] = A[k,i] * tm[k]
+    end
+    f = A \ log(sig)
+
     exp(f[1] + f[2]*Tk + f[3]*Tk^2)
 end
 

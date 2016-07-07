@@ -2,5 +2,4 @@ julia 0.4
 Distributions
 Roots
 StatsBase
-Compat
-CurveFit
+Compat 0.8.4
