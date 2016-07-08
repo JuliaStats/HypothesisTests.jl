@@ -28,8 +28,8 @@ const libRmath = "libRmath-julia"
 
 # RMATH WRAPPERS
 macro rmath_deferred_free(base)
-    libcall = symbol(string(base, "_free"))
-    func = symbol(string(base, "_deferred_free"))
+    libcall = Symbol(base, "_free")
+    func = Symbol(base, "_deferred_free")
     quote
         let gc_tracking_obj = @compat(Union{})[]
             global $func
