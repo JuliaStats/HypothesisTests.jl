@@ -31,7 +31,7 @@ using Distributions, Roots, StatsBase, Compat
 export testname, pvalue, ci
 abstract HypothesisTest
 
-check_same_length(x::Vector, y::Vector) = if length(x) != length(y)
+check_same_length(x::AbstractVector, y::AbstractVector) = if length(x) != length(y)
     throw(DimensionMismatch("Vectors must be the same length"))
 end
 
@@ -126,7 +126,6 @@ end
 
 include("common.jl")
 
-include("b.jl")
 include("binomial.jl")
 include("circular.jl")
 include("fisher.jl")

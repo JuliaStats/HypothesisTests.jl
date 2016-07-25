@@ -1,4 +1,3 @@
-include("b.jl")
 include("binomial.jl")
 include("circular.jl")
 include("fisher.jl")
