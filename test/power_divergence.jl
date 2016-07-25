@@ -5,7 +5,7 @@ using Base.Test
 #Example 1 in R
 #Agresti (2007) p. 39
 
-d = [ [762,484] [327,239] [468,477]]
+d = [[762,484] [327,239] [468,477]]
 
 m = PowerDivergenceTest(d)
 
@@ -16,8 +16,8 @@ c = ci(m)
 c0 =
 [(0.23322451940515054,0.31882480957222203),(0.1323902792890823,0.21799056945615383),(0.0754443235400798,0.16104461370715129),(0.04352557127312297,0.12912586144019447),(0.12658686978599926,0.21218715995307078),(0.12985128763148351,0.21545157779855498)]
 
-[ @test_approx_eq c[i][1] c0[i][1] for i in 1:length(c)]
-[ @test_approx_eq c[i][2] c0[i][2] for i in 1:length(c)]
+[@test_approx_eq c[i][1] c0[i][1] for i in 1:length(c)]
+[@test_approx_eq c[i][2] c0[i][2] for i in 1:length(c)]
 
 @test_approx_eq pvalue(m) 2.9535891832117357e-7
 @test_approx_eq m.stat 30.070149095754687
@@ -54,9 +54,9 @@ show(IOBuffer(), m)
 m = ChisqTest(d)
 m = MultinomialLRT(d)
 
-ci(m, method = :bootstrap) 
-ci(m, method = :bootstrap, tail=:left) 
-ci(m, method = :bootstrap, tail=:right) 
+ci(m, method = :bootstrap)
+ci(m, method = :bootstrap, tail=:left)
+ci(m, method = :bootstrap, tail=:right)
 
 ci(m, method = :gold)
 ci(m, method = :gold, tail=:left)
@@ -73,13 +73,13 @@ ci(m, method = :sison_glaz, tail=:right)
 
 @test_throws ArgumentError ci(m, method=:FOO)
 @test_throws ArgumentError ci(m, tail=:fox)
- 
+
 
 
 
 #Example 3 in R
 
-d = [ 20, 15, 25 ]
+d = [20, 15, 25]
 m = PowerDivergenceTest(d)
 
 @test_approx_eq m.theta0 [0.3333333333333333,0.3333333333333333,0.3333333333333333]
@@ -88,11 +88,11 @@ m = PowerDivergenceTest(d)
 c = ci(m)
 c0 = [(0.04999999999999999,0.5833301356192295),(0.0,0.49999680228589616),(0.13333333333333336,0.6666634689525628)]
 
-[ @test_approx_eq c[i][1] c0[i][1] for i in 1:length(c)]
-[ @test_approx_eq c[i][2] c0[i][2] for i in 1:length(c)]
+[@test_approx_eq c[i][1] c0[i][1] for i in 1:length(c)]
+[@test_approx_eq c[i][2] c0[i][2] for i in 1:length(c)]
 
 @test_approx_eq pvalue(m) 0.2865047968601901
-@test_approx_eq m.stat 2.5 
+@test_approx_eq m.stat 2.5
 @test_approx_eq m.df 2
 @test_approx_eq m.n 60
 @test_approx_eq m.residuals [0.0,-1.118033988749895,1.118033988749895]
@@ -126,9 +126,9 @@ show(IOBuffer(), m)
 m = ChisqTest(d)
 m = MultinomialLRT(d)
 
-ci(m, method = :bootstrap) 
-ci(m, method = :bootstrap, tail=:left) 
-ci(m, method = :bootstrap, tail=:right) 
+ci(m, method = :bootstrap)
+ci(m, method = :bootstrap, tail=:left)
+ci(m, method = :bootstrap, tail=:right)
 
 ci(m, method = :gold)
 ci(m, method = :gold, tail=:left)
@@ -164,3 +164,5 @@ ChisqTest(x,y,(1:3,1:3))
 MultinomialLRT(x,y,3)
 MultinomialLRT(x,y,(1:3,1:3))
 
+# Issue #43 - large numbers caused overflow
+PowerDivergenceTest(rand(1_000_000+(1:10), 3, 3))
