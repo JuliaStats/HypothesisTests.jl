@@ -46,9 +46,21 @@ end
 testname(::FisherExactTest) = "Fisher's exact test"
 population_param_of_interest(x::FisherExactTest) = ("Odds ratio", 1.0, x.ω) # parameter of interest: name, value under h0, point estimate
 
+# The sizing argument to print_matrix was removed during the 0.5 dev period
+if VERSION < v"0.5.0-dev+1936"
+    function _print_matrix(io::IO, X::AbstractVecOrMat, pre::AbstractString)
+        m = typemax(Int)
+        Base.print_matrix(io, X, (m, m), pre)
+    end
+else
+    function _print_matrix(io::IO, X::AbstractVecOrMat, pre::AbstractString)
+        Base.print_matrix(io, X, pre)
+    end
+end
+
 function show_params(io::IO, x::FisherExactTest, ident="")
     println(io, ident, "contingency table:")
-    Base.print_matrix(io, [x.a x.b; x.c x.d], (typemax(Int), typemax(Int)), repeat(ident, 2))
+    _print_matrix(io, [x.a x.b; x.c x.d], repeat(ident, 2))
     println(io)
 end
 
