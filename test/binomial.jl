@@ -22,9 +22,9 @@ t = BinomialTest(26, 78)
 show(IOBuffer(), t)
 
 t = BinomialTest([trues(6); falses(3)])
-@test pvalue(t) 0.5078125000000002
-@test pvalue(t, tail=:left) 0.91015625
-@test pvalue(t, tail=:right) 0.2539062500000001
+@test pvalue(t) ≈ 0.5078125000000002
+@test pvalue(t, tail=:left) ≈ 0.91015625
+@test pvalue(t, tail=:right) ≈ 0.2539062500000001
 @test_ci_approx ci(t) (0.2992950562085405, 0.9251453685803082)
 @test_ci_approx ci(t, tail=:left) (0.0, 0.9022531865607242)
 @test_ci_approx ci(t, tail=:right) (0.3449413659437032, 1.0)
@@ -61,14 +61,14 @@ show(IOBuffer(), SignTest(x, y))
 
 # www.stat.umn.edu/geyer/old03/5102/notes/rank.pdf
 x = [-4.7, 3.7, 22.4, 13.6, 8.7, 9.1, -7.8, 10.8, 15.6, 23.5, 14.4, 20.2, 6.5, 10.1, -6.9]
-@test pvalue(SignTest(x)) 0.03515625
-@test pvalue(SignTest(x), tail=:left) 0.996307373046875
-@test pvalue(SignTest(x), tail=:right) 0.017578125000000007
-@test ci(SignTest(x), 1-0.99995) (-7.8, 23.5)
-@test ci(SignTest(x), 1-0.9999) (-6.9, 22.4)
-@test ci(SignTest(x), 1-0.993) (-4.7, 20.2)
-@test ci(SignTest(x), 1-0.965) (3.7, 15.6)
-@test ci(SignTest(x), 1-0.882) (6.5, 14.4)
-@test ci(SignTest(x), 1-0.7) (8.7, 13.6)
-@test ci(SignTest(x), 1-0.6) (9.1, 10.8)
+@test pvalue(SignTest(x)) ≈ 0.03515625
+@test pvalue(SignTest(x), tail=:left) ≈ 0.996307373046875
+@test pvalue(SignTest(x), tail=:right) ≈ 0.017578125000000007
+@test_ci_approx ci(SignTest(x), 1-0.99995) (-7.8, 23.5)
+@test_ci_approx ci(SignTest(x), 1-0.9999) (-6.9, 22.4)
+@test_ci_approx ci(SignTest(x), 1-0.993) (-4.7, 20.2)
+@test_ci_approx ci(SignTest(x), 1-0.965) (3.7, 15.6)
+@test_ci_approx ci(SignTest(x), 1-0.882) (6.5, 14.4)
+@test_ci_approx ci(SignTest(x), 1-0.7) (8.7, 13.6)
+@test_ci_approx ci(SignTest(x), 1-0.6) (9.1, 10.8)
 show(IOBuffer(), SignTest(x))
