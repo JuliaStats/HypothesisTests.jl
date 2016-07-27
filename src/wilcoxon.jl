@@ -219,13 +219,3 @@ function calculate_ci(x::AbstractVector, alpha::Real=0.05; tail=:both)
         return (-Inf, right)
     end
 end
-
-## helper: libRmath
-
-@rmath_deferred_free(wilcox)
-function pwilcox(q::Number, p1::Number, p2::Number, lower_tail::Bool,
-                 log_p::Bool=false)
-    wilcox_deferred_free()
-    ccall((:pwilcox,libRmath), Float64, (Float64,Float64,Float64,Int32,Int32),
-          q, p1, p2, lower_tail, log_p)
-end
