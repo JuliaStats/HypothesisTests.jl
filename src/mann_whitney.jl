@@ -174,15 +174,3 @@ function pvalue(x::ApproximateMannWhitneyUTest; tail=:both)
         end
     end
 end
-
-
-## helper: libRmath
-
-@rmath_deferred_free(signrank)
-function psignrank(q::Number, p1::Number, lower_tail::Bool,
-                   log_p::Bool=false)
-    signrank_deferred_free()
-    ccall((:psignrank,libRmath), Float64, (Float64,Float64,Int32,Int32), q, p1,
-          lower_tail, log_p)
-end
-

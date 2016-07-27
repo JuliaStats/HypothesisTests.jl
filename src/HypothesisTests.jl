@@ -27,7 +27,7 @@ VERSION >= v"0.4.0-dev+6521" && __precompile__()
 module HypothesisTests
 
 using Distributions, Roots, StatsBase, Compat, Combinatorics
-using Rmath: pwilcox
+using Rmath: pwilcox, psignrank
 
 export testname, pvalue, ci
 abstract HypothesisTest
