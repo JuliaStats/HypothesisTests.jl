@@ -3,10 +3,10 @@
 # approximate array equality is incorrect when either limit is
 # infinite.
 macro test_ci_approx(x::Expr, y::Expr)
-    @eval begin
-        Base.Test.@test typeof($x) <: Tuple{Real,Real}
-        Base.Test.@test typeof($x) == typeof($y)
-        Base.Test.@test all(map(isapprox, $x, $y))
+    return quote
+        Base.Test.@test typeof($(esc(x))) <: Tuple{Real,Real}
+        Base.Test.@test typeof($(esc(x))) == typeof($(esc(y)))
+        Base.Test.@test all(map(isapprox, $(esc(x)), $(esc(y))))
     end
 end
 
