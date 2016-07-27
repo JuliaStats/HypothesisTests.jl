@@ -26,7 +26,7 @@ VERSION >= v"0.4.0-dev+6521" && __precompile__()
 
 module HypothesisTests
 
-using Distributions, Roots, StatsBase, Compat
+using Distributions, Roots, StatsBase, Compat, Combinatorics
 using Rmath: pwilcox
 
 export testname, pvalue, ci
@@ -37,7 +37,7 @@ check_same_length(x::AbstractVector, y::AbstractVector) = if length(x) != length
 end
 
 # Basic function for finding a p-value given a distribution and tail
-pvalue(dist::ContinuousUnivariateDistribution, x::Number; tail=:both) = 
+pvalue(dist::ContinuousUnivariateDistribution, x::Number; tail=:both) =
     if tail == :both
         min(2 * min(cdf(dist, x), ccdf(dist, x)), 1.0)
     elseif tail == :left
@@ -48,7 +48,7 @@ pvalue(dist::ContinuousUnivariateDistribution, x::Number; tail=:both) =
         throw(ArgumentError("tail=$(tail) is invalid"))
     end
 
-pvalue(dist::DiscreteUnivariateDistribution, x::Number; tail=:both) = 
+pvalue(dist::DiscreteUnivariateDistribution, x::Number; tail=:both) =
     if tail == :both
         min(2 * min(ccdf(dist, x-1), cdf(dist, x)), 1.0)
     elseif tail == :left
