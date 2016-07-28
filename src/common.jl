@@ -22,30 +22,6 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-const libRmath = "libRmath-julia"
-
-# PROBABILITY FUNCTIONS
-
-# RMATH WRAPPERS
-macro rmath_deferred_free(base)
-    libcall = symbol(string(base, "_free"))
-    func = symbol(string(base, "_deferred_free"))
-    quote
-        let gc_tracking_obj = @compat(Union{})[]
-            global $func
-            function $libcall(x::Vector{@compat(Union{})})
-                gc_tracking_obj = @compat(Union{})[]
-                ccall(($(string(libcall)),libRmath), Void, ())
-            end
-            function $func()
-                if !isa(gc_tracking_obj, Bool)
-                    finalizer(gc_tracking_obj, $libcall)
-                    gc_tracking_obj = false
-                end
-            end
-        end
-    end
-end
 
 ## COMMON FUNCTIONS
 

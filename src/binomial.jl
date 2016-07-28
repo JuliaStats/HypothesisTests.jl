@@ -35,7 +35,7 @@ immutable BinomialTest <: HypothesisTest
 end
 
 BinomialTest(x::AbstractVector{Bool}, p=0.5) =
-	BinomialTest(sum(x), length(x), p)
+    BinomialTest(sum(x), length(x), p)
 
 """
 ```julia
@@ -135,14 +135,14 @@ end
 ## SIGN TEST
 
 immutable SignTest <: HypothesisTest
-	median::Float64
-	x::Int
-	n::Int
-	data
+    median::Float64
+    x::Int
+    n::Int
+    data
 end
 
 SignTest{T<:Real}(x::AbstractVector{T}, median::Real=0) =
-	SignTest(median, sum(x .> median), sum(x .!= median), sort(x))
+    SignTest(median, sum(x .> median), sum(x .!= median), sort(x))
 SignTest{T<:Real, S<:Real}(x::AbstractVector{T}, y::AbstractVector{S}) = SignTest(x - y, 0.0)
 
 testname(::SignTest) = "Sign Test"
@@ -152,7 +152,7 @@ function show_params(io::IO, x::SignTest, ident="")
     text1 = "number of observations:"
     text2 = "observations larger than $(x.median): "
     maxlen = length(text2)
-    
+
     println(io, ident, text1, repeat(" ", maxlen-length(text1)), x.n)
     println(io, ident, text2, x.x)
 end
@@ -178,18 +178,18 @@ Compute a confidence interval C with coverage 1-alpha.
 If tail is :both (default), then a two-sided confidence interval is returned. If tail is :left or :right, then a one-sided confidence interval is returned
 """
 @compat function ci(x::SignTest, alpha::Float64=0.05; tail=:both)
-	check_alpha(alpha)
+    check_alpha(alpha)
 
-	if tail == :left
-		q = Int(quantile(Binomial(x.n, 0.5), alpha))
-		(x.data[q+1], x.median)
-	elseif tail == :right
-		q = Int(quantile(Binomial(x.n, 0.5), alpha))
-		(x.median, x.data[end-q])
-	elseif tail == :both
-		q = Int(quantile(Binomial(x.n, 0.5), alpha/2))
-		(x.data[q+1], x.data[end-q])
-	else
-		throw(ArgumentError("tail=$(tail) is invalid"))
-	end
+    if tail == :left
+        q = Int(quantile(Binomial(x.n, 0.5), alpha))
+        (x.data[q+1], x.median)
+    elseif tail == :right
+        q = Int(quantile(Binomial(x.n, 0.5), alpha))
+        (x.median, x.data[end-q])
+    elseif tail == :both
+        q = Int(quantile(Binomial(x.n, 0.5), alpha/2))
+        (x.data[q+1], x.data[end-q])
+    else
+        throw(ArgumentError("tail=$(tail) is invalid"))
+    end
 end
