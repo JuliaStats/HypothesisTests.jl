@@ -132,58 +132,54 @@ function tlinear_Z(x::FisherTLinearAssociation)
 end
 
 # p-values
-for (fn, transform, comparison, distfn) in ((:pvalue, :abs, :>, :ccdf),
-                                             (:leftpvalue, :+, :<, :cdf),
-                                             (:rightpvalue, :+, :>, :ccdf))
-    function pvalue(x::FisherTLinearAssociation; tail=:both)
-        n = length(x.theta)
-        if n == 0
-            return NaN
-        elseif n < 25 || x.uniformly_distributed == nothing
-            # If the number of samples is small, or if we don't know whether the
-            # distribution is uniform, use a permutation test.
+function pvalue(x::FisherTLinearAssociation; tail=:both)
+    n = length(x.theta)
+    if n == 0
+        return NaN
+    elseif n < 25 || x.uniformly_distributed == nothing
+        # If the number of samples is small, or if we don't know whether the
+        # distribution is uniform, use a permutation test.
 
-            # "For n < 25, use a randomisation test based on the quantity T = AB - CD"
-            ct = cos(x.theta)
-            st = sin(x.theta)
-            cp = cos(x.phi)
-            sp = sin(x.phi)
-            T = sum(ct.*cp)*sum(st.*sp)-sum(ct.*sp)*sum(st.*cp)
-            greater = 0
+        # "For n < 25, use a randomisation test based on the quantity T = AB - CD"
+        ct = cos(x.theta)
+        st = sin(x.theta)
+        cp = cos(x.phi)
+        sp = sin(x.phi)
+        T = sum(ct.*cp)*sum(st.*sp)-sum(ct.*sp)*sum(st.*cp)
+        greater = 0
 
-            exact = n <= 8
-            nperms = exact ? factorial(n) : 100000
-            indices = [1:n;]
-            for i = 1:nperms
-                tp = exact ? nthperm(indices, i) : shuffle!(indices)
-                a = 0.0
-                b = 0.0
-                c = 0.0
-                d = 0.0
-                for j = 1:n
-                    a += ct[tp[j]]*cp[j]
-                    b += st[tp[j]]*sp[j]
-                    c += ct[tp[j]]*sp[j]
-                    d += st[tp[j]]*cp[j]
-                end
-                Tp = a*b-c*d
-                greater += tail == :both ? abs(Tp) > T :
-                           tail == :left ? Tp < T :
-                           tail == :right ? Tp > T :
-                           throw(ArgumentError("tail=$(tail) is invalid"))
+        exact = n <= 8
+        nperms = exact ? factorial(n) : 100000
+        indices = [1:n;]
+        for i = 1:nperms
+            tp = exact ? nthperm(indices, i) : shuffle!(indices)
+            a = 0.0
+            b = 0.0
+            c = 0.0
+            d = 0.0
+            for j = 1:n
+                a += ct[tp[j]]*cp[j]
+                b += st[tp[j]]*sp[j]
+                c += ct[tp[j]]*sp[j]
+                d += st[tp[j]]*cp[j]
             end
-            greater / nperms
-        else
-            # Use approximate distribution of test statistic. This only works if we
-            # know whether the distributions of theta and phi are uniform. Otherwise,
-            # the provided p-values are not conservative.
-
-            # "If either distribution has a mean resultant length 0...the statistic has
-            # approximately a double exponential distribution with density 1/2*exp(-abs(x))""
-            (dist, stat) = x.uniformly_distributed ? (Laplace(), n*x.rho_t) :
-                (Normal(), tlinear_Z(x.rho_t, x.theta, x.phi))
-            return pvalue(dist, stat; tail=tail)
+            Tp = a*b-c*d
+            greater += tail == :both ? abs(Tp) > T :
+                       tail == :left ? Tp < T :
+                       tail == :right ? Tp > T :
+                       throw(ArgumentError("tail=$(tail) is invalid"))
         end
+        greater / nperms
+    else
+        # Use approximate distribution of test statistic. This only works if we
+        # know whether the distributions of theta and phi are uniform. Otherwise,
+        # the provided p-values are not conservative.
+
+        # "If either distribution has a mean resultant length 0...the statistic has
+        # approximately a double exponential distribution with density 1/2*exp(-abs(x))""
+        (dist, stat) = x.uniformly_distributed ? (Laplace(), n*x.rho_t) :
+            (Normal(), tlinear_Z(x.rho_t, x.theta, x.phi))
+        return pvalue(dist, stat; tail=tail)
     end
 end
 
