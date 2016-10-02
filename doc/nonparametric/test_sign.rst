@@ -7,7 +7,7 @@ Sign test
 	from which ``x`` was drawn has median ``median`` against the
 	alternative hypothesis that the median is not equal to ``median``.
 
-    Implements: :ref:`pvalue<pvalue>`, :ref:`ci<ci>`
+    Implements: :ref:`pvalue<pvalue>`, :ref:`confint<confint>`
 
 .. function:: SignTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real}, median::Real=0)
 
@@ -15,4 +15,4 @@ Sign test
 	of ``x - y`` has median ``median`` against the alternative
 	hypothesis that the median is not equal to ``median``.
 
-    Implements: :ref:`pvalue<pvalue>`, :ref:`ci<ci>`
+    Implements: :ref:`pvalue<pvalue>`, :ref:`confint<confint>`

@@ -31,13 +31,13 @@ abstract TwoSampleTTest <: TTest
 pvalue(x::TTest; tail=:both) = pvalue(TDist(x.df), x.t; tail=tail)
 
 # confidence interval by inversion
-function ci(x::TTest, alpha::Float64=0.05; tail=:both)
+function StatsBase.confint(x::TTest, alpha::Float64=0.05; tail=:both)
     check_alpha(alpha)
 
     if tail == :left
-        (-Inf, ci(x, alpha*2)[2])
+        (-Inf, StatsBase.confint(x, alpha*2)[2])
     elseif tail == :right
-        (ci(x, alpha*2)[1], Inf)
+        (StatsBase.confint(x, alpha*2)[1], Inf)
     elseif tail == :both
         q = quantile(TDist(x.df), 1-alpha/2)
         (x.xbar-q*x.stderr, x.xbar+q*x.stderr)
@@ -140,4 +140,3 @@ function UnequalVarianceTTest{T<:Real,S<:Real}(x::AbstractVector{T}, y::Abstract
     df = (varx / nx + vary / ny)^2 / ((varx / nx)^2 / (nx - 1) + (vary / ny)^2 / (ny - 1))
     UnequalVarianceTTest(nx, ny, xbar, df, stderr, t, μ0)
 end
-

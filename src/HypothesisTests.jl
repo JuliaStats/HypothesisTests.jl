@@ -30,7 +30,9 @@ using Distributions, Roots, StatsBase, Compat
 using Combinatorics: combinations
 using Rmath: pwilcox, psignrank
 
-export testname, pvalue, ci
+import StatsBase.confint
+
+export testname, pvalue, confint
 abstract HypothesisTest
 
 check_same_length(x::AbstractVector, y::AbstractVector) = if length(x) != length(y)
@@ -84,14 +86,14 @@ function Base.show{T<:HypothesisTest}(io::IO, test::T)
     println(io, repeat("-", length(testname(test))))
 
     # population details
-    has_ci = applicable(ci, test)
+    has_ci = applicable(StatsBase.confint, test)
     (param_name, param_under_h0, param_estimate) = population_param_of_interest(test)
     println(io, "Population details:")
     println(io, "    parameter of interest:   $param_name")
     println(io, "    value under h_0:         $param_under_h0")
     println(io, "    point estimate:          $param_estimate")
     if has_ci
-        println(io, "    95% confidence interval: $(ci(test))")
+        println(io, "    95% confidence interval: $(StatsBase.confint(test))")
     end
     println(io)
 
@@ -126,6 +128,7 @@ function show_params{T<:HypothesisTest}(io::IO, test::T, ident="")
     end
 end
 
+include("deprecated.jl")
 include("common.jl")
 
 include("binomial.jl")

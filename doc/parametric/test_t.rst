@@ -8,7 +8,7 @@ T-test
     the alternative hypothesis that the distribution does not have mean
     ``mu0``.
 
-    Implements: :ref:`pvalue<pvalue>`, :ref:`ci<ci>`
+    Implements: :ref:`pvalue<pvalue>`, :ref:`confint<confint>`
 
 .. function:: OneSampleTTest(xbar::Real, stdev::Real, n::Int, mu0::Real=0)
 
@@ -16,9 +16,9 @@ T-test
     values with mean ``xbar`` and sample standard deviation
     ``stdev``  come from a distribution with ``mu0`` against
     the alternative hypothesis that the distribution does not have mean
-    ``mu0``. 
-    
-    Implements: :ref:`pvalue<pvalue>`, :ref:`ci<ci>`
+    ``mu0``.
+
+    Implements: :ref:`pvalue<pvalue>`, :ref:`confint<confint>`
 
 .. function:: OneSampleTTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real}, mu0::Real=0)
 
@@ -27,8 +27,8 @@ T-test
     ``y`` come from a distribution with ``mu0`` against the
     alternative hypothesis that the distribution does not have mean
     ``mu0``.
-    
-    Implements: :ref:`pvalue<pvalue>`, :ref:`ci<ci>`
+
+    Implements: :ref:`pvalue<pvalue>`, :ref:`confint<confint>`
 
 .. function:: EqualVarianceTTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real})
 
@@ -36,8 +36,8 @@ T-test
     ``x`` and ``y`` come from a distributions with the same mean
     and equal variances against the alternative hypothesis that the
     distributions have different means and but equal variances.
-    
-    Implements: :ref:`pvalue<pvalue>`, :ref:`ci<ci>`
+
+    Implements: :ref:`pvalue<pvalue>`, :ref:`confint<confint>`
 
 .. function:: UnequalVarianceTTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real})
 
@@ -54,5 +54,5 @@ T-test
     .. math::
         \nu_{\chi'} \approx \frac{\left(\sum_{i=1}^n k_i s_i^2\right)^2}
                                  {\sum_{i=1}^n \frac{(k_i s_i^2)^2}{\nu_i}}
-    
-    Implements: :ref:`pvalue<pvalue>`, :ref:`ci<ci>`
+
+    Implements: :ref:`pvalue<pvalue>`, :ref:`confint<confint>`

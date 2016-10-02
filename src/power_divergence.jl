@@ -22,7 +22,7 @@ immutable PowerDivergenceTest <: HypothesisTest
 end
 
 #test name
-function testname(x::PowerDivergenceTest) 
+function testname(x::PowerDivergenceTest)
   if x.lambda == 1
     return("Pearson's Chi-square Test")
   elseif x.lambda == 0
@@ -43,16 +43,16 @@ population_param_of_interest(x::PowerDivergenceTest) = ("Multinomial Probabiliti
 
 pvalue(x::PowerDivergenceTest; tail=:right) = pvalue(Chisq(x.df),x.stat; tail=tail)
 
-function ci(x::PowerDivergenceTest, alpha::Float64=0.05; tail::Symbol=:both, method::Symbol=:sison_glaz, correct::Bool=true, bootstrap_iters::Int64=10000, GC::Bool=true)
+function StatsBase.confint(x::PowerDivergenceTest, alpha::Float64=0.05; tail::Symbol=:both, method::Symbol=:sison_glaz, correct::Bool=true, bootstrap_iters::Int64=10000, GC::Bool=true)
   check_alpha(alpha)
 
   m  = length(x.thetahat)
-  
+
   if tail == :left
-    i = ci(x, alpha*2,method=method, GC=GC)
+    i = StatsBase.confint(x, alpha*2,method=method, GC=GC)
     @compat Tuple{Float64,Float64}[ (0.0, i[j][2]) for j in 1:m]
   elseif tail == :right
-    i = ci(x, alpha*2,method=method, GC=GC)
+    i = StatsBase.confint(x, alpha*2,method=method, GC=GC)
     @compat Tuple{Float64,Float64}[ (i[j][1], 1.0) for j in 1:m]
   elseif tail == :both
     if method == :gold
@@ -66,7 +66,7 @@ function ci(x::PowerDivergenceTest, alpha::Float64=0.05; tail::Symbol=:both, met
     else
       throw(ArgumentError("method=$(method) is invalid or not implemented yet"))
     end
-  else 
+  else
     throw(ArgumentError("tail=$(tail) is invalid"))
   end
 end
@@ -84,10 +84,10 @@ function ci_quesenberry_hurst(x::PowerDivergenceTest,alpha::Float64; GC::Bool=tr
 
   u = (cv + 2*x.observed + sqrt(  cv * (cv + 4 * x.observed .* (x.n - x.observed)/x.n)))/( 2*(x.n + cv))
   l = (cv + 2*x.observed - sqrt(  cv * (cv + 4 * x.observed .* (x.n - x.observed)/x.n)))/( 2*(x.n + cv))
-  @compat Tuple{Float64,Float64}[ (boundproportion(l[j]), boundproportion(u[j])) for j in 1:m] 
+  @compat Tuple{Float64,Float64}[ (boundproportion(l[j]), boundproportion(u[j])) for j in 1:m]
 end
 
-# asymptotic simultaneous confidence interval 
+# asymptotic simultaneous confidence interval
 # Gold (1963)
 function ci_gold(x::PowerDivergenceTest, alpha::Float64; correct::Bool=true, GC::Bool=true)
   m  = length(x.thetahat)
@@ -95,7 +95,7 @@ function ci_gold(x::PowerDivergenceTest, alpha::Float64; correct::Bool=true, GC:
 
   u = [ x.thetahat[j] + sqrt(cv * x.thetahat[j]*(1-x.thetahat[j])/x.n) + (correct ? 1/(2*x.n) : 0 ) for j in 1:m]
   l = [ x.thetahat[j] - sqrt(cv * x.thetahat[j]*(1-x.thetahat[j])/x.n) - (correct ? 1/(2*x.n) : 0 ) for j in 1:m]
-  @compat Tuple{Float64,Float64}[ (boundproportion(l[j]), boundproportion(u[j])) for j in 1:m] 
+  @compat Tuple{Float64,Float64}[ (boundproportion(l[j]), boundproportion(u[j])) for j in 1:m]
 end
 
 # Simultaneous confidence interval
@@ -104,7 +104,7 @@ end
 function ci_sison_glaz(x::PowerDivergenceTest, alpha::Float64; skew_correct::Bool=true)
   k = length(x.thetahat)
   probn = 1/pdf( Poisson(x.n),x.n)
-  
+
   c = 0
   p_old = 0
 
@@ -118,7 +118,7 @@ function ci_sison_glaz(x::PowerDivergenceTest, alpha::Float64; skew_correct::Boo
       b = max(lambda - c, 0)
       poislama = lambda > 0 ? cdf(Poisson(lambda),a) : 1
       poislamb = lambda > 0 ? cdf(Poisson(lambda),b-1) : 1
-      den = b > 0 ? poislama-poislamb : poislama 
+      den = b > 0 ? poislama-poislamb : poislama
 
       mu  = zeros(4,1)
       for r in 1:4
@@ -150,7 +150,7 @@ function ci_sison_glaz(x::PowerDivergenceTest, alpha::Float64; skew_correct::Boo
     z  = (x.n-s1)/sqrt(s2)
     g1 = s3/(s2^(3/2))
     g2 = s4*(s2^2)
-    
+
     poly = 1 + g1 * (z^3 - 3*z)/6 + g2*(z^4-6*z^2+3)/24 + g1^2 * (z^6 - 15*z^4 + 45*z^2 -15)/72
     f = poly*exp(-z^2/2)/(sqrt(2*pi))
     probx = 1
@@ -227,7 +227,7 @@ function PowerDivergenceTest{T<:Integer,U<:AbstractFloat}(x::AbstractMatrix{T}; 
     thetahat = x/n
     V = reshape(n * theta0 .* (1-theta0), size(x))
 
-    abs( 1 - sum(theta0)) <= sqrt(eps()) ? nothing : error("Probabilities must sum to one") 
+    abs( 1 - sum(theta0)) <= sqrt(eps()) ? nothing : error("Probabilities must sum to one")
   else
     error("Number of rows or columns must be at least 1")
   end
@@ -235,7 +235,7 @@ function PowerDivergenceTest{T<:Integer,U<:AbstractFloat}(x::AbstractMatrix{T}; 
   stat = 0
   if lambda == 0
     for i in 1:length(x)
-      stat += x[i]*(log(x[i]) - log(xhat[i])) 
+      stat += x[i]*(log(x[i]) - log(xhat[i]))
     end
     stat *= 2
   elseif lambda == -1
@@ -249,7 +249,7 @@ function PowerDivergenceTest{T<:Integer,U<:AbstractFloat}(x::AbstractMatrix{T}; 
     end
     stat *= 2/(lambda*(lambda+1))
   end
-  
+
   PowerDivergenceTest(lambda, theta0, stat, df, x, n, thetahat[:], xhat, (x - xhat)./sqrt(xhat), (x-xhat)./sqrt(V))
 end
 
@@ -266,7 +266,7 @@ function PowerDivergenceTest{T<:Integer,U<:AbstractFloat}(x::AbstractVector{T}, 
   PowerDivergenceTest(d,lambda=lambda)
 end
 
-PowerDivergenceTest{T<:Integer,U<:AbstractFloat}(x::AbstractVector{T}; lambda::U=1.0, theta0::Vector{U} = ones(length(x))/length(x)) = 
+PowerDivergenceTest{T<:Integer,U<:AbstractFloat}(x::AbstractVector{T}; lambda::U=1.0, theta0::Vector{U} = ones(length(x))/length(x)) =
   PowerDivergenceTest(reshape(x,length(x),1),lambda=lambda,theta0=theta0)
 
 #ChisqTest
@@ -284,7 +284,7 @@ function ChisqTest{T<:Integer}(x::AbstractVector{T}, y::AbstractVector{T}, k::T)
   PowerDivergenceTest(d,lambda=1.0)
 end
 
-ChisqTest{T<:Integer,U<:AbstractFloat}(x::AbstractVector{T}, theta0::Vector{U} = ones(length(x))/length(x)) = 
+ChisqTest{T<:Integer,U<:AbstractFloat}(x::AbstractVector{T}, theta0::Vector{U} = ones(length(x))/length(x)) =
   PowerDivergenceTest(reshape(x,length(x),1), lambda=1.0, theta0 = theta0)
 
 #MultinomialLRT
@@ -302,7 +302,7 @@ function MultinomialLRT{T<:Integer}(x::AbstractVector{T}, y::AbstractVector{T}, 
   PowerDivergenceTest(d,lambda=0.0)
 end
 
-MultinomialLRT{T<:Integer,U<:AbstractFloat}(x::AbstractVector{T}, theta0::Vector{U} = ones(length(x))/length(x)) = 
+MultinomialLRT{T<:Integer,U<:AbstractFloat}(x::AbstractVector{T}, theta0::Vector{U} = ones(length(x))/length(x)) =
   PowerDivergenceTest(reshape(x,length(x),1), lambda=0.0, theta0 = theta0)
 
 function show_params(io::IO, x::PowerDivergenceTest, ident="")
@@ -312,4 +312,3 @@ function show_params(io::IO, x::PowerDivergenceTest, ident="")
   println(io,ident, "residuals:          $(x.residuals[:])")
   println(io,ident, "std. residuals:     $(x.stdresiduals[:])")
 end
-

@@ -27,10 +27,10 @@ Fisher exact test
 
     .. note::
         The print output contains the conditional maximum likelihood estimate of the odd-ratio
-        rather than the sample odds ratio; it maximizes the likelihood given by Fisher's 
+        rather than the sample odds ratio; it maximizes the likelihood given by Fisher's
         non-central hypergeometric distribution.
 
-    Implements: :ref:`pvalue<pvalue_fisher>`, :ref:`ci<ci_fisher>`
+    Implements: :ref:`pvalue<pvalue_fisher>`, :ref:`confint<ci_fisher>`
 
     References:
 

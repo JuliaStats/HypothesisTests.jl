@@ -18,9 +18,9 @@ using HypothesisTests
 pvalue(OneSampleTTest(x))
 pvalue(OneSampleTTest(x), tail=:left)
 pvalue(OneSampleTTest(x), tail=:right)
-ci(OneSampleTTest(x))
-ci(OneSampleTTest(x, tail=:left))
-ci(OneSampleTTest(x, tail=:right))
+confint(OneSampleTTest(x))
+confint(OneSampleTTest(x, tail=:left))
+confint(OneSampleTTest(x, tail=:right))
 OneSampleTTest(x).t
 OneSampleTTest(x).df
 
