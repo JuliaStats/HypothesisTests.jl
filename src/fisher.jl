@@ -76,7 +76,7 @@ function pvalue(x::FisherExactTest; tail=:both, method=:central)
         p = pvalue(Hypergeometric(x.a + x.b, x.c + x.d, x.a + x.c), x.a, tail=tail)
     end
     p = max(min(p, 1.0), 0.0)
-    
+
     return p
 end
 
@@ -103,7 +103,7 @@ function pvalue_both_minlike(x::FisherExactTest, ω::Float64=1.0)
 end
 
 # confidence interval by inversion of p-value
-function ci(x::FisherExactTest, alpha::Float64=0.05; tail=:both, method=:central)
+function StatsBase.confint(x::FisherExactTest, alpha::Float64=0.05; tail=:both, method=:central)
     check_alpha(alpha)
     dist(ω) = FisherNoncentralHypergeometric(x.a+x.b, x.c+x.d, x.a+x.c, ω)
     obj(ω) = pvalue(dist(ω), x.a, tail=tail) - alpha
@@ -122,7 +122,7 @@ function ci(x::FisherExactTest, alpha::Float64=0.05; tail=:both, method=:central
         end
     elseif tail == :both
         if method == :central
-            (ci(x, alpha/2; tail=:right)[1], ci(x, alpha/2; tail=:left)[2])
+            (StatsBase.confint(x, alpha/2; tail=:right)[1], StatsBase.confint(x, alpha/2; tail=:left)[2])
         else
             throw(ArgumentError("method=$(method) is not implemented yet"))
         end
@@ -179,4 +179,3 @@ function cond_mle_odds_ratio(a::Int, b::Int, c::Int, d::Int)
         fzero(obj, find_brackets(obj)...)
     end
 end
-

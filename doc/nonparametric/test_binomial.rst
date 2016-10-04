@@ -10,7 +10,7 @@ Binomial test
 
 	Computed confidence intervals are Clopper-Pearson intervals.
 
-    Implements: :ref:`pvalue<pvalue>`, :ref:`ci<ci_binomial>`
+    Implements: :ref:`pvalue<pvalue>`, :ref:`confint<ci_binomial>`
 
 .. function:: BinomialTest(x::AbstractVector{Bool}, p::Real=0.5)
 
@@ -19,4 +19,4 @@ Binomial test
 	alternative hypothesis that the success probability is not equal to
 	``p``.
 
-    Implements: :ref:`pvalue<pvalue>`, :ref:`ci<ci_binomial>`
+    Implements: :ref:`pvalue<pvalue>`, :ref:`confint<ci_binomial>`

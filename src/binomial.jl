@@ -58,7 +58,7 @@ pvalue(x::BinomialTest; tail=:both) = pvalue(Binomial(x.n, x.p), x.x; tail=tail)
 
 """
 ```julia
-function ci(x::HypothesisTest, alpha::Float64=0.05; tail=:both, method=:clopper_pearson)
+function confint(x::HypothesisTest, alpha::Float64=0.05; tail=:both, method=:clopper_pearson)
 ```
 Compute a confidence interval with coverage 1-alpha for multinomial proportions using one of the following methods. Possible values for method are:
 
@@ -67,13 +67,13 @@ Bootstrap intervals :bootstrap :
 Quesenberry, Hurst intervals :quesenberry_hurst :
 Gold intervals :gold (Asymptotic simultaneous intervals):
 """
-function ci(x::BinomialTest, alpha::Float64=0.05; tail=:both, method=:clopper_pearson)
+function StatsBase.confint(x::BinomialTest, alpha::Float64=0.05; tail=:both, method=:clopper_pearson)
     check_alpha(alpha)
 
     if tail == :left
-        (0.0, ci(x, alpha*2, method=method)[2])
+        (0.0, StatsBase.confint(x, alpha*2, method=method)[2])
     elseif tail == :right
-        (ci(x, alpha*2, method=method)[1], 1.0)
+        (StatsBase.confint(x, alpha*2, method=method)[1], 1.0)
     elseif tail == :both
         if method == :clopper_pearson
             ci_clopper_pearson(x, alpha)
@@ -170,14 +170,14 @@ pvalue(x::SignTest; tail=:both) = pvalue(Binomial(x.n, 0.5), x.x; tail=tail)
 
 """
 ```julia
-function ci(x::HypothesisTest, alpha::Float64=0.05; tail=:both)
+function confint(x::HypothesisTest, alpha::Float64=0.05; tail=:both)
 ```
 
 Compute a confidence interval C with coverage 1-alpha.
 
 If tail is :both (default), then a two-sided confidence interval is returned. If tail is :left or :right, then a one-sided confidence interval is returned
 """
-@compat function ci(x::SignTest, alpha::Float64=0.05; tail=:both)
+@compat function StatsBase.confint(x::SignTest, alpha::Float64=0.05; tail=:both)
     check_alpha(alpha)
 
     if tail == :left

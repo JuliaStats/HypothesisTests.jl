@@ -3,7 +3,7 @@
 Confidence Interval
 ==============================================
 
-.. function:: ci(test::HypothesisTest, alpha=0.05; tail=:both)
+.. function:: confint(test::HypothesisTest, alpha=0.05; tail=:both)
 
     Compute a confidence interval C with coverage 1-``alpha``.
 
@@ -28,51 +28,51 @@ Confidence Interval
 Confidence Interval for Binomial Proportions
 ----------------------------------------------
 
-.. function:: ci(test::BinomialTest, alpha=0.05; tail=:both, method=:clopper_pearson)
+.. function:: confint(test::BinomialTest, alpha=0.05; tail=:both, method=:clopper_pearson)
 
-   Compute a confidence interval with coverage 1-``alpha`` for a binomial proportion 
+   Compute a confidence interval with coverage 1-``alpha`` for a binomial proportion
    using one of the following methods. Possible values for ``method`` are:
 
-   - Clopper-Pearson interval ``:clopper_pearson`` (default): This interval is based on the binomial 
-     distribution. The empirical coverage is never less than the nominal coverage of 
+   - Clopper-Pearson interval ``:clopper_pearson`` (default): This interval is based on the binomial
+     distribution. The empirical coverage is never less than the nominal coverage of
      1-``alpha``; it is usually too conservative.
-   - Wald interval ``:wald`` (normal approximation interval): This interval relies on 
-     the standard approximation of the actual binomial distribution by a normal distribution. 
-     Coverage can be erratically poor for success probabilities close to zero or one. 
-   - Wilson score interval ``:wilson``: This interval relies on a normal approximation. 
+   - Wald interval ``:wald`` (normal approximation interval): This interval relies on
+     the standard approximation of the actual binomial distribution by a normal distribution.
+     Coverage can be erratically poor for success probabilities close to zero or one.
+   - Wilson score interval ``:wilson``: This interval relies on a normal approximation.
      In contrast to ``:wald`` the standard deviation is not approximated by an empirical
-     estimate resulting in good empirical coverages even for small numbers of draws and 
+     estimate resulting in good empirical coverages even for small numbers of draws and
      extreme success probabilities.
    - Jeffreys interval ``:jeffrey``: Bayesian confidence interval obtained by using a
-     non-informative Jeffreys prior. The interval is very similar to the Wilson interval. 
+     non-informative Jeffreys prior. The interval is very similar to the Wilson interval.
    - Agresti Coull interval ``:agresti_coull``: Simplified version of the Wilson interval;
-     they are centered around the same value. The Agresti Coull interval has higher or 
+     they are centered around the same value. The Agresti Coull interval has higher or
      equal coverage.
 
    References:
 
-   - Brown, L.D., Cai, T.T., and DasGupta, A. Interval estimation for a binomial proportion. 
-     Statistical Science, 16(2):101–117, 2001. 
-     
+   - Brown, L.D., Cai, T.T., and DasGupta, A. Interval estimation for a binomial proportion.
+     Statistical Science, 16(2):101–117, 2001.
+
 .. _ci_multinomial:
 
 Confidence Interval for Multinomial Proportions
 ----------------------------------------------
 
-.. function:: ci(test::PowerDivergenceTest, alpha=0.05; tail=:both, method=:sison_glaz)
+.. function:: confint(test::PowerDivergenceTest, alpha=0.05; tail=:both, method=:sison_glaz)
 
-   Compute a confidence interval with coverage 1-``alpha`` for multinomial proportions 
+   Compute a confidence interval with coverage 1-``alpha`` for multinomial proportions
    using one of the following methods. Possible values for ``method`` are:
 
    - Sison, Glaz intervals ``:sison_glaz`` (default):
    - Bootstrap intervals ``:bootstrap`` :
    - Quesenberry, Hurst intervals ``:quesenberry_hurst`` :
    - Gold intervals ``:gold`` (Asymptotic simultaneous intervals):
-   
+
    References:
 
-    - Agresti, Alan. Categorical Data Analysis, 3rd Edition. Wiley, 2013. 
-    - Sison, C.P and Glaz, J. Simultaneous confidence intervals and sample size determination for multinomial proportions.  
+    - Agresti, Alan. Categorical Data Analysis, 3rd Edition. Wiley, 2013.
+    - Sison, C.P and Glaz, J. Simultaneous confidence intervals and sample size determination for multinomial proportions.
       Journal of the American Statistical Association, 90:366-369, 1995.
     - Quesensberry, C.P. and Hurst, D.C. Large Sample Simultaneous Confidence Intervals for Multinational Proportions.
       Technometrics, 6:191-195, 1964.
@@ -84,7 +84,7 @@ Confidence Interval for Multinomial Proportions
 Confidence Interval for Fisher exact test
 ----------------------------------------------
 
-.. function:: ci(x::FisherExactTest, alpha::Float64=0.05; tail=:both, method=:central)
+.. function:: confint(x::FisherExactTest, alpha::Float64=0.05; tail=:both, method=:central)
 
    Compute a confidence interval with coverage 1-``alpha`` by inverting the ``:central`` p-value.
 
