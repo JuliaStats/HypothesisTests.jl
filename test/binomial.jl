@@ -19,7 +19,7 @@ t = BinomialTest(26, 78)
 @test_ci_approx confint(t, method=:agresti_coull) (0.2384423809121706, 0.44387022232522744)
 @test_ci_approx confint(t, tail=:left, method=:agresti_coull) (0.0, 0.42558712894362222)
 @test_ci_approx confint(t, tail=:right, method=:agresti_coull) (0.25225408385003706, 1.0)
-@test_ci_approx confint(t, method=:arcsine) (0.21751884746236805,0.4737725552343892)
+@test_ci_approx confint(t, method=:arcsine) (0.23366209634204066,0.44117918327686334)
 @test_ci_approx confint(t, tail=:left, method=:arcsine) (0.0,0.4235046425920888)
 @test_ci_approx confint(t, tail=:left, method=:arcsine) (0.2489264087216164,1.0)
 
