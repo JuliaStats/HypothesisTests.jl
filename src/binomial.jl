@@ -133,12 +133,12 @@ function ci_wilson(x::BinomialTest, alpha::Float64=0.05)
     (μ-q*σ, μ+q*σ)
 end
 
-# Arcsine transformation interval
+# Arcsine transformation interval as based on Cohen's H: https://en.wikipedia.org/wiki/Binomial_proportion_confidence_interval#Arcsine_transformation
 function ci_arcsine(x::BinomialTest, alpha::Float64=0.05)
     q = quantile(Normal(), 1-alpha/2)
     p = x.x / x.n
     z = q/(2*sqrt(x.n))
-    (sin(asin(sqrt(p)-z))^2, sin(asin(sqrt(p)+z))^2)
+    (sin(asin(sqrt(p))-z)^2, sin(asin(sqrt(p))+z)^2)
 end
 
 ## SIGN TEST
