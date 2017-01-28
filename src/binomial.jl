@@ -137,8 +137,8 @@ end
 function ci_arcsine(x::BinomialTest, alpha::Float64=0.05)
     q = quantile(Normal(), 1-alpha/2)
     p = x.x / x.n
-    σ = q/(2*sqrt(x.n))
-    (sin(asin(sqrt(p)-σ))^2, sin(asin(sqrt(p)+σ))^2)
+    z = q/(2*sqrt(x.n))
+    (sin(asin(sqrt(p)-z))^2, sin(asin(sqrt(p)+z))^2)
 end
 
 ## SIGN TEST
