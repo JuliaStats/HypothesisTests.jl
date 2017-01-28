@@ -58,35 +58,35 @@ pvalue(x::BinomialTest; tail=:both) = pvalue(Binomial(x.n, x.p), x.x; tail=tail)
 
 """
 ```julia
-function confint(x::HypothesisTest, α::Float64=0.05; tail=:both, method=:clopper_pearson)
+function confint(x::HypothesisTest, alpha::Float64=0.05; tail=:both, method=:clopper_pearson)
 ```
-Compute a confidence interval with coverage 1-α for multinomial proportions using one of the following methods. Possible values for method are:
+Compute a confidence interval with coverage 1-alpha for multinomial proportions using one of the following methods. Possible values for method are:
 
 Sison, Glaz intervals :sison_glaz (default):
 Bootstrap intervals :bootstrap :
 Quesenberry, Hurst intervals :quesenberry_hurst :
 Gold intervals :gold (Asymptotic simultaneous intervals):
 """
-function StatsBase.confint(x::BinomialTest, α::Float64=0.05; tail=:both, method=:clopper_pearson)
-    check_alpha(α)
+function StatsBase.confint(x::BinomialTest, alpha::Float64=0.05; tail=:both, method=:clopper_pearson)
+    check_alpha(alpha)
 
     if tail == :left
-        (0.0, StatsBase.confint(x, α*2, method=method)[2])
+        (0.0, StatsBase.confint(x, alpha*2, method=method)[2])
     elseif tail == :right
-        (StatsBase.confint(x, α*2, method=method)[1], 1.0)
+        (StatsBase.confint(x, alpha*2, method=method)[1], 1.0)
     elseif tail == :both
         if method == :clopper_pearson
-            ci_clopper_pearson(x, α)
+            ci_clopper_pearson(x, alpha)
         elseif method == :wald
-            ci_wald(x, α)
+            ci_wald(x, alpha)
         elseif method == :wilson
-            ci_wilson(x, α)
+            ci_wilson(x, alpha)
         elseif method == :jeffrey
-            ci_jeffrey(x, α)
+            ci_jeffrey(x, alpha)
         elseif method == :agresti_coull
-            ci_agresti_coull(x, α)
+            ci_agresti_coull(x, alpha)
         elseif method == :arcsine
-            ci_arcsine(x, α)
+            ci_arcsine(x, alpha)
         else
             throw(ArgumentError("method=$(method) is not implemented yet"))
         end
@@ -96,25 +96,25 @@ function StatsBase.confint(x::BinomialTest, α::Float64=0.05; tail=:both, method
 end
 
 # Clopper-Pearson interval (confidence interval by inversion)
-function ci_clopper_pearson(x::BinomialTest, α::Float64=0.05)
-    (quantile(Beta(x.x, x.n - x.x + 1), α/2), quantile(Beta(x.x + 1, x.n - x.x), 1-α/2))
+function ci_clopper_pearson(x::BinomialTest, alpha::Float64=0.05)
+    (quantile(Beta(x.x, x.n - x.x + 1), alpha/2), quantile(Beta(x.x + 1, x.n - x.x), 1-alpha/2))
 end
 
 # Wald interval / normal approximation interval
-function ci_wald(x::BinomialTest, α::Float64=0.05)
+function ci_wald(x::BinomialTest, alpha::Float64=0.05)
     μ = x.x / x.n
     σ = sqrt(μ*(1-μ)/x.n)
-    (quantile(Normal(μ, σ), α/2), quantile(Normal(μ, σ), 1-α/2))
+    (quantile(Normal(μ, σ), alpha/2), quantile(Normal(μ, σ), 1-alpha/2))
 end
 
 # Jeffreys interval
-function ci_jeffrey(x::BinomialTest, α::Float64=0.05)
-    (quantile(Beta(x.x + 1/2, x.n - x.x + 1/2), α/2), quantile(Beta(x.x + 1/2, x.n - x.x + 1/2), 1-α/2))
+function ci_jeffrey(x::BinomialTest, alpha::Float64=0.05)
+    (quantile(Beta(x.x + 1/2, x.n - x.x + 1/2), alpha/2), quantile(Beta(x.x + 1/2, x.n - x.x + 1/2), 1-alpha/2))
 end
 
 # Agresti-Coull interval
-function ci_agresti_coull(x::BinomialTest, α::Float64=0.05)
-    q = quantile(Normal(), 1-α/2)
+function ci_agresti_coull(x::BinomialTest, alpha::Float64=0.05)
+    q = quantile(Normal(), 1-alpha/2)
     n = x.n + q^2
     μ = (x.x + q^2/2)/n
     σ = sqrt(μ*(1-μ)/n)
@@ -122,8 +122,8 @@ function ci_agresti_coull(x::BinomialTest, α::Float64=0.05)
 end
 
 # Wilson score interval
-function ci_wilson(x::BinomialTest, α::Float64=0.05)
-    q = quantile(Normal(), 1-α/2)
+function ci_wilson(x::BinomialTest, alpha::Float64=0.05)
+    q = quantile(Normal(), 1-alpha/2)
     p = x.x / x.n
     denominator = 1 + q^2/x.n
     μ = p + q^2/(2*x.n)
@@ -134,8 +134,8 @@ function ci_wilson(x::BinomialTest, α::Float64=0.05)
 end
 
 # Arcsine transformation interval
-function ci_arcsine(x::BinomialTest, α::Float64=0.05)
-    q = quantile(Normal(), 1-α/2)
+function ci_arcsine(x::BinomialTest, alpha::Float64=0.05)
+    q = quantile(Normal(), 1-alpha/2)
     p = x.x / x.n
     σ = q/(2*sqrt(x.n))
     (sin(asin(sqrt(p)-σ))^2, sin(asin(sqrt(p)+σ))^2)
@@ -179,24 +179,24 @@ pvalue(x::SignTest; tail=:both) = pvalue(Binomial(x.n, 0.5), x.x; tail=tail)
 
 """
 ```julia
-function confint(x::HypothesisTest, α::Float64=0.05; tail=:both)
+function confint(x::HypothesisTest, alpha::Float64=0.05; tail=:both)
 ```
 
-Compute a confidence interval C with coverage 1-α.
+Compute a confidence interval C with coverage 1-alpha.
 
 If tail is :both (default), then a two-sided confidence interval is returned. If tail is :left or :right, then a one-sided confidence interval is returned
 """
-@compat function StatsBase.confint(x::SignTest, α::Float64=0.05; tail=:both)
-    check_alpha(α)
+@compat function StatsBase.confint(x::SignTest, alpha::Float64=0.05; tail=:both)
+    check_alpha(alpha)
 
     if tail == :left
-        q = Int(quantile(Binomial(x.n, 0.5), α))
+        q = Int(quantile(Binomial(x.n, 0.5), alpha))
         (x.data[q+1], x.median)
     elseif tail == :right
-        q = Int(quantile(Binomial(x.n, 0.5), α))
+        q = Int(quantile(Binomial(x.n, 0.5), alpha))
         (x.median, x.data[end-q])
     elseif tail == :both
-        q = Int(quantile(Binomial(x.n, 0.5), α/2))
+        q = Int(quantile(Binomial(x.n, 0.5), alpha/2))
         (x.data[q+1], x.data[end-q])
     else
         throw(ArgumentError("tail=$(tail) is invalid"))
