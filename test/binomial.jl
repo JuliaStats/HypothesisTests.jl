@@ -21,7 +21,7 @@ t = BinomialTest(26, 78)
 @test_ci_approx confint(t, tail=:right, method=:agresti_coull) (0.25225408385003706, 1.0)
 @test_ci_approx confint(t, method=:arcsine) (0.23366209634204066,0.44117918327686334)
 @test_ci_approx confint(t, tail=:left, method=:arcsine) (0.0,0.4235046425920888)
-@test_ci_approx confint(t, tail=:left, method=:arcsine) (0.2489264087216164,1.0)
+@test_ci_approx confint(t, tail=:right, method=:arcsine) (0.2489264087216164,1.0)
 
 show(IOBuffer(), t)
 
