@@ -19,6 +19,10 @@ t = BinomialTest(26, 78)
 @test_ci_approx confint(t, method=:agresti_coull) (0.2384423809121706, 0.44387022232522744)
 @test_ci_approx confint(t, tail=:left, method=:agresti_coull) (0.0, 0.42558712894362222)
 @test_ci_approx confint(t, tail=:right, method=:agresti_coull) (0.25225408385003706, 1.0)
+@test_ci_approx confint(t, method=:arcsine) (0.21751884746236805,0.4737725552343892)
+@test_ci_approx confint(t, tail=:left, method=:arcsine) (0.0,0.4235046425920888)
+@test_ci_approx confint(t, tail=:left, method=:arcsine) (0.2489264087216164,1.0)
+
 show(IOBuffer(), t)
 
 t = BinomialTest([trues(6); falses(3)])
@@ -40,6 +44,9 @@ t = BinomialTest([trues(6); falses(3)])
 @test_ci_approx confint(t, method=:agresti_coull) (0.350905767251112,0.88271254994237336)
 @test_ci_approx confint(t, tail=:left, method=:agresti_coull) (0.0,0.86049746046629294)
 @test_ci_approx confint(t, tail=:right, method=:agresti_coull) (0.39579136642712159,1.0)
+@test_ci_approx confint(t, method=:arcsine) (0.345812446615087,0.9188773496172281)
+@test_ci_approx confint(t, tail=:left, method=:arcsine) (0.0,0.8879439981269358)
+@test_ci_approx confint(t, tail=:right, method=:arcsine) (0.3965293068864491,1.0)
 show(IOBuffer(), t)
 
 x = [55, 58, 61, 61, 62, 62, 62, 63, 63, 64, 66, 68, 68, 69, 69, 69, 70, 71, 72, 72]
