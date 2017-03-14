@@ -26,9 +26,9 @@ export
     ExactOneSampleKSTest,
     ApproximateOneSampleKSTest, ApproximateTwoSampleKSTest
 
-abstract KSTest <: HypothesisTest
-abstract ApproximateKSTest <: KSTest
-abstract ExactKSTest <: KSTest
+@compat abstract type KSTest <: HypothesisTest end
+@compat abstract type ApproximateKSTest <: KSTest end
+@compat abstract type ExactKSTest <: KSTest end
 
 population_param_of_interest(x::KSTest) = ("Supremum of CDF differences", 0.0, x.δ) # parameter of interest: name, value under h0, point estimate
 

@@ -16,21 +16,21 @@ se = s / sqrt(n)
 z = (m - 0) / se
 
 tst = OneSampleZTest(x)
-@test_approx_eq(pvalue(tst), 2 * min(cdf(null, z), ccdf(null, z)))
-@test_approx_eq(pvalue(tst; tail=:left), cdf(null, z))
-@test_approx_eq(pvalue(tst; tail=:right), ccdf(null, z))
+@test pvalue(tst) ≈ 2 * min(cdf(null, z), ccdf(null, z))
+@test pvalue(tst; tail=:left) ≈ cdf(null, z)
+@test pvalue(tst; tail=:right) ≈ ccdf(null, z)
 show(IOBuffer(), tst)
 
 tst = OneSampleZTest(m, s, n)
-@test_approx_eq(pvalue(tst), 2 * min(cdf(null, z), ccdf(null, z)))
-@test_approx_eq(confint(tst)[1], m + quantile(null, 0.05 / 2) * se)
-@test_approx_eq(confint(tst)[2], m + cquantile(null, 0.05 / 2) * se)
-@test_approx_eq(confint(tst, 0.10)[1], m + quantile(null, 0.10 / 2) * se)
-@test_approx_eq(confint(tst, 0.10)[2], m + cquantile(null, 0.10 / 2) * se)
-@test_approx_eq(confint(tst; tail=:left)[1], -Inf)
-@test_approx_eq(confint(tst; tail=:left)[2], m + cquantile(null, 0.05) * se)
-@test_approx_eq(confint(tst; tail=:right)[1], m + quantile(null, 0.05) * se)
-@test_approx_eq(confint(tst; tail=:right)[2], Inf)
+@test pvalue(tst) ≈ 2 * min(cdf(null, z), ccdf(null, z))
+@test confint(tst)[1] ≈ m + quantile(null, 0.05 / 2) * se
+@test confint(tst)[2] ≈ m + cquantile(null, 0.05 / 2) * se
+@test confint(tst, 0.10)[1] ≈ m + quantile(null, 0.10 / 2) * se
+@test confint(tst, 0.10)[2] ≈ m + cquantile(null, 0.10 / 2) * se
+@test confint(tst; tail=:left)[1] ≈ -Inf
+@test confint(tst; tail=:left)[2] ≈ m + cquantile(null, 0.05) * se
+@test confint(tst; tail=:right)[1] ≈ m + quantile(null, 0.05) * se
+@test confint(tst; tail=:right)[2] ≈ Inf
 show(IOBuffer(), tst)
 
 x = -10:5
@@ -39,21 +39,21 @@ se = s / sqrt(n)
 z = (m - 0) / se
 
 tst = OneSampleZTest(x)
-@test_approx_eq(pvalue(tst), 2 * min(cdf(null, z), ccdf(null, z)))
-@test_approx_eq(pvalue(tst; tail=:left), cdf(null, z))
-@test_approx_eq(pvalue(tst; tail=:right), ccdf(null, z))
+@test pvalue(tst) ≈ 2 * min(cdf(null, z), ccdf(null, z))
+@test pvalue(tst; tail=:left) ≈ cdf(null, z)
+@test pvalue(tst; tail=:right) ≈ ccdf(null, z)
 show(IOBuffer(), tst)
 
 tst = OneSampleZTest(m, s, n)
-@test_approx_eq(pvalue(tst), 2 * min(cdf(null, z), ccdf(null, z)))
-@test_approx_eq(confint(tst)[1], m + quantile(null, 0.05 / 2) * se)
-@test_approx_eq(confint(tst)[2], m + cquantile(null, 0.05 / 2) * se)
-@test_approx_eq(confint(tst, 0.10)[1], m + quantile(null, 0.10 / 2) * se)
-@test_approx_eq(confint(tst, 0.10)[2], m + cquantile(null, 0.10 / 2) * se)
-@test_approx_eq(confint(tst; tail=:left)[1], -Inf)
-@test_approx_eq(confint(tst; tail=:left)[2], m + cquantile(null, 0.05) * se)
-@test_approx_eq(confint(tst; tail=:right)[1], m + quantile(null, 0.05) * se)
-@test_approx_eq(confint(tst; tail=:right)[2], Inf)
+@test pvalue(tst) ≈ 2 * min(cdf(null, z), ccdf(null, z))
+@test confint(tst)[1] ≈ m + quantile(null, 0.05 / 2) * se
+@test confint(tst)[2] ≈ m + cquantile(null, 0.05 / 2) * se
+@test confint(tst, 0.10)[1] ≈ m + quantile(null, 0.10 / 2) * se
+@test confint(tst, 0.10)[2] ≈ m + cquantile(null, 0.10 / 2) * se
+@test confint(tst; tail=:left)[1] ≈ -Inf
+@test confint(tst; tail=:left)[2] ≈ m + cquantile(null, 0.05) * se
+@test confint(tst; tail=:right)[1] ≈ m + quantile(null, 0.05) * se
+@test confint(tst; tail=:right)[2] ≈ Inf
 show(IOBuffer(), tst)
 
 # Paired samples
@@ -62,7 +62,7 @@ m, s, n = mean(x - y), std(x - y), length(x - y)
 se = s / sqrt(n)
 z = (m - 0) / se
 tst = OneSampleZTest(x, y)
-@test_approx_eq(pvalue(tst), 2 * min(cdf(null, z), ccdf(null, z)))
+@test pvalue(tst) ≈ 2 * min(cdf(null, z), ccdf(null, z))
 
 ## TWO SAMPLE Z-TESTS
 
@@ -77,21 +77,21 @@ avg_var = (n1 - 1) / (n1 + n2 - 2) * s1sq + (n2 - 1) / (n1 + n2 - 2) * s2sq
 se = sqrt(avg_var / n1 + avg_var / n2)
 z = xbar / se
 
-@test_approx_eq(tst.z, z)
-@test_approx_eq(pvalue(tst), 2 * min(cdf(null, z), ccdf(null, z)))
-@test_approx_eq(pvalue(tst; tail=:left), cdf(null, z))
-@test_approx_eq(pvalue(tst; tail=:right), ccdf(null, z))
-@test_approx_eq(confint(tst)[1], xbar + quantile(null, 0.05 / 2) * se)
-@test_approx_eq(confint(tst)[2], xbar + cquantile(null, 0.05 / 2) * se)
+@test tst.z ≈ z
+@test pvalue(tst) ≈ 2 * min(cdf(null, z), ccdf(null, z))
+@test pvalue(tst; tail=:left) ≈ cdf(null, z)
+@test pvalue(tst; tail=:right) ≈ ccdf(null, z)
+@test confint(tst)[1] ≈ xbar + quantile(null, 0.05 / 2) * se
+@test confint(tst)[2] ≈ xbar + cquantile(null, 0.05 / 2) * se
 show(IOBuffer(), tst)
 
 tst = UnequalVarianceZTest(a1, a2)
 se = sqrt(s1sq / n1 + s2sq / n2)
 z = xbar / se
-@test_approx_eq(tst.z, z)
-@test_approx_eq(pvalue(tst), 2 * min(cdf(null, z), ccdf(null, z)))
-@test_approx_eq(pvalue(tst; tail=:left), cdf(null, z))
-@test_approx_eq(pvalue(tst; tail=:right), ccdf(null, z))
-@test_approx_eq(confint(tst)[1], xbar + quantile(null, 0.05 / 2) * se)
-@test_approx_eq(confint(tst)[2], xbar + cquantile(null, 0.05 / 2) * se)
+@test tst.z ≈ z
+@test pvalue(tst) ≈ 2 * min(cdf(null, z), ccdf(null, z))
+@test pvalue(tst; tail=:left) ≈ cdf(null, z)
+@test pvalue(tst; tail=:right) ≈ ccdf(null, z)
+@test confint(tst)[1] ≈ xbar + quantile(null, 0.05 / 2) * se
+@test confint(tst)[2] ≈ xbar + cquantile(null, 0.05 / 2) * se
 show(IOBuffer(), tst)

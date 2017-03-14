@@ -25,8 +25,8 @@
 export OneSampleZTest, TwoSampleZTest, EqualVarianceZTest,
     UnequalVarianceZTest
 
-abstract ZTest <: HypothesisTest
-abstract TwoSampleZTest <: ZTest
+@compat abstract type ZTest <: HypothesisTest end
+@compat abstract type TwoSampleZTest <: ZTest end
 
 pvalue(x::ZTest; tail=:both) = pvalue(Normal(0.0, 1.0), x.z; tail=tail)
 

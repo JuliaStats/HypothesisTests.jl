@@ -49,9 +49,9 @@ show(IOBuffer(), SignedRankTest([1:10;], [2:2:20;]))
 
 # Test confidence interval
 x = [-7.8, -6.9, -4.7, 3.7, 6.5, 8.7, 9.1, 10.1, 10.8, 13.6, 14.4, 16.6, 20.2, 22.4, 23.5]
-@test_approx_eq_eps confint(ExactSignedRankTest(x))[1] 3.3 1e-4
-@test_approx_eq_eps confint(ExactSignedRankTest(x))[2] 15.5 1e-4
-@test_approx_eq_eps confint(ApproximateSignedRankTest(x))[1] 3.3 1e-4
-@test_approx_eq_eps confint(ApproximateSignedRankTest(x))[2] 15.5 1e-4
-@test_approx_eq_eps confint(SignedRankTest(x); tail=:left)[1] 4.45 1e-4
-@test_approx_eq_eps confint(SignedRankTest(x); tail=:right)[2] 14.45 1e-4
+@test isapprox(confint(ExactSignedRankTest(x))[1], 3.3, atol=1e-4)
+@test isapprox(confint(ExactSignedRankTest(x))[2], 15.5, atol=1e-4)
+@test isapprox(confint(ApproximateSignedRankTest(x))[1], 3.3, atol=1e-4)
+@test isapprox(confint(ApproximateSignedRankTest(x))[2], 15.5, atol=1e-4)
+@test isapprox(confint(SignedRankTest(x); tail=:left)[1], 4.45, atol=1e-4)
+@test isapprox(confint(SignedRankTest(x); tail=:right)[2], 14.45, atol=1e-4)

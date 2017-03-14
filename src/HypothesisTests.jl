@@ -22,7 +22,7 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-VERSION >= v"0.4.0-dev+6521" && __precompile__()
+__precompile__()
 
 module HypothesisTests
 
@@ -33,7 +33,7 @@ using Rmath: pwilcox, psignrank
 import StatsBase.confint
 
 export testname, pvalue, confint
-abstract HypothesisTest
+@compat abstract type HypothesisTest end
 
 check_same_length(x::AbstractVector, y::AbstractVector) = if length(x) != length(y)
     throw(DimensionMismatch("Vectors must be the same length"))

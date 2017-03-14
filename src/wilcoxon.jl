@@ -41,7 +41,7 @@ SignedRankTest{T<:Real,S<:Real}(x::AbstractVector{T}, y::AbstractVector{S}) = Si
 # Get W and absolute ranks for signed rank test
 function signedrankstats{S<:Real}(x::AbstractVector{S})
    nonzero_x = x[x .!= 0]
-   (ranks, tieadj) = tiedrank_adj(abs(nonzero_x))
+   (ranks, tieadj) = tiedrank_adj(abs.(nonzero_x))
    W = 0.0
    for i = 1:length(nonzero_x)
        if nonzero_x[i] > 0
@@ -73,7 +73,7 @@ population_param_of_interest(x::ExactSignedRankTest) = ("Location parameter (pse
 function show_params(io::IO, x::ExactSignedRankTest, ident)
     println(io, ident, "number of observations:      ", x.n)
     println(io, ident, "Wilcoxon rank-sum statistic: ", x.W)
-    println(io, ident, "rank sums:                   ", [sum(x.ranks[x.signs]), sum(x.ranks[!x.signs])])
+    println(io, ident, "rank sums:                   ", [sum(x.ranks[x.signs]), sum(x.ranks[map(!, x.signs)])])
     println(io, ident, "adjustment for ties:         ", x.tie_adjustment)
 end
 
@@ -163,7 +163,7 @@ population_param_of_interest(x::ApproximateSignedRankTest) = ("Location paramete
 function show_params(io::IO, x::ApproximateSignedRankTest, ident)
     println(io, ident, "number of observations:      ", x.n)
     println(io, ident, "Wilcoxon rank-sum statistic: ", x.W)
-    println(io, ident, "rank sums:                   ", [sum(x.ranks[x.signs]), sum(x.ranks[!x.signs])])
+    println(io, ident, "rank sums:                   ", [sum(x.ranks[x.signs]), sum(x.ranks[map(!, x.signs)])])
     println(io, ident, "adjustment for ties:         ", x.tie_adjustment)
     println(io, ident, "normal approximation (μ, σ): ", (x.mu, x.sigma))
 end
@@ -197,7 +197,7 @@ function calculate_ci(x::AbstractVector, alpha::Real=0.05; tail=:both)
     m = div(n * (n + 1), 2)
     k_range = 1:div(m, 2)
     l = [1 - 2 * psignrank(i, n, true) for i in k_range]
-    k = indmin(abs(l-c))
+    k = indmin(abs.(l-c))
     vals = Float64[]
     enumerated = enumerate(x)
     for (outer_index, outer_value) in enumerated

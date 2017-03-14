@@ -39,13 +39,13 @@ immutable RayleighTest <: HypothesisTest
     n::Int        # number of observations
 end
 function RayleighTest{S <: Complex}(samples::Vector{S})
-    s = @compat Float64(abs(sum(samples./abs(samples))))
+    s = Float64(abs(sum(samples./abs(samples))))
     n = length(samples)
     Rbar = s/n
     RayleighTest(Rbar, n)
 end
 function RayleighTest{S <: Real}(samples::Vector{S})
-    s = @compat Float64(abs(sum(exp(im*samples))))
+    s = Float64(abs(sum(exp, im * samples)))
     n = length(samples)
     Rbar = s/n
     RayleighTest(Rbar, n)
@@ -71,24 +71,24 @@ immutable FisherTLinearAssociation{S <: Real, T <: Real} <: HypothesisTest
     rho_t::Float64                              # circular correlation coefficient
     theta::Vector{S}                            # radians of group 1
     phi::Vector{T}                              # radians of group 2
-    uniformly_distributed::@compat(Union{Bool,Void}) # is distribution of theta and phi uniform?
+    uniformly_distributed::Union{Bool,Void}     # is distribution of theta and phi uniform?
 end
 function FisherTLinearAssociation{Stheta <: Real, Sphi <: Real}(theta::Vector{Stheta},
-        phi::Vector{Sphi}, uniformly_distributed::@compat(Union{Bool,Void}))
+        phi::Vector{Sphi}, uniformly_distributed::Union{Bool,Void})
     check_same_length(theta, phi)
 
-    A = sum(cos(theta).*cos(phi))
-    B = sum(sin(theta).*sin(phi))
-    C = sum(cos(theta).*sin(phi))
-    D = sum(sin(theta).*cos(phi))
+    A = sum(cos.(theta).*cos.(phi))
+    B = sum(sin.(theta).*sin.(phi))
+    C = sum(cos.(theta).*sin.(phi))
+    D = sum(sin.(theta).*cos.(phi))
     T = A*B-C*D
 
     # Notation drawn from Fisher, 1993
     n = length(theta)
-    E = sum(cos(2*theta))
-    F = sum(sin(2*theta))
-    G = sum(cos(2*phi))
-    H = sum(sin(2*phi))
+    E = sum(cos, 2*theta)
+    F = sum(sin, 2*theta)
+    G = sum(cos, 2*phi)
+    H = sum(sin, 2*phi)
     rho_t = 4*T/sqrt((n^2 - E^2 - F^2)*(n^2-G^2-H^2))
     FisherTLinearAssociation(rho_t, theta, phi, uniformly_distributed)
 end
@@ -105,19 +105,19 @@ end
 # For large samples, compute the distribution and statistic of T
 function tlinear_Z(x::FisherTLinearAssociation)
     n = length(x.theta)
-    theta_resultant = sum(exp(im*x.theta))
-    phi_resultant = sum(exp(im*x.phi))
+    theta_resultant       = sum(exp, im * x.theta)
+    phi_resultant         = sum(exp, im * x.phi)
     theta_resultant_angle = angle(theta_resultant)
-    phi_resultant_angle = angle(phi_resultant)
-    alpha_2_theta = mean(cos(2*(x.theta-theta_resultant_angle)))
-    beta_2_theta = mean(sin(2*(x.theta-theta_resultant_angle)))
-    alpha_2_phi = mean(cos(2*(x.phi-phi_resultant_angle)))
-    beta_2_phi = mean(sin(2*(x.phi-phi_resultant_angle)))
-    U_theta = (1-alpha_2_theta^2-beta_2_theta^2)/2
-    U_phi = (1-alpha_2_phi^2-beta_2_phi^2)/2
-    V_theta = (abs2(theta_resultant)/n^2)*(1-alpha_2_theta)
-    V_phi = (abs2(phi_resultant)/n^2)*(1-alpha_2_phi)
-    sqrt(n)*U_theta*U_phi*rho_t/sqrt(V_theta*V_phi)
+    phi_resultant_angle   = angle(phi_resultant)
+    alpha_2_theta         = mean(cos, 2 * (x.theta - theta_resultant_angle))
+    beta_2_theta          = mean(sin, 2 * (x.theta - theta_resultant_angle))
+    alpha_2_phi           = mean(cos, 2 * (x.phi - phi_resultant_angle))
+    beta_2_phi            = mean(sin, 2 * (x.phi - phi_resultant_angle))
+    U_theta               = (1 - alpha_2_theta^2 - beta_2_theta^2) / 2
+    U_phi                 = (1-alpha_2_phi^2-beta_2_phi^2)/2
+    V_theta               = (abs2(theta_resultant) / n^2) * (1 - alpha_2_theta)
+    V_phi                 = (abs2(phi_resultant) / n^2) * (1 - alpha_2_phi)
+    return sqrt(n) * U_theta * U_phi * rho_t / sqrt(V_theta * V_phi)
 
     # Alternative computational strategy from Fisher and Lee (1983)
     # a1 = [mean(cos(theta)), mean(cos(phi))]
@@ -141,10 +141,10 @@ function pvalue(x::FisherTLinearAssociation; tail=:both)
         # distribution is uniform, use a permutation test.
 
         # "For n < 25, use a randomisation test based on the quantity T = AB - CD"
-        ct = cos(x.theta)
-        st = sin(x.theta)
-        cp = cos(x.phi)
-        sp = sin(x.phi)
+        ct = cos.(x.theta)
+        st = sin.(x.theta)
+        cp = cos.(x.phi)
+        sp = sin.(x.phi)
         T = sum(ct.*cp)*sum(st.*sp)-sum(ct.*sp)*sum(st.*cp)
         greater = 0
 
@@ -192,16 +192,17 @@ end
 function JammalamadakaCircularCorrelation{S <: Real, T <: Real}(alpha::Vector{S}, beta::Vector{T})
     check_same_length(alpha, beta)
     # calculate sample mean directions
-    alpha_bar = angle(sum(exp(im*alpha)))
-    beta_bar = angle(sum(exp(im*beta)))
-    r = sum(sin(alpha .- alpha_bar).*sin(beta .- beta_bar))/sqrt(sum(sin(alpha .- alpha_bar).^2)*sum(sin(beta .- beta_bar).^2))
+    alpha_bar = angle(sum(exp, im * alpha))
+    beta_bar = angle(sum(exp, im * beta))
+    r = sum(sin.(alpha .- alpha_bar) .* sin.(beta .- beta_bar)) /
+        sqrt(sum(sin.(alpha .- alpha_bar).^2) * sum(sin.(beta .- beta_bar).^2))
 
-    sin2_alpha = sin(alpha .- alpha_bar).^2
-    sin2_beta = sin(beta .- beta_bar).^2
+    sin2_alpha = sin.(alpha .- alpha_bar).^2
+    sin2_beta = sin.(beta .- beta_bar).^2
     lambda_20 = mean(sin2_alpha)
     lambda_02 = mean(sin2_beta)
-    lambda_22 = mean(sin2_alpha.*sin2_beta)
-    Z = sqrt(length(alpha)*lambda_20*lambda_02/lambda_22)*r
+    lambda_22 = mean(sin2_alpha .* sin2_beta)
+    Z = sqrt(length(alpha) * lambda_20 * lambda_02 / lambda_22) * r
 
     JammalamadakaCircularCorrelation(r, Z)
 end
