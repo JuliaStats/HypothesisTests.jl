@@ -61,7 +61,7 @@ end
 
 testname(::BoxPierceTest) = "Box-Pierce autocorrelation test"
 population_param_of_interest(x::BoxPierceTest) = ("autocorrelations up to lag k",
- "all zero", NaN)
+    "all zero", NaN)
 
 function show_params(io::IO, x::BoxPierceTest, ident)
     println(io, ident, "number of observations:         ", x.n)
@@ -109,7 +109,7 @@ end
 
 testname(::LjungBoxTest) = "Ljung-Box autocorrelation test"
 population_param_of_interest(x::LjungBoxTest) = ("autocorrelations up to lag k",
- "all zero", NaN)
+    "all zero", NaN)
 
 function show_params(io::IO, x::LjungBoxTest, ident)
     println(io, ident, "number of observations:         ", x.n)
