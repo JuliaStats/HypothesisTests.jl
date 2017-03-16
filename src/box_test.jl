@@ -51,8 +51,8 @@ External links
 """
 function BoxPierceTest{T<:Real}(y::AbstractVector{T}, lag::Int, dof::Int=0)
     if dof>=lag
-        throw(ArgumentError("Number of lags has to be larger than degrees of
-        freedom correction"))
+        throw(ArgumentError("Number of lags has to be larger than degrees of" *
+        " freedom correction"))
     end
     n = size(y,1)
     Q = n * first(sum(k -> autocor(y,k:k).^2, 1:lag))
@@ -99,8 +99,8 @@ External links
 """
 function LjungBoxTest{T<:Real}(y::AbstractVector{T}, lag::Int, dof::Int=0)
     if dof>=lag
-        throw(ArgumentError("Number of lags has to be larger than degrees of
-        freedom correction"))
+        throw(ArgumentError("Number of lags has to be larger than degrees of" *
+        " freedom correction"))
     end
     n = size(y,1)
     Q = n*(n+2)* first(sum(k -> autocor(y,k:k).^2/(n-k), 1:lag))
