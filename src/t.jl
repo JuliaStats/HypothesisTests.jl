@@ -25,8 +25,8 @@
 export OneSampleTTest, TwoSampleTTest, EqualVarianceTTest,
     UnequalVarianceTTest
 
-abstract TTest <: HypothesisTest
-abstract TwoSampleTTest <: TTest
+@compat abstract type TTest <: HypothesisTest end
+@compat abstract type TwoSampleTTest <: TTest end
 
 pvalue(x::TTest; tail=:both) = pvalue(TDist(x.df), x.t; tail=tail)
 

@@ -2,7 +2,7 @@
 
 export OneSampleADTest, KSampleADTest
 
-abstract ADTest <: HypothesisTest
+@compat abstract type ADTest <: HypothesisTest end
 
 ## ONE SAMPLE AD-TEST
 ### http://www.itl.nist.gov/div898/handbook/eda/section3/eda35e.htm
@@ -101,7 +101,7 @@ function pvalue(x::KSampleADTest)
     @inbounds for i = 1:2, k = 1:5
         A[k,i+1] = A[k,i] * tm[k]
     end
-    f = A \ log(sig)
+    f = A \ log.(sig)
 
     exp(f[1] + f[2]*Tk + f[3]*Tk^2)
 end

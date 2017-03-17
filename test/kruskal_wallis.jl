@@ -10,9 +10,9 @@ t = HypothesisTests.KruskalWallisTest(u5, u250, u2500, more)
 @test t.n_i == [length(u5), length(u250), length(u2500), length(more)]
 @test t.df == 3
 @test t.R_i == [31, 25, 88, 66]
-@test_approx_eq t.H 1.5803174603174597
+@test t.H ≈ 1.5803174603174597
 @test t.tie_adjustment == 1
-@test_approx_eq pvalue(t) 0.6638608922384397
+@test pvalue(t) ≈ 0.6638608922384397
 show(IOBuffer(), t)
 
 # http://www.brightstat.com/index.php?option=com_content&task=view&id=41&Itemid=1&limit=1&limitstart=2
@@ -25,9 +25,9 @@ t = HypothesisTests.KruskalWallisTest(city1, city2, city3, city4)
 @test t.n_i == [length(city1), length(city2), length(city3), length(city4)]
 @test t.df == 3
 @test t.R_i == [104, 113, 53, 30]
-@test_approx_eq t.H 16.028783253379856
-@test_approx_eq t.tie_adjustment 0.9969565217391304
-@test_approx_eq pvalue(t) 0.0011186794961869423
+@test t.H ≈ 16.028783253379856
+@test t.tie_adjustment ≈ 0.9969565217391304
+@test pvalue(t) ≈ 0.0011186794961869423
 show(IOBuffer(), t)
 
 # example with non-integer rank sum
@@ -38,7 +38,7 @@ t = KruskalWallisTest(t1, t2, t3)
 @test t.n_i == [length(t1), length(t2), length(t3)]
 @test t.df == 2
 @test t.R_i ==  [9.5, 17.5, 18.0]
-@test_approx_eq t.H 2.039215686274513
-@test_approx_eq t.tie_adjustment 0.9916666666666667
-@test_approx_eq pvalue(t) 0.3607363776845705
+@test t.H ≈ 2.039215686274513
+@test t.tie_adjustment ≈ 0.9916666666666667
+@test pvalue(t) ≈ 0.3607363776845705
 show(IOBuffer(), t)
