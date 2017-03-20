@@ -142,4 +142,5 @@ include("z.jl")
 include("wilcoxon.jl")
 include("power_divergence.jl")
 include("anderson_darling.jl")
+include("box_test.jl")
 end
