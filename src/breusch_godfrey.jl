@@ -39,8 +39,8 @@ of a regression model.
 `X` is the matrix of regressors from the original model and `e` the vector of residuals.
 `lag` determines the number of lagged residuals included in the auxiliary regression.
 Set `start0` to specify how the starting values for the lagged residuals are handled.
-Default (= true) is to set them to zero (as in Godfrey, 1978), alternatively (= false)
-one can use the first `lag` residuals as starting values, losing `lag` observations.
+`start0 = true` (default) sets them to zero (as in Godfrey, 1978); `start0 = false`
+uses the first `lag` residuals as starting values, i.e. shortening the sample by `lag`.
 
 External links
 
