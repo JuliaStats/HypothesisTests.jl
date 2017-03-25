@@ -46,19 +46,16 @@ External links
 
 * [Breusch-Godfrey test on Wikipedia](https://en.wikipedia.org/wiki/Breusch–Godfrey_test)
 """
-function BreuschGodfreyTest{T<:Real}(xmat::AbstractArray{T},e::AbstractVector{T}, lag::Int,
-    start0::Bool=true)
+function BreuschGodfreyTest{T<:Real}(xmat::AbstractArray{T}, e::AbstractVector{T},
+                                     lag::Int, start0::Bool=true)
     n = size(e,1)
     elag = zeros(Float64,n,lag)
     for ii = 1:lag  # construct lagged residuals
         elag[ii+1:end,ii] = e[1:end-ii]
     end
 
-    if start0 == true   # set starting values to 0 (default)
-        offset = 0
-    else                # discard first #lag observations
-        offset = lag
-    end
+    offset = start0 ? 0 : lag
+
     regmat = [xmat[offset+1:end,:] elag[offset+1:end,:]]
     regcoeff = regmat\e[offset+1:end]
     resid = e[offset+1:end] - regmat*regcoeff
@@ -69,8 +66,8 @@ function BreuschGodfreyTest{T<:Real}(xmat::AbstractArray{T},e::AbstractVector{T}
 end
 
 testname(::BreuschGodfreyTest) = "Breusch-Godfrey autocorrelation test"
-population_param_of_interest(x::BreuschGodfreyTest) = ("coefficients on lagged residuals up to lag p",
-    "all zero", NaN)
+population_param_of_interest(x::BreuschGodfreyTest) =
+    ("coefficients on lagged residuals up to lag p", "all zero", NaN)
 
 function show_params(io::IO, x::BreuschGodfreyTest, ident)
     println(io, ident, "number of observations:         ", x.n)

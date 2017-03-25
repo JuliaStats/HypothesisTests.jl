@@ -107,7 +107,7 @@ data_h1 = [
 coeff_vec = data_h1[:,2:end]\data_h1[:,1]
 res_vec = data_h1[:,1] - data_h1[:,2:end]*coeff_vec
 
-t = HypothesisTests.BreuschGodfreyTest(data_h1[:,2:end],res_vec,4)
+t = BreuschGodfreyTest(data_h1[:,2:end],res_vec,4)
 
 @test t.n == 100
 @test t.lag == 4
@@ -115,7 +115,7 @@ t = HypothesisTests.BreuschGodfreyTest(data_h1[:,2:end],res_vec,4)
 @test pvalue(t) ≈ 2.5390992557054064e-6
 show(IOBuffer(), t)
 
-t = HypothesisTests.BreuschGodfreyTest(data_h1[:,2:end],res_vec,2,false)
+t = BreuschGodfreyTest(data_h1[:,2:end],res_vec,2,false)
 
 @test t.n == 98
 @test t.lag == 2
@@ -126,7 +126,7 @@ show(IOBuffer(), t)
 coeff_vec = data_h1[:,3:end]\data_h1[:,1] # no constant
 res_vec = data_h1[:,1] - data_h1[:,3:end]*coeff_vec
 
-t = HypothesisTests.BreuschGodfreyTest(data_h1[:,3:end],res_vec,10)
+t = BreuschGodfreyTest(data_h1[:,3:end],res_vec,10)
 
 @test t.n == 100
 @test t.lag == 10
@@ -241,7 +241,7 @@ data_h0 = [
 coeff_vec = data_h0[:,2:end]\data_h0[:,1]
 res_vec = data_h0[:,1] - data_h0[:,2:end]*coeff_vec
 
-t = HypothesisTests.BreuschGodfreyTest(data_h0[:,2:end],res_vec,4)
+t = BreuschGodfreyTest(data_h0[:,2:end],res_vec,4)
 
 @test t.n == 100
 @test t.lag == 4
@@ -249,7 +249,7 @@ t = HypothesisTests.BreuschGodfreyTest(data_h0[:,2:end],res_vec,4)
 @test pvalue(t) ≈ 0.7397687483602012
 show(IOBuffer(), t)
 
-t = HypothesisTests.BreuschGodfreyTest(data_h0[:,2:end],res_vec,2,false)
+t = BreuschGodfreyTest(data_h0[:,2:end],res_vec,2,false)
 
 @test t.n == 98
 @test t.lag == 2
@@ -260,7 +260,7 @@ show(IOBuffer(), t)
 coeff_vec = data_h0[:,3:end]\data_h0[:,1] # no constant
 res_vec = data_h0[:,1] - data_h0[:,3:end]*coeff_vec
 
-t = HypothesisTests.BreuschGodfreyTest(data_h0[:,3:end],res_vec,10)
+t = BreuschGodfreyTest(data_h0[:,3:end],res_vec,10)
 
 @test t.n == 100
 @test t.lag == 10
