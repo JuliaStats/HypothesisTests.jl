@@ -68,18 +68,6 @@ function check_alpha(alpha::Float64)
     end
 end
 
-function significance{T<:Real}(p_val::T)
-    if p_val > 0.05
-        "not significant"
-    elseif p_val < 0.001
-        "extremely significant"
-    elseif  p_val < 0.01
-        "very significant"
-    else
-        "significant"
-    end
-end
-
 # Pretty-print
 function Base.show{T<:HypothesisTest}(io::IO, test::T)
     println(io, testname(test))
@@ -102,7 +90,7 @@ function Base.show{T<:HypothesisTest}(io::IO, test::T)
     outcome = if p > 0.05 "fail to reject" else "reject" end
     println(io, "Test summary:")
     println(io, "    outcome with 95% confidence: $outcome h_0")
-    println(io, "    two-sided p-value:           $p ($(significance(p)))")
+    println(io, "    two-sided p-value:           $p")
     println(io)
 
     # further details
