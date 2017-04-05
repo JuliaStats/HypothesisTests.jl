@@ -171,3 +171,8 @@ ChisqTest(x,y,(1:3,1:3))
 
 MultinomialLRT(x,y,3)
 MultinomialLRT(x,y,(1:3,1:3))
+
+# Test that large counts don't cause overflow (issue #43)
+d = [113997 1031298
+     334453 37471]
+PowerDivergenceTest(d)
