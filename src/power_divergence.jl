@@ -108,11 +108,12 @@ function ci_sison_glaz(x::PowerDivergenceTest, alpha::Float64; skew_correct::Boo
     probn = inv(pdf(Poisson(x.n), x.n))
 
     c = 0
-    p_old = 0
+    p_old = 0.0
+    m1, m2, m3, m4, m5 = zeros(k), zeros(k), zeros(k), zeros(k), zeros(k)
+    mu = zeros(4)
 
     for c in 1:x.n
         #run truncpoi
-        m = zeros(k, 5)
         for i in 1:k
             lambda = x.observed[i]
             #run moments
@@ -122,20 +123,19 @@ function ci_sison_glaz(x::PowerDivergenceTest, alpha::Float64; skew_correct::Boo
                 poislama = cdf(Poisson(lambda), a)
                 poislamb = cdf(Poisson(lambda), b - 1)
             else
-                poislama = poislamb = 1
+                poislama = poislamb = 1.0
             end
             den = b > 0 ? poislama-poislamb : poislama
 
-            mu  = zeros(4,1)
             for r in 1:4
                 if lambda > 0
                     plar = cdf(Poisson(lambda), a - r)
                     plbr = cdf(Poisson(lambda), b - r - 1)
                 else
-                    plar = plbr = 1
+                    plar = plbr = 1.0
                 end
                 poisA = ifelse(a - r >= 0, poislama - plar, poislama)
-                poisB = 0
+                poisB = 0.0
                 if  b - r - 1 >= 0
                     poisB = poislamb - plbr
                 end
@@ -143,30 +143,30 @@ function ci_sison_glaz(x::PowerDivergenceTest, alpha::Float64; skew_correct::Boo
                     poisB = poislamb
                 end
                 if b - r - 1 < 0 && b - 1 < 0
-                    poisB = 0
+                    poisB = 0.0
                 end
                 mu[r] = lambda^r * (1 - (poisA - poisB) / den)
             end
             # end of moments
-            m[i,1] = mu[1]
-            m[i,2] = mu[2] + mu[1] - mu[1]^2
-            m[i,3] = mu[3] + mu[2] * (3 - 3mu[1]) + (mu[1] - 3mu[1]^2 + 2mu[1]^3)
-            m[i,4] = mu[4] + mu[3] * (6 - 4mu[1]) + mu[2] * (7 - 12mu[1] + 6mu[1]^2) + mu[1] - 4mu[1]^2 + 6mu[1]^3 - 3mu[1]^4
-            m[i,5] = den
+            m1[i] = mu[1]
+            m2[i] = mu[2] + mu[1] - mu[1]^2
+            m3[i] = mu[3] + mu[2] * (3 - 3mu[1]) + (mu[1] - 3mu[1]^2 + 2mu[1]^3)
+            m4[i] = mu[4] + mu[3] * (6 - 4mu[1]) + mu[2] * (7 - 12mu[1] + 6mu[1]^2) + mu[1] - 4mu[1]^2 + 6mu[1]^3 - 3mu[1]^4
+            m5[i] = den
         end
         for i in 1:k
-            m[i,4] -= 3m[i,2]^2
+            m4[i] -= 3m2[i]^2
         end
-        s1, s2, s3, s4 = mapslices(sum, m, 1)
+        s1, s2, s3, s4 = sum(m1), sum(m2), sum(m3), sum(m4)
         z  = (x.n - s1) / sqrt(s2)
         g1 = s3 / s2^(3/2)
         g2 = s4 * s2^2
 
         poly = 1 + g1 * (z^3 - 3z) / 6 + g2 * (z^4 - 6z^2 + 3) / 24 + g1^2 * (z^6 - 15z^4 + 45z^2 - 15) / 72
         f = poly * exp(-z^2 / 2) / sqrt(2π)
-        probx = 1
+        probx = 1.0
         for i in 1:k
-            probx *= probx * m[i,5]
+            probx *= probx * m5[i]
         end
 
         p = probn * probx * f / sqrt(s2)
@@ -230,7 +230,7 @@ function PowerDivergenceTest{T<:Integer,U<:AbstractFloat}(x::AbstractMatrix{T}; 
         thetahat = x ./ n
         xhat = rowsums * colsums / n
         theta0 = xhat / n
-        V = Float64[colsums[j] * rowsums[i] * (n - rowsums[i]) * (n - colsums[j]) / n^3 for i in 1:nrows, j in 1:ncols]
+        V = Float64[(colsums[j]/n) * (rowsums[i]/n) * (1 - rowsums[i]/n) * (n - colsums[j]) for i in 1:nrows, j in 1:ncols]
     elseif nrows == 1 || ncols == 1
         df = length(x) - 1
         xhat = reshape(n * theta0, size(x))
