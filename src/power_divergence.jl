@@ -230,7 +230,7 @@ function PowerDivergenceTest{T<:Integer,U<:AbstractFloat}(x::AbstractMatrix{T}; 
         thetahat = x ./ n
         xhat = rowsums * colsums / n
         theta0 = xhat / n
-        V = Float64[colsums[j] * rowsums[i] * (n - rowsums[i]) * (n - colsums[j]) / n^3 for i in 1:nrows, j in 1:ncols]
+        V = Float64[(colsums[j]/n) * (rowsums[i]/n) * (1 - rowsums[i]/n) * (n - colsums[j]) for i in 1:nrows, j in 1:ncols]
     elseif nrows == 1 || ncols == 1
         df = length(x) - 1
         xhat = reshape(n * theta0, size(x))
