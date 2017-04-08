@@ -132,4 +132,5 @@ include("power_divergence.jl")
 include("anderson_darling.jl")
 include("box_test.jl")
 include("breusch_godfrey.jl")
+include("augmented_dickey_fuller.jl")
 end
