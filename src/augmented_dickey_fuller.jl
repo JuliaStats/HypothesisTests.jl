@@ -26,7 +26,7 @@ export ADFTest
 
 immutable ADFTest <: HypothesisTest
     n               ::Int               # number of observations
-    deterministic   ::String            # deterministic terms included in regression
+    deterministic   ::Symbol            # deterministic terms included in regression
     lag             ::Int               # number of lags in test statistic
     stat            ::Float64           # test statistic
     coef            ::Float64           # coefficient on lagged (non-differenced) variable
@@ -58,24 +58,24 @@ External links
 
   * [Augmented Dickey-Fuller test on Wikipedia](https://en.wikipedia.org/wiki/Augmented_Dickey–Fuller_test)
 """
-function ADFTest{T<:Real}(y::AbstractVector{T}, deterministic::String, lag::Int)
+function ADFTest{T<:Real}(y::AbstractVector{T}, deterministic::Symbol, lag::Int)
 
     nobs = length(y)
     Δy = diff(y)
 
-    if deterministic == "none"
+    if deterministic == :none
         Δyt   = Δy[lag+1:end]
         xt    = y[lag+1:end-1,1:1]
         dfexo = 0
-    elseif deterministic == "constant"
+    elseif deterministic == :constant
         Δyt   = Δy[lag+1:end]
         xt    = [ y[lag+1:end-1] ones(nobs-lag-1, 1) ]
         dfexo = 1
-    elseif deterministic == "trend"
+    elseif deterministic == :trend
         Δyt   = Δy[lag+1:end]
         xt    = [ y[lag+1:end-1] ones(nobs-lag-1, 1) (1:nobs-lag-1) ]
         dfexo = 2
-    elseif deterministic == "squared_trend"
+    elseif deterministic == :squared_trend
         Δyt   = Δy[lag+1:end]
         xt    = [ y[lag+1:end-1] ones(nobs-lag-1, 1) (1:nobs-lag-1) [
                   i^2 for i = 1:nobs-lag-1] ]
@@ -103,7 +103,7 @@ function ADFTest{T<:Real}(y::AbstractVector{T}, deterministic::String, lag::Int)
 
 end
 
-function adf_cv(nobs::Int, deterministic::String)
+function adf_cv(nobs::Int, deterministic::Symbol)
     # computes critical values
     #
     # based on James G. MacKinnon, "Critical values for cointegration tests,"
@@ -129,16 +129,16 @@ function adf_cv(nobs::Int, deterministic::String)
     ]
 
     # Equation A.1 in MacKinnon (2010)
-    if deterministic == "none"
+    if deterministic == :none
         adf_crit_val = cv_coeff[1:3, 1] + cv_coeff[1:3, 2] ./ nobs +
                           cv_coeff[1:3, 3] ./ (nobs^2) + cv_coeff[1:3, 4] ./ (nobs^3)
-    elseif deterministic == "constant"
+    elseif deterministic == :constant
         adf_crit_val = cv_coeff[4:6, 1] + cv_coeff[4:6, 2] ./ nobs +
                           cv_coeff[4:6, 3] ./ (nobs^2) + cv_coeff[4:6, 4] ./ (nobs^3)
-    elseif deterministic == "trend"
+    elseif deterministic == :trend
         adf_crit_val = cv_coeff[7:9, 1] + cv_coeff[7:9, 2] ./ nobs +
                           cv_coeff[7:9, 3] ./ (nobs^2) + cv_coeff[7:9, 4] ./ (nobs^3)
-    elseif deterministic == "squared_trend"
+    elseif deterministic == :squared_trend
         adf_crit_val = cv_coeff[10:12, 1] + cv_coeff[10:12, 2] ./ nobs +
                           cv_coeff[10:12, 3] ./ (nobs^2) + cv_coeff[10:12, 4] ./ (nobs^3)
     else
@@ -147,7 +147,7 @@ function adf_cv(nobs::Int, deterministic::String)
 
 end
 
-function adf_pv_aux(adf_stat::Float64, deterministic::String)
+function adf_pv_aux(adf_stat::Float64, deterministic::Symbol)
     # helper function for p-value computation
     #
     # based on James G. MacKinnon, "Approximate Asymptotic Distribution Functions for
@@ -175,13 +175,13 @@ function adf_pv_aux(adf_stat::Float64, deterministic::String)
         3.0778 0.49529 -0.41477 -0.059359 -3.21 0.54
     ]
 
-    if deterministic == "none"
+    if deterministic == :none
         tab_row = 1
-    elseif deterministic == "constant"
+    elseif deterministic == :constant
         tab_row = 2
-    elseif deterministic == "trend"
+    elseif deterministic == :trend
         tab_row = 3
-    elseif deterministic == "squared_trend"
+    elseif deterministic == :squared_trend
         tab_row = 4
     else
         throw(ArgumentError("deterministic = $(deterministic) is invalid"))

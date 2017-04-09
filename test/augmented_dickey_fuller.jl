@@ -29,10 +29,10 @@ sim_data_h0 = [
     -5.205900331311935
 ]
 
-t = ADFTest(sim_data_h0, "none", 0)
+t = ADFTest(sim_data_h0, :none, 0)
 
 @test t.n == 100
-@test t.deterministic == "none"
+@test t.deterministic == :none
 @test t.lag == 0
 @test t.stat ≈ -0.6050597112208628
 @test t.coef ≈ -0.009972855420884913
@@ -40,10 +40,10 @@ t = ADFTest(sim_data_h0, "none", 0)
 @test pvalue(t) ≈ 0.4525095990064268
 show(IOBuffer(), t)
 
-t = ADFTest(sim_data_h0, "constant", 4)
+t = ADFTest(sim_data_h0, :constant, 4)
 
 @test t.n == 96
-@test t.deterministic == "constant"
+@test t.deterministic == :constant
 @test t.lag == 4
 @test t.stat ≈ -1.3432252172180439
 @test t.coef ≈ -0.034891024784937275
@@ -51,10 +51,10 @@ t = ADFTest(sim_data_h0, "constant", 4)
 @test pvalue(t) ≈ 0.6091721848538273
 show(IOBuffer(), t)
 
-t = ADFTest(sim_data_h0, "trend", 1)
+t = ADFTest(sim_data_h0, :trend, 1)
 
 @test t.n == 99
-@test t.deterministic == "trend"
+@test t.deterministic == :trend
 @test t.lag == 1
 @test t.stat ≈ -1.643937136091079
 @test t.coef ≈ -0.06200340824254233
@@ -62,10 +62,10 @@ t = ADFTest(sim_data_h0, "trend", 1)
 @test pvalue(t) ≈ 0.7747580288456625
 show(IOBuffer(), t)
 
-t = ADFTest(sim_data_h0, "squared_trend", 10)
+t = ADFTest(sim_data_h0, :squared_trend, 10)
 
 @test t.n == 90
-@test t.deterministic == "squared_trend"
+@test t.deterministic == :squared_trend
 @test t.lag == 10
 @test t.stat ≈ -2.0185041960365777
 @test t.coef ≈ -0.11370011315231617
@@ -102,10 +102,10 @@ sim_data_h1 = [
     -0.3850795292384054
 ]
 
-t = ADFTest(sim_data_h1, "none", 2)
+t = ADFTest(sim_data_h1, :none, 2)
 
 @test t.n == 98
-@test t.deterministic == "none"
+@test t.deterministic == :none
 @test t.lag == 2
 @test t.stat ≈ -4.856134193950414
 @test t.coef ≈ -0.5258695197499671
@@ -113,10 +113,10 @@ t = ADFTest(sim_data_h1, "none", 2)
 @test pvalue(t) ≈ 2.011399607967822e-6
 show(IOBuffer(), t)
 
-t = ADFTest(sim_data_h1, "constant", 0)
+t = ADFTest(sim_data_h1, :constant, 0)
 
 @test t.n == 100
-@test t.deterministic == "constant"
+@test t.deterministic == :constant
 @test t.lag == 0
 @test t.stat ≈ -5.371126891727986
 @test t.coef ≈ -0.45433645147215723
@@ -124,10 +124,10 @@ t = ADFTest(sim_data_h1, "constant", 0)
 @test pvalue(t) ≈ 3.8937264616617045e-6
 show(IOBuffer(), t)
 
-t = ADFTest(sim_data_h1, "trend", 7)
+t = ADFTest(sim_data_h1, :trend, 7)
 
 @test t.n == 93
-@test t.deterministic == "trend"
+@test t.deterministic == :trend
 @test t.lag == 7
 @test t.stat ≈ -2.636305455046
 @test t.coef ≈ -0.4407260538688699
@@ -135,10 +135,10 @@ t = ADFTest(sim_data_h1, "trend", 7)
 @test pvalue(t) ≈ 0.2634673926249714
 show(IOBuffer(), t)
 
-t = ADFTest(sim_data_h1, "squared_trend", 4)
+t = ADFTest(sim_data_h1, :squared_trend, 4)
 
 @test t.n == 96
-@test t.deterministic == "squared_trend"
+@test t.deterministic == :squared_trend
 @test t.lag == 4
 @test t.stat ≈ -4.300112549464304
 @test t.coef ≈ -0.6759438045021552
