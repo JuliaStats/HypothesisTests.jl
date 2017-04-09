@@ -26,7 +26,7 @@ export ADFTest
 
 immutable ADFTest <: HypothesisTest
     n               ::Int               # number of observations
-    deterministic   ::AbstractString    # deterministic terms included in regression
+    deterministic   ::String            # deterministic terms included in regression
     lag             ::Int               # number of lags in test statistic
     stat            ::Float64           # test statistic
     coef            ::Float64           # coefficient on lagged (non-differenced) variable
@@ -58,15 +58,14 @@ External links
 
   * [Augmented Dickey-Fuller test on Wikipedia](https://en.wikipedia.org/wiki/Augmented_Dickey–Fuller_test)
 """
-function ADFTest{T<:Real}(y::AbstractVector{T}, deterministic::AbstractString, lag::Int)
+function ADFTest{T<:Real}(y::AbstractVector{T}, deterministic::String, lag::Int)
 
     nobs = length(y)
     Δy = diff(y)
 
     if deterministic == "none"
         Δyt   = Δy[lag+1:end]
-        xt    = (y[lag+1:end-1]')' # to make sure that xt is always two dimensional Array
-                                   # needed in line 94 for case with no lags
+        xt    = y[lag+1:end-1,1:1]
         dfexo = 0
     elseif deterministic == "constant"
         Δyt   = Δy[lag+1:end]
@@ -95,8 +94,8 @@ function ADFTest{T<:Real}(y::AbstractVector{T}, deterministic::AbstractString, l
     n        = length(adf_res)
     k        = lag + 1 + dfexo
     sigma2   = dot(adf_res, adf_res) / (n - k)
-    cov_coef = sigma2 * inv(xt' * xt)
-    adf_stat = adf_coef[1] / sqrt(cov_coef[1,1])
+    inv_xtxt = inv(xt' * xt)
+    adf_stat = adf_coef[1] / sqrt(sigma2 * inv_xtxt[1,1])
 
     crit_val = adf_cv(nobs, deterministic)
 
@@ -104,7 +103,7 @@ function ADFTest{T<:Real}(y::AbstractVector{T}, deterministic::AbstractString, l
 
 end
 
-function adf_cv(nobs::Int, deterministic::AbstractString)
+function adf_cv(nobs::Int, deterministic::String)
     # computes critical values
     #
     # based on James G. MacKinnon, "Critical values for cointegration tests,"
@@ -148,7 +147,7 @@ function adf_cv(nobs::Int, deterministic::AbstractString)
 
 end
 
-function adf_pv_aux(adf_stat::Float64, deterministic::AbstractString)
+function adf_pv_aux(adf_stat::Float64, deterministic::String)
     # helper function for p-value computation
     #
     # based on James G. MacKinnon, "Approximate Asymptotic Distribution Functions for
