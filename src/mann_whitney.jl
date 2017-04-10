@@ -66,6 +66,7 @@ ExactMannWhitneyUTest{S<:Real,T<:Real}(x::AbstractVector{S}, y::AbstractVector{T
 
 testname(::ExactMannWhitneyUTest) = "Exact Mann-Whitney U test"
 population_param_of_interest(x::ExactMannWhitneyUTest) = ("Location parameter (pseudomedian)", 0, x.median) # parameter of interest: name, value under h0, point estimate
+default_tail(test::ExactMannWhitneyUTest) = :both
 
 function show_params(io::IO, x::ExactMannWhitneyUTest, ident)
     println(io, ident, "number of observations in each group: ", [x.nx, x.ny])
@@ -96,7 +97,7 @@ function mwuenumerate(x::ExactMannWhitneyUTest)
     (le/tot, gr/tot)
 end
 
-function pvalue(x::ExactMannWhitneyUTest; tail=:both) 
+function pvalue(x::ExactMannWhitneyUTest; tail=:both)
     if x.tie_adjustment == 0
         # Compute exact p-value using method from Rmath, which is fast but
         # cannot account for ties
@@ -152,6 +153,7 @@ ApproximateMannWhitneyUTest{S<:Real,T<:Real}(x::AbstractVector{S}, y::AbstractVe
 
 testname(::ApproximateMannWhitneyUTest) = "Approximate Mann-Whitney U test"
 population_param_of_interest(x::ApproximateMannWhitneyUTest) = ("Location parameter (pseudomedian)", 0, x.median) # parameter of interest: name, value under h0, point estimate
+default_tail(test::ApproximateMannWhitneyUTest) = :both
 
 function show_params(io::IO, x::ApproximateMannWhitneyUTest, ident)
     println(io, ident, "number of observations in each group: ", [x.nx, x.ny])
@@ -161,7 +163,7 @@ function show_params(io::IO, x::ApproximateMannWhitneyUTest, ident)
     println(io, ident, "normal approximation (μ, σ):          ", (x.mu, x.sigma))
 end
 
-function pvalue(x::ApproximateMannWhitneyUTest; tail=:both) 
+function pvalue(x::ApproximateMannWhitneyUTest; tail=:both)
     if x.mu == x.sigma == 0
         1
     else

@@ -40,30 +40,27 @@ check_same_length(x::AbstractVector, y::AbstractVector) = if length(x) != length
 end
 
 # Basic function for finding a p-value given a distribution and tail
-function pvalue(dist::ContinuousUnivariateDistribution, x::Number; tail=:both)
+pvalue(dist::ContinuousUnivariateDistribution, x::Number; tail=:both) =
     if tail == :both
-        p = min(2 * min(cdf(dist, x), ccdf(dist, x)), 1.0)
+        min(2 * min(cdf(dist, x), ccdf(dist, x)), 1.0)
     elseif tail == :left
-        p = cdf(dist, x)
+        cdf(dist, x)
     elseif tail == :right
-        p = ccdf(dist, x)
+        ccdf(dist, x)
     else
         throw(ArgumentError("tail=$(tail) is invalid"))
     end
-    return p, tail
-end
-function pvalue(dist::DiscreteUnivariateDistribution, x::Number; tail=:both)
+
+pvalue(dist::DiscreteUnivariateDistribution, x::Number; tail=:both) =
     if tail == :both
-        p = min(2 * min(ccdf(dist, x-1), cdf(dist, x)), 1.0)
+        min(2 * min(ccdf(dist, x-1), cdf(dist, x)), 1.0)
     elseif tail == :left
-        p = cdf(dist, x)
+        cdf(dist, x)
     elseif tail == :right
-        p = ccdf(dist, x-1)
+        ccdf(dist, x-1)
     else
         throw(ArgumentError("tail=$(tail) is invalid"))
     end
-    return p, tail
-end
 
 function check_alpha(alpha::Float64)
     if alpha <= 0 || alpha >= 0.5
@@ -89,14 +86,17 @@ function Base.show{T<:HypothesisTest}(io::IO, test::T)
     println(io)
 
     # test summary
-    p, tail = pvalue(test)
+    p = pvalue(test)
     outcome = if p > 0.05 "fail to reject" else "reject" end
+    tail = default_tail(test)
     println(io, "Test summary:")
     println(io, "    outcome with 95% confidence: $outcome h_0")
     if tail == :both
         println(io, "    two-sided p-value:           $p")
-    else
+    elseif tail == :left || tail == :right
         println(io, "    one-sided p-value:           $p")
+    else
+        println(io, "    p-value:                     $p")
     end
     println(io)
 
@@ -107,6 +107,9 @@ end
 
 # parameter of interest: name, value under h0, point estimate
 population_param_of_interest{T<:HypothesisTest}(test::T) = ("not implemented yet", NaN, NaN)
+
+# is the test one- or two-sided
+default_tail(test::HypothesisTest) = :undefined
 
 function show_params{T<:HypothesisTest}(io::IO, test::T, ident="")
     fieldidx = find(Bool[t<:Number for t in T.types])

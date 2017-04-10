@@ -69,6 +69,7 @@ ExactSignedRankTest{S<:Real,T<:Real}(x::AbstractVector{S}, y::AbstractVector{T})
 
 testname(::ExactSignedRankTest) = "Exact Wilcoxon signed rank test"
 population_param_of_interest(x::ExactSignedRankTest) = ("Location parameter (pseudomedian)", 0, x.median) # parameter of interest: name, value under h0, point estimate
+default_tail(test::ExactSignedRankTest) = :both
 
 function show_params(io::IO, x::ExactSignedRankTest, ident)
     println(io, ident, "number of observations:      ", x.n)
@@ -159,6 +160,7 @@ ApproximateSignedRankTest{S<:Real,T<:Real}(x::AbstractVector{S}, y::AbstractVect
 
 testname(::ApproximateSignedRankTest) = "Approximate Wilcoxon signed rank test"
 population_param_of_interest(x::ApproximateSignedRankTest) = ("Location parameter (pseudomedian)", 0, x.median) # parameter of interest: name, value under h0, point estimate
+default_tail(test::ApproximateSignedRankTest) = :both
 
 function show_params(io::IO, x::ApproximateSignedRankTest, ident)
     println(io, ident, "number of observations:      ", x.n)

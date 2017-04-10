@@ -35,6 +35,7 @@ function OneSampleADTest{T<:Real}(x::AbstractVector{T}, d::UnivariateDistributio
 end
 
 testname(::OneSampleADTest) = "One sample Anderson-Darling test"
+default_tail(test::OneSampleADTest) = :right
 
 function show_params(io::IO, x::OneSampleADTest, ident="")
     println(io, ident, "number of observations:   $(x.n)")
@@ -77,6 +78,7 @@ function KSampleADTest{T<:Real}(xs::AbstractVector{T}...; modified=true)
 end
 
 testname(::KSampleADTest) = "k-sample Anderson-Darling test"
+default_tail(test::KSampleADTest) = :right
 
 function show_params(io::IO, x::KSampleADTest, ident="")
     println(io, ident, "number of samples:        $(x.k)")
