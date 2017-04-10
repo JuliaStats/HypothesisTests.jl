@@ -40,27 +40,30 @@ check_same_length(x::AbstractVector, y::AbstractVector) = if length(x) != length
 end
 
 # Basic function for finding a p-value given a distribution and tail
-pvalue(dist::ContinuousUnivariateDistribution, x::Number; tail=:both) =
+function pvalue(dist::ContinuousUnivariateDistribution, x::Number; tail=:both)
     if tail == :both
-        min(2 * min(cdf(dist, x), ccdf(dist, x)), 1.0)
+        p = min(2 * min(cdf(dist, x), ccdf(dist, x)), 1.0)
     elseif tail == :left
-        cdf(dist, x)
+        p = cdf(dist, x)
     elseif tail == :right
-        ccdf(dist, x)
+        p = ccdf(dist, x)
     else
         throw(ArgumentError("tail=$(tail) is invalid"))
     end
-
-pvalue(dist::DiscreteUnivariateDistribution, x::Number; tail=:both) =
+    return p, tail
+end
+function pvalue(dist::DiscreteUnivariateDistribution, x::Number; tail=:both)
     if tail == :both
-        min(2 * min(ccdf(dist, x-1), cdf(dist, x)), 1.0)
+        p = min(2 * min(ccdf(dist, x-1), cdf(dist, x)), 1.0)
     elseif tail == :left
-        cdf(dist, x)
+        p = cdf(dist, x)
     elseif tail == :right
-        ccdf(dist, x-1)
+        p = ccdf(dist, x-1)
     else
         throw(ArgumentError("tail=$(tail) is invalid"))
     end
+    return p, tail
+end
 
 function check_alpha(alpha::Float64)
     if alpha <= 0 || alpha >= 0.5
@@ -86,11 +89,15 @@ function Base.show{T<:HypothesisTest}(io::IO, test::T)
     println(io)
 
     # test summary
-    p = pvalue(test)
+    p, tail = pvalue(test)
     outcome = if p > 0.05 "fail to reject" else "reject" end
     println(io, "Test summary:")
     println(io, "    outcome with 95% confidence: $outcome h_0")
-    println(io, "    two-sided p-value:           $p")
+    if tail == :both
+        println(io, "    two-sided p-value:           $p")
+    else
+        println(io, "    one-sided p-value:           $p")
+    end
     println(io)
 
     # further details
