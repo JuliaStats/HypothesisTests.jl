@@ -1,10 +1,12 @@
 using HypothesisTests, Base.Test
+using HypothesisTests: default_tail
 
 # Basic exact test
 @test abs(pvalue(ExactMannWhitneyUTest([1:10;], [2.1:2:21;])) - 0.0232) <= 1e-4
 @test abs(pvalue(ExactMannWhitneyUTest([2.1:2:21;], [1:10;])) - 0.0232) <= 1e-4
 @test abs(pvalue(ExactMannWhitneyUTest([1.5:10:100;], [2.1:2:21;])) - 0.0068) <= 1e-4
 @test abs(pvalue(ExactMannWhitneyUTest([2.1:2:21;], [1.5:10:100;])) - 0.0068) <= 1e-4
+@test default_tail(ExactMannWhitneyUTest([1:10;], [2.1:2:21;])) == :both
 show(IOBuffer(), ExactMannWhitneyUTest([1:10;], [2.1:2:21;]))
 
 # Exact with ties
@@ -26,6 +28,7 @@ show(IOBuffer(), ExactMannWhitneyUTest([1:10;], [2:2:24;]))
 @test abs(pvalue(ApproximateMannWhitneyUTest([2.1:2:21;], [1:10;])) - 0.0257) <= 1e-4
 @test abs(pvalue(ApproximateMannWhitneyUTest([1.5:10:100;], [2.1:2:21;])) - 0.0091) <= 1e-4
 @test abs(pvalue(ApproximateMannWhitneyUTest([2.1:2:21;], [1.5:10:100;])) - 0.0091) <= 1e-4
+@test default_tail(ApproximateMannWhitneyUTest([1:10;], [2.1:2:21;])) == :both
 show(IOBuffer(), ApproximateMannWhitneyUTest([1:10;], [2.1:2:21;]))
 
 # Approximate with ties

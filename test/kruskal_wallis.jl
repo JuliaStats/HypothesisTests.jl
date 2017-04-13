@@ -1,4 +1,5 @@
 using HypothesisTests, Base.Test
+using HypothesisTests: default_tail
 
 # www.uni-siegen.de/phil/sozialwissenschaften/soziologie/mitarbeiter/ludwig-mayerhofer/statistik/statistik_downloads/statistik_ii_7.pdf
 u5 = [620, 5350, 7220]
@@ -13,6 +14,7 @@ t = HypothesisTests.KruskalWallisTest(u5, u250, u2500, more)
 @test t.H ≈ 1.5803174603174597
 @test t.tie_adjustment == 1
 @test pvalue(t) ≈ 0.6638608922384397
+@test default_tail(t) == :right
 show(IOBuffer(), t)
 
 # http://www.brightstat.com/index.php?option=com_content&task=view&id=41&Itemid=1&limit=1&limitstart=2
