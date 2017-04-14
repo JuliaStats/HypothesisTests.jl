@@ -1,4 +1,5 @@
 using HypothesisTests, Distributions, Base.Test
+using HypothesisTests: default_tail
 
 # One sample test
 n = 1000
@@ -8,6 +9,7 @@ x = rand(Normal(), n)
 t = OneSampleADTest(x, Normal())
 @test isapprox(t.A², 0.2013, atol=0.1^4)
 @test isapprox(pvalue(t), 0.8811, atol=0.1^4)
+@test default_tail(t) == :right
 
 x = rand(DoubleExponential(), n)
 t = OneSampleADTest(x, Normal())
@@ -34,6 +36,7 @@ t = KSampleADTest(samples...)
 @test isapprox(t.A²k, 8.3926, atol=0.1^4)
 @test isapprox(t.σ, 1.2038, atol=0.1^4)
 @test isapprox(pvalue(t), 0.0020, atol=0.1^4)
+@test default_tail(t) == :right
 
 t = KSampleADTest(samples..., modified = false)
 @test isapprox(t.A²k, 8.3559, atol=0.1^4)

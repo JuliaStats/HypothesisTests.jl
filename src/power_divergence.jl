@@ -40,6 +40,7 @@ end
 
 # parameter of interest: name, value under h0, point estimate
 population_param_of_interest(x::PowerDivergenceTest) = ("Multinomial Probabilities", x.theta0, x.thetahat)
+default_tail(test::PowerDivergenceTest) = :right
 
 pvalue(x::PowerDivergenceTest; tail=:right) = pvalue(Chisq(x.df),x.stat; tail=tail)
 

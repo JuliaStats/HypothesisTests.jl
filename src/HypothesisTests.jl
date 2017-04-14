@@ -88,9 +88,16 @@ function Base.show{T<:HypothesisTest}(io::IO, test::T)
     # test summary
     p = pvalue(test)
     outcome = if p > 0.05 "fail to reject" else "reject" end
+    tail = default_tail(test)
     println(io, "Test summary:")
     println(io, "    outcome with 95% confidence: $outcome h_0")
-    println(io, "    two-sided p-value:           $p")
+    if tail == :both
+        println(io, "    two-sided p-value:           $p")
+    elseif tail == :left || tail == :right
+        println(io, "    one-sided p-value:           $p")
+    else
+        println(io, "    p-value:                     $p")
+    end
     println(io)
 
     # further details
@@ -100,6 +107,9 @@ end
 
 # parameter of interest: name, value under h0, point estimate
 population_param_of_interest{T<:HypothesisTest}(test::T) = ("not implemented yet", NaN, NaN)
+
+# is the test one- or two-sided
+default_tail(test::HypothesisTest) = :undefined
 
 function show_params{T<:HypothesisTest}(io::IO, test::T, ident="")
     fieldidx = find(Bool[t<:Number for t in T.types])

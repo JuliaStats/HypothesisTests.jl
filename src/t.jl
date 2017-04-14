@@ -30,6 +30,8 @@ export OneSampleTTest, TwoSampleTTest, EqualVarianceTTest,
 
 pvalue(x::TTest; tail=:both) = pvalue(TDist(x.df), x.t; tail=tail)
 
+default_tail(test::TTest) = :both
+
 # confidence interval by inversion
 function StatsBase.confint(x::TTest, alpha::Float64=0.05; tail=:both)
     check_alpha(alpha)

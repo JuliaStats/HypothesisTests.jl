@@ -1,4 +1,5 @@
 using HypothesisTests, Base.Test
+using HypothesisTests: default_tail
 
 sim_data_h0=[
     0.297287984535462;0.382395967790608;-0.597634476728231;-0.0104452446373756;
@@ -35,6 +36,7 @@ t = HypothesisTests.BoxPierceTest(sim_data_h0,2,1)
 @test t.dof == 1
 @test t.Q ≈ 1.233942980734545
 @test pvalue(t) ≈ 0.2666415904008932
+@test default_tail(t) == :right
 show(IOBuffer(), t)
 
 t = HypothesisTests.LjungBoxTest(sim_data_h0,5,2)
@@ -44,6 +46,7 @@ t = HypothesisTests.LjungBoxTest(sim_data_h0,5,2)
 @test t.dof == 2
 @test t.Q ≈ 3.2090126519163626
 @test pvalue(t) ≈ 0.36050846449240337
+@test default_tail(t) == :right
 show(IOBuffer(), t)
 
 sim_data_h1 = [

@@ -32,7 +32,7 @@ immutable KruskalWallisTest <: HypothesisTest
     tie_adjustment::Float64  # adjustment for ties
 end
 
-function KruskalWallisTest{T<:Real}(groups::AbstractVector{T}...) 
+function KruskalWallisTest{T<:Real}(groups::AbstractVector{T}...)
     (H, R_i, tieadj, n_i) = kwstats(groups...)
     if length(groups)<=3 && any(n_i .< 6)
         warn("This test is only asymptotically correct and might be inaccurate for the given group size")
@@ -43,6 +43,7 @@ end
 
 testname(::KruskalWallisTest) = "Kruskal-Wallis rank sum test (chi-square approximation)"
 population_param_of_interest(x::KruskalWallisTest) = ("Location parameters", "all equal", NaN) # parameter of interest: name, value under h0, point estimate
+default_tail(test::KruskalWallisTest) = :right
 
 function show_params(io::IO, x::KruskalWallisTest, ident)
     println(io, ident, "number of observation in each group: ", x.n_i)
@@ -75,7 +76,7 @@ function kwstats{T<:Real}(groups::AbstractVector{T}...)
     end
 
     # compute test statistic and correct for ties
-    H = 12 * sum(R_i.^2./n_i) / (n * (n + 1)) - 3 * (n + 1) 
+    H = 12 * sum(R_i.^2./n_i) / (n * (n + 1)) - 3 * (n + 1)
     H /= C
 
     (H, R_i, C, n_i)
