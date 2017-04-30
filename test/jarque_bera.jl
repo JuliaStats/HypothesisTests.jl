@@ -1,7 +1,7 @@
 using HypothesisTests, Base.Test
 using HypothesisTests: default_tail
 
-sim_data_h0 = [
+sim_data_h0 = 1.0 .+ [
     0.2972879845354616, 0.3823959677906078, -0.5976344767282311, -0.01044524463737564,
     -0.839026854388764, 0.31111133849833383, 2.2950878238373105, -2.2670863488005306,
     0.5299655761667461, 0.43142152642291204, 0.5837082875687786, 0.9632716050381906,
@@ -34,8 +34,8 @@ t = JarqueBeraTest(sim_data_h0)
 
 @test t.n == 102
 @test t.JB ≈ 1.0204197333021678
-@test t.m3 ≈ -0.020898241881743652
-@test t.m4 ≈ 2.5723646740153603
+@test t.skew ≈ -0.020527653857777352
+@test t.kurt ≈ 2.5117242352057993
 @test pvalue(t) ≈ 0.6003695680393418
 @test default_tail(t) == :right
 show(IOBuffer(), t)
@@ -51,8 +51,8 @@ t = JarqueBeraTest(sim_data_h1)
 
 @test t.n == 102
 @test t.JB ≈ 17.00081983024691
-@test t.m3 ≈ 0.014654996946875639
-@test t.m4 ≈ 0.06293028100717186
+@test t.skew ≈ 0.11785113019775637
+@test t.kurt ≈ 1.0138888888888888
 @test pvalue(t) ≈ 0.00020338498134114293
 @test default_tail(t) == :right
 show(IOBuffer(), t)

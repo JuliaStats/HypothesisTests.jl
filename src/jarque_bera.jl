@@ -25,40 +25,58 @@
 export JarqueBeraTest
 
 immutable JarqueBeraTest <: HypothesisTest
-    n       ::Int           # number of observations
-    JB      ::Float64       # test statistic
-    m3      ::Float64       # skewness
-    m4      ::Float64       # excess kurtosis
+    n::Int         # number of observations
+    JB::Float64    # test statistic
+    skew::Float64  # skewness
+    kurt::Float64  # excess kurtosis
 end
 
 """
-    JarqueBeraTest(y)
+    JarqueBeraTest(y::AbstractVector)
 
-Compute the Jarque-Bera statistic to test the null hypothesis that a series `y` comes from a normal distribution.
+Compute the Jarque-Bera statistic to test the null hypothesis that a real-valued vector `y`
+is normally distributed.
 
-Note that the p-values might be distorted in small samples.
+Note that the approximation by the Chi-squared distribution does not work well and the
+speed of convergence is slow. In small samples, the test tends to be over-sized for
+nominal levels up to about 3% and under-sized for larger nominal levels (Mantalos, 2010).
 
-External links
+# References
 
-* [Jarque-Bera test on Wikipedia](https://en.wikipedia.org/wiki/Jarque–Bera_test)
+  * Panagiotis Mantalos, 2011, "The three different measures of the sample skewness and
+    kurtosis and the effects to the Jarque-Bera test for normality", International Journal
+    of Computational Economics and Econometrics, Vol. 2, No. 1,
+    [link](http://dx.doi.org/10.1504/IJCEE.2011.040576).
+
+# External links
+
+  * [Jarque-Bera test on Wikipedia](https://en.wikipedia.org/wiki/Jarque–Bera_test)
 """
-
 function JarqueBeraTest{T<:Real}(y::AbstractVector{T})
     n = length(y)
-    m1 = sum(y)/n
-    m2 = sum((y - m1).^2)/n
-    m3 = sum((y - m1).^3)/n
-    m4 = sum((y - m1).^4)/n
-    b1 = (m3/m2^(3/2))^2
-    b2 = (m4/m2^2)
+    M = Base.promote_op(/, T, typeof(n))
+    m1r = m2r = m3r = m4r = zero(M)
+    @inbounds for yi in y # compute raw moments
+        m1r += yi / n
+        m2r += yi^2 / n
+        m3r += yi^3 / n
+        m4r += yi^4 / n
+    end
+    # compute central moments (http://mathworld.wolfram.com/CentralMoment.html)
+    m2 = -m1r^2 + m2r
+    m3 = 2 * m1r^3 - 3 * m1r * m2r + m3r
+    m4 = -3 * m1r^4 + 6 * m1r^2 * m2r - 4 * m1r * m3r + m4r
 
-    stat = n * b1/6 + n*(b2 - 3)^2/24
-    JarqueBeraTest(n, stat, m3, m4)
+    skew = m3 / m2^(3/2)
+    kurt = m4 / m2^2
+
+    stat = n * skew^2 / 6 + n * (kurt - 3)^2 / 24
+    JarqueBeraTest(n, stat, skew, kurt)
 end
 
 testname(::JarqueBeraTest) = "Jarque-Bera normality test"
 population_param_of_interest(x::JarqueBeraTest) =
-    ("skewness and excess kurtosis", "both zero", "$(x.m3) and $(x.m4-3)")
+    ("skewness and kurtosis", "0 and 3", "$(x.skew) and $(x.kurt)")
 default_tail(test::JarqueBeraTest) = :right
 
 function show_params(io::IO, x::JarqueBeraTest, ident)
