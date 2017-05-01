@@ -42,7 +42,7 @@ end
 population_param_of_interest(x::PowerDivergenceTest) = ("Multinomial Probabilities", x.theta0, x.thetahat)
 default_tail(test::PowerDivergenceTest) = :right
 
-pvalue(x::PowerDivergenceTest; tail=:right) = pvalue(Chisq(x.df),x.stat; tail=tail)
+pvalue(x::PowerDivergenceTest; tail=:both) = pvalue(Chisq(x.df),x.stat; tail=tail)
 
 function StatsBase.confint(x::PowerDivergenceTest, alpha::Float64=0.05;
                            tail::Symbol=:both, method::Symbol=:sison_glaz, correct::Bool=true,
