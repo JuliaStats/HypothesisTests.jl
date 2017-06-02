@@ -76,10 +76,20 @@ function get_tail(test::HypothesisTest)
     end
 end
 
+function get_alpha(test::HypothesisTest)
+    if :alpha in fieldnames(test)
+        getfield(test, :alpha)
+    else
+        0.05
+    end
+end
+
 # Pretty-print
 function Base.show{T<:HypothesisTest}(io::IO, test::T)
     println(io, testname(test))
     println(io, repeat("-", length(testname(test))))
+    
+    conf_string = string((1 - get_alpha(test)) * 100) * "%"
 
     # population details
     has_ci = applicable(StatsBase.confint, test)
@@ -89,16 +99,16 @@ function Base.show{T<:HypothesisTest}(io::IO, test::T)
     println(io, "    value under h_0:         $param_under_h0")
     println(io, "    point estimate:          $param_estimate")
     if has_ci
-        println(io, "    95% confidence interval: $(StatsBase.confint(test))")
+        println(io, "    $conf_string confidence interval: $(StatsBase.confint(test))") # TODO indent all details like this one
     end
     println(io)
 
     # test summary
     tail = get_tail(test)
     p = pvalue(test, tail=tail)
-    outcome = if p > 0.05 "fail to reject" else "reject" end
+    outcome = if p > get_alpha(test) "fail to reject" else "reject" end
     println(io, "Test summary:")
-    println(io, "    outcome with 95% confidence: $outcome h_0")
+    println(io, "    outcome with $conf_string confidence: $outcome h_0") # TODO indent all details like this one
     if tail == :both
         println(io, "    two-sided p-value:           $p")
     elseif tail == :left || tail == :right
