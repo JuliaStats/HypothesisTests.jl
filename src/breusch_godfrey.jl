@@ -76,4 +76,4 @@ function show_params(io::IO, x::BreuschGodfreyTest, ident)
     println(io, ident, "T*R^2 statistic:                ", x.BG)
 end
 
-pvalue(x::BreuschGodfreyTest) = pvalue(Chisq(x.lag), x.BG; tail=:right)
+pvalue(x::BreuschGodfreyTest; tail=default_tail(x)) = pvalue(Chisq(x.lag), x.BG; tail=tail)

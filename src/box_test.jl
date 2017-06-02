@@ -71,7 +71,7 @@ function show_params(io::IO, x::BoxPierceTest, ident)
     println(io, ident, "Q statistic:                    ", x.Q)
 end
 
-pvalue(x::BoxPierceTest) = pvalue(Chisq(x.lag-x.dof), x.Q; tail=:right)
+pvalue(x::BoxPierceTest; tail=default_tail(x)) = pvalue(Chisq(x.lag-x.dof), x.Q; tail=tail)
 
 #Ljung-Box test
 
@@ -120,4 +120,4 @@ function show_params(io::IO, x::LjungBoxTest, ident)
     println(io, ident, "Q statistic:                    ", x.Q)
 end
 
-pvalue(x::LjungBoxTest) = pvalue(Chisq(x.lag-x.dof), x.Q; tail=:right)
+pvalue(x::LjungBoxTest; tail=default_tail(x)) = pvalue(Chisq(x.lag-x.dof), x.Q; tail=tail)

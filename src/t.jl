@@ -33,13 +33,13 @@ pvalue(x::TTest; tail=:both) = pvalue(TDist(x.df), x.t; tail=tail)
 default_tail(test::TTest) = :both
 
 # confidence interval by inversion
-function StatsBase.confint(x::TTest, alpha::Float64=0.05; tail=:both)
+function StatsBase.confint(x::TTest, alpha::Float64=get_alpha(x); tail=get_tail(x))
     check_alpha(alpha)
 
     if tail == :left
-        (-Inf, StatsBase.confint(x, alpha*2)[2])
+        (-Inf, StatsBase.confint(x, alpha*2, tail=:both)[2]) # tail=:both required as recursive anchor
     elseif tail == :right
-        (StatsBase.confint(x, alpha*2)[1], Inf)
+        (StatsBase.confint(x, alpha*2, tail=:both)[1], Inf)
     elseif tail == :both
         q = quantile(TDist(x.df), 1-alpha/2)
         (x.xbar-q*x.stderr, x.xbar+q*x.stderr)
@@ -58,6 +58,8 @@ immutable OneSampleTTest <: TTest
     stderr::Real # empirical standard error
     t::Real      # t-statistic
     μ0::Real     # mean under h_0
+    tail::Symbol # :left, :right, or :both
+    alpha::Real  # alpha value
 end
 
 testname(::OneSampleTTest) = "One sample t-test"
@@ -70,19 +72,21 @@ function show_params(io::IO, x::OneSampleTTest, ident="")
     println(io, ident, "empirical standard error: $(x.stderr)")
 end
 
-function OneSampleTTest(xbar::Real, stddev::Real, n::Int, μ0::Real=0)
+function OneSampleTTest(xbar::Real, stddev::Real, n::Int, μ0::Real=0; tail::Symbol=:both, alpha::Real=0.05)
     stderr = stddev/sqrt(n)
     t = (xbar-μ0)/stderr
     df = n-1
-    OneSampleTTest(n, xbar, df, stderr, t, μ0)
+    OneSampleTTest(n, xbar, df, stderr, t, μ0, tail, alpha)
 end
 
-OneSampleTTest{T<:Real}(v::AbstractVector{T}, μ0::Real=0) = OneSampleTTest(mean(v), std(v), length(v), μ0)
+OneSampleTTest{T<:Real}(v::AbstractVector{T}, μ0::Real=0; tail::Symbol=:both, alpha::Real=0.05) =
+    OneSampleTTest(mean(v), std(v), length(v), μ0, tail=tail, alpha=alpha)
 
-function OneSampleTTest{T<:Real, S<:Real}(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0)
+function OneSampleTTest{T<:Real, S<:Real}(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0;
+                        tail::Symbol=:both, alpha::Real=0.05)
     check_same_length(x, y)
 
-    OneSampleTTest(x - y, μ0)
+    OneSampleTTest(x - y, μ0, tail=tail, alpha=alpha)
 end
 
 
@@ -96,6 +100,8 @@ immutable EqualVarianceTTest <: TwoSampleTTest
     stderr::Real # empirical standard error
     t::Real      # t-statistic
     μ0::Real     # mean difference under h_0
+    tail::Symbol # :left, :right, or :both
+    alpha::Real  # alpha value
 end
 
 function show_params(io::IO, x::TwoSampleTTest, ident="")
@@ -108,14 +114,15 @@ end
 testname(::EqualVarianceTTest) = "Two sample t-test (equal variance)"
 population_param_of_interest(x::TwoSampleTTest) = ("Mean difference", x.μ0, x.xbar) # parameter of interest: name, value under h0, point estimate
 
-function EqualVarianceTTest{T<:Real,S<:Real}(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0)
+function EqualVarianceTTest{T<:Real,S<:Real}(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0;
+                                             tail::Symbol=:both, alpha::Real=0.05)
     nx, ny = length(x), length(y)
     xbar = mean(x) - mean(y)
     stddev = sqrt(((nx - 1) * var(x) + (ny - 1) * var(y)) / (nx + ny - 2))
     stderr = stddev * sqrt(1/nx + 1/ny)
     t = (xbar - μ0) / stderr
     df = nx + ny - 2
-    EqualVarianceTTest(nx, ny, xbar, df, stderr, t, μ0)
+    EqualVarianceTTest(nx, ny, xbar, df, stderr, t, μ0, tail, alpha)
 end
 
 
@@ -129,16 +136,19 @@ immutable UnequalVarianceTTest <: TwoSampleTTest
     stderr::Real # empirical standard error
     t::Real      # t-statistic
     μ0::Real     # mean under h_0
+    tail::Symbol # :left, :right, or :both
+    alpha::Real  # alpha value
 end
 
 testname(::UnequalVarianceTTest) = "Two sample t-test (unequal variance)"
 
-function UnequalVarianceTTest{T<:Real,S<:Real}(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0)
+function UnequalVarianceTTest{T<:Real,S<:Real}(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0;
+                                               tail::Symbol=:both, alpha::Real=0.05)
     nx, ny = length(x), length(y)
     xbar = mean(x)-mean(y)
     varx, vary = var(x), var(y)
     stderr = sqrt(varx/nx + vary/ny)
     t = (xbar-μ0)/stderr
     df = (varx / nx + vary / ny)^2 / ((varx / nx)^2 / (nx - 1) + (vary / ny)^2 / (ny - 1))
-    UnequalVarianceTTest(nx, ny, xbar, df, stderr, t, μ0)
+    UnequalVarianceTTest(nx, ny, xbar, df, stderr, t, μ0, tail, alpha)
 end
