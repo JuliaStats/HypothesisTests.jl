@@ -84,6 +84,9 @@ function get_alpha(test::HypothesisTest)
     end
 end
 
+# Utility for pretty-printing: Append white space so that length(with_trailing_whitespace(s)) = max(len, length(s))
+with_trailing_whitespace(s::String, len::Int) = s * join(repeat([" "], outer=max(len - length(s), 0)), "")
+
 # Pretty-print
 function Base.show{T<:HypothesisTest}(io::IO, test::T)
     println(io, testname(test))
@@ -93,13 +96,14 @@ function Base.show{T<:HypothesisTest}(io::IO, test::T)
 
     # population details
     has_ci = applicable(StatsBase.confint, test)
+    label_len = has_ci ? length(conf_string) + 21 : 22 # 21 is length of ' confidence interval:', 22 that of 'parameter of interest:'
     (param_name, param_under_h0, param_estimate) = population_param_of_interest(test)
     println(io, "Population details:")
-    println(io, "    parameter of interest:   $param_name")
-    println(io, "    value under h_0:         $param_under_h0")
-    println(io, "    point estimate:          $param_estimate")
+    println(io, "    $(with_trailing_whitespace("parameter of interest:", label_len)) $param_name")
+    println(io, "    $(with_trailing_whitespace("value under h_0", label_len)) $param_under_h0")
+    println(io, "    $(with_trailing_whitespace("point estimate", label_len)) $param_estimate")
     if has_ci
-        println(io, "    $conf_string confidence interval: $(StatsBase.confint(test))") # TODO indent all details like this one
+        println(io, "    $conf_string confidence interval: $(StatsBase.confint(test))")
     end
     println(io)
 
@@ -108,13 +112,14 @@ function Base.show{T<:HypothesisTest}(io::IO, test::T)
     p = pvalue(test, tail=tail)
     outcome = if p > get_alpha(test) "fail to reject" else "reject" end
     println(io, "Test summary:")
-    println(io, "    outcome with $conf_string confidence: $outcome h_0") # TODO indent all details like this one
+    label_len = length(conf_string) + 25 # 25 is length of 'outcome with  confidence:'
+    println(io, "    outcome with $conf_string confidence: $outcome h_0")
     if tail == :both
-        println(io, "    two-sided p-value:           $p")
+        println(io, "    $(with_trailing_whitespace("two-sided p-value:", label_len)) $p")
     elseif tail == :left || tail == :right
-        println(io, "    one-sided p-value:           $p")
+        println(io, "    $(with_trailing_whitespace("one-sided p-value:", label_len)) $p")
     else
-        println(io, "    p-value:                     $p")
+        println(io, "    $(with_trailing_whitespace("p-value:", label_len)) $p")
     end
     println(io)
 
