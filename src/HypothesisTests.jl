@@ -68,6 +68,14 @@ function check_alpha(alpha::Float64)
     end
 end
 
+function get_tail(test::HypothesisTest)
+    if :tail in fieldnames(test)
+        getfield(test, :tail)
+    else
+        default_tail(test)
+    end
+end
+
 # Pretty-print
 function Base.show{T<:HypothesisTest}(io::IO, test::T)
     println(io, testname(test))
@@ -86,9 +94,9 @@ function Base.show{T<:HypothesisTest}(io::IO, test::T)
     println(io)
 
     # test summary
-    p = pvalue(test)
+    tail = get_tail(test)
+    p = pvalue(test, tail=tail)
     outcome = if p > 0.05 "fail to reject" else "reject" end
-    tail = default_tail(test)
     println(io, "Test summary:")
     println(io, "    outcome with 95% confidence: $outcome h_0")
     if tail == :both
