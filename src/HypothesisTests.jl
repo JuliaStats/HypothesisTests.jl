@@ -68,21 +68,16 @@ function check_alpha(alpha::Float64)
     end
 end
 
-function get_tail(test::HypothesisTest)
-    if :tail in fieldnames(test)
-        getfield(test, :tail)
+# Utility to get an optional field (e.g., :tail and :alpha)
+getfield(value::HypothesisTest, name::Symbol, default::Any) =
+    if name in fieldnames(value)
+        Base.getfield(value, name)
     else
-        default_tail(test)
+        default
     end
-end
 
-function get_alpha(test::HypothesisTest)
-    if :alpha in fieldnames(test)
-        getfield(test, :alpha)
-    else
-        0.05
-    end
-end
+get_tail(test::HypothesisTest) = getfield(test, :tail, default_tail(test))
+get_alpha(test::HypothesisTest) = getfield(test, :alpha, 0.05)
 
 # Utility for pretty-printing: Append white space so that length(with_trailing_whitespace(s)) = max(len, length(s))
 with_trailing_whitespace(s::String, len::Int) = s * join(repeat([" "], outer=max(len - length(s), 0)), "")
