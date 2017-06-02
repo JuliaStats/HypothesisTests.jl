@@ -60,7 +60,10 @@ function show_params(io::IO, x::RayleighTest, ident="")
     println(io, ident, "test statistic:         $(x.Rbar^2 * x.n)")
 end
 
-function pvalue(x::RayleighTest)
+function pvalue(x::RayleighTest; tail=default_tail(x))
+    if tail != default_tail(x) # warn that tail is not used here
+        warn("tail=$tail has no effect on the computation of the p value")
+    end
     Z = x.Rbar^2 * x.n
     x.n > 1e6 ? exp(-Z) :
         exp(-Z)*(1+(2*Z-Z^2)/(4*x.n)-(24*Z - 132*Z^2 + 76*Z^3 - 9*Z^4)/(288*x.n^2))

@@ -207,6 +207,7 @@ end
 testname(::ADFTest) = "Augmented Dickey-Fuller unit root test"
 population_param_of_interest(x::ADFTest) =
     ("coefficient on lagged non-differenced variable", 0, x.coef)
+default_tail(test::ADFTest) = :left
 
 function show_params(io::IO, x::ADFTest, ident)
     println(io, ident, "sample size in regression:          ", x.n)
@@ -215,4 +216,4 @@ function show_params(io::IO, x::ADFTest, ident)
     println(io, ident, "Critical values at 1%, 5%, and 10%: ", x.cv')
 end
 
-pvalue(x::ADFTest) = HypothesisTests.pvalue(Normal(0, 1), adf_pv_aux(x.stat, x.deterministic); tail=:left)
+pvalue(x::ADFTest; tail=default_tail(x)) = HypothesisTests.pvalue(Normal(0, 1), adf_pv_aux(x.stat, x.deterministic); tail=tail)
