@@ -87,7 +87,9 @@ function Base.show{T<:HypothesisTest}(io::IO, test::T)
     println(io, testname(test))
     println(io, repeat("-", length(testname(test))))
     
-    conf_string = string((1 - get_alpha(test)) * 100) * "%"
+    alpha = get_alpha(test)
+    tail  = get_tail(test)
+    conf_string = string((1 - alpha) * 100) * "%"
 
     # population details
     has_ci = applicable(StatsBase.confint, test)
@@ -98,14 +100,13 @@ function Base.show{T<:HypothesisTest}(io::IO, test::T)
     println(io, "    $(with_trailing_whitespace("value under h_0", label_len)) $param_under_h0")
     println(io, "    $(with_trailing_whitespace("point estimate", label_len)) $param_estimate")
     if has_ci
-        println(io, "    $conf_string confidence interval: $(StatsBase.confint(test))")
+        println(io, "    $conf_string confidence interval: $(StatsBase.confint(test, alpha, tail=tail))")
     end
     println(io)
 
     # test summary
-    tail = get_tail(test)
     p = pvalue(test, tail=tail)
-    outcome = if p > get_alpha(test) "fail to reject" else "reject" end
+    outcome = if p > alpha "fail to reject" else "reject" end
     println(io, "Test summary:")
     label_len = length(conf_string) + 25 # 25 is length of 'outcome with  confidence:'
     println(io, "    outcome with $conf_string confidence: $outcome h_0")
