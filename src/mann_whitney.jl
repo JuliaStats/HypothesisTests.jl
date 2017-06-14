@@ -66,7 +66,7 @@ ExactMannWhitneyUTest{S<:Real,T<:Real}(x::AbstractVector{S}, y::AbstractVector{T
 
 testname(::ExactMannWhitneyUTest) = "Exact Mann-Whitney U test"
 population_param_of_interest(x::ExactMannWhitneyUTest) = ("Location parameter (pseudomedian)", 0, x.median) # parameter of interest: name, value under h0, point estimate
-default_tail(test::ExactMannWhitneyUTest) = :both
+tail(test::ExactMannWhitneyUTest) = :both
 
 function show_params(io::IO, x::ExactMannWhitneyUTest, ident)
     println(io, ident, "number of observations in each group: ", [x.nx, x.ny])
@@ -153,7 +153,7 @@ ApproximateMannWhitneyUTest{S<:Real,T<:Real}(x::AbstractVector{S}, y::AbstractVe
 
 testname(::ApproximateMannWhitneyUTest) = "Approximate Mann-Whitney U test"
 population_param_of_interest(x::ApproximateMannWhitneyUTest) = ("Location parameter (pseudomedian)", 0, x.median) # parameter of interest: name, value under h0, point estimate
-default_tail(test::ApproximateMannWhitneyUTest) = :both
+tail(test::ApproximateMannWhitneyUTest) = :both
 
 function show_params(io::IO, x::ApproximateMannWhitneyUTest, ident)
     println(io, ident, "number of observations in each group: ", [x.nx, x.ny])

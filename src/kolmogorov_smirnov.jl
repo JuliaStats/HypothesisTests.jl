@@ -31,7 +31,7 @@ export
 @compat abstract type ExactKSTest <: KSTest end
 
 population_param_of_interest(x::KSTest) = ("Supremum of CDF differences", 0.0, x.δ) # parameter of interest: name, value under h0, point estimate
-default_tail(test::KSTest) = :both
+tail(test::KSTest) = :both
 
 ## ONE SAMPLE KS-TEST
 

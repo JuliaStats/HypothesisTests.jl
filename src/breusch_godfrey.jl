@@ -68,7 +68,7 @@ end
 testname(::BreuschGodfreyTest) = "Breusch-Godfrey autocorrelation test"
 population_param_of_interest(x::BreuschGodfreyTest) =
     ("coefficients on lagged residuals up to lag p", "all zero", NaN)
-default_tail(test::BreuschGodfreyTest) = :right
+tail(test::BreuschGodfreyTest) = :right
 
 function show_params(io::IO, x::BreuschGodfreyTest, ident)
     println(io, ident, "number of observations:         ", x.n)

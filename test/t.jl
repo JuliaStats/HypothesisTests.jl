@@ -1,5 +1,5 @@
 using HypothesisTests, Base.Test
-using HypothesisTests: default_tail
+using HypothesisTests: tail
 
 ## ONE SAMPLE T-TEST
 
@@ -10,7 +10,7 @@ tst = OneSampleTTest(-5:10)
 @test abs(pvalue(tst) - 0.0530) <= 1e-4
 @test abs(pvalue(tst; tail=:left) - 0.9735) <= 1e-4
 @test abs(pvalue(tst; tail=:right) - 0.0265) <= 1e-4
-@test default_tail(tst) == :both
+@test tail(tst) == :both
 show(IOBuffer(), tst)
 
 tst = OneSampleTTest(mean(-5:10), std(-5:10), 16)
@@ -50,7 +50,7 @@ tst = EqualVarianceTTest(a1, a2)
 @test abs(tst.t - 1.959) <= 1e-3
 @test abs(pvalue(tst) - 0.078) <= 1e-3
 @test all(abs.([confint(tst)...] - [-0.0131, 0.2031]) .<= 1e-4)
-@test default_tail(tst) == :both
+@test tail(tst) == :both
 show(IOBuffer(), tst)
 
 tst = UnequalVarianceTTest(a1, a2)
@@ -58,5 +58,5 @@ tst = UnequalVarianceTTest(a1, a2)
 @test abs(tst.t - 1.959) <= 1e-3
 @test abs(pvalue(tst) - 0.091) <= 1e-3
 @test all(abs.([confint(tst)...] - [-0.0196, 0.2096]) .<= 1e-4)
-@test default_tail(tst) == :both
+@test tail(tst) == :both
 show(IOBuffer(), tst)

@@ -68,24 +68,13 @@ function check_alpha(alpha::Float64)
     end
 end
 
-# Utility to get an optional field (e.g., :tail and :alpha)
-getfield(value::HypothesisTest, name::Symbol, default::Any) =
-    if name in fieldnames(value)
-        Base.getfield(value, name)
-    else
-        default
-    end
-
-get_tail(test::HypothesisTest) = getfield(test, :tail, default_tail(test))
-get_alpha(test::HypothesisTest) = getfield(test, :alpha, 0.05)
-
 # Pretty-print
 function Base.show{T<:HypothesisTest}(io::IO, test::T)
     println(io, testname(test))
     println(io, repeat("-", length(testname(test))))
     
     # utilities for pretty-printing
-    conf_string = string(floor((1 - get_alpha(test)) * 100, 6)) # limit to 6 decimals in %
+    conf_string = string(floor((1 - alpha(test)) * 100, 6)) # limit to 6 decimals in %
     prettify_detail(label::String, value::Any, len::Int) = # len is max length of label
         "    " * label * " "^max(len - length(label), 0) * string(value)
 
@@ -102,9 +91,9 @@ function Base.show{T<:HypothesisTest}(io::IO, test::T)
     println(io)
 
     # test summary
-    tail = get_tail(test)
+    tail = HypothesisTests.tail(test)
     p = pvalue(test, tail=tail)
-    outcome = if p > get_alpha(test) "fail to reject" else "reject" end
+    outcome = if p > alpha(test) "fail to reject" else "reject" end
     tailvalue =
         if     tail == :both "two-sided p-value:"
         elseif tail == :left || tail == :right "one-sided p-value ($(string(tail)) tail):"
@@ -122,8 +111,9 @@ end
 # parameter of interest: name, value under h0, point estimate
 population_param_of_interest{T<:HypothesisTest}(test::T) = ("not implemented yet", NaN, NaN)
 
-# is the test one- or two-sided
-default_tail(test::HypothesisTest) = :undefined
+# is the test one- or two-sided?
+tail(test::HypothesisTest)  = :undefined    # overloaded for defaults or field access
+alpha(test::HypothesisTest) = 0.05
 
 function show_params{T<:HypothesisTest}(io::IO, test::T, ident="")
     fieldidx = find(Bool[t<:Number for t in T.types])

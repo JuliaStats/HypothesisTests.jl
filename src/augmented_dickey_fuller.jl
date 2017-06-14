@@ -207,7 +207,7 @@ end
 testname(::ADFTest) = "Augmented Dickey-Fuller unit root test"
 population_param_of_interest(x::ADFTest) =
     ("coefficient on lagged non-differenced variable", 0, x.coef)
-default_tail(test::ADFTest) = :left
+tail(test::ADFTest) = :left
 
 function show_params(io::IO, x::ADFTest, ident)
     println(io, ident, "sample size in regression:          ", x.n)

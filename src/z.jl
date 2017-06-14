@@ -30,7 +30,7 @@ export OneSampleZTest, TwoSampleZTest, EqualVarianceZTest,
 
 pvalue(x::ZTest; tail=:both) = pvalue(Normal(0.0, 1.0), x.z; tail=tail)
 
-default_tail(test::ZTest) = :both
+tail(test::ZTest) = :both
 
 # confidence interval by inversion
 function StatsBase.confint(x::ZTest, alpha::Float64=0.05; tail=:both)

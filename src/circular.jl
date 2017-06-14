@@ -53,7 +53,7 @@ end
 
 testname(::RayleighTest) = "Rayleigh test"
 population_param_of_interest(x::RayleighTest) = ("Mean resultant length", 0, x.Rbar) # parameter of interest: name, value under h0, point estimate
-default_tail(test::RayleighTest) = :both
+tail(test::RayleighTest) = :both
 
 function show_params(io::IO, x::RayleighTest, ident="")
     println(io, ident, "number of observations: $(x.n)")
@@ -102,7 +102,7 @@ FisherTLinearAssociation{S <: Real, T <: Real}(theta::Vector{S},
 testname(::FisherTLinearAssociation) =
     "T-linear test of circular-circular association"
 population_param_of_interest(x::FisherTLinearAssociation) = ("Circular correlation coefficient", 0, x.rho_t) # parameter of interest: name, value under h0, point estimate
-default_tail(test::FisherTLinearAssociation) = :both
+tail(test::FisherTLinearAssociation) = :both
 
 function show_params(io::IO, x::FisherTLinearAssociation, ident="")
     println(io, ident, "number of observations: [$(length(x.theta)),$(length(x.phi))]")
@@ -215,7 +215,7 @@ end
 
 testname(::JammalamadakaCircularCorrelation) = "Jammalamadaka circular correlation"
 population_param_of_interest(x::JammalamadakaCircularCorrelation) = ("Circular-circular correlation coefficient", 0, x.r) # parameter of interest: name, value under h0, point estimate
-default_tail(test::JammalamadakaCircularCorrelation) = :both
+tail(test::JammalamadakaCircularCorrelation) = :both
 
 function show_params(io::IO, x::JammalamadakaCircularCorrelation, ident="")
     println(io, ident, "test statistic: $(x.Z)")

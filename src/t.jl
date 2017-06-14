@@ -28,12 +28,12 @@ export OneSampleTTest, TwoSampleTTest, EqualVarianceTTest,
 @compat abstract type TTest <: HypothesisTest end
 @compat abstract type TwoSampleTTest <: TTest end
 
-pvalue(x::TTest; tail=:both) = pvalue(TDist(x.df), x.t; tail=tail)
-
-default_tail(test::TTest) = :both
+pvalue(x::TTest; tail=x.tail) = pvalue(TDist(x.df), x.t; tail=tail)
+tail(x::TTest)  = x.tail    # defaults set by constructors
+alpha(x::TTest) = x.alpha
 
 # confidence interval by inversion
-function StatsBase.confint(x::TTest, alpha::Float64=get_alpha(x); tail=get_tail(x))
+function StatsBase.confint(x::TTest, alpha::Float64=x.alpha; tail::Symbol=x.tail)
     check_alpha(alpha)
 
     if tail == :left

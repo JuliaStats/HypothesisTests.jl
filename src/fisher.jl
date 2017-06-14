@@ -45,7 +45,7 @@ end
 
 testname(::FisherExactTest) = "Fisher's exact test"
 population_param_of_interest(x::FisherExactTest) = ("Odds ratio", 1.0, x.ω) # parameter of interest: name, value under h0, point estimate
-default_tail(test::FisherExactTest) = :both
+tail(test::FisherExactTest) = :both
 
 # The sizing argument to print_matrix was removed during the 0.5 dev period
 if VERSION < v"0.5.0-dev+1936"

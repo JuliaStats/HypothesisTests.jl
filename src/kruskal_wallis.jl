@@ -43,7 +43,7 @@ end
 
 testname(::KruskalWallisTest) = "Kruskal-Wallis rank sum test (chi-square approximation)"
 population_param_of_interest(x::KruskalWallisTest) = ("Location parameters", "all equal", NaN) # parameter of interest: name, value under h0, point estimate
-default_tail(test::KruskalWallisTest) = :right
+tail(test::KruskalWallisTest) = :right
 
 function show_params(io::IO, x::KruskalWallisTest, ident)
     println(io, ident, "number of observation in each group: ", x.n_i)
