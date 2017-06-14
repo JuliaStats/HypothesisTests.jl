@@ -60,9 +60,9 @@ function show_params(io::IO, x::RayleighTest, ident="")
     println(io, ident, "test statistic:         $(x.Rbar^2 * x.n)")
 end
 
-function pvalue(x::RayleighTest; tail=default_tail(x))
-    if tail != default_tail(x) # warn that tail is not used here
-        warn("tail=$tail has no effect on the computation of the p value")
+function pvalue(x::RayleighTest; tail=:both) # :both is default tail
+    if tail != :both # warn that tail is not used here
+        throw(ArgumentError(":both is the only valid value for the tail of a RayleighTest"))
     end
     Z = x.Rbar^2 * x.n
     x.n > 1e6 ? exp(-Z) :

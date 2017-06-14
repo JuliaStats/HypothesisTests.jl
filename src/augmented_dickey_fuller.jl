@@ -216,4 +216,5 @@ function show_params(io::IO, x::ADFTest, ident)
     println(io, ident, "Critical values at 1%, 5%, and 10%: ", x.cv')
 end
 
-pvalue(x::ADFTest; tail=default_tail(x)) = HypothesisTests.pvalue(Normal(0, 1), adf_pv_aux(x.stat, x.deterministic); tail=tail)
+pvalue(x::ADFTest; tail=:left) =    # :left is default tail
+    HypothesisTests.pvalue(Normal(0, 1), adf_pv_aux(x.stat, x.deterministic); tail=tail)
