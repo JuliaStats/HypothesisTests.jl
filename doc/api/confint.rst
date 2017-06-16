@@ -3,11 +3,12 @@
 Confidence Interval
 ==============================================
 
-.. function:: confint(test::HypothesisTest, alpha=0.05; tail=:both)
+.. function:: confint(test::HypothesisTest, alpha=alpha(test); tail=tail(test))
 
-    Compute a confidence interval C with coverage 1-``alpha``.
+    Compute a confidence interval C with coverage 1-``alpha``
+    (``alpha=0.05`` is the default for all tests).
 
-    If ``tail`` is ``:both`` (default), then a two-sided confidence
+    If ``tail`` is ``:both`` (default for most tests), then a two-sided confidence
     interval is returned. If ``tail`` is ``:left`` or
     ``:right``, then a one-sided confidence interval is returned
 
