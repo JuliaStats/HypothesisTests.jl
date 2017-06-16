@@ -1,6 +1,8 @@
 using HypothesisTests, Base.Test
 using HypothesisTests: tail
 
+iobuffer = IOBuffer() # define once to ease temporary redirection to STDOUT
+
 ## ONE SAMPLE T-TEST
 
 # One sample
@@ -11,7 +13,7 @@ tst = OneSampleTTest(-5:10)
 @test abs(pvalue(tst; tail=:left) - 0.9735) <= 1e-4
 @test abs(pvalue(tst; tail=:right) - 0.0265) <= 1e-4
 @test tail(tst) == :both
-show(IOBuffer(), tst)
+show(iobuffer, tst)
 
 tst = OneSampleTTest(mean(-5:10), std(-5:10), 16)
 @test abs(pvalue(tst) - 0.0530) <= 1e-4
@@ -24,7 +26,7 @@ c = confint(tst; tail=:left)
 c = confint(tst; tail=:right)
 @test abs(c[1] - 0.4135) .<= 1e-4
 @test c[2] == Inf
-show(IOBuffer(), tst)
+show(iobuffer, tst)
 
 tst = OneSampleTTest(-10:5)
 @test abs(pvalue(tst) - 0.0530) <= 1e-4
@@ -33,7 +35,7 @@ tst = OneSampleTTest(-10:5)
 @test all(abs.([confint(tst)...] - [-5.0369, 0.0369]) .<= 1e-4)
 @test abs.(confint(tst; tail=:left)[2] - (-0.4135)) .<= 1e-4
 @test abs.(confint(tst; tail=:right)[1] - (-4.5865)) .<= 1e-4
-show(IOBuffer(), tst)
+show(iobuffer, tst)
 
 # Paired samples
 @test abs(pvalue(OneSampleTTest([1, 1, 2, 1, 0], [0, 1, 1, 1, 0])) - 0.1778) <= 1e-4
@@ -51,7 +53,7 @@ tst = EqualVarianceTTest(a1, a2)
 @test abs(pvalue(tst) - 0.078) <= 1e-3
 @test all(abs.([confint(tst)...] - [-0.0131, 0.2031]) .<= 1e-4)
 @test tail(tst) == :both
-show(IOBuffer(), tst)
+show(iobuffer, tst)
 
 tst = UnequalVarianceTTest(a1, a2)
 @test abs(tst.df - 7.03) <= 0.01
@@ -59,4 +61,4 @@ tst = UnequalVarianceTTest(a1, a2)
 @test abs(pvalue(tst) - 0.091) <= 1e-3
 @test all(abs.([confint(tst)...] - [-0.0196, 0.2096]) .<= 1e-4)
 @test tail(tst) == :both
-show(IOBuffer(), tst)
+show(iobuffer, tst)
