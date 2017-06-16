@@ -92,7 +92,7 @@ function Base.show{T<:HypothesisTest}(io::IO, test::T)
 
     # test summary
     tail = HypothesisTests.tail(test)
-    p = pvalue(test, tail=tail)
+    p = pvalue(test) # obeys value of HypothesisTests.tail(test) if applicable
     outcome = if p > alpha(test) "fail to reject" else "reject" end
     tailvalue =
         if     tail == :both "two-sided p-value:"
