@@ -6,6 +6,7 @@ t = BinomialTest(26, 78)
 @test pvalue(t, tail=:left) ≈ 0.002167440441753716
 @test pvalue(t, tail=:right) ≈ 0.9989844298129187
 @test tail(t) == :both
+# @test HypothesisTests.default_tail(t) == :both
 @test_ci_approx confint(t) (0.23058523962930383, 0.4491666887959782)
 @test_ci_approx confint(t, tail=:left) (0.0, 0.4313047758370174)
 @test_ci_approx confint(t, tail=:right) (0.2451709633730693, 1.0)
@@ -59,6 +60,7 @@ x = [55, 58, 61, 61, 62, 62, 62, 63, 63, 64, 66, 68, 68, 69, 69, 69, 70, 71, 72,
 @test pvalue(SignTest(x, 70), tail=:left) ≈ 0.0022125244140625013
 @test pvalue(SignTest(x, 70), tail=:right) ≈ 0.9996356964111328
 @test tail(SignTest(x)) == :both
+# @test HypothesisTests.default_tail(SignTest(x)) == :both
 @test_ci_approx confint(SignTest(x, 70)) (62, 69)
 @test_ci_approx confint(SignTest(x, 70), 0.0002) (61, 71)
 show(IOBuffer(), SignTest(x, 70))

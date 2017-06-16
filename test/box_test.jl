@@ -37,6 +37,7 @@ t = HypothesisTests.BoxPierceTest(sim_data_h0,2,1)
 @test t.Q ≈ 1.233942980734545
 @test pvalue(t) ≈ 0.2666415904008932
 @test tail(t) == :right
+# @test HypothesisTests.default_tail(t) == :right
 show(IOBuffer(), t)
 
 t = HypothesisTests.LjungBoxTest(sim_data_h0,5,2)
@@ -47,6 +48,7 @@ t = HypothesisTests.LjungBoxTest(sim_data_h0,5,2)
 @test t.Q ≈ 3.2090126519163626
 @test pvalue(t) ≈ 0.36050846449240337
 @test tail(t) == :right
+# @test HypothesisTests.default_tail(t) == :right
 show(IOBuffer(), t)
 
 sim_data_h1 = [

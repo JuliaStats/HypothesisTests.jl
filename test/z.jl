@@ -21,6 +21,7 @@ tst = OneSampleZTest(x)
 @test pvalue(tst; tail=:left) ≈ cdf(null, z)
 @test pvalue(tst; tail=:right) ≈ ccdf(null, z)
 @test tail(tst) == :both
+# @test HypothesisTests.default_tail(tst) == :both
 show(IOBuffer(), tst)
 
 tst = OneSampleZTest(m, s, n)
@@ -84,6 +85,7 @@ z = xbar / se
 @test pvalue(tst; tail=:left) ≈ cdf(null, z)
 @test pvalue(tst; tail=:right) ≈ ccdf(null, z)
 @test tail(tst) == :both
+# @test HypothesisTests.default_tail(tst) == :both
 @test confint(tst)[1] ≈ xbar + quantile(null, 0.05 / 2) * se
 @test confint(tst)[2] ≈ xbar + cquantile(null, 0.05 / 2) * se
 show(IOBuffer(), tst)

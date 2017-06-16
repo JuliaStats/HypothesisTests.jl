@@ -38,6 +38,7 @@ t = JarqueBeraTest(sim_data_h0)
 @test t.kurt ≈ 2.5117242352057993
 @test pvalue(t) ≈ 0.6003695680393418
 @test tail(t) == :right
+# @test HypothesisTests.default_tail(t) == :right
 show(IOBuffer(), t)
 
 sim_data_h1 = [
@@ -55,4 +56,5 @@ t = JarqueBeraTest(sim_data_h1)
 @test t.kurt ≈ 1.0138888888888888
 @test pvalue(t) ≈ 0.00020338498134114293
 @test tail(t) == :right
+# @test HypothesisTests.default_tail(t) == :right
 show(IOBuffer(), t)

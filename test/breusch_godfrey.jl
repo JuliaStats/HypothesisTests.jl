@@ -115,6 +115,7 @@ t = BreuschGodfreyTest(data_h1[:,2:end],res_vec,4)
 @test t.BG ≈ 31.39810637185552
 @test pvalue(t) ≈ 2.5390992557054064e-6
 @test tail(t) == :right
+# @test HypothesisTests.default_tail(t) == :right
 show(IOBuffer(), t)
 
 t = BreuschGodfreyTest(data_h1[:,2:end],res_vec,2,false)

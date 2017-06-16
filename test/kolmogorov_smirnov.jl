@@ -15,6 +15,7 @@ t = ApproximateOneSampleKSTest(x, Uniform())
 @test pvalue(t; tail=:left) ≈ 0.849573771973747
 @test pvalue(t; tail=:right) ≈ 0.3545875485608989
 @test tail(t) == :both
+# @test HypothesisTests.default_tail(t) == :both
 show(IOBuffer(), t)
 
 t = ApproximateTwoSampleKSTest(x, [(0:24)/25...])
@@ -25,6 +26,7 @@ t = ApproximateTwoSampleKSTest(x, [(0:24)/25...])
 @test pvalue(t; tail=:left) ≈ 0.8521437889662113
 @test pvalue(t; tail=:right) ≈ 0.697676326071031
 @test tail(t) == :both
+# @test HypothesisTests.default_tail(t) == :both
 show(IOBuffer(), t)
 
 t = ExactOneSampleKSTest(x, Uniform())
@@ -35,6 +37,7 @@ t = ExactOneSampleKSTest(x, Uniform())
 @test pvalue(t; tail=:left) ≈ 0.8195705417998183
 @test pvalue(t; tail=:right) ≈ 0.32350648882777194
 @test tail(t) == :both
+# @test HypothesisTests.default_tail(t) == :both
 show(IOBuffer(), t)
 
 ## check fit to normal distribution

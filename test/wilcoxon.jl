@@ -7,6 +7,7 @@ using HypothesisTests: tail
 @test abs(pvalue(ExactSignedRankTest([1:10;], [2:2:16; -1; 1])) - 0.4316) <= 1e-4
 @test abs(pvalue(ExactSignedRankTest([2:2:16; -1; 1], [1:10;])) - 0.4316) <= 1e-4
 @test tail(ExactSignedRankTest([1:10;], [2:2:20;])) == :both
+# @test HypothesisTests.default_tail(ExactSignedRankTest([1:10;], [2:2:20;])) == :both
 show(IOBuffer(), ExactSignedRankTest([1:10;], [2:2:20;]))
 
 # Exact with ties
@@ -23,6 +24,7 @@ show(IOBuffer(), ExactSignedRankTest([1:10;], [1:10;]))
 @test abs(pvalue(ApproximateSignedRankTest([1:10;], [2:2:16; -1; 1])) - 0.4148) <= 1e-4
 @test abs(pvalue(ApproximateSignedRankTest([2:2:16; -1; 1], [1:10;])) - 0.4148) <= 1e-4
 @test tail(ApproximateSignedRankTest([1:10;], [2:2:20;])) == :both
+# @test HypothesisTests.default_tail(ApproximateSignedRankTest([1:10;], [2:2:20;])) == :both
 show(IOBuffer(), ApproximateSignedRankTest([1:10;], [2:2:20;]))
 
 # Approximate with ties
@@ -37,6 +39,7 @@ show(IOBuffer(), ApproximateSignedRankTest([1:10;], [1:10;]))
 @test abs(pvalue(SignedRankTest([1:10;], [2:2:20;])) - 0.0020) <= 1e-4
 @test abs(pvalue(SignedRankTest([1:10;], [2:11;])) - 0.0020) <= 1e-4
 @test tail(SignedRankTest([1:10;], [2:2:20;])) == :both
+# @test HypothesisTests.default_tail(SignedRankTest([1:10;], [2:2:20;])) == :both
 show(IOBuffer(), SignedRankTest([1:10;], [2:2:20;]))
 
 # One Sample tests

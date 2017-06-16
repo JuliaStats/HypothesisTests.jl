@@ -14,6 +14,7 @@ t = RayleighTest(
     *pi/180)
 @test abs(pvalue(t) - 0.20) <= 0.01
 @test tail(t) == :both
+# @test HypothesisTests.default_tail(t) == :both
 show(IOBuffer(), t)
 
 # Fisher, 1995 example 6.8
@@ -29,6 +30,7 @@ t = FisherTLinearAssociation(wind_direction_6am, wind_direction_12pm)
 @test abs(t.rho_t- 0.191) < 0.001
 @test abs(pvalue(t) - 0.01) < 0.01
 @test tail(t) == :both
+# @test HypothesisTests.default_tail(t) == :both
 show(IOBuffer(), t)
 
 # Jammaladak, 2001 example 8.1
@@ -36,4 +38,5 @@ t = JammalamadakaCircularCorrelation(wind_direction_6am, wind_direction_12pm)
 @test abs(t.r - 0.2704648) < 1e-7
 @test abs(pvalue(t) - 0.2247383) < 1e-7
 @test tail(t) == :both
+# @test HypothesisTests.default_tail(t) == :both
 show(IOBuffer(), t)
