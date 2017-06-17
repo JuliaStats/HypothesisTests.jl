@@ -5,7 +5,7 @@ os:
   - osx
 julia:
   - 0.5
-  - nightly
+#  - nightly    # The REQUIRE file states that only julia 0.5 is supported
 notifications:
   email: false
 # uncomment the following lines to override the default test script
