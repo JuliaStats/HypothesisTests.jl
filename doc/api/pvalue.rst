@@ -7,7 +7,7 @@ p-value
 
     Compute the p-value for a given significance test.
 
-    If ``tail`` is ``:both`` (default for most hypothesis tests), then the p-value for the
+    If ``tail`` is ``:both``, then the p-value for the
     two-sided test is returned. If ``tail`` is ``:left`` or
     ``:right``, then a one-sided test is performed.
 

@@ -8,7 +8,6 @@ t = HypothesisTests.FisherExactTest(1, 1, 1, 1)
 @test pvalue(t; method=:central) ≈ 1.0
 @test pvalue(t; method=:minlike) ≈ 1.0
 @test tail(t) == :both
-# @test HypothesisTests.default_tail(t) == :both
 @test_ci_approx confint(t; tail=:left) (0.0, 76.24918299781056)
 @test_ci_approx confint(t; tail=:right) (0.013114894621608135, Inf)
 @test_ci_approx confint(t; method=:central) (0.006400016357911029, 156.2496006379585)

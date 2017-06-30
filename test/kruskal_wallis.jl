@@ -15,7 +15,6 @@ t = HypothesisTests.KruskalWallisTest(u5, u250, u2500, more)
 @test t.tie_adjustment == 1
 @test pvalue(t) ≈ 0.6638608922384397
 @test tail(t) == :right
-# @test HypothesisTests.default_tail(t) == :right
 show(IOBuffer(), t)
 
 # http://www.brightstat.com/index.php?option=com_content&task=view&id=41&Itemid=1&limit=1&limitstart=2

@@ -37,7 +37,7 @@ function StatsBase.confint(x::TTest, alpha::Float64=x.alpha; tail::Symbol=x.tail
     check_alpha(alpha)
 
     if tail == :left
-        (-Inf, StatsBase.confint(x, alpha*2, tail=:both)[2]) # tail=:both required as recursive anchor
+        (-Inf, StatsBase.confint(x, alpha*2, tail=:both)[2]) # tail=:both blocks infinite recursion
     elseif tail == :right
         (StatsBase.confint(x, alpha*2, tail=:both)[1], Inf)
     elseif tail == :both

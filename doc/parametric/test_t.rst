@@ -7,8 +7,8 @@ T-test
     in vector ``v`` comes from a distribution with mean ``mu0`` against
     the alternative hypothesis that the distribution does not have mean
     ``mu0``.
-    
-    ``tail`` and ``alpha`` specify the defaults for the application of 
+
+    ``tail`` and ``alpha`` specify the defaults when calling
     :ref:`pvalue<pvalue>` and :ref:`confint<confint>`.
 
     Implements: :ref:`pvalue<pvalue>`, :ref:`confint<confint>`
@@ -20,8 +20,8 @@ T-test
     ``stdev``  come from a distribution with ``mu0`` against
     the alternative hypothesis that the distribution does not have mean
     ``mu0``.
-    
-    ``tail`` and ``alpha`` specify the defaults for the application of 
+
+    ``tail`` and ``alpha`` specify the defaults when calling
     :ref:`pvalue<pvalue>` and :ref:`confint<confint>`.
 
     Implements: :ref:`pvalue<pvalue>`, :ref:`confint<confint>`
@@ -33,8 +33,8 @@ T-test
     ``y`` come from a distribution with ``mu0`` against the
     alternative hypothesis that the distribution does not have mean
     ``mu0``.
-    
-    ``tail`` and ``alpha`` specify the defaults for the application of 
+
+    ``tail`` and ``alpha`` specify the defaults when calling
     :ref:`pvalue<pvalue>` and :ref:`confint<confint>`.
 
     Implements: :ref:`pvalue<pvalue>`, :ref:`confint<confint>`
@@ -45,8 +45,8 @@ T-test
     ``x`` and ``y`` come from a distributions with the same mean
     and equal variances against the alternative hypothesis that the
     distributions have different means and but equal variances.
-    
-    ``tail`` and ``alpha`` specify the defaults for the application of 
+
+    ``tail`` and ``alpha`` specify the defaults when calling
     :ref:`pvalue<pvalue>` and :ref:`confint<confint>`.
 
     Implements: :ref:`pvalue<pvalue>`, :ref:`confint<confint>`
@@ -66,8 +66,8 @@ T-test
     .. math::
         \nu_{\chi'} \approx \frac{\left(\sum_{i=1}^n k_i s_i^2\right)^2}
                                  {\sum_{i=1}^n \frac{(k_i s_i^2)^2}{\nu_i}}
-    
-    ``tail`` and ``alpha`` specify the defaults for the application of 
+
+    ``tail`` and ``alpha`` specify the defaults when calling
     :ref:`pvalue<pvalue>` and :ref:`confint<confint>`.
-    
+
     Implements: :ref:`pvalue<pvalue>`, :ref:`confint<confint>`
