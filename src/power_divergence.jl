@@ -119,7 +119,7 @@ function ci_sison_glaz(x::PowerDivergenceTest, alpha::Float64; skew_correct::Boo
             lambda = x.observed[i]
             #run moments
             a = lambda + c
-            b = max(lambda - c, 0)
+            b = max(lambda - c, 0.0)
             if lambda > 0
                 poislama = cdf(Poisson(lambda), a)
                 poislamb = cdf(Poisson(lambda), b - 1)
@@ -135,12 +135,12 @@ function ci_sison_glaz(x::PowerDivergenceTest, alpha::Float64; skew_correct::Boo
                 else
                     plar = plbr = 1.0
                 end
-                poisA = ifelse(a - r >= 0, poislama - plar, poislama)
+                poisA = ifelse( (a - r) >= 0, poislama - plar, poislama)
                 poisB = 0.0
-                if  b - r - 1 >= 0
+                if  (b - r - 1) >= 0
                     poisB = poislamb - plbr
                 end
-                if b - r - 1 < 0 && b - 1 >= 0
+                if (b - r - 1) < 0 && b - 1 >= 0
                     poisB = poislamb
                 end
                 if b - r - 1 < 0 && b - 1 < 0
@@ -167,7 +167,7 @@ function ci_sison_glaz(x::PowerDivergenceTest, alpha::Float64; skew_correct::Boo
         f = poly * exp(-z^2 / 2) / sqrt(2π)
         probx = 1.0
         for i in 1:k
-            probx *= probx * m5[i]
+            probx *= m5[i]
         end
 
         p = probn * probx * f / sqrt(s2)
