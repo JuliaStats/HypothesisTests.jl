@@ -109,6 +109,7 @@ function ci_sison_glaz(x::PowerDivergenceTest, alpha::Float64; skew_correct::Boo
     probn = 1 /(cdf(Poisson(x.n), x.n) - cdf(Poisson(x.n), x.n - 1))
     
     c = 0
+    p = 0.0
     p_old = 0.0
     m1, m2, m3, m4, m5 = zeros(k), zeros(k), zeros(k), zeros(k), zeros(k)
     mu = zeros(4)
