@@ -170,7 +170,7 @@ function ci_sison_glaz(x::PowerDivergenceTest, alpha::Float64; skew_correct::Boo
         p_old = p
     end
 
-    delta = (1 - alpha - p_old) / p_old
+    delta = (1 - alpha - p_old) / (p - p_old)
     out = zeros(k, 5)
     num = zeros(k, 1)
 
