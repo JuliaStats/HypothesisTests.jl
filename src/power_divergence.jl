@@ -106,8 +106,8 @@ end
 # adapted from SAS macro by May, Johnson (2000)
 function ci_sison_glaz(x::PowerDivergenceTest, alpha::Float64; skew_correct::Bool=true)
     k = length(x.thetahat)
-    probn = inv(pdf(Poisson(x.n), x.n))
-
+    probn = 1 /(cdf(Poisson(x.n), x.n) - cdf(Poisson(x.n), x.n - 1))
+    
     c = 0
     p_old = 0.0
     m1, m2, m3, m4, m5 = zeros(k), zeros(k), zeros(k), zeros(k), zeros(k)
@@ -120,30 +120,23 @@ function ci_sison_glaz(x::PowerDivergenceTest, alpha::Float64; skew_correct::Boo
             #run moments
             a = lambda + c
             b = max(lambda - c, 0.0)
-            if lambda > 0
-                poislama = cdf(Poisson(lambda), a)
-                poislamb = cdf(Poisson(lambda), b - 1)
-            else
-                poislama = poislamb = 1.0
-            end
-            den = b > 0 ? poislama-poislamb : poislama
+            poislama = cdf(Poisson(lambda), a)
+            poislamb = cdf(Poisson(lambda), b - 1)
+            den = b > 0.0 ? poislama-poislamb : poislama
 
             for r in 1:4
-                if lambda > 0
-                    plar = cdf(Poisson(lambda), a - r)
-                    plbr = cdf(Poisson(lambda), b - r - 1)
-                else
-                    plar = plbr = 1.0
-                end
+                plar = cdf(Poisson(lambda), a - r)
+                plbr = cdf(Poisson(lambda), b - r - 1)
+                
                 poisA = ifelse( (a - r) >= 0, poislama - plar, poislama)
                 poisB = 0.0
-                if  (b - r - 1) >= 0
+                if  (b - r - 1) >= 0.0
                     poisB = poislamb - plbr
                 end
-                if (b - r - 1) < 0 && b - 1 >= 0
+                if (b - r - 1) < 0 && b - 1 >= 0.0
                     poisB = poislamb
                 end
-                if b - r - 1 < 0 && b - 1 < 0
+                if (b - r - 1) < 0.0 && b - 1 < 0.0
                     poisB = 0.0
                 end
                 mu[r] = lambda^r * (1 - (poisA - poisB) / den)
