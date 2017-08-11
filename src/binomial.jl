@@ -188,7 +188,7 @@ Compute a confidence interval C with coverage 1-alpha.
 
 If tail is :both (default), then a two-sided confidence interval is returned. If tail is :left or :right, then a one-sided confidence interval is returned
 """
-@compat function StatsBase.confint(x::SignTest, alpha::Float64=0.05; tail=:both)
+function StatsBase.confint(x::SignTest, alpha::Float64=0.05; tail=:both)
     check_alpha(alpha)
 
     if tail == :left

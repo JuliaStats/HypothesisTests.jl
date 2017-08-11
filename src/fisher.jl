@@ -48,15 +48,8 @@ population_param_of_interest(x::FisherExactTest) = ("Odds ratio", 1.0, x.ω) # p
 default_tail(test::FisherExactTest) = :both
 
 # The sizing argument to print_matrix was removed during the 0.5 dev period
-if VERSION < v"0.5.0-dev+1936"
-    function _print_matrix(io::IO, X::AbstractVecOrMat, pre::AbstractString)
-        m = typemax(Int)
-        Base.print_matrix(io, X, (m, m), pre)
-    end
-else
-    function _print_matrix(io::IO, X::AbstractVecOrMat, pre::AbstractString)
-        Base.print_matrix(io, X, pre)
-    end
+function _print_matrix(io::IO, X::AbstractVecOrMat, pre::AbstractString)
+    Base.print_matrix(io, X, pre)
 end
 
 function show_params(io::IO, x::FisherExactTest, ident="")
