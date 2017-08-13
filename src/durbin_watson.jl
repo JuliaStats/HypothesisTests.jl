@@ -24,7 +24,7 @@
 
 export DurbinWatsonTest
 
-struct DurbinWatsonTest <: HypothesisTest
+immutable DurbinWatsonTest <: HypothesisTest
     xmat::Array{Float64}  # regressor matrix
     n::Int                # number of observations
     DW::Float64           # test statistic
@@ -73,8 +73,8 @@ and `:right` (positive serial correlation).
   https://en.wikipedia.org/wiki/Durbin–Watson_statistic
   ](https://en.wikipedia.org/wiki/Durbin–Watson_statistic)
 """
-function DurbinWatsonTest{T<:Real}(xmat::AbstractArray{T}, e::AbstractVector{T};
-    p_compute::Symbol = :approx) # approx as ndep not implemented completely
+function DurbinWatsonTest{T<:Real}(xmat::AbstractArray{T}, e::AbstractArray{T};
+    p_compute::Symbol = :ndep)
 
     n = length(e)
     DW = sum(diff(e) .^2) / sum(e .^2)
@@ -92,9 +92,115 @@ function show_params(io::IO, x::DurbinWatsonTest, ident)
     println(io, ident, "DW statistic:               ", x.DW)
 end
 
+"""
+    pan_algorithm(a::AbstractArray, x::Float64, m::Int, n::Int)
+
+Compute exact p-values for the Durbin-Watson statistic using Pan's algorithm (Farebrother,
+1980).
+
+`a` is the vector of non-zero Eigenvalues of ``(I-(X(X'X)^{-1}X'))A`` (see Durbin and
+Watson, 1971, p. 2), `x` is the value of the Durbin-Watson statistic, `m` the number of
+elements in `a`, and `n` the number of approximation terms (see Farebrother, 1980, eq. 5).
+
+# References
+
+  * J. Durbin and G. S. Watson, 1971, "Testing for Serial Correlation in Least Squares
+  Regression: III", Biometrika, Vol. 58, No. 1, pp. 1-19,
+  [http://www.jstor.org/stable/2334313](http://www.jstor.org/stable/2334313).
+  * R. W. Farebrother, 1980, "Algorithm AS 153: Pan's Procedure for the Tail Probabilities
+  of the Durbin-Watson Statistic", Journal of the Royal Statistical Society, Series C
+  (Applied Statistics), Vol. 29, No. 2, pp. 224-227,
+  [http://www.jstor.org/stable/2986316](http://www.jstor.org/stable/2986316).
+
+"""
+function pan_algorithm(a::AbstractArray, x::Float64, m::Int, n::Int)
+
+    ν = findfirst(ai -> ai >= x, a)
+    if ν == 0
+        return 1.0
+    elseif ν == 1
+        return 0.0
+    else
+        k = 1
+        ν = ν - 1
+        h = m - ν
+
+        if ν <= h
+            d  = 2; h  = ν; k  = - k; j1 = 0; j2 = 2; j3 = 3; j4 = 1
+        else
+            d  = - 2; ν  = ν + 2; j1 = m - 2; j2 = m - 1; j3 = m + 1; j4 = m
+        end
+
+        pin = pi / (2n)
+        sum = (k + 1) / 2
+        sgn = k / n
+        n2  = 2n - 1
+
+        # first integral
+        for  f1 = h - 2 * floor(Int,h/2) : -1 : 0
+            for f2 = j2:d:ν
+                sum1 = a[j4]
+                if f2 == 0
+                    prod = x
+                else
+                    prod = a[f2]
+                end
+                u = 0.5 * (sum1 + prod)
+                v = 0.5 * (sum1 - prod)
+                sum1 = 0.0
+                for  i = n2:-2:1
+                    y = u - v * cos(i * pin)
+                    num = y - x
+                    prod = 1.0
+                    for k in [(1:j1)' (j3:m)']
+                        prod *= num / (y - a[k])
+                    end
+                    sum1 += sqrt(abs(prod))
+                end
+                sgn = -sgn
+                sum += sgn * sum1
+                j1 += d
+                j3 += d
+                j4 += d
+            end
+
+            # second integral
+            if d == 2
+                j3 = j2
+            else
+                j1 = j2
+            end
+            j2 = 0
+            ν  = 0
+        end
+        return sum
+    end
+
+end
+
 function pvalue(x::DurbinWatsonTest; tail=:both)
 
-    if (x.p_compute == :ndep && x.n > 100) || x.p_compute == :approx
+    exact_problem_flag = 0
+    if (x.p_compute == :ndep && x.n <= 100) || x.p_compute == :exact
+        # p-vales based on Pan's algorithm (see Farebrother, 1980)
+
+        # the following setup is, e.g, described in Durbin and Watson (1971)
+        A = diagm(-ones(x.n - 1), -1) + diagm(-ones(x.n - 1), 1) +diagm(2 * ones(x.n), 0)
+        A[1, 1] = 1
+        A[x.n, x.n] = 1
+        EV_temp = sort(real(eig((I - (x.xmat / (x.xmat' * x.xmat) * x.xmat')) *A)[1]))
+        EV = EV_temp[EV_temp .> 1e-10]
+        p_temp = pan_algorithm(EV, x.DW, length(EV), 15)
+
+        if p_temp < 0.0 || p_temp > 1.0
+            # println(p_temp)
+            warn("Exact p-values outside [0,1]. Approximate p-values reported instead.")
+            exact_problem_flag = 1
+        end
+    end
+
+    if exact_problem_flag == 1 || (x.p_compute == :ndep && x.n > 100
+        ) || x.p_compute == :approx
         # p-values based on normal approximation (see Durbin and Watson, 1950)
 
         # the following derivations follow Durbin and Watson (1951, p. 164)
@@ -117,10 +223,6 @@ function pvalue(x::DurbinWatsonTest; tail=:both)
         dw_var = 2 / ((x.n - k) * (x.n - k + 2)) * (Q - P * dw_mean)
 
         p_temp = cdf(Normal(dw_mean, sqrt(dw_var)), x.DW)
-
-    elseif (x.p_compute == :ndep && x.n <= 100) || x.p_compute == :exact
-        # p-vales based on Pan's algorithm (see Farebrother, 1980)
-        throw(ArgumentError("not implemented yet"))
     end
 
     if tail == :both

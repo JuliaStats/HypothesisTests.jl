@@ -63,16 +63,27 @@ y_p1_sim = [ # simulated with 0.9 error correlation
 n = length(y_p1_sim)
 X = [ones(n, 1) x_sim]
 b = X \ y_p1_sim
-e = y_p1_sim - X * b
+resid = y_p1_sim - X * b
 
-t = DurbinWatsonTest(X, e)
+t = DurbinWatsonTest(X, resid) # asymptotic p-values
 
 @test t.n == 101
 @test t.DW ≈ 0.40499929824035813
-@test t.p_compute == :approx
+@test t.p_compute == :ndep
 @test pvalue(t) ≈ 5.158964292454297e-16
 @test pvalue(t, tail = :left) ≈ 0.9999999999999998
 @test pvalue(t, tail = :right) ≈ 2.5794821462271485e-16
+@test default_tail(t) == :both
+show(IOBuffer(), t)
+
+t = DurbinWatsonTest(X, resid; p_compute = :exact) # exact p-values
+
+@test t.n == 101
+@test t.DW ≈ 0.40499929824035813
+@test t.p_compute == :exact
+@test pvalue(t) ≈ 3.6994415420651786e-24
+@test pvalue(t, tail = :left) ≈ 1.00
+@test pvalue(t, tail = :right) ≈ 1.8497207710325893e-24
 @test default_tail(t) == :both
 show(IOBuffer(), t)
 
@@ -109,16 +120,27 @@ y_m1_sim = [ # simulated with -0.9 error correlation
 n = length(y_m1_sim)
 X = [ones(n, 1) x_sim]
 b = X \ y_m1_sim
-e = y_m1_sim - X * b
+resid = y_m1_sim - X * b
 
-t = DurbinWatsonTest(X, e)
+t = DurbinWatsonTest(X, resid) # asymptotic p-values
 
 @test t.n == 101
 @test t.DW ≈ 3.1196941838878423
-@test t.p_compute == :approx
+@test t.p_compute == :ndep
 @test pvalue(t) ≈ 1.3691928363065143e-8
 @test pvalue(t, tail = :left) ≈ 6.8459641815325715e-9
 @test pvalue(t, tail = :right) ≈ 0.9999999931540359
+@test default_tail(t) == :both
+show(IOBuffer(), t)
+
+t = DurbinWatsonTest(X, resid; p_compute = :exact) # exact p-values
+
+@test t.n == 101
+@test t.DW ≈ 3.1196941838878423
+@test t.p_compute == :exact
+@test pvalue(t) ≈ 6.608698033261362e-10
+@test pvalue(t, tail = :left) ≈ 3.304349016630681e-10
+@test pvalue(t, tail = :right) ≈ 0.9999999996695651
 @test default_tail(t) == :both
 show(IOBuffer(), t)
 
@@ -155,15 +177,41 @@ y_0_sim = [ # simulated with 0 error correlation
 n = length(y_0_sim)
 X = [ones(n, 1) x_sim]
 b = X \ y_0_sim
-e = y_0_sim - X * b
+resid = y_0_sim - X * b
 
-t = DurbinWatsonTest(X, e)
+t = DurbinWatsonTest(X, resid)
 
 @test t.n == 101
 @test t.DW ≈ 2.0315450779948154
-@test t.p_compute == :approx
+@test t.p_compute == :ndep
 @test pvalue(t) ≈ 0.8794168553233327
 @test pvalue(t, tail = :left) ≈ 0.43970842766166635
 @test pvalue(t, tail = :right) ≈ 0.5602915723383337
 @test default_tail(t) == :both
 show(IOBuffer(), t)
+
+t = DurbinWatsonTest(X, resid; p_compute = :exact) # exact p-values
+
+@test t.n == 101
+@test t.DW ≈ 2.0315450779948154
+@test t.p_compute == :exact
+@test pvalue(t) ≈ 0.8794168553233327 # exact p-values outsid [0,1], use approx.
+@test pvalue(t, tail = :left) ≈ 0.43970842766166635
+@test pvalue(t, tail = :right) ≈ 0.5602915723383337
+@test default_tail(t) == :both
+show(IOBuffer(), t)
+
+# test corner cases
+t1 = DurbinWatsonTest(X, size(X,1), 0.00, :exact)
+
+@test pvalue(t1) == 0.00
+@test pvalue(t1, tail = :left) == 1.00
+@test pvalue(t1, tail = :right) == 0.00
+show(IOBuffer(), t1)
+
+t1 = DurbinWatsonTest(X, size(X,1), 4.00, :exact)
+
+@test pvalue(t1) == 0.00
+@test pvalue(t1, tail = :left) == 0.00
+@test pvalue(t1, tail = :right) == 1.00
+show(IOBuffer(), t1)
