@@ -36,11 +36,37 @@ immutable FisherExactTest <: HypothesisTest
 
     # conditional maximum likehood estimate of odd ratio
     ω::Float64
+end
 
-    function FisherExactTest(a::Int, b::Int, c::Int, d::Int)
-        ω = cond_mle_odds_ratio(a, b, c, d)
-        new(a, b, c, d, ω)
-    end
+"""
+    FisherExactTest(a::Integer, b::Integer, c::Integer, d::Integer)
+
+Perform Fisher's exact test of the null hypothesis that the success probabilities ``a/c``
+and ``b/d`` are equal, that is the odds ratio ``(a/c) / (b/d)`` is one, against the
+alternative hypothesis that they are not equal.
+
+The contingency table is structured as:
+
+| -  | X1 | X2 |
+|:--:|:--:|:--:|
+|*Y1*| a  | b  |
+|*Y2*| c  | d  |
+
+!!! note
+    The print output contains the conditional maximum likelihood estimate of the odd-ratio
+    rather than the sample odds ratio; it maximizes the likelihood given by Fisher's
+    non-central hypergeometric distribution.
+
+Implements: [`pvalue`](@ref), [`confint`](@ref)
+
+# References
+
+  * Fay, M.P. Supplementary material to confidence intervals that match Fisher’s exact or
+    Blaker’s exact tests. Biostatistics, 0(0): 1-13, 2009.
+"""
+function FisherExactTest(a::Int, b::Int, c::Int, d::Int)
+    ω = cond_mle_odds_ratio(a, b, c, d)
+    FisherExactTest(a, b, c, d, ω)
 end
 
 testname(::FisherExactTest) = "Fisher's exact test"
@@ -59,6 +85,41 @@ function show_params(io::IO, x::FisherExactTest, ident="")
 end
 
 # DOC: for tail=:both there exist multiple ``method``s for computing a pvalue and the corresponding ci.
+"""
+    pvalue(x::FisherExactTest; tail = :both, method = :central)
+
+Compute the p-value for a given significance test.
+
+The one-sided p-values are based on Fisher's non-central hypergeometric distribution
+``f_\\omega(i)`` with odd-ratio ``\\omega``:
+```math
+    \\begin{align}
+        p_\\omega^{(\\text{left})} &=\\sum_{i\\leq a} f_\\omega(i)\\\\
+        p_\\omega^{(\\text{right})} &=\\sum_{i\\geq a} f_\\omega(i)
+    \\end{align}
+```
+For `tail = :both`, possible values for `method` are:
+
+  - Central interval `:central` (default): This p-value is two times the minimum of the
+    one-sided p-values.
+
+  - Minimum likelihood interval `:minlike`: This p-value is computed by summing all tables
+    with the same marginals that are equally or less probable:
+    ```math
+        p_\\omega = \\sum_{f_\\omega(i)\\leq f_\\omega(a)} f_\\omega(i)
+    ```
+
+!!! note
+    Since the p-value is not necessarily unimodal, the corresponding confidence region might
+    not be an interval.
+
+# References
+
+  * Gibbons, J.D, Pratt, J.W. P-values: Interpretation and Methodology American
+    Statistican, 29(1):20-25, 1975.
+  * Fay, M.P. Supplementary material to Confidence intervals that match Fisher’s exact or
+    Blaker’s exact tests. Biostatistics, 0(0):1-13, 2009.
+"""
 function pvalue(x::FisherExactTest; tail=:both, method=:central)
     if tail == :both && method != :central
         if method == :minlike
@@ -97,6 +158,18 @@ function pvalue_both_minlike(x::FisherExactTest, ω::Float64=1.0)
 end
 
 # confidence interval by inversion of p-value
+"""
+    confint(x::FisherExactTest, alpha::Float64=0.05; tail=:both, method=:central)
+
+Compute a confidence interval with coverage 1 - `alpha` by inverting the `:central` p-value.
+
+# References
+
+  * Gibbons, J.D, Pratt, J.W. P-values: Interpretation and Methodology American
+    Statistican, 29(1):20-25, 1975.
+  * Fay, M.P. Supplementary material to Confidence intervals that match Fisher’s exact or
+    Blaker’s exact tests. Biostatistics, 0(0):1-13, 2009.
+"""
 function StatsBase.confint(x::FisherExactTest, alpha::Float64=0.05; tail=:both, method=:central)
     check_alpha(alpha)
     dist(ω) = FisherNoncentralHypergeometric(x.a+x.b, x.c+x.d, x.a+x.c, ω)

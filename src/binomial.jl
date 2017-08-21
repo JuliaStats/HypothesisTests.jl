@@ -34,6 +34,19 @@ immutable BinomialTest <: HypothesisTest
     BinomialTest(x::Real, n::Real, p::Real=0.5) = new(p, x, n)
 end
 
+"""
+    BinomialTest(x::Integer, n::Integer, p::Real = 0.5)
+    BinomialTest(x::AbstractVector{Bool}, p::Real = 0.5)
+
+Perform a binomial test of the null hypothesis that the distribution from which `x`
+successes were encountered in `n` draws (or alternatively from which the vector `x` was
+drawn) has success probability `p` against the alternative hypothesis that the success
+probability is not equal to	`p`.
+
+Computed confidence intervals by default are Clopper-Pearson intervals.
+
+Implements: [`pvalue`](@ref), [`confint`](@ref)
+"""
 BinomialTest(x::AbstractVector{Bool}, p=0.5) =
     BinomialTest(sum(x), length(x), p)
 
@@ -53,20 +66,52 @@ function show_params(io::IO, x::BinomialTest, ident="")
     println(io, ident, "number of successes:    $(x.x)")
 end
 
+"""
+    pvalue(test::HypothesisTest; tail = :both)
+
+Compute the p-value for a given significance test.
+
+If `tail` is `:both` (default), then the p-value for the two-sided test is returned. If
+`tail` is `:left` or `:right`, then a one-sided test is performed.
+"""
 pvalue(x::BinomialTest; tail=:both) = pvalue(Binomial(x.n, x.p), x.x; tail=tail)
 
 # Confidence interval
 
 """
-```julia
-function confint(x::HypothesisTest, alpha::Float64=0.05; tail=:both, method=:clopper_pearson)
-```
-Compute a confidence interval with coverage 1-alpha for multinomial proportions using one of the following methods. Possible values for method are:
+    confint(test::BinomialTest, alpha = 0.05; tail = :both, method = :clopper_pearson)
 
-Sison, Glaz intervals :sison_glaz (default):
-Bootstrap intervals :bootstrap :
-Quesenberry, Hurst intervals :quesenberry_hurst :
-Gold intervals :gold (Asymptotic simultaneous intervals):
+Compute a confidence interval with coverage 1-`alpha` for a binomial proportion using one
+of the following methods. Possible values for `method` are:
+
+  - Clopper-Pearson interval `:clopper_pearson` (default): This interval is based on the
+    binomial distribution. The empirical coverage is never less than the nominal coverage of
+    1-`alpha`; it is usually too conservative.
+  - Wald interval `:wald` (normal approximation interval): This interval relies on the
+    standard approximation of the actual binomial distribution by a normal distribution.
+    Coverage can be erratically poor for success probabilities close to zero or one.
+  - Wilson score interval `:wilson`: This interval relies on a normal approximation. In
+    contrast to `:wald`, the standard deviation is not approximated by an empirical
+    estimate resulting in good empirical coverages even for small numbers of draws and
+    extreme success probabilities.
+  - Jeffreys interval `:jeffrey`: Bayesian confidence interval obtained by using a
+    non-informative Jeffreys prior. The interval is very similar to the Wilson interval.
+  - Agresti Coull interval `:agresti_coull`: Simplified version of the Wilson interval;
+    they are centered around the same value. The Agresti Coull interval has higher or
+    equal coverage.
+  - Arcsine transformation `:arcsine`.
+
+# References
+
+  * Brown, L.D., Cai, T.T., and DasGupta, A. Interval estimation for a binomial proportion.
+    Statistical Science, 16(2):101–117, 2001.
+
+# External links
+
+  * [Binomial confidence interval on Wikipedia (https://en.wikipedia.org/wiki/
+    Binomial_proportion_confidence_interval)](https://en.wikipedia.org/wiki/
+    Binomial_proportion_confidence_interval)
+
 """
 function StatsBase.confint(x::BinomialTest, alpha::Float64=0.05; tail=:both, method=:clopper_pearson)
     check_alpha(alpha)
@@ -151,9 +196,20 @@ immutable SignTest <: HypothesisTest
     data
 end
 
+"""
+    SignTest(x::AbstractVector{T<:Real}, median::Real = 0)
+    SignTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real}, median::Real = 0)
+
+Perform a sign test of the null hypothesis that the distribution from which `x`
+(or `x - y`) was drawn has median `median` against the alternative hypothesis that the
+median is not equal to `median`.
+
+Implements: [`pvalue`](@ref), [`confint`](@ref)
+"""
 SignTest{T<:Real}(x::AbstractVector{T}, median::Real=0) =
     SignTest(median, sum(x .> median), sum(x .!= median), sort(x))
-SignTest{T<:Real, S<:Real}(x::AbstractVector{T}, y::AbstractVector{S}) = SignTest(x - y, 0.0)
+SignTest{T<:Real, S<:Real}(x::AbstractVector{T}, y::AbstractVector{S}) =
+    SignTest(x - y, 0.0)
 
 testname(::SignTest) = "Sign Test"
 population_param_of_interest(x::SignTest) = ("Median", x.median, median(x.data)) # parameter of interest: name, value under h0, point estimate
@@ -168,26 +224,8 @@ function show_params(io::IO, x::SignTest, ident="")
     println(io, ident, text2, x.x)
 end
 
-"""
-```julia
-pvalue(x::HypothesisTest; tail=:both)
-```
-
-Compute the p-value for a given significance test.
-
-If tail is :both (default), then the p-value for the two-sided test is returned. If tail is :left or :right, then a one-sided test is performed.
-"""
 pvalue(x::SignTest; tail=:both) = pvalue(Binomial(x.n, 0.5), x.x; tail=tail)
 
-"""
-```julia
-function confint(x::HypothesisTest, alpha::Float64=0.05; tail=:both)
-```
-
-Compute a confidence interval C with coverage 1-alpha.
-
-If tail is :both (default), then a two-sided confidence interval is returned. If tail is :left or :right, then a one-sided confidence interval is returned
-"""
 function StatsBase.confint(x::SignTest, alpha::Float64=0.05; tail=:both)
     check_alpha(alpha)
 

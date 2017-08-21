@@ -6,7 +6,6 @@ function boundproportion{T<:Real}(x::T)
     max(min(convert(Float64,x),1.0),0.0)
 end
 
-
 immutable PowerDivergenceTest <: HypothesisTest
     lambda::Float64
     theta0::Vector{Float64}
@@ -44,6 +43,28 @@ default_tail(test::PowerDivergenceTest) = :right
 
 pvalue(x::PowerDivergenceTest; tail=:right) = pvalue(Chisq(x.df),x.stat; tail=tail)
 
+"""
+    confint(test::PowerDivergenceTest, alpha = 0.05; tail = :both, method = :sison_glaz)
+
+Compute a confidence interval with coverage 1-`alpha` for multinomial proportions using
+one of the following methods. Possible values for `method` are:
+
+  - Sison, Glaz intervals `:sison_glaz` (default)
+  - Bootstrap intervals `:bootstrap`
+  - Quesenberry, Hurst intervals `:quesenberry_hurst`
+  - Gold intervals `:gold` (Asymptotic simultaneous intervals)
+
+# References
+
+  * Agresti, Alan. Categorical Data Analysis, 3rd Edition. Wiley, 2013.
+  * Sison, C.P and Glaz, J. Simultaneous confidence intervals and sample size determination
+    for multinomial proportions. Journal of the American Statistical Association,
+    90:366-369, 1995.
+  * Quesensberry, C.P. and Hurst, D.C. Large Sample Simultaneous Confidence Intervals for
+    Multinational Proportions. Technometrics, 6:191-195, 1964.
+  * Gold, R. Z. Tests Auxiliary to :math:`{\chi^{2}}` Tests in a Markov Chain. Annals of
+    Mathematical Statistics, 30:56-74, 1963.
+"""
 function StatsBase.confint(x::PowerDivergenceTest, alpha::Float64=0.05;
                            tail::Symbol=:both, method::Symbol=:sison_glaz, correct::Bool=true,
                            bootstrap_iters::Int64=10000, GC::Bool=true)
@@ -214,6 +235,48 @@ end
 
 # Under regularity conditions, their asymptotic distributions are all the same (Drost 1989)
 # Chi-squared null approximation works best for lambda near 2/3
+"""
+    PowerDivergenceTest(x [,y] [, lambda] [,theta0] )
+
+Perform a Power Divergence Test.
+
+If `x` is a matrix with one row or column, or if `x` is a vector and `y` is not given, then
+a goodness-of-fit test is performed (``x`` is treated as a one-dimensional contingency
+table. The entries of `x` must be non-negative integers. In this case, the hypothesis
+tested is whether the population probabilities equal those in `theta0`, or are all equal if
+`theta0` is not given.
+
+If `x` is a matrix with at least two rows and columns, it is taken as a two-dimensional
+contigency table: the entries of `x` must be non-negative integers. Otherwise, `x` and
+`y` must be vectors of the same length. The contigency table is calculated using `counts`
+from `Statsbase`. Then the power divergence test is performed of the null hypothesis that
+the joint distribution of the cell counts in a 2-dimensional contingency table is the
+product of the row and column marginals.
+
+The power divergence test is given by
+```math
+    \\dfrac{2}{\\lambda(\\lambda+1)}\\sum_{i=1}^I \\sum_{j=1}^J n_{ij} \\left[(n_{ij}
+    /\\hat{n}_{ij})^\\lambda -1\\right]
+```
+where ``n_{ij}`` is the cell count in the ``i`` th row and ``j`` th column and ``\\lambda``
+is a real number that has the following feature
+
+  * ``λ = 1``: this is equal to Pearson's chi-squared statistic
+  * ``λ \\to 0``: it converges to the likelihood ratio test statistic
+  * ``λ \\to -1``: it converges to the minimum discrimination information statistic
+    (Gokhale and Kullback 1978)
+  * ``λ = -2``: it equals Neyman modified chi-squared (Neyman 1949)
+  * ``λ = -1/2``:  it equals the Freeman-Tukey statistic (Freeman and Tukey 1950).
+
+Under regularity conditions, the asymptotic distributions are identical (see Drost et. al.
+1989). The chi-squared null approximation works best for ``λ`` near ``2/3``.
+
+Implements: [`pvalue`](@ref), [`confint`](@ref)
+
+# References
+
+  * Agresti, Alan. Categorical Data Analysis, 3rd Edition. Wiley, 2013.
+"""
 function PowerDivergenceTest{T<:Integer,U<:AbstractFloat}(x::AbstractMatrix{T}; lambda::U=1.0, theta0::Vector{U} = ones(length(x))/length(x))
 
     nrows, ncols = size(x)
@@ -281,6 +344,11 @@ PowerDivergenceTest{T<:Integer,U<:AbstractFloat}(x::AbstractVector{T}; lambda::U
     PowerDivergenceTest(reshape(x, length(x), 1), lambda=lambda, theta0=theta0)
 
 #ChisqTest
+"""
+    ChisqTest(x [,y] [,theta0])
+
+Convenience function for power divergence test with ``λ=1``.
+"""
 function ChisqTest{T<:Integer}(x::AbstractMatrix{T})
     PowerDivergenceTest(x, lambda=1.0)
 end
@@ -299,6 +367,11 @@ ChisqTest{T<:Integer,U<:AbstractFloat}(x::AbstractVector{T}, theta0::Vector{U} =
     PowerDivergenceTest(reshape(x, length(x), 1), lambda=1.0, theta0=theta0)
 
 #MultinomialLRT
+"""
+    MultinomialLRT(x [,y] [,theta0])
+
+Convenience function for power divergence test with ``λ=0``.
+"""
 function MultinomialLRT{T<:Integer}(x::AbstractMatrix{T})
     PowerDivergenceTest(x, lambda=0.0)
 end

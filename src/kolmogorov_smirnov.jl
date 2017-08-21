@@ -54,6 +54,15 @@ immutable ExactOneSampleKSTest <: ExactKSTest
     δn::Float64 # supremum of the negative CDF differences
 end
 
+"""
+    ExactOneSampleKSTest{T<:Real}(x::AbstractVector{T}, d::UnivariateDistribution)
+
+Perform a one sample Kolmogorov–Smirnov-test of the null hypothesis that the data in vector
+`x` comes from the distribution `d` against the alternative hypothesis that the sample
+is not drawn from `d`.
+
+Implements: [`pvalue`](@ref)
+"""
 function ExactOneSampleKSTest{T<:Real}(x::AbstractVector{T}, d::UnivariateDistribution)
     if length(x) > length(unique(x))
         warn("This test is inaccurate with ties")
@@ -89,6 +98,15 @@ immutable ApproximateOneSampleKSTest <: ApproximateKSTest
     δn::Float64 # suproemum of the negative CDF differences
 end
 
+"""
+    ApproximateOneSampleKSTest{T<:Real}(x::AbstractVector{T}, d::UnivariateDistribution)
+
+Perform an asymptotic one sample Kolmogorov–Smirnov-test of the null hypothesis that the
+data in vector `x` comes from the distribution `d` against the alternative hypothesis
+that the sample is not drawn from `d`.
+
+Implements: [`pvalue`](@ref)
+"""
 function ApproximateOneSampleKSTest{T<:Real}(x::AbstractVector{T}, d::UnivariateDistribution)
     if length(x) > length(unique(x))
         warn("This test is inaccurate with ties")
@@ -129,6 +147,21 @@ immutable ApproximateTwoSampleKSTest <: ApproximateKSTest
     δn::Float64 # suproemum of the negative CDF differences
 end
 
+"""
+    ApproximateTwoSampleKSTest{T<:Real, S<:Real}(x::AbstractVector{T}, y::AbstractVector{S})
+
+Perform an asymptotic two sample Kolmogorov–Smirnov-test of the null hypothesis that `x`
+and `y` are drawn from the same distribution against the alternative hypothesis that the
+distribution comes from different distributions.
+
+Implements: [`pvalue`](@ref)
+
+# External links
+
+  * [Approximation of one-sided test:
+     https://www.encyclopediaofmath.org/index.php/Kolmogorov-Smirnov_test](
+     https://www.encyclopediaofmath.org/index.php/Kolmogorov-Smirnov_test)
+"""
 function ApproximateTwoSampleKSTest{T<:Real, S<:Real}(x::AbstractVector{T}, y::AbstractVector{S})
     n_x, n_y = length(x), length(y)
     if n_x+n_y > length(unique([x; y]))
