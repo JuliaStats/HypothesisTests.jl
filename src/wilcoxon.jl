@@ -173,7 +173,7 @@ immutable ApproximateSignedRankTest{T<:Real} <: HypothesisTest
     sigma::Float64          # normal approximation: std
 end
 """
-    ApproximateSignedRank(x::AbstractVector{T<:Real}[, y::AbstractVector{T<:Real}])
+    ApproximateSignedRankTest(x::AbstractVector{T<:Real}[, y::AbstractVector{T<:Real}])
 
 Perform an approximate signed rank U test.
 
@@ -186,7 +186,7 @@ statistic:
         a & = \\sum_{t \\in \\mathcal{T}} t^3 - t
     \\end{align}
 ```
-where ``\mathcal{T}`` is the set of the counts of tied values at each tied position.
+where ``\\mathcal{T}`` is the set of the counts of tied values at each tied position.
 
 Implements: [`pvalue`](@ref)
 """

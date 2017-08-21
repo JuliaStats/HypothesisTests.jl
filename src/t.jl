@@ -105,7 +105,7 @@ function OneSampleTTest(xbar::Real, stddev::Real, n::Int, μ0::Real=0)
 end
 
 """
-OneSampleTTest(v::AbstractVector{T<:Real}, mu0::Real = 0)
+    OneSampleTTest(v::AbstractVector{T<:Real}, mu0::Real = 0)
 
 Perform a one sample t-test of the null hypothesis that the data in vector `v` comes from
 a distribution with mean `mu0` against the alternative hypothesis that the distribution
