@@ -30,6 +30,15 @@ immutable OneSampleADTest <: ADTest
     A²::Float64 # Anderson-Darling test statistic
 end
 
+"""
+    OneSampleADTest{T<:Real}(x::AbstractVector{T}, d::UnivariateDistribution)
+
+Perform a one sample Anderson–Darling test of the null hypothesis that the data in vector
+`x` comes from the distribution `d` against the alternative hypothesis that the sample
+is not drawn from `d`.
+
+Implements: [`pvalue`](@ref)
+"""
 function OneSampleADTest{T<:Real}(x::AbstractVector{T}, d::UnivariateDistribution)
     OneSampleADTest(adstats(x, d)...)
 end
@@ -73,6 +82,23 @@ immutable KSampleADTest <: ADTest
     A²k::Float64 # Anderson-Darling test statistic
 end
 
+"""
+    KSampleADTest{T<:Real}(xs::AbstractVector{T}...; modified=true)
+
+Perform a k-sample Anderson–Darling test of the null hypothesis that the data in vectors
+`xs` comes from the same distribution against the alternative hypothesis that the samples
+comes from different distributions.
+
+`modified` paramater enables a modified test calculation for samples whose observations
+do not all coincide.
+
+Implements: [`pvalue`](@ref)
+
+# References
+
+  * K-Sample Anderson-Darling Tests, F. W. Scholz and M. A. Stephens, Journal of the
+    American Statistical Association, Vol. 82, No. 399. (Sep., 1987), pp. 918-924.
+"""
 function KSampleADTest{T<:Real}(xs::AbstractVector{T}...; modified=true)
     KSampleADTest(a2_ksample(xs, modified)...)
 end

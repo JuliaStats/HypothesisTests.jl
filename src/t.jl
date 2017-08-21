@@ -33,6 +33,24 @@ pvalue(x::TTest; tail=:both) = pvalue(TDist(x.df), x.t; tail=tail)
 default_tail(test::TTest) = :both
 
 # confidence interval by inversion
+"""
+    confint(test::HypothesisTest, alpha = 0.05; tail = :both)
+
+Compute a confidence interval C with coverage 1-`alpha`.
+
+If `tail` is `:both` (default), then a two-sided confidence interval is returned. If `tail`
+is `:left` or `:right`, then a one-sided confidence interval is returned.
+
+!!! note
+    Most of the implemented confidence intervals are *strongly consistent*, that is, the
+    confidence interval with coverage 1-`alpha` does not contain the test statistic under
+    ``h_0`` if and only if the corresponding test rejects the null hypothesis
+    ``h_0: \\theta=\\theta_0``:
+    ```math
+        C (x, 1 − \\alpha) = \\{\\theta : p_\\theta (x) > \\alpha\\},
+    ```
+    where ``p_\\theta`` is the [`pvalue`](@ref) of the corresponding test.
+"""
 function StatsBase.confint(x::TTest, alpha::Float64=0.05; tail=:both)
     check_alpha(alpha)
 
@@ -70,6 +88,15 @@ function show_params(io::IO, x::OneSampleTTest, ident="")
     println(io, ident, "empirical standard error: $(x.stderr)")
 end
 
+"""
+    OneSampleTTest(xbar::Real, stdev::Real, n::Int, mu0::Real = 0)
+
+Perform a one sample t-test of the null hypothesis that `n` values with mean `xbar` and
+sample standard deviation `stdev`  come from a distribution with `mu0` against the
+alternative hypothesis that the distribution does not have mean `mu0`.
+
+Implements: [`pvalue`](@ref), [`confint`](@ref)
+"""
 function OneSampleTTest(xbar::Real, stddev::Real, n::Int, μ0::Real=0)
     stderr = stddev/sqrt(n)
     t = (xbar-μ0)/stderr
@@ -77,8 +104,26 @@ function OneSampleTTest(xbar::Real, stddev::Real, n::Int, μ0::Real=0)
     OneSampleTTest(n, xbar, df, stderr, t, μ0)
 end
 
+"""
+    OneSampleTTest(v::AbstractVector{T<:Real}, mu0::Real = 0)
+
+Perform a one sample t-test of the null hypothesis that the data in vector `v` comes from
+a distribution with mean `mu0` against the alternative hypothesis that the distribution
+does not have mean `mu0`.
+
+Implements: [`pvalue`](@ref), [`confint`](@ref)
+"""
 OneSampleTTest{T<:Real}(v::AbstractVector{T}, μ0::Real=0) = OneSampleTTest(mean(v), std(v), length(v), μ0)
 
+"""
+    OneSampleTTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real}, mu0::Real = 0)
+
+Perform a paired sample t-test of the null hypothesis that the differences between pairs of
+values in vectors `x` and `y` come from a distribution with mean `mu0` against the
+alternative hypothesis that the distribution does not have mean `mu0`.
+
+Implements: [`pvalue`](@ref), [`confint`](@ref)
+"""
 function OneSampleTTest{T<:Real, S<:Real}(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0)
     check_same_length(x, y)
 
@@ -108,6 +153,15 @@ end
 testname(::EqualVarianceTTest) = "Two sample t-test (equal variance)"
 population_param_of_interest(x::TwoSampleTTest) = ("Mean difference", x.μ0, x.xbar) # parameter of interest: name, value under h0, point estimate
 
+"""
+    EqualVarianceTTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real})
+
+Perform a two-sample t-test of the null hypothesis that `x` and `y` come from a
+distributions with the same mean and equal variances against the alternative hypothesis
+that the distributions have different means and but equal variances.
+
+Implements: [`pvalue`](@ref), [`confint`](@ref)
+"""
 function EqualVarianceTTest{T<:Real,S<:Real}(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0)
     nx, ny = length(x), length(y)
     xbar = mean(x) - mean(y)
@@ -133,6 +187,23 @@ end
 
 testname(::UnequalVarianceTTest) = "Two sample t-test (unequal variance)"
 
+"""
+    UnequalVarianceTTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real})
+
+Perform an unequal variance two-sample t-test of the null hypothesis that `x` and `y` come
+from a distributions with the same mean against the alternative hypothesis that the
+distributions have different means.
+
+This test is also known as sometimes known as Welch's t-test. It differs from the equal
+variance t-test in that it computes the number of degrees of freedom of the test using the
+Welch-Satterthwaite equation:
+```math
+    \\nu_{\\chi'} \\approx \\frac{\\left(\\sum_{i=1}^n k_i s_i^2\\right)^2}{\\sum_{i=1}^n
+        \\frac{(k_i s_i^2)^2}{\\nu_i}}
+```
+
+Implements: [`pvalue`](@ref), [`confint`](@ref)
+"""
 function UnequalVarianceTTest{T<:Real,S<:Real}(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0)
     nx, ny = length(x), length(y)
     xbar = mean(x)-mean(y)

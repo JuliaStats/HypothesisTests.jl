@@ -32,6 +32,35 @@ immutable KruskalWallisTest <: HypothesisTest
     tie_adjustment::Float64  # adjustment for ties
 end
 
+"""
+    KruskalWallisTest{T<:Real}(groups::AbstractVector{T}...)
+
+Perform Kruskal Wallis rank sum test of the null hypothesis that the location parameters of
+the distribution of the ``n`` observations are the same in each of the `groups`
+``\\mathcal{G}`` against the alternative hypothesis that they differ in at least one.
+
+The Kruskal-Wallis test is an extension of the Mann-Whitney U test to more than two groups.
+
+The p-value is computed using a chi-square approximation to the distribution of the test
+statistic ``H_c=\\frac{H}{C}``:
+```math
+    \\begin{align}
+    H & = \\frac{12}{n(n+1)} \\sum_{g \\in \\mathcal{G}} \\frac{R_g^2}{n_g} - 3(n+1)\\\\
+    C & = 1-\\frac{1}{n^3-n}\\sum_{t \\in \\mathcal{T}} (t^3-t),
+    \\end{align}
+```
+where ``\\mathcal{T}`` is the set of the counts of tied values at each tied position,
+``n_g`` is the number of observations, and ``R_g`` is the rank sum in group g. See
+references for further details.
+
+Implements: [`pvalue`](@ref)
+
+# References
+
+  * Meyer, J.P, Seaman, M.A., Expanded tables of critical values for the Kruskal-Wallis
+    H statistic. Paper presented at the annual meeting of the American Educational Research
+    Association, San Francisco, April 2006.
+"""
 function KruskalWallisTest{T<:Real}(groups::AbstractVector{T}...)
     (H, R_i, tieadj, n_i) = kwstats(groups...)
     if length(groups)<=3 && any(n_i .< 6)
