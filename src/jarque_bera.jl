@@ -77,7 +77,7 @@ end
 testname(::JarqueBeraTest) = "Jarque-Bera normality test"
 population_param_of_interest(x::JarqueBeraTest) =
     ("skewness and kurtosis", "0 and 3", "$(x.skew) and $(x.kurt)")
-default_tail(test::JarqueBeraTest) = :right
+tail(test::JarqueBeraTest) = :right
 
 function show_params(io::IO, x::JarqueBeraTest, ident)
     println(io, ident, "number of observations:         ", x.n)

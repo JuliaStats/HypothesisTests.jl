@@ -46,7 +46,7 @@ Returns the string value. E.g. "Binomial test", "Sign Test"
 """
 testname(::BinomialTest) = "Binomial test"
 population_param_of_interest(x::BinomialTest) = ("Probability of success", x.p, x.x/x.n) # parameter of interest: name, value under h0, point estimate
-default_tail(test::BinomialTest) = :both
+tail(test::BinomialTest) = :both
 
 function show_params(io::IO, x::BinomialTest, ident="")
     println(io, ident, "number of observations: $(x.n)")
@@ -158,7 +158,7 @@ SignTest{T<:Real, S<:Real}(x::AbstractVector{T}, y::AbstractVector{S}) = SignTes
 
 testname(::SignTest) = "Sign Test"
 population_param_of_interest(x::SignTest) = ("Median", x.median, median(x.data)) # parameter of interest: name, value under h0, point estimate
-default_tail(test::SignTest) = :both
+tail(test::SignTest) = :both
 
 function show_params(io::IO, x::SignTest, ident="")
     text1 = "number of observations:"

@@ -1,6 +1,6 @@
 using HypothesisTests, Base.Test
 using StatsBase
-using HypothesisTests: default_tail
+using HypothesisTests: tail
 
 #Example 1 in R
 #Agresti (2007) p. 39
@@ -26,7 +26,7 @@ for i = 1:length(c)
 end
 
 @test pvalue(m) ≈ 2.9535891832117357e-7
-@test default_tail(m) == :right
+@test tail(m) == :right
 @test m.stat ≈ 30.070149095754687
 @test m.df ≈ 2
 @test m.n ≈ 2757

@@ -1,6 +1,6 @@
 using HypothesisTests, Base.Test
 using Distributions
-using HypothesisTests: default_tail
+using HypothesisTests: tail
 
 # This is always the null in our tests.
 null = Normal(0.0, 1.0)
@@ -20,7 +20,7 @@ tst = OneSampleZTest(x)
 @test pvalue(tst) ≈ 2 * min(cdf(null, z), ccdf(null, z))
 @test pvalue(tst; tail=:left) ≈ cdf(null, z)
 @test pvalue(tst; tail=:right) ≈ ccdf(null, z)
-@test default_tail(tst) == :both
+@test tail(tst) == :both
 show(IOBuffer(), tst)
 
 tst = OneSampleZTest(m, s, n)
@@ -83,7 +83,7 @@ z = xbar / se
 @test pvalue(tst) ≈ 2 * min(cdf(null, z), ccdf(null, z))
 @test pvalue(tst; tail=:left) ≈ cdf(null, z)
 @test pvalue(tst; tail=:right) ≈ ccdf(null, z)
-@test default_tail(tst) == :both
+@test tail(tst) == :both
 @test confint(tst)[1] ≈ xbar + quantile(null, 0.05 / 2) * se
 @test confint(tst)[2] ≈ xbar + cquantile(null, 0.05 / 2) * se
 show(IOBuffer(), tst)

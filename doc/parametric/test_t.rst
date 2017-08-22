@@ -1,16 +1,19 @@
 T-test
 =============================================
 
-.. function:: OneSampleTTest(v::AbstractVector{T<:Real}, mu0::Real=0)
+.. function:: OneSampleTTest(v::AbstractVector{T<:Real}, mu0::Real=0; tail::Symbol=:both, alpha::Real=0.05)
 
     Perform a one sample t-test of the null hypothesis that the data
     in vector ``v`` comes from a distribution with mean ``mu0`` against
     the alternative hypothesis that the distribution does not have mean
     ``mu0``.
 
+    ``tail`` and ``alpha`` specify the defaults when calling
+    :ref:`pvalue<pvalue>` and :ref:`confint<confint>`.
+
     Implements: :ref:`pvalue<pvalue>`, :ref:`confint<confint>`
 
-.. function:: OneSampleTTest(xbar::Real, stdev::Real, n::Int, mu0::Real=0)
+.. function:: OneSampleTTest(xbar::Real, stdev::Real, n::Int, mu0::Real=0; tail::Symbol=:both, alpha::Real=0.05)
 
     Perform a one sample t-test of the null hypothesis that ``n``
     values with mean ``xbar`` and sample standard deviation
@@ -18,9 +21,12 @@ T-test
     the alternative hypothesis that the distribution does not have mean
     ``mu0``.
 
+    ``tail`` and ``alpha`` specify the defaults when calling
+    :ref:`pvalue<pvalue>` and :ref:`confint<confint>`.
+
     Implements: :ref:`pvalue<pvalue>`, :ref:`confint<confint>`
 
-.. function:: OneSampleTTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real}, mu0::Real=0)
+.. function:: OneSampleTTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real}, mu0::Real=0; tail::Symbol=:both, alpha::Real=0.05)
 
     Perform a paired sample t-test of the null hypothesis that
     the differences between pairs of values in vectors ``x`` and
@@ -28,18 +34,24 @@ T-test
     alternative hypothesis that the distribution does not have mean
     ``mu0``.
 
+    ``tail`` and ``alpha`` specify the defaults when calling
+    :ref:`pvalue<pvalue>` and :ref:`confint<confint>`.
+
     Implements: :ref:`pvalue<pvalue>`, :ref:`confint<confint>`
 
-.. function:: EqualVarianceTTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real})
+.. function:: EqualVarianceTTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real}; tail::Symbol=:both, alpha::Real=0.05)
 
     Perform a two-sample t-test of the null hypothesis that
     ``x`` and ``y`` come from a distributions with the same mean
     and equal variances against the alternative hypothesis that the
     distributions have different means and but equal variances.
 
+    ``tail`` and ``alpha`` specify the defaults when calling
+    :ref:`pvalue<pvalue>` and :ref:`confint<confint>`.
+
     Implements: :ref:`pvalue<pvalue>`, :ref:`confint<confint>`
 
-.. function:: UnequalVarianceTTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real})
+.. function:: UnequalVarianceTTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real}; tail::Symbol=:both, alpha::Real=0.05)
 
     Perform an unequal variance two-sample t-test of the null
     hypothesis that ``x`` and ``y`` come from a distributions with
@@ -54,5 +66,8 @@ T-test
     .. math::
         \nu_{\chi'} \approx \frac{\left(\sum_{i=1}^n k_i s_i^2\right)^2}
                                  {\sum_{i=1}^n \frac{(k_i s_i^2)^2}{\nu_i}}
+
+    ``tail`` and ``alpha`` specify the defaults when calling
+    :ref:`pvalue<pvalue>` and :ref:`confint<confint>`.
 
     Implements: :ref:`pvalue<pvalue>`, :ref:`confint<confint>`
