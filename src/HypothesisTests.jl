@@ -144,4 +144,5 @@ include("box_test.jl")
 include("breusch_godfrey.jl")
 include("augmented_dickey_fuller.jl")
 include("jarque_bera.jl")
+include("durbin_watson.jl")
 end
