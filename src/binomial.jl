@@ -100,7 +100,6 @@ of the following methods. Possible values for `method` are:
 
   * [Binomial confidence interval on Wikipedia](https://en.wikipedia.org/wiki/
     Binomial_proportion_confidence_interval)
-
 """
 function StatsBase.confint(x::BinomialTest, alpha::Float64=0.05; tail=:both, method=:clopper_pearson)
     check_alpha(alpha)
