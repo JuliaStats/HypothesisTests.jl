@@ -62,7 +62,7 @@ one of the following methods. Possible values for `method` are:
     90:366-369, 1995.
   * Quesensberry, C.P. and Hurst, D.C. Large Sample Simultaneous Confidence Intervals for
     Multinational Proportions. Technometrics, 6:191-195, 1964.
-  * Gold, R. Z. Tests Auxiliary to :math:`{\chi^{2}}` Tests in a Markov Chain. Annals of
+  * Gold, R. Z. Tests Auxiliary to ``χ^2` Tests in a Markov Chain. Annals of
     Mathematical Statistics, 30:56-74, 1963.
 """
 function StatsBase.confint(x::PowerDivergenceTest, alpha::Float64=0.05;
@@ -241,22 +241,22 @@ end
 Perform a Power Divergence Test.
 
 If `x` is a matrix with one row or column, or if `x` is a vector and `y` is not given, then
-a goodness-of-fit test is performed (``x`` is treated as a one-dimensional contingency
-table. The entries of `x` must be non-negative integers. In this case, the hypothesis
+a goodness-of-fit test is performed (`x` is treated as a one-dimensional contingency
+table). The entries of `x` must be non-negative integers. In this case, the hypothesis
 tested is whether the population probabilities equal those in `theta0`, or are all equal if
 `theta0` is not given.
 
 If `x` is a matrix with at least two rows and columns, it is taken as a two-dimensional
-contigency table: the entries of `x` must be non-negative integers. Otherwise, `x` and
-`y` must be vectors of the same length. The contigency table is calculated using `counts`
-from `Statsbase`. Then the power divergence test is performed of the null hypothesis that
+contingency table: the entries of `x` must be non-negative integers. Otherwise, `x` and
+`y` must be vectors of the same length. The contingency table is calculated using `counts`
+from [`Statsbase`](@ref). Then the power divergence test is performed of the null hypothesis that
 the joint distribution of the cell counts in a 2-dimensional contingency table is the
 product of the row and column marginals.
 
 The power divergence test is given by
 ```math
-    \\dfrac{2}{\\lambda(\\lambda+1)}\\sum_{i=1}^I \\sum_{j=1}^J n_{ij} \\left[(n_{ij}
-    /\\hat{n}_{ij})^\\lambda -1\\right]
+    \\dfrac{2}{λ(λ+1)}\\sum_{i=1}^I \\sum_{j=1}^J n_{ij} \\left[(n_{ij}
+    /\\hat{n}_{ij})^λ -1\\right]
 ```
 where ``n_{ij}`` is the cell count in the ``i`` th row and ``j`` th column and ``\\lambda``
 is a real number that has the following feature

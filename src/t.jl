@@ -33,24 +33,6 @@ pvalue(x::TTest; tail=:both) = pvalue(TDist(x.df), x.t; tail=tail)
 default_tail(test::TTest) = :both
 
 # confidence interval by inversion
-"""
-    confint(test::HypothesisTest, alpha = 0.05; tail = :both)
-
-Compute a confidence interval C with coverage 1-`alpha`.
-
-If `tail` is `:both` (default), then a two-sided confidence interval is returned. If `tail`
-is `:left` or `:right`, then a one-sided confidence interval is returned.
-
-!!! note
-    Most of the implemented confidence intervals are *strongly consistent*, that is, the
-    confidence interval with coverage 1-`alpha` does not contain the test statistic under
-    ``h_0`` if and only if the corresponding test rejects the null hypothesis
-    ``h_0: \\theta=\\theta_0``:
-    ```math
-        C (x, 1 − \\alpha) = \\{\\theta : p_\\theta (x) > \\alpha\\},
-    ```
-    where ``p_\\theta`` is the [`pvalue`](@ref) of the corresponding test.
-"""
 function StatsBase.confint(x::TTest, alpha::Float64=0.05; tail=:both)
     check_alpha(alpha)
 
@@ -151,7 +133,8 @@ function show_params(io::IO, x::TwoSampleTTest, ident="")
 end
 
 testname(::EqualVarianceTTest) = "Two sample t-test (equal variance)"
-population_param_of_interest(x::TwoSampleTTest) = ("Mean difference", x.μ0, x.xbar) # parameter of interest: name, value under h0, point estimate
+population_param_of_interest(x::TwoSampleTTest) = ("Mean difference", x.μ0, x.xbar)
+# parameter of interest: name, value under h0, point estimate
 
 """
     EqualVarianceTTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real})
@@ -198,8 +181,8 @@ This test is also known as sometimes known as Welch's t-test. It differs from th
 variance t-test in that it computes the number of degrees of freedom of the test using the
 Welch-Satterthwaite equation:
 ```math
-    \\nu_{\\chi'} \\approx \\frac{\\left(\\sum_{i=1}^n k_i s_i^2\\right)^2}{\\sum_{i=1}^n
-        \\frac{(k_i s_i^2)^2}{\\nu_i}}
+    ν_{χ'} ≈ \\frac{\\left(\\sum_{i=1}^n k_i s_i^2\\right)^2}{\\sum_{i=1}^n
+        \\frac{(k_i s_i^2)^2}{ν_i}}
 ```
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)

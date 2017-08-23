@@ -32,15 +32,16 @@ export SignedRankTest, ExactSignedRankTest, ApproximateSignedRankTest
     SignedRankTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real})
 
 Perform a Wilcoxon signed rank test of the null hypothesis that the distribution of `x`
-(or the difference `x - y`) has zero median against the alternative hypothesis that the
-median is non-zero.
+(or the difference `x - y` if `y` is provided) has zero median against the alternative
+hypothesis that the median is non-zero.
 
 When there are no tied ranks and ≤50 samples, or tied ranks and ≤15 samples,
-`SignedRankTest` performs an exact signed rank test. In all other cases, `SignedRankTest`
-performs an approximate signed rank test. Behavior may be further controlled by using
-`ExactSignedRankTest` or `ApproximateSignedRankTest` directly.
+[`SignedRankTest`](@ref) performs an exact signed rank test. In all other cases,
+[`SignedRankTest`](@ref) performs an approximate signed rank test. Behavior may be further
+controlled by using [`ExactSignedRankTest`](@ref) or [`ApproximateSignedRankTest`](@ref)
+directly.
 
-Implements: [`pvalue`](@ref)
+Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
 function SignedRankTest{T<:Real}(x::AbstractVector{T})
     (W, ranks, signs, tie_adjustment, n, median) = signedrankstats(x)
@@ -80,13 +81,16 @@ end
 """
     ExactSignedRankTest(x::AbstractVector{T<:Real}[, y::AbstractVector{T<:Real}])
 
-Perform an exact signed rank U test.
+Perform a Wilcoxon exact signed rank U test of the null hypothesis that the distribution of
+`x` (or the difference `x - y` if `y` is provided) has zero median against the alternative
+hypothesis that the median is non-zero.
 
-When there are no tied ranks, the exact p-value is computed using the `psignrank` function
-from `libRmath`. In the presence of tied ranks, a p-value is computed by exhaustive
-enumeration of permutations, which can be very slow for even moderately sized data sets.
+When there are no tied ranks, the exact p-value is computed using the [`psignrank`](@ref)
+function from [`libRmath`](@ref). In the presence of tied ranks, a p-value is computed by
+exhaustive enumeration of permutations, which can be very slow for even moderately sized
+data sets.
 
-Implements: [`pvalue`](@ref)
+Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
 ExactSignedRankTest{T<:Real}(x::AbstractVector{T}) =
     ExactSignedRankTest(x, signedrankstats(x)...)
@@ -94,7 +98,8 @@ ExactSignedRankTest{S<:Real,T<:Real}(x::AbstractVector{S}, y::AbstractVector{T})
     ExactSignedRankTest(x - y)
 
 testname(::ExactSignedRankTest) = "Exact Wilcoxon signed rank test"
-population_param_of_interest(x::ExactSignedRankTest) = ("Location parameter (pseudomedian)", 0, x.median) # parameter of interest: name, value under h0, point estimate
+population_param_of_interest(x::ExactSignedRankTest) = ("Location parameter (pseudomedian)", 0, x.median)
+# parameter of interest: name, value under h0, point estimate
 default_tail(test::ExactSignedRankTest) = :both
 
 function show_params(io::IO, x::ExactSignedRankTest, ident)
@@ -175,20 +180,22 @@ end
 """
     ApproximateSignedRankTest(x::AbstractVector{T<:Real}[, y::AbstractVector{T<:Real}])
 
-Perform an approximate signed rank U test.
+Perform a Wilcoxon approximate signed rank U test of the null hypothesis that the
+distribution of `x` (or the difference `x - y` if `y` is provided) has zero median against
+the alternative hypothesis that the median is non-zero.
 
 The p-value is computed using a normal approximation to the distribution of the signed rank
 statistic:
 ```math
     \\begin{align}
-        \\mu & = \\frac{n(n + 1)}{4}\\\\
-        \\sigma & = \\frac{n(n + 1)(2 * n + 1)}{24} - \\frac{a}{48}\\\\
+        μ & = \\frac{n(n + 1)}{4}\\\\
+        σ & = \\frac{n(n + 1)(2 * n + 1)}{24} - \\frac{a}{48}\\\\
         a & = \\sum_{t \\in \\mathcal{T}} t^3 - t
     \\end{align}
 ```
 where ``\\mathcal{T}`` is the set of the counts of tied values at each tied position.
 
-Implements: [`pvalue`](@ref)
+Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
 function ApproximateSignedRankTest{T<:Real}(x::Vector, W::Float64, ranks::Vector{T}, signs::BitArray{1}, tie_adjustment::Float64, n::Int, median::Float64)
     nz = length(ranks) # num non-zeros

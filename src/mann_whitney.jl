@@ -71,17 +71,6 @@ end
 
 
 ## EXACT MANN-WHITNEY U TEST
-"""
-    ExactMannWhitneyUTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real})
-
-Perform an exact Mann-Whitney U test.
-
-When there are no tied ranks, the exact p-value is computed using the `pwilcox` function
-from `libRmath`. In the presence of tied ranks, a p-value is computed by exhaustive
-enumeration of permutations, which can be very slow for even moderately sized data sets.
-
-Implements: [`pvalue`](@ref)
-"""
 immutable ExactMannWhitneyUTest{T<:Real} <: HypothesisTest
     U::Float64              # test statistic: Mann-Whitney-U statistic
     ranks::Vector{Float64}  # ranks
@@ -91,6 +80,17 @@ immutable ExactMannWhitneyUTest{T<:Real} <: HypothesisTest
     median::T               # sample median
 end
 
+"""
+    ExactMannWhitneyUTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real})
+
+Perform an exact Mann-Whitney U test.
+
+When there are no tied ranks, the exact p-value is computed using the [`pwilcox`](@ref) function
+from [`libRmath`](@ref). In the presence of tied ranks, a p-value is computed by exhaustive
+enumeration of permutations, which can be very slow for even moderately sized data sets.
+
+Implements: [`pvalue`](@ref)
+"""
 ExactMannWhitneyUTest{S<:Real,T<:Real}(x::AbstractVector{S}, y::AbstractVector{T}) =
     ExactMannWhitneyUTest(mwustats(x, y)...)
 
@@ -158,6 +158,16 @@ function pvalue(x::ExactMannWhitneyUTest; tail=:both)
     end
 end
 
+immutable ApproximateMannWhitneyUTest{T<:Real} <: HypothesisTest
+    U::Float64              # test statistic: Mann-Whitney-U statistic
+    ranks::Vector{T}        # ranks
+    tie_adjustment::Float64 # adjustment for ties
+    nx::Int                 # number of observations
+    ny::Int
+    median::Float64         # sample median
+    mu::Float64             # normal approximation: mean
+    sigma::Float64          # normal approximation: std
+end
 
 ## APPROXIMATE MANN-WHITNEY U TEST
 """
@@ -169,28 +179,18 @@ The p-value is computed using a normal approximation to the distribution of the
 Mann-Whitney U statistic:
 ```math
     \\begin{align}
-        \\mu & = \\frac{n_x n_y}{2}\\\\
-        \\sigma &= \\frac{n_x n_y}{12}\\left(n_x + n_y + 1 - \\frac{a}{(n_x + n_y)(n_x +
-             n_y - 1)}\\right)\\\\
-         a & = \\sum_{t \\in \\mathcal{T}} t^3 - t
+        μ & = \\frac{n_x n_y}{2}\\\\
+        σ & = \\frac{n_x n_y}{12}\\left(n_x + n_y + 1 - \\frac{a}{(n_x + n_y)(n_x +
+            n_y - 1)}\\right)\\\\
+        a & = \\sum_{t \\in \\mathcal{T}} t^3 - t
     \\end{align}
 ```
 where ``\\mathcal{T}`` is the set of the counts of tied values at each tied position.
 
 Implements: [`pvalue`](@ref)
 """
-immutable ApproximateMannWhitneyUTest{T<:Real} <: HypothesisTest
-    U::Float64              # test statistic: Mann-Whitney-U statistic
-    ranks::Vector{T}        # ranks
-    tie_adjustment::Float64 # adjustment for ties
-    nx::Int                 # number of observations
-    ny::Int
-    median::Float64         # sample median
-    mu::Float64             # normal approximation: mean
-    sigma::Float64          # normal approximation: std
-end
-function ApproximateMannWhitneyUTest{T<:Real}(U::Real, ranks::AbstractVector{T}, tie_adjustment::Real,
-                                     nx::Int, ny::Int, median::Float64)
+function ApproximateMannWhitneyUTest{T<:Real}(U::Real, ranks::AbstractVector{T},
+    tie_adjustment::Real, nx::Int, ny::Int, median::Float64)
     mu = U - nx * ny / 2
     sigma = sqrt((nx * ny * (nx + ny + 1 - tie_adjustment /
         ((nx + ny) * (nx + ny - 1)))) / 12)

@@ -24,20 +24,6 @@
 
 export FisherExactTest
 
-immutable FisherExactTest <: HypothesisTest
-    # Format:
-    # X1  X2
-    # Y1  a  b
-    # Y2  c  d
-    a::Int
-    b::Int
-    c::Int
-    d::Int
-
-    # conditional maximum likehood estimate of odd ratio
-    ω::Float64
-end
-
 """
     FisherExactTest(a::Integer, b::Integer, c::Integer, d::Integer)
 
@@ -64,9 +50,23 @@ Implements: [`pvalue`](@ref), [`confint`](@ref)
   * Fay, M.P. Supplementary material to confidence intervals that match Fisher’s exact or
     Blaker’s exact tests. Biostatistics, 0(0): 1-13, 2009.
 """
-function FisherExactTest(a::Int, b::Int, c::Int, d::Int)
-    ω = cond_mle_odds_ratio(a, b, c, d)
-    FisherExactTest(a, b, c, d, ω)
+immutable FisherExactTest <: HypothesisTest
+    # Format:
+    # X1  X2
+    # Y1  a  b
+    # Y2  c  d
+    a::Int
+    b::Int
+    c::Int
+    d::Int
+
+    # conditional maximum likehood estimate of odd ratio
+    ω::Float64
+
+    function FisherExactTest(a::Int, b::Int, c::Int, d::Int)
+        ω = cond_mle_odds_ratio(a, b, c, d)
+        new(a, b, c, d, ω)
+    end
 end
 
 testname(::FisherExactTest) = "Fisher's exact test"
@@ -91,11 +91,11 @@ end
 Compute the p-value for a given significance test.
 
 The one-sided p-values are based on Fisher's non-central hypergeometric distribution
-``f_\\omega(i)`` with odd-ratio ``\\omega``:
+``f_ω(i)`` with odd-ratio ``ω``:
 ```math
     \\begin{align}
-        p_\\omega^{(\\text{left})} &=\\sum_{i\\leq a} f_\\omega(i)\\\\
-        p_\\omega^{(\\text{right})} &=\\sum_{i\\geq a} f_\\omega(i)
+        p_ω^{(\\text{left})} &=\\sum_{i≦ a} f_ω(i)\\\\
+        p_ω^{(\\text{right})} &=\\sum_{i≧ a} f_ω(i)
     \\end{align}
 ```
 For `tail = :both`, possible values for `method` are:
@@ -106,7 +106,7 @@ For `tail = :both`, possible values for `method` are:
   - Minimum likelihood interval `:minlike`: This p-value is computed by summing all tables
     with the same marginals that are equally or less probable:
     ```math
-        p_\\omega = \\sum_{f_\\omega(i)\\leq f_\\omega(a)} f_\\omega(i)
+        p_ω = \\sum_{f_ω(i)\\leq f_ω(a)} f_ω(i)
     ```
 
 !!! note

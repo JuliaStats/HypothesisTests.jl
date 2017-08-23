@@ -41,7 +41,7 @@ end
 Perform a binomial test of the null hypothesis that the distribution from which `x`
 successes were encountered in `n` draws (or alternatively from which the vector `x` was
 drawn) has success probability `p` against the alternative hypothesis that the success
-probability is not equal to	`p`.
+probability is not equal to `p`.
 
 Computed confidence intervals by default are Clopper-Pearson intervals.
 
@@ -51,14 +51,13 @@ BinomialTest(x::AbstractVector{Bool}, p=0.5) =
     BinomialTest(sum(x), length(x), p)
 
 """
-```julia
-testname(::HypothesisTest)
-```
+    testname(::HypothesisTest)
 
-Returns the string value. E.g. "Binomial test", "Sign Test"
+Returns the string value. E.g. "Binomial test", "Sign Test".
 """
 testname(::BinomialTest) = "Binomial test"
-population_param_of_interest(x::BinomialTest) = ("Probability of success", x.p, x.x/x.n) # parameter of interest: name, value under h0, point estimate
+population_param_of_interest(x::BinomialTest) = ("Probability of success", x.p, x.x/x.n)
+# parameter of interest: name, value under h0, point estimate
 default_tail(test::BinomialTest) = :both
 
 function show_params(io::IO, x::BinomialTest, ident="")
@@ -66,18 +65,9 @@ function show_params(io::IO, x::BinomialTest, ident="")
     println(io, ident, "number of successes:    $(x.x)")
 end
 
-"""
-    pvalue(test::HypothesisTest; tail = :both)
-
-Compute the p-value for a given significance test.
-
-If `tail` is `:both` (default), then the p-value for the two-sided test is returned. If
-`tail` is `:left` or `:right`, then a one-sided test is performed.
-"""
 pvalue(x::BinomialTest; tail=:both) = pvalue(Binomial(x.n, x.p), x.x; tail=tail)
 
 # Confidence interval
-
 """
     confint(test::BinomialTest, alpha = 0.05; tail = :both, method = :clopper_pearson)
 
@@ -108,8 +98,7 @@ of the following methods. Possible values for `method` are:
 
 # External links
 
-  * [Binomial confidence interval on Wikipedia (https://en.wikipedia.org/wiki/
-    Binomial_proportion_confidence_interval)](https://en.wikipedia.org/wiki/
+  * [Binomial confidence interval on Wikipedia](https://en.wikipedia.org/wiki/
     Binomial_proportion_confidence_interval)
 
 """
@@ -201,8 +190,8 @@ end
     SignTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real}, median::Real = 0)
 
 Perform a sign test of the null hypothesis that the distribution from which `x`
-(or `x - y`) was drawn has median `median` against the alternative hypothesis that the
-median is not equal to `median`.
+(or `x - y` if `y` is provided) was drawn has median `median` against the alternative
+hypothesis that the median is not equal to `median`.
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
@@ -212,7 +201,8 @@ SignTest{T<:Real, S<:Real}(x::AbstractVector{T}, y::AbstractVector{S}) =
     SignTest(x - y, 0.0)
 
 testname(::SignTest) = "Sign Test"
-population_param_of_interest(x::SignTest) = ("Median", x.median, median(x.data)) # parameter of interest: name, value under h0, point estimate
+population_param_of_interest(x::SignTest) = ("Median", x.median, median(x.data))
+# parameter of interest: name, value under h0, point estimate
 default_tail(test::SignTest) = :both
 
 function show_params(io::IO, x::SignTest, ident="")
