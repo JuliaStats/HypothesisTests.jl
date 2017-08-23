@@ -39,7 +39,7 @@ The contingency table is structured as:
 |*Y2*| c  | d  |
 
 !!! note
-    The print output contains the conditional maximum likelihood estimate of the odd-ratio
+    The [`show`](@ref) output contains the conditional maximum likelihood estimate of the odds ratio
     rather than the sample odds ratio; it maximizes the likelihood given by Fisher's
     non-central hypergeometric distribution.
 
@@ -47,8 +47,9 @@ Implements: [`pvalue`](@ref), [`confint`](@ref)
 
 # References
 
-  * Fay, M.P. Supplementary material to confidence intervals that match Fisher’s exact or
-    Blaker’s exact tests. Biostatistics, 0(0): 1-13, 2009.
+  * Fay, M.P., Supplementary material to "Confidence intervals that match Fisher’s exact or
+    Blaker’s exact tests". Biostatistics, Volume 11, Issue 2, 1 April 2010, Pages 373–374,
+    [link](https://doi.org/10.1093/biostatistics/kxp050)
 """
 immutable FisherExactTest <: HypothesisTest
     # Format:
@@ -88,37 +89,33 @@ end
 """
     pvalue(x::FisherExactTest; tail = :both, method = :central)
 
-Compute the p-value for a given significance test.
+Compute the p-value for a given Fisher exact test.
 
 The one-sided p-values are based on Fisher's non-central hypergeometric distribution
-``f_ω(i)`` with odd-ratio ``ω``:
+``f_ω(i)`` with odds ratio ``ω``:
 ```math
     \\begin{align}
-        p_ω^{(\\text{left})} &=\\sum_{i≦ a} f_ω(i)\\\\
-        p_ω^{(\\text{right})} &=\\sum_{i≧ a} f_ω(i)
+        p_ω^{(\\text{left})} &=\\sum_{i ≤ a} f_ω(i)\\\\
+        p_ω^{(\\text{right})} &=\\sum_{i ≥ a} f_ω(i)
     \\end{align}
 ```
 For `tail = :both`, possible values for `method` are:
 
-  - Central interval `:central` (default): This p-value is two times the minimum of the
+  - `:central` (default): Central interval, i.e. the p-value is two times the minimum of the
     one-sided p-values.
-
-  - Minimum likelihood interval `:minlike`: This p-value is computed by summing all tables
-    with the same marginals that are equally or less probable:
+  - `:minlike`: Minimum likelihood interval, i.e. the p-value is computed by summing all
+    tables with the same marginals that are equally or less probable:
     ```math
-        p_ω = \\sum_{f_ω(i)\\leq f_ω(a)} f_ω(i)
+        p_ω = \\sum_{f_ω(i)≤ f_ω(a)} f_ω(i)
     ```
-
-!!! note
-    Since the p-value is not necessarily unimodal, the corresponding confidence region might
-    not be an interval.
 
 # References
 
-  * Gibbons, J.D, Pratt, J.W. P-values: Interpretation and Methodology American
+  * Gibbons, J.D., Pratt, J.W., P-values: Interpretation and Methodology, American
     Statistican, 29(1):20-25, 1975.
-  * Fay, M.P. Supplementary material to Confidence intervals that match Fisher’s exact or
-    Blaker’s exact tests. Biostatistics, 0(0):1-13, 2009.
+  * Fay, M.P., Supplementary material to "Confidence intervals that match Fisher’s exact or
+    Blaker’s exact tests". Biostatistics, Volume 11, Issue 2, 1 April 2010, Pages 373–374,
+    [link](https://doi.org/10.1093/biostatistics/kxp050)
 """
 function pvalue(x::FisherExactTest; tail=:both, method=:central)
     if tail == :both && method != :central
@@ -161,14 +158,21 @@ end
 """
     confint(x::FisherExactTest, alpha::Float64=0.05; tail=:both, method=:central)
 
-Compute a confidence interval with coverage 1 - `alpha` by inverting the `:central` p-value.
+Compute a confidence interval with coverage 1 - `alpha`. One-sided intervals are based on
+Fisher's non-central hypergeometric distribution. For `tail = :both`, the only
+`method` implemented yet is the central interval (`:central`).
+
+!!! note
+    Since the p-value is not necessarily unimodal, the corresponding confidence region might
+    not be an interval.
 
 # References
 
-  * Gibbons, J.D, Pratt, J.W. P-values: Interpretation and Methodology American
+  * Gibbons, J.D, Pratt, J.W. P-values: Interpretation and Methodology, American
     Statistican, 29(1):20-25, 1975.
-  * Fay, M.P. Supplementary material to Confidence intervals that match Fisher’s exact or
-    Blaker’s exact tests. Biostatistics, 0(0):1-13, 2009.
+  * Fay, M.P., Supplementary material to "Confidence intervals that match Fisher’s exact or
+    Blaker’s exact tests". Biostatistics, Volume 11, Issue 2, 1 April 2010, Pages 373–374,
+    [link](https://doi.org/10.1093/biostatistics/kxp050)
 """
 function StatsBase.confint(x::FisherExactTest, alpha::Float64=0.05; tail=:both, method=:central)
     check_alpha(alpha)

@@ -31,10 +31,10 @@ immutable OneSampleADTest <: ADTest
 end
 
 """
-    OneSampleADTest{T<:Real}(x::AbstractVector{T}, d::UnivariateDistribution)
+    OneSampleADTest(x::AbstractVector{<:Real}, d::UnivariateDistribution)
 
-Perform a one sample Anderson–Darling test of the null hypothesis that the data in vector
-`x` comes from the distribution `d` against the alternative hypothesis that the sample
+Perform a one-sample Anderson–Darling test of the null hypothesis that the data in vector
+`x` come from the distribution `d` against the alternative hypothesis that the sample
 is not drawn from `d`.
 
 Implements: [`pvalue`](@ref)
@@ -71,10 +71,7 @@ function pvalue(x::OneSampleADTest)
     end
 end
 
-
 ## K-SAMPLE ANDERSON DARLING TEST
-### k-Sample Anderson-Darling Tests, F. W. Scholz; M. A. Stephens, Journal of the American Statistical Association, Vol. 82, No. 399. (Sep., 1987), pp. 918-924.
-
 immutable KSampleADTest <: ADTest
     k::Int        # number of samples
     n::Int        # number of observations
@@ -83,20 +80,20 @@ immutable KSampleADTest <: ADTest
 end
 
 """
-    KSampleADTest{T<:Real}(xs::AbstractVector{T}...; modified=true)
+    KSampleADTest(xs::AbstractVector{<:Real}...; modified = true)
 
-Perform a k-sample Anderson–Darling test of the null hypothesis that the data in vectors
-`xs` comes from the same distribution against the alternative hypothesis that the samples
-comes from different distributions.
+Perform a ``k``-sample Anderson–Darling test of the null hypothesis that the data in the
+``k`` vectors `xs` come from the same distribution against the alternative hypothesis that
+the samples come from different distributions.
 
-`modified` paramater enables a modified test calculation for samples whose observations
+`modified` parameter enables a modified test calculation for samples whose observations
 do not all coincide.
 
 Implements: [`pvalue`](@ref)
 
 # References
 
-  * K-Sample Anderson-Darling Tests, F. W. Scholz and M. A. Stephens, Journal of the
+  * F. W. Scholz and M. A. Stephens, K-Sample Anderson-Darling Tests, Journal of the
     American Statistical Association, Vol. 82, No. 399. (Sep., 1987), pp. 918-924.
 """
 function KSampleADTest{T<:Real}(xs::AbstractVector{T}...; modified=true)

@@ -55,11 +55,11 @@ immutable ExactOneSampleKSTest <: ExactKSTest
 end
 
 """
-    ExactOneSampleKSTest{T<:Real}(x::AbstractVector{T}, d::UnivariateDistribution)
+    ExactOneSampleKSTest(x::AbstractVector{<:Real}, d::UnivariateDistribution)
 
-Perform a one sample Kolmogorov–Smirnov-test of the null hypothesis that the data in vector
-`x` comes from the distribution `d` against the alternative hypothesis that the sample
-is not drawn from `d`.
+Perform a one-sample exact Kolmogorov–Smirnov test of the null hypothesis that the data in
+vector `x` comes from the distribution `d` against the alternative hypothesis that the
+sample is not drawn from `d`.
 
 Implements: [`pvalue`](@ref)
 """
@@ -99,9 +99,9 @@ immutable ApproximateOneSampleKSTest <: ApproximateKSTest
 end
 
 """
-    ApproximateOneSampleKSTest{T<:Real}(x::AbstractVector{T}, d::UnivariateDistribution)
+    ApproximateOneSampleKSTest(x::AbstractVector{<:Real}, d::UnivariateDistribution)
 
-Perform an asymptotic one sample Kolmogorov–Smirnov-test of the null hypothesis that the
+Perform an asymptotic one-sample Kolmogorov–Smirnov test of the null hypothesis that the
 data in vector `x` comes from the distribution `d` against the alternative hypothesis
 that the sample is not drawn from `d`.
 
@@ -148,11 +148,11 @@ immutable ApproximateTwoSampleKSTest <: ApproximateKSTest
 end
 
 """
-    ApproximateTwoSampleKSTest{T<:Real, S<:Real}(x::AbstractVector{T}, y::AbstractVector{S})
+    ApproximateTwoSampleKSTest(x::AbstractVector{<:Real}, y::AbstractVector{<:Real})
 
-Perform an asymptotic two sample Kolmogorov–Smirnov-test of the null hypothesis that `x`
-and `y` are drawn from the same distribution against the alternative hypothesis that the
-distribution comes from different distributions.
+Perform an asymptotic two-sample Kolmogorov–Smirnov-test of the null hypothesis that `x`
+and `y` are drawn from the same distribution against the alternative hypothesis that they
+come from different distributions.
 
 Implements: [`pvalue`](@ref)
 

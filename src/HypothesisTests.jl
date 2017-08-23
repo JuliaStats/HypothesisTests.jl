@@ -51,11 +51,11 @@ is `:left` or `:right`, then a one-sided confidence interval is returned.
     Most of the implemented confidence intervals are *strongly consistent*, that is, the
     confidence interval with coverage 1-`alpha` does not contain the test statistic under
     ``h_0`` if and only if the corresponding test rejects the null hypothesis
-    ``h_0: \\theta=\\theta_0``:
+    ``h_0: θ = θ_0``:
     ```math
-        C (x, 1 − \\alpha) = \\{\\theta : p_\\theta (x) > \\alpha\\},
+        C (x, 1 − α) = \\{θ : p_θ (x) > α\\},
     ```
-    where ``p_\\theta`` is the [`pvalue`](@ref) of the corresponding test.
+    where ``p_θ`` is the [`pvalue`](@ref) of the corresponding test.
 """
 function confint end
 
