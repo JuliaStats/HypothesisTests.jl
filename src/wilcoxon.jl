@@ -85,10 +85,9 @@ Perform a Wilcoxon exact signed rank U test of the null hypothesis that the dist
 `x` (or the difference `x - y` if `y` is provided) has zero median against the alternative
 hypothesis that the median is non-zero.
 
-When there are no tied ranks, the exact p-value is computed using the [`psignrank`](@ref)
-function from [`libRmath`](@ref). In the presence of tied ranks, a p-value is computed by
-exhaustive enumeration of permutations, which can be very slow for even moderately sized
-data sets.
+When there are no tied ranks, the exact p-value is computed using the `psignrank` function
+from the `Rmath` package. In the presence of tied ranks, a p-value is computed by exhaustive
+enumeration of permutations, which can be very slow for even moderately sized data sets.
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
@@ -98,8 +97,7 @@ ExactSignedRankTest{S<:Real,T<:Real}(x::AbstractVector{S}, y::AbstractVector{T})
     ExactSignedRankTest(x - y)
 
 testname(::ExactSignedRankTest) = "Exact Wilcoxon signed rank test"
-population_param_of_interest(x::ExactSignedRankTest) = ("Location parameter (pseudomedian)", 0, x.median)
-# parameter of interest: name, value under h0, point estimate
+population_param_of_interest(x::ExactSignedRankTest) = ("Location parameter (pseudomedian)", 0, x.median) # parameter of interest: name, value under h0, point estimate
 default_tail(test::ExactSignedRankTest) = :both
 
 function show_params(io::IO, x::ExactSignedRankTest, ident)
@@ -187,11 +185,11 @@ the alternative hypothesis that the median is non-zero.
 The p-value is computed using a normal approximation to the distribution of the signed rank
 statistic:
 ```math
-    \\begin{align}
+    \\begin{align*}
         μ & = \\frac{n(n + 1)}{4}\\\\
         σ & = \\frac{n(n + 1)(2 * n + 1)}{24} - \\frac{a}{48}\\\\
         a & = \\sum_{t \\in \\mathcal{T}} t^3 - t
-    \\end{align}
+    \\end{align*}
 ```
 where ``\\mathcal{T}`` is the set of the counts of tied values at each tied position.
 

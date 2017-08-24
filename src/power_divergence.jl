@@ -247,9 +247,10 @@ those in `theta0`, or are all equal if `theta0` is not given.
 
 If `x` is a matrix with at least two rows and columns, it is taken as a two-dimensional
 contingency table. Otherwise, `x` and `y` must be vectors of the same length. The contingency
-table is calculated using `counts` from [`Statsbase`](@ref). Then the power divergence test
-is conducted under the null hypothesis that the joint distribution of the cell counts in a
-2-dimensional contingency table is the product of the row and column marginals.
+table is calculated using the `counts` function from the `StatsBase` package. Then the power
+divergence test is conducted under the null hypothesis that the joint distribution of the
+cell counts in a 2-dimensional contingency table is the product of the row and column
+marginals.
 
 Note that the entries of `x` (and `y` if provided) must be non-negative integers.
 
@@ -259,7 +260,7 @@ The power divergence test is given by
     /\\hat{n}_{ij})^λ -1\\right]
 ```
 where ``n_{ij}`` is the cell count in the ``i`` th row and ``j`` th column and ``λ`` is a
-real number determing the nature of the test to be performed:
+real number determining the nature of the test to be performed:
 
   * ``λ = 1``: equal to Pearson's chi-squared statistic
   * ``λ \\to 0``: converges to the likelihood ratio test statistic
@@ -345,9 +346,26 @@ PowerDivergenceTest{T<:Integer,U<:AbstractFloat}(x::AbstractVector{T}; lambda::U
 
 #ChisqTest
 """
-    ChisqTest(x [,y] [,theta0])
+    ChisqTest(x[, y][, theta0 = ones(length(x))/length(x)])
 
-Convenience function for power divergence test with ``λ=1``.
+Perform a [`PowerDivergenceTest`](@ref) with ``λ = 1``, i.e. in the form of Pearson's
+chi-squared statistic.
+
+If `y` is not given and `x` is a matrix with one row or column, or `x` is a vector, then
+a goodness-of-fit test is performed (`x` is treated as a one-dimensional contingency
+table). In this case, the hypothesis tested is whether the population probabilities equal
+those in `theta0`, or are all equal if `theta0` is not given.
+
+If `x` is a matrix with at least two rows and columns, it is taken as a two-dimensional
+contingency table. Otherwise, `x` and `y` must be vectors of the same length. The contingency
+table is calculated using `counts` function from the `StatsBase` package. Then the power
+divergence test is conducted under the null hypothesis that the joint distribution of the
+cell counts in a 2-dimensional contingency table is the product of the row and column
+marginals.
+
+Note that the entries of `x` (and `y` if provided) must be non-negative integers.
+
+Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
 function ChisqTest{T<:Integer}(x::AbstractMatrix{T})
     PowerDivergenceTest(x, lambda=1.0)
@@ -368,9 +386,26 @@ ChisqTest{T<:Integer,U<:AbstractFloat}(x::AbstractVector{T}, theta0::Vector{U} =
 
 #MultinomialLRT
 """
-    MultinomialLRT(x [,y] [,theta0])
+    MultinomialLRT(x[, y][, theta0 = ones(length(x))/length(x)])
 
-Convenience function for power divergence test with ``λ=0``.
+Perform a [`PowerDivergenceTest`](@ref) with ``λ = 0``, i.e. in the form of the likelihood
+ratio test statistic.
+
+If `y` is not given and `x` is a matrix with one row or column, or `x` is a vector, then
+a goodness-of-fit test is performed (`x` is treated as a one-dimensional contingency
+table). In this case, the hypothesis tested is whether the population probabilities equal
+those in `theta0`, or are all equal if `theta0` is not given.
+
+If `x` is a matrix with at least two rows and columns, it is taken as a two-dimensional
+contingency table. Otherwise, `x` and `y` must be vectors of the same length. The contingency
+table is calculated using `counts` function from the `StatsBase` package. Then the power
+divergence test is conducted under the null hypothesis that the joint distribution of the
+cell counts in a 2-dimensional contingency table is the product of the row and column
+marginals.
+
+Note that the entries of `x` (and `y` if provided) must be non-negative integers.
+
+Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
 function MultinomialLRT{T<:Integer}(x::AbstractMatrix{T})
     PowerDivergenceTest(x, lambda=0.0)

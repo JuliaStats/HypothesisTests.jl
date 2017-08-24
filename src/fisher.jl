@@ -39,9 +39,9 @@ The contingency table is structured as:
 |*Y2*| c  | d  |
 
 !!! note
-    The [`show`](@ref) output contains the conditional maximum likelihood estimate of the odds ratio
-    rather than the sample odds ratio; it maximizes the likelihood given by Fisher's
-    non-central hypergeometric distribution.
+    The `show` function output contains the conditional maximum likelihood estimate of the
+    odds ratio rather than the sample odds ratio; it maximizes the likelihood given by
+    Fisher's non-central hypergeometric distribution.
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 
@@ -94,10 +94,10 @@ Compute the p-value for a given Fisher exact test.
 The one-sided p-values are based on Fisher's non-central hypergeometric distribution
 ``f_ω(i)`` with odds ratio ``ω``:
 ```math
-    \\begin{align}
+    \\begin{align*}
         p_ω^{(\\text{left})} &=\\sum_{i ≤ a} f_ω(i)\\\\
         p_ω^{(\\text{right})} &=\\sum_{i ≥ a} f_ω(i)
-    \\end{align}
+    \\end{align*}
 ```
 For `tail = :both`, possible values for `method` are:
 

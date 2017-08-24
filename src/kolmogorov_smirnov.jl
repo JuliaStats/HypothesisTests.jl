@@ -158,8 +158,8 @@ Implements: [`pvalue`](@ref)
 
 # External links
 
-  * [Approximation of one-sided test (Encyclopedia of Mathematics)](
-    https://www.encyclopediaofmath.org/index.php/Kolmogorov-Smirnov_test)
+  * [Approximation of one-sided test (Encyclopedia of Mathematics)
+    ](https://www.encyclopediaofmath.org/index.php/Kolmogorov-Smirnov_test)
 """
 function ApproximateTwoSampleKSTest{T<:Real, S<:Real}(x::AbstractVector{T}, y::AbstractVector{S})
     n_x, n_y = length(x), length(y)

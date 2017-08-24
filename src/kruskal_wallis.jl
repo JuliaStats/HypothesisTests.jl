@@ -44,10 +44,10 @@ The Kruskal-Wallis test is an extension of the Mann-Whitney U test to more than 
 The p-value is computed using a ``χ^2`` approximation to the distribution of the test
 statistic ``H_c=\\frac{H}{C}``:
 ```math
-    \\begin{align}
+    \\begin{align*}
     H & = \\frac{12}{n(n+1)} \\sum_{g ∈ \\mathcal{G}} \\frac{R_g^2}{n_g} - 3(n+1)\\\\
     C & = 1-\\frac{1}{n^3-n}\\sum_{t ∈ \\mathcal{T}} (t^3-t),
-    \\end{align}
+    \\end{align*}
 ```
 where ``\\mathcal{T}`` is the set of the counts of tied values at each tied position, ``n``
 is the total number of observations across all groups, and ``n_g`` and ``R_g`` are the number of
@@ -64,8 +64,8 @@ Implements: [`pvalue`](@ref)
 
 # External links
 
-  * [Kruskal-Wallis test on Wikipedia](
-    https://en.wikipedia.org/wiki/Kruskal–Wallis_one-way_analysis_of_variance)
+  * [Kruskal-Wallis test on Wikipedia
+    ](https://en.wikipedia.org/wiki/Kruskal-Wallis_one-way_analysis_of_variance)
 """
 function KruskalWallisTest{T<:Real}(groups::AbstractVector{T}...)
     (H, R_i, tieadj, n_i) = kwstats(groups...)
