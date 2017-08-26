@@ -1,5 +1,5 @@
 # Wilcoxon.jl
-# Wilcoxon rank sum (Mann-Whitney U) and signed rank tests in Julia
+# Wilcoxon rank sum (Mann-Whitney U) tests
 #
 # Copyright (C) 2012   Simon Kornblith
 #
@@ -27,6 +27,26 @@ export MannWhitneyUTest, ExactMannWhitneyUTest, ApproximateMannWhitneyUTest
 ## COMMON MANN-WHITNEY U
 
 # Automatic exact/normal selection
+"""
+    MannWhitneyUTest(x::AbstractVector{<:Real}, y::AbstractVector{<:Real})
+
+Perform a Mann-Whitney U test of the null hypothesis that the probability that an
+observation drawn from the same population as `x` is greater than an observation drawn
+from the same population as `y` is equal to the probability that an observation drawn
+from the same population as `y` is greater than an observation drawn from the same
+population as `x` against the alternative hypothesis that these probabilities are not
+equal.
+
+The Mann-Whitney U test is sometimes known as the Wilcoxon rank-sum test.
+
+When there are no tied ranks and ≤50 samples, or tied ranks and ≤10 samples,
+`MannWhitneyUTest` performs an exact Mann-Whitney U test. In all other cases,
+`MannWhitneyUTest` performs an approximate Mann-Whitney U test. Behavior may be further
+controlled by using [`ExactMannWhitneyUTest`](@ref) or [`ApproximateMannWhitneyUTest`](@ref)
+directly.
+
+Implements: [`pvalue`](@ref)
+"""
 function MannWhitneyUTest{S<:Real,T<:Real}(x::AbstractVector{S}, y::AbstractVector{T})
     (U, ranks, tieadj, nx, ny, median) = mwustats(x, y)
     if nx + ny <= 10 || (nx + ny <= 50 && tieadj == 0)
@@ -52,7 +72,6 @@ end
 
 
 ## EXACT MANN-WHITNEY U TEST
-
 immutable ExactMannWhitneyUTest{T<:Real} <: HypothesisTest
     U::Float64              # test statistic: Mann-Whitney-U statistic
     ranks::Vector{Float64}  # ranks
@@ -61,6 +80,23 @@ immutable ExactMannWhitneyUTest{T<:Real} <: HypothesisTest
     ny::Int
     median::T               # sample median
 end
+
+"""
+    ExactMannWhitneyUTest(x::AbstractVector{<:Real}, y::AbstractVector{<:Real})
+
+Perform an exact Mann-Whitney U test of the null hypothesis that the probability that an
+observation drawn from the same population as `x` is greater than an observation drawn
+from the same population as `y` is equal to the probability that an observation drawn
+from the same population as `y` is greater than an observation drawn from the same
+population as `x` against the alternative hypothesis that these probabilities are not
+equal.
+
+When there are no tied ranks, the exact p-value is computed using the `pwilcox` function
+from the `Rmath` package. In the presence of tied ranks, a p-value is computed by exhaustive
+enumeration of permutations, which can be very slow for even moderately sized data sets.
+
+Implements: [`pvalue`](@ref)
+"""
 ExactMannWhitneyUTest{S<:Real,T<:Real}(x::AbstractVector{S}, y::AbstractVector{T}) =
     ExactMannWhitneyUTest(mwustats(x, y)...)
 
@@ -128,9 +164,6 @@ function pvalue(x::ExactMannWhitneyUTest; tail=:both)
     end
 end
 
-
-## APPROXIMATE MANN-WHITNEY U TEST
-
 immutable ApproximateMannWhitneyUTest{T<:Real} <: HypothesisTest
     U::Float64              # test statistic: Mann-Whitney-U statistic
     ranks::Vector{T}        # ranks
@@ -141,8 +174,34 @@ immutable ApproximateMannWhitneyUTest{T<:Real} <: HypothesisTest
     mu::Float64             # normal approximation: mean
     sigma::Float64          # normal approximation: std
 end
-function ApproximateMannWhitneyUTest{T<:Real}(U::Real, ranks::AbstractVector{T}, tie_adjustment::Real,
-                                     nx::Int, ny::Int, median::Float64)
+
+## APPROXIMATE MANN-WHITNEY U TEST
+"""
+    ApproximateMannWhitneyUTest(x::AbstractVector{<:Real}, y::AbstractVector{<:Real})
+
+Perform an approximate Mann-Whitney U test of the null hypothesis that the probability that
+an observation drawn from the same population as `x` is greater than an observation drawn
+from the same population as `y` is equal to the probability that an observation drawn
+from the same population as `y` is greater than an observation drawn from the same
+population as `x` against the alternative hypothesis that these probabilities are not
+equal.
+
+The p-value is computed using a normal approximation to the distribution of the
+Mann-Whitney U statistic:
+```math
+    \\begin{align*}
+        μ & = \\frac{n_x n_y}{2}\\\\
+        σ & = \\frac{n_x n_y}{12}\\left(n_x + n_y + 1 - \\frac{a}{(n_x + n_y)(n_x +
+            n_y - 1)}\\right)\\\\
+        a & = \\sum_{t \\in \\mathcal{T}} t^3 - t
+    \\end{align*}
+```
+where ``\\mathcal{T}`` is the set of the counts of tied values at each tied position.
+
+Implements: [`pvalue`](@ref)
+"""
+function ApproximateMannWhitneyUTest{T<:Real}(U::Real, ranks::AbstractVector{T},
+    tie_adjustment::Real, nx::Int, ny::Int, median::Float64)
     mu = U - nx * ny / 2
     sigma = sqrt((nx * ny * (nx + ny + 1 - tie_adjustment /
         ((nx + ny) * (nx + ny - 1)))) / 12)

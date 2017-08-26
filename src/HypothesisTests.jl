@@ -39,6 +39,36 @@ check_same_length(x::AbstractVector, y::AbstractVector) = if length(x) != length
     throw(DimensionMismatch("Vectors must be the same length"))
 end
 
+"""
+    confint(test::HypothesisTest, alpha = 0.05; tail = :both)
+
+Compute a confidence interval C with coverage 1-`alpha`.
+
+If `tail` is `:both` (default), then a two-sided confidence interval is returned. If `tail`
+is `:left` or `:right`, then a one-sided confidence interval is returned.
+
+!!! note
+    Most of the implemented confidence intervals are *strongly consistent*, that is, the
+    confidence interval with coverage 1-`alpha` does not contain the test statistic under
+    ``h_0`` if and only if the corresponding test rejects the null hypothesis
+    ``h_0: θ = θ_0``:
+    ```math
+        C (x, 1 − α) = \\{θ : p_θ (x) > α\\},
+    ```
+    where ``p_θ`` is the [`pvalue`](@ref) of the corresponding test.
+"""
+function confint end
+
+"""
+    pvalue(test::HypothesisTest; tail = :both)
+
+Compute the p-value for a given significance test.
+
+If `tail` is `:both` (default), then the p-value for the two-sided test is returned. If
+`tail` is `:left` or `:right`, then a one-sided test is performed.
+"""
+function pvalue end
+
 # Basic function for finding a p-value given a distribution and tail
 pvalue(dist::ContinuousUnivariateDistribution, x::Number; tail=:both) =
     if tail == :both

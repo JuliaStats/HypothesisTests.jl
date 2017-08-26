@@ -70,6 +70,15 @@ function show_params(io::IO, x::OneSampleTTest, ident="")
     println(io, ident, "empirical standard error: $(x.stderr)")
 end
 
+"""
+    OneSampleTTest(xbar::Real, stddev::Real, n::Int, μ0::Real = 0)
+
+Perform a one sample t-test of the null hypothesis that `n` values with mean `xbar` and
+sample standard deviation `stddev`  come from a distribution with mean `μ0` against the
+alternative hypothesis that the distribution does not have mean `μ0`.
+
+Implements: [`pvalue`](@ref), [`confint`](@ref)
+"""
 function OneSampleTTest(xbar::Real, stddev::Real, n::Int, μ0::Real=0)
     stderr = stddev/sqrt(n)
     t = (xbar-μ0)/stderr
@@ -77,8 +86,26 @@ function OneSampleTTest(xbar::Real, stddev::Real, n::Int, μ0::Real=0)
     OneSampleTTest(n, xbar, df, stderr, t, μ0)
 end
 
+"""
+    OneSampleTTest(v::AbstractVector{T<:Real}, μ0::Real = 0)
+
+Perform a one sample t-test of the null hypothesis that the data in vector `v` comes from
+a distribution with mean `μ0` against the alternative hypothesis that the distribution
+does not have mean `μ0`.
+
+Implements: [`pvalue`](@ref), [`confint`](@ref)
+"""
 OneSampleTTest{T<:Real}(v::AbstractVector{T}, μ0::Real=0) = OneSampleTTest(mean(v), std(v), length(v), μ0)
 
+"""
+    OneSampleTTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real}, μ0::Real = 0)
+
+Perform a paired sample t-test of the null hypothesis that the differences between pairs of
+values in vectors `x` and `y` come from a distribution with mean `μ0` against the
+alternative hypothesis that the distribution does not have mean `μ0`.
+
+Implements: [`pvalue`](@ref), [`confint`](@ref)
+"""
 function OneSampleTTest{T<:Real, S<:Real}(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0)
     check_same_length(x, y)
 
@@ -108,6 +135,15 @@ end
 testname(::EqualVarianceTTest) = "Two sample t-test (equal variance)"
 population_param_of_interest(x::TwoSampleTTest) = ("Mean difference", x.μ0, x.xbar) # parameter of interest: name, value under h0, point estimate
 
+"""
+    EqualVarianceTTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real})
+
+Perform a two-sample t-test of the null hypothesis that `x` and `y` come from distributions
+with equal means and variances against the alternative hypothesis that the distributions
+have different means but equal variances.
+
+Implements: [`pvalue`](@ref), [`confint`](@ref)
+"""
 function EqualVarianceTTest{T<:Real,S<:Real}(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0)
     nx, ny = length(x), length(y)
     xbar = mean(x) - mean(y)
@@ -133,6 +169,23 @@ end
 
 testname(::UnequalVarianceTTest) = "Two sample t-test (unequal variance)"
 
+"""
+    UnequalVarianceTTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real})
+
+Perform an unequal variance two-sample t-test of the null hypothesis that `x` and `y` come
+from distributions with equal means against the alternative hypothesis that the
+distributions have different means.
+
+This test is sometimes known as Welch's t-test. It differs from the equal variance t-test in
+that it computes the number of degrees of freedom of the test using the Welch-Satterthwaite
+equation:
+```math
+    ν_{χ'} ≈ \\frac{\\left(\\sum_{i=1}^n k_i s_i^2\\right)^2}{\\sum_{i=1}^n
+        \\frac{(k_i s_i^2)^2}{ν_i}}
+```
+
+Implements: [`pvalue`](@ref), [`confint`](@ref)
+"""
 function UnequalVarianceTTest{T<:Real,S<:Real}(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0)
     nx, ny = length(x), length(y)
     xbar = mean(x)-mean(y)
