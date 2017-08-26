@@ -33,7 +33,7 @@ using Rmath: pwilcox, psignrank
 import StatsBase.confint
 
 export testname, pvalue, confint
-@compat abstract type HypothesisTest end
+abstract type HypothesisTest end
 
 check_same_length(x::AbstractVector, y::AbstractVector) = if length(x) != length(y)
     throw(DimensionMismatch("Vectors must be the same length"))
@@ -99,7 +99,7 @@ function check_alpha(alpha::Float64)
 end
 
 # Pretty-print
-function Base.show{T<:HypothesisTest}(io::IO, test::T)
+function Base.show(io::IO, test::T) where T<:HypothesisTest
     println(io, testname(test))
     println(io, repeat("-", length(testname(test))))
 
@@ -136,12 +136,12 @@ function Base.show{T<:HypothesisTest}(io::IO, test::T)
 end
 
 # parameter of interest: name, value under h0, point estimate
-population_param_of_interest{T<:HypothesisTest}(test::T) = ("not implemented yet", NaN, NaN)
+population_param_of_interest(test::T) where {T<:HypothesisTest} = ("not implemented yet", NaN, NaN)
 
 # is the test one- or two-sided
 default_tail(test::HypothesisTest) = :undefined
 
-function show_params{T<:HypothesisTest}(io::IO, test::T, ident="")
+function show_params(io::IO, test::T, ident="") where T<:HypothesisTest
     fieldidx = find(Bool[t<:Number for t in T.types])
     if !isempty(fieldidx)
         lengths = [length(string(T.names[i])) for i in fieldidx]

@@ -26,7 +26,7 @@ export BinomialTest, SignTest
 
 ## BINOMIAL TEST
 
-immutable BinomialTest <: HypothesisTest
+struct BinomialTest <: HypothesisTest
     p::Float64
     x::Int
     n::Int
@@ -176,7 +176,7 @@ end
 
 ## SIGN TEST
 
-immutable SignTest <: HypothesisTest
+struct SignTest <: HypothesisTest
     median::Float64
     x::Int
     n::Int
@@ -193,9 +193,9 @@ hypothesis that the median is not equal to `median`.
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
-SignTest{T<:Real}(x::AbstractVector{T}, median::Real=0) =
+SignTest(x::AbstractVector{T}, median::Real=0) where {T<:Real} =
     SignTest(median, sum(x .> median), sum(x .!= median), sort(x))
-SignTest{T<:Real, S<:Real}(x::AbstractVector{T}, y::AbstractVector{S}) =
+SignTest(x::AbstractVector{T}, y::AbstractVector{S}) where {T<:Real, S<:Real} =
     SignTest(x - y, 0.0)
 
 testname(::SignTest) = "Sign Test"

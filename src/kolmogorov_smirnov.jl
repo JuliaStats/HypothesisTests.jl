@@ -26,9 +26,9 @@ export
     ExactOneSampleKSTest,
     ApproximateOneSampleKSTest, ApproximateTwoSampleKSTest
 
-@compat abstract type KSTest <: HypothesisTest end
-@compat abstract type ApproximateKSTest <: KSTest end
-@compat abstract type ExactKSTest <: KSTest end
+abstract type KSTest <: HypothesisTest end
+abstract type ApproximateKSTest <: KSTest end
+abstract type ExactKSTest <: KSTest end
 
 population_param_of_interest(x::KSTest) = ("Supremum of CDF differences", 0.0, x.δ) # parameter of interest: name, value under h0, point estimate
 default_tail(test::KSTest) = :both
@@ -36,7 +36,7 @@ default_tail(test::KSTest) = :both
 ## ONE SAMPLE KS-TEST
 
 # compute supremum of differences between target and empirical cdf before and after the jump of the empirical cdf.
-function ksstats{T<:Real}(x::AbstractVector{T}, d::UnivariateDistribution)
+function ksstats(x::AbstractVector{T}, d::UnivariateDistribution) where T<:Real
     n = length(x)
     cdfs = cdf(d, sort(x))
     δp = maximum((1:n) / n - cdfs)
@@ -47,7 +47,7 @@ end
 
 ### EXACT KOLMOGOROV SMIRNOV TEST
 
-immutable ExactOneSampleKSTest <: ExactKSTest
+struct ExactOneSampleKSTest <: ExactKSTest
     n::Int      # number of observations
     δ::Float64  # supremum of CDF differences
     δp::Float64 # supremum of the positive CDF differences
@@ -63,7 +63,7 @@ sample is not drawn from `d`.
 
 Implements: [`pvalue`](@ref)
 """
-function ExactOneSampleKSTest{T<:Real}(x::AbstractVector{T}, d::UnivariateDistribution)
+function ExactOneSampleKSTest(x::AbstractVector{T}, d::UnivariateDistribution) where T<:Real
     if length(x) > length(unique(x))
         warn("This test is inaccurate with ties")
     end
@@ -91,7 +91,7 @@ end
 
 ### APPROXIMATE KOLMOGOROV SMIRNOV TEST
 
-immutable ApproximateOneSampleKSTest <: ApproximateKSTest
+struct ApproximateOneSampleKSTest <: ApproximateKSTest
     n::Int      # number of observations
     δ::Float64  # supremum of CDF differences
     δp::Float64 # supremum of the positive CDF differences
@@ -107,7 +107,7 @@ that the sample is not drawn from `d`.
 
 Implements: [`pvalue`](@ref)
 """
-function ApproximateOneSampleKSTest{T<:Real}(x::AbstractVector{T}, d::UnivariateDistribution)
+function ApproximateOneSampleKSTest(x::AbstractVector{T}, d::UnivariateDistribution) where T<:Real
     if length(x) > length(unique(x))
         warn("This test is inaccurate with ties")
     end
@@ -139,7 +139,7 @@ end
 
 ### APPROXIMATE KOLMOGOROV SMIRNOV TEST
 
-immutable ApproximateTwoSampleKSTest <: ApproximateKSTest
+struct ApproximateTwoSampleKSTest <: ApproximateKSTest
     n_x::Int    # number of observations
     n_y::Int    # number of observations
     δ::Float64  # supremum of CDF differences
@@ -161,7 +161,7 @@ Implements: [`pvalue`](@ref)
   * [Approximation of one-sided test (Encyclopedia of Mathematics)
     ](https://www.encyclopediaofmath.org/index.php/Kolmogorov-Smirnov_test)
 """
-function ApproximateTwoSampleKSTest{T<:Real, S<:Real}(x::AbstractVector{T}, y::AbstractVector{S})
+function ApproximateTwoSampleKSTest(x::AbstractVector{T}, y::AbstractVector{S}) where {T<:Real, S<:Real}
     n_x, n_y = length(x), length(y)
     if n_x+n_y > length(unique([x; y]))
         warn("This test is inaccurate with ties")
@@ -192,7 +192,7 @@ function pvalue(x::ApproximateTwoSampleKSTest; tail=:both)
 end
 
 # compute supremum of differences between empirical cdfs.
-function ksstats{T<:Real, S<:Real}(x::AbstractVector{T}, y::AbstractVector{S})
+function ksstats(x::AbstractVector{T}, y::AbstractVector{S}) where {T<:Real, S<:Real}
     n_x, n_y = length(x), length(y)
     sort_idx = sortperm([x; y])
     pdf_diffs = [ones(n_x)/n_x; -ones(n_y)/n_y][sort_idx]

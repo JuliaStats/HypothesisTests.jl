@@ -24,7 +24,7 @@
 
 export JarqueBeraTest
 
-immutable JarqueBeraTest <: HypothesisTest
+struct JarqueBeraTest <: HypothesisTest
     n::Int         # number of observations
     JB::Float64    # test statistic
     skew::Float64  # skewness
@@ -52,7 +52,7 @@ nominal levels up to about 3% and under-sized for larger nominal levels (Mantalo
 
   * [Jarque-Bera test on Wikipedia](https://en.wikipedia.org/wiki/Jarque–Bera_test)
 """
-function JarqueBeraTest{T<:Real}(y::AbstractVector{T})
+function JarqueBeraTest(y::AbstractVector{T}) where T<:Real
     n = length(y)
     M = Base.promote_op(/, T, typeof(n))
     m1r = m2r = m3r = m4r = zero(M)

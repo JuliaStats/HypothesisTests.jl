@@ -24,7 +24,7 @@
 
 export KruskalWallisTest
 
-immutable KruskalWallisTest <: HypothesisTest
+struct KruskalWallisTest <: HypothesisTest
     n_i::Vector{Int}         # number of observations in each group
     df::Int                  # degrees of freedom
     R_i::Vector{Float64}     # rank sums
@@ -67,7 +67,7 @@ Implements: [`pvalue`](@ref)
   * [Kruskal-Wallis test on Wikipedia
     ](https://en.wikipedia.org/wiki/Kruskal-Wallis_one-way_analysis_of_variance)
 """
-function KruskalWallisTest{T<:Real}(groups::AbstractVector{T}...)
+function KruskalWallisTest(groups::AbstractVector{T}...) where T<:Real
     (H, R_i, tieadj, n_i) = kwstats(groups...)
     if length(groups)<=3 && any(n_i .< 6)
         warn("This test is only asymptotically correct and might be inaccurate for the given group size")
@@ -94,7 +94,7 @@ pvalue(x::KruskalWallisTest) = pvalue(Chisq(x.df), x.H; tail=:right)
 ## helper
 
 # Get H, rank sums, and tie adjustment for Kruskal-Wallis test
-function kwstats{T<:Real}(groups::AbstractVector{T}...)
+function kwstats(groups::AbstractVector{T}...) where T<:Real
     n_i = [length(g) for g in groups]
     n = sum(n_i)
 

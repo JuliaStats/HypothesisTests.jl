@@ -24,7 +24,7 @@
 
 export ADFTest
 
-immutable ADFTest <: HypothesisTest
+struct ADFTest <: HypothesisTest
     n               ::Int               # number of observations
     deterministic   ::Symbol            # deterministic terms included in regression
     lag             ::Int               # number of lags in test statistic
@@ -58,7 +58,7 @@ External links
 
   * [Augmented Dickey-Fuller test on Wikipedia](https://en.wikipedia.org/wiki/Augmented_Dickey–Fuller_test)
 """
-function ADFTest{T<:Real}(y::AbstractVector{T}, deterministic::Symbol, lag::Int)
+function ADFTest(y::AbstractVector{T}, deterministic::Symbol, lag::Int) where T<:Real
 
     nobs = length(y)
     Δy = diff(y)

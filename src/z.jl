@@ -25,8 +25,8 @@
 export OneSampleZTest, TwoSampleZTest, EqualVarianceZTest,
     UnequalVarianceZTest
 
-@compat abstract type ZTest <: HypothesisTest end
-@compat abstract type TwoSampleZTest <: ZTest end
+abstract type ZTest <: HypothesisTest end
+abstract type TwoSampleZTest <: ZTest end
 
 pvalue(x::ZTest; tail=:both) = pvalue(Normal(0.0, 1.0), x.z; tail=tail)
 
@@ -51,7 +51,7 @@ end
 
 ## ONE SAMPLE Z-TEST
 
-immutable OneSampleZTest <: ZTest
+struct OneSampleZTest <: ZTest
     n::Int       # number of observations
     xbar::Real   # estimated mean
     stderr::Real # population standard error
@@ -74,9 +74,9 @@ function OneSampleZTest(xbar::Real, stddev::Real, n::Int, μ0::Real=0)
     OneSampleZTest(n, xbar, stderr, z, μ0)
 end
 
-OneSampleZTest{T<:Real}(v::AbstractVector{T}, μ0::Real=0) = OneSampleZTest(mean(v), std(v), length(v), μ0)
+OneSampleZTest(v::AbstractVector{T}, μ0::Real=0) where {T<:Real} = OneSampleZTest(mean(v), std(v), length(v), μ0)
 
-function OneSampleZTest{T<:Real, S<:Real}(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0)
+function OneSampleZTest(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0) where {T<:Real, S<:Real}
     check_same_length(x, y)
 
     OneSampleZTest(x - y, μ0)
@@ -85,7 +85,7 @@ end
 
 ## TWO SAMPLE Z-TEST (EQUAL VARIANCE)
 
-immutable EqualVarianceZTest <: TwoSampleZTest
+struct EqualVarianceZTest <: TwoSampleZTest
     n_x::Int     # number of observations
     n_y::Int     # number of observations
     xbar::Real   # estimated mean difference
@@ -103,7 +103,7 @@ end
 testname(::EqualVarianceZTest) = "Two sample z-test (equal variance)"
 population_param_of_interest(x::TwoSampleZTest) = ("Mean difference", x.μ0, x.xbar) # parameter of interest: name, value under h0, point estimate
 
-function EqualVarianceZTest{T<:Real,S<:Real}(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0)
+function EqualVarianceZTest(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0) where {T<:Real,S<:Real}
     nx, ny = length(x), length(y)
     xbar = mean(x) - mean(y)
     stddev = sqrt(((nx - 1) * var(x) + (ny - 1) * var(y)) / (nx + ny - 2))
@@ -115,7 +115,7 @@ end
 
 ## TWO SAMPLE Z-TEST (UNEQUAL VARIANCE)
 
-immutable UnequalVarianceZTest <: TwoSampleZTest
+struct UnequalVarianceZTest <: TwoSampleZTest
     n_x::Int     # number of observations
     n_y::Int     # number of observations
     xbar::Real   # estimated mean
@@ -126,7 +126,7 @@ end
 
 testname(::UnequalVarianceZTest) = "Two sample z-test (unequal variance)"
 
-function UnequalVarianceZTest{T<:Real,S<:Real}(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0)
+function UnequalVarianceZTest(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0) where {T<:Real,S<:Real}
     nx, ny = length(x), length(y)
     xbar = mean(x)-mean(y)
     varx, vary = var(x), var(y)

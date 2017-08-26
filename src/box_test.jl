@@ -26,7 +26,7 @@ export BoxPierceTest, LjungBoxTest
 
 # Box-Pierce test
 
-immutable BoxPierceTest <: HypothesisTest
+struct BoxPierceTest <: HypothesisTest
     y::Vector{Float64}  # time series vector
     n::Int              # number of observations
     lag::Int            # number of lags in test statistic
@@ -49,7 +49,7 @@ External links
 
 * [Box-Pierce test on Wikipedia](https://en.wikipedia.org/wiki/Ljung–Box_test#Box-Pierce_test)
 """
-function BoxPierceTest{T<:Real}(y::AbstractVector{T}, lag::Int, dof::Int=0)
+function BoxPierceTest(y::AbstractVector{T}, lag::Int, dof::Int=0) where T<:Real
     if dof>=lag
         throw(ArgumentError("Number of lags has to be larger than degrees of" *
         " freedom correction"))
@@ -75,7 +75,7 @@ pvalue(x::BoxPierceTest) = pvalue(Chisq(x.lag-x.dof), x.Q; tail=:right)
 
 #Ljung-Box test
 
-immutable LjungBoxTest <: HypothesisTest
+struct LjungBoxTest <: HypothesisTest
     y::Vector{Float64}  # time series vector
     n::Int              # number of observations
     lag::Int            # number of lags in test statistic
@@ -98,7 +98,7 @@ External links
 
 * [Ljung-Box test on Wikipedia](https://en.wikipedia.org/wiki/Ljung–Box_test)
 """
-function LjungBoxTest{T<:Real}(y::AbstractVector{T}, lag::Int, dof::Int=0)
+function LjungBoxTest(y::AbstractVector{T}, lag::Int, dof::Int=0) where T<:Real
     if dof>=lag
         throw(ArgumentError("Number of lags has to be larger than degrees of" *
         " freedom correction"))
