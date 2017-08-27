@@ -34,17 +34,17 @@ export RayleighTest, FisherTLinearAssociation, JammalamadakaCircularCorrelation
 
 ## RAYLEIGH TEST OF UNIFORMITY AGAINST AN UNSPECIFIED UNIMODAL ALTERNATIVE
 
-immutable RayleighTest <: HypothesisTest
+struct RayleighTest <: HypothesisTest
     Rbar::Float64 # mean resultant length
     n::Int        # number of observations
 end
-function RayleighTest{S <: Complex}(samples::Vector{S})
+function RayleighTest(samples::Vector{S}) where S <: Complex
     s = Float64(abs(sum(samples./abs(samples))))
     n = length(samples)
     Rbar = s/n
     RayleighTest(Rbar, n)
 end
-function RayleighTest{S <: Real}(samples::Vector{S})
+function RayleighTest(samples::Vector{S}) where S <: Real
     s = Float64(abs(sum(exp, im * samples)))
     n = length(samples)
     Rbar = s/n
@@ -68,14 +68,14 @@ end
 
 ## N.I. FISHER'S TEST OF T-LINEAR CIRCULAR-CIRCULAR ASSOCIATION
 
-immutable FisherTLinearAssociation{S <: Real, T <: Real} <: HypothesisTest
+struct FisherTLinearAssociation{S <: Real, T <: Real} <: HypothesisTest
     rho_t::Float64                              # circular correlation coefficient
     theta::Vector{S}                            # radians of group 1
     phi::Vector{T}                              # radians of group 2
     uniformly_distributed::Union{Bool,Void}     # is distribution of theta and phi uniform?
 end
-function FisherTLinearAssociation{Stheta <: Real, Sphi <: Real}(theta::Vector{Stheta},
-        phi::Vector{Sphi}, uniformly_distributed::Union{Bool,Void})
+function FisherTLinearAssociation(theta::Vector{Stheta},
+        phi::Vector{Sphi}, uniformly_distributed::Union{Bool,Void}) where {Stheta <: Real, Sphi <: Real}
     check_same_length(theta, phi)
 
     A = sum(cos.(theta).*cos.(phi))
@@ -93,8 +93,8 @@ function FisherTLinearAssociation{Stheta <: Real, Sphi <: Real}(theta::Vector{St
     rho_t = 4*T/sqrt((n^2 - E^2 - F^2)*(n^2-G^2-H^2))
     FisherTLinearAssociation(rho_t, theta, phi, uniformly_distributed)
 end
-FisherTLinearAssociation{S <: Real, T <: Real}(theta::Vector{S},
-        phi::Vector{T}) = FisherTLinearAssociation(theta, phi, nothing)
+FisherTLinearAssociation(theta::Vector{S},
+phi::Vector{T}) where {S <: Real, T <: Real} = FisherTLinearAssociation(theta, phi, nothing)
 
 testname(::FisherTLinearAssociation) =
     "T-linear test of circular-circular association"
@@ -188,11 +188,11 @@ end
 
 ## JAMMALAMADAKA'S CIRCULAR CORRELATION
 
-immutable JammalamadakaCircularCorrelation <: HypothesisTest
+struct JammalamadakaCircularCorrelation <: HypothesisTest
     r::Float64  # circular-circular correlation coefficient
     Z::Float64  # test statistic
 end
-function JammalamadakaCircularCorrelation{S <: Real, T <: Real}(alpha::Vector{S}, beta::Vector{T})
+function JammalamadakaCircularCorrelation(alpha::Vector{S}, beta::Vector{T}) where {S <: Real, T <: Real}
     check_same_length(alpha, beta)
     # calculate sample mean directions
     alpha_bar = angle(sum(exp, im * alpha))
@@ -225,7 +225,7 @@ pvalue(x::JammalamadakaCircularCorrelation; tail=:both) = pvalue(Normal(), x.Z; 
 # Complex numbers
 for fn in (:JammalamadakaCircularCorrelation, :FisherTLinearAssociation)
     @eval begin
-        $(fn){S <: Complex, T <: Complex}(x::Vector{S}, y::Vector{T}) =
+        $(fn)(x::Vector{S}, y::Vector{T}) where {S <: Complex, T <: Complex} =
             $(fn)(angle(x), angle(y))
     end
 end

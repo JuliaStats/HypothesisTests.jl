@@ -47,7 +47,7 @@ directly.
 
 Implements: [`pvalue`](@ref)
 """
-function MannWhitneyUTest{S<:Real,T<:Real}(x::AbstractVector{S}, y::AbstractVector{T})
+function MannWhitneyUTest(x::AbstractVector{S}, y::AbstractVector{T}) where {S<:Real,T<:Real}
     (U, ranks, tieadj, nx, ny, median) = mwustats(x, y)
     if nx + ny <= 10 || (nx + ny <= 50 && tieadj == 0)
         ExactMannWhitneyUTest(U, ranks, tieadj, nx, ny, median)
@@ -57,7 +57,7 @@ function MannWhitneyUTest{S<:Real,T<:Real}(x::AbstractVector{S}, y::AbstractVect
 end
 
 # Get U, ranks, and tie adjustment for Mann-Whitney U test
-function mwustats{S<:Real,T<:Real}(x::AbstractVector{S}, y::AbstractVector{T})
+function mwustats(x::AbstractVector{S}, y::AbstractVector{T}) where {S<:Real,T<:Real}
     nx = length(x)
     ny = length(y)
     if nx <= ny
@@ -72,7 +72,7 @@ end
 
 
 ## EXACT MANN-WHITNEY U TEST
-immutable ExactMannWhitneyUTest{T<:Real} <: HypothesisTest
+struct ExactMannWhitneyUTest{T<:Real} <: HypothesisTest
     U::Float64              # test statistic: Mann-Whitney-U statistic
     ranks::Vector{Float64}  # ranks
     tie_adjustment::Float64 # adjustment for ties
@@ -97,7 +97,7 @@ enumeration of permutations, which can be very slow for even moderately sized da
 
 Implements: [`pvalue`](@ref)
 """
-ExactMannWhitneyUTest{S<:Real,T<:Real}(x::AbstractVector{S}, y::AbstractVector{T}) =
+ExactMannWhitneyUTest(x::AbstractVector{S}, y::AbstractVector{T}) where {S<:Real,T<:Real} =
     ExactMannWhitneyUTest(mwustats(x, y)...)
 
 testname(::ExactMannWhitneyUTest) = "Exact Mann-Whitney U test"
@@ -164,7 +164,7 @@ function pvalue(x::ExactMannWhitneyUTest; tail=:both)
     end
 end
 
-immutable ApproximateMannWhitneyUTest{T<:Real} <: HypothesisTest
+struct ApproximateMannWhitneyUTest{T<:Real} <: HypothesisTest
     U::Float64              # test statistic: Mann-Whitney-U statistic
     ranks::Vector{T}        # ranks
     tie_adjustment::Float64 # adjustment for ties
@@ -200,14 +200,14 @@ where ``\\mathcal{T}`` is the set of the counts of tied values at each tied posi
 
 Implements: [`pvalue`](@ref)
 """
-function ApproximateMannWhitneyUTest{T<:Real}(U::Real, ranks::AbstractVector{T},
-    tie_adjustment::Real, nx::Int, ny::Int, median::Float64)
+function ApproximateMannWhitneyUTest(U::Real, ranks::AbstractVector{T},
+    tie_adjustment::Real, nx::Int, ny::Int, median::Float64) where T<:Real
     mu = U - nx * ny / 2
     sigma = sqrt((nx * ny * (nx + ny + 1 - tie_adjustment /
         ((nx + ny) * (nx + ny - 1)))) / 12)
     ApproximateMannWhitneyUTest(U, ranks, tie_adjustment, nx, ny, median, mu, sigma)
 end
-ApproximateMannWhitneyUTest{S<:Real,T<:Real}(x::AbstractVector{S}, y::AbstractVector{T}) =
+ApproximateMannWhitneyUTest(x::AbstractVector{S}, y::AbstractVector{T}) where {S<:Real,T<:Real} =
     ApproximateMannWhitneyUTest(mwustats(x, y)...)
 
 testname(::ApproximateMannWhitneyUTest) = "Approximate Mann-Whitney U test"

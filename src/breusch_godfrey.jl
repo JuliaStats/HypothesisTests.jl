@@ -24,7 +24,7 @@
 
 export BreuschGodfreyTest
 
-immutable BreuschGodfreyTest <: HypothesisTest
+struct BreuschGodfreyTest <: HypothesisTest
     n::Int              # number of observations
     lag::Int            # number of lags in test statistic
     BG::Float64         # test statistic
@@ -46,8 +46,8 @@ External links
 
 * [Breusch-Godfrey test on Wikipedia](https://en.wikipedia.org/wiki/Breusch–Godfrey_test)
 """
-function BreuschGodfreyTest{T<:Real}(xmat::AbstractArray{T}, e::AbstractVector{T},
-                                     lag::Int, start0::Bool=true)
+function BreuschGodfreyTest(xmat::AbstractArray{T}, e::AbstractVector{T},
+                            lag::Int, start0::Bool=true) where T<:Real
     n = size(e,1)
     elag = zeros(Float64,n,lag)
     for ii = 1:lag  # construct lagged residuals

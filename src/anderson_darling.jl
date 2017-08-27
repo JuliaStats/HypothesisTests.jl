@@ -2,12 +2,12 @@
 
 export OneSampleADTest, KSampleADTest
 
-@compat abstract type ADTest <: HypothesisTest end
+abstract type ADTest <: HypothesisTest end
 
 ## ONE SAMPLE AD-TEST
 ### http://www.itl.nist.gov/div898/handbook/eda/section3/eda35e.htm
 
-function adstats{T<:Real}(x::AbstractVector{T}, d::UnivariateDistribution)
+function adstats(x::AbstractVector{T}, d::UnivariateDistribution) where T<:Real
     n = length(x)
     y = sort(x)
     μ = mean(y)
@@ -23,7 +23,7 @@ function adstats{T<:Real}(x::AbstractVector{T}, d::UnivariateDistribution)
     (n, μ, σ, A²)
 end
 
-immutable OneSampleADTest <: ADTest
+struct OneSampleADTest <: ADTest
     n::Int      # number of observations
     μ::Float64  # sample mean
     σ::Float64  # sample std
@@ -39,7 +39,7 @@ is not drawn from `d`.
 
 Implements: [`pvalue`](@ref)
 """
-function OneSampleADTest{T<:Real}(x::AbstractVector{T}, d::UnivariateDistribution)
+function OneSampleADTest(x::AbstractVector{T}, d::UnivariateDistribution) where T<:Real
     OneSampleADTest(adstats(x, d)...)
 end
 
@@ -72,7 +72,7 @@ function pvalue(x::OneSampleADTest)
 end
 
 ## K-SAMPLE ANDERSON DARLING TEST
-immutable KSampleADTest <: ADTest
+struct KSampleADTest <: ADTest
     k::Int        # number of samples
     n::Int        # number of observations
     σ::Float64   # variance A²k
@@ -96,7 +96,7 @@ Implements: [`pvalue`](@ref)
   * F. W. Scholz and M. A. Stephens, K-Sample Anderson-Darling Tests, Journal of the
     American Statistical Association, Vol. 82, No. 399. (Sep., 1987), pp. 918-924.
 """
-function KSampleADTest{T<:Real}(xs::AbstractVector{T}...; modified=true)
+function KSampleADTest(xs::AbstractVector{T}...; modified=true) where T<:Real
     KSampleADTest(a2_ksample(xs, modified)...)
 end
 

@@ -25,8 +25,8 @@
 export OneSampleTTest, TwoSampleTTest, EqualVarianceTTest,
     UnequalVarianceTTest
 
-@compat abstract type TTest <: HypothesisTest end
-@compat abstract type TwoSampleTTest <: TTest end
+abstract type TTest <: HypothesisTest end
+abstract type TwoSampleTTest <: TTest end
 
 pvalue(x::TTest; tail=:both) = pvalue(TDist(x.df), x.t; tail=tail)
 
@@ -51,7 +51,7 @@ end
 
 ## ONE SAMPLE T-TEST
 
-immutable OneSampleTTest <: TTest
+struct OneSampleTTest <: TTest
     n::Int       # number of observations
     xbar::Real   # estimated mean
     df::Int      # degrees of freedom
@@ -95,7 +95,7 @@ does not have mean `μ0`.
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
-OneSampleTTest{T<:Real}(v::AbstractVector{T}, μ0::Real=0) = OneSampleTTest(mean(v), std(v), length(v), μ0)
+OneSampleTTest(v::AbstractVector{T}, μ0::Real=0) where {T<:Real} = OneSampleTTest(mean(v), std(v), length(v), μ0)
 
 """
     OneSampleTTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real}, μ0::Real = 0)
@@ -106,7 +106,7 @@ alternative hypothesis that the distribution does not have mean `μ0`.
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
-function OneSampleTTest{T<:Real, S<:Real}(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0)
+function OneSampleTTest(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0) where {T<:Real, S<:Real}
     check_same_length(x, y)
 
     OneSampleTTest(x - y, μ0)
@@ -115,7 +115,7 @@ end
 
 ## TWO SAMPLE T-TEST (EQUAL VARIANCE)
 
-immutable EqualVarianceTTest <: TwoSampleTTest
+struct EqualVarianceTTest <: TwoSampleTTest
     n_x::Int     # number of observations
     n_y::Int     # number of observations
     xbar::Real   # estimated mean difference
@@ -144,7 +144,7 @@ have different means but equal variances.
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
-function EqualVarianceTTest{T<:Real,S<:Real}(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0)
+function EqualVarianceTTest(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0) where {T<:Real,S<:Real}
     nx, ny = length(x), length(y)
     xbar = mean(x) - mean(y)
     stddev = sqrt(((nx - 1) * var(x) + (ny - 1) * var(y)) / (nx + ny - 2))
@@ -157,7 +157,7 @@ end
 
 ## TWO SAMPLE T-TEST (UNEQUAL VARIANCE)
 
-immutable UnequalVarianceTTest <: TwoSampleTTest
+struct UnequalVarianceTTest <: TwoSampleTTest
     n_x::Int     # number of observations
     n_y::Int     # number of observations
     xbar::Real   # estimated mean
@@ -186,7 +186,7 @@ equation:
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
-function UnequalVarianceTTest{T<:Real,S<:Real}(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0)
+function UnequalVarianceTTest(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0) where {T<:Real,S<:Real}
     nx, ny = length(x), length(y)
     xbar = mean(x)-mean(y)
     varx, vary = var(x), var(y)

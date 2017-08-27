@@ -1,12 +1,12 @@
 export PowerDivergenceTest, ChisqTest, MultinomialLRT
 
-@compat const Levels{T} = Tuple{UnitRange{T},UnitRange{T}}
+const Levels{T} = Tuple{UnitRange{T},UnitRange{T}}
 
-function boundproportion{T<:Real}(x::T)
+function boundproportion(x::T) where T<:Real
     max(min(convert(Float64,x),1.0),0.0)
 end
 
-immutable PowerDivergenceTest <: HypothesisTest
+struct PowerDivergenceTest <: HypothesisTest
     lambda::Float64
     theta0::Vector{Float64}
     stat::Float64
@@ -278,7 +278,7 @@ Implements: [`pvalue`](@ref), [`confint`](@ref)
 
   * Agresti, Alan. Categorical Data Analysis, 3rd Edition. Wiley, 2013.
 """
-function PowerDivergenceTest{T<:Integer,U<:AbstractFloat}(x::AbstractMatrix{T}; lambda::U=1.0, theta0::Vector{U} = ones(length(x))/length(x))
+function PowerDivergenceTest(x::AbstractMatrix{T}; lambda::U=1.0, theta0::Vector{U} = ones(length(x))/length(x)) where {T<:Integer,U<:AbstractFloat}
 
     nrows, ncols = size(x)
     n = sum(x)
@@ -331,17 +331,17 @@ end
 #convenience functions
 
 #PDT
-function PowerDivergenceTest{T<:Integer,U<:AbstractFloat}(x::AbstractVector{T}, y::AbstractVector{T}, levels::Levels{T}; lambda::U=1.0)
+function PowerDivergenceTest(x::AbstractVector{T}, y::AbstractVector{T}, levels::Levels{T}; lambda::U=1.0) where {T<:Integer,U<:AbstractFloat}
     d = counts(x, y, levels)
     PowerDivergenceTest(d, lambda=lambda)
 end
 
-function PowerDivergenceTest{T<:Integer,U<:AbstractFloat}(x::AbstractVector{T}, y::AbstractVector{T}, k::T; lambda::U=1.0)
+function PowerDivergenceTest(x::AbstractVector{T}, y::AbstractVector{T}, k::T; lambda::U=1.0) where {T<:Integer,U<:AbstractFloat}
     d = counts(x, y, k)
     PowerDivergenceTest(d, lambda=lambda)
 end
 
-PowerDivergenceTest{T<:Integer,U<:AbstractFloat}(x::AbstractVector{T}; lambda::U=1.0, theta0::Vector{U} = ones(length(x))/length(x)) =
+PowerDivergenceTest(x::AbstractVector{T}; lambda::U=1.0, theta0::Vector{U} = ones(length(x))/length(x)) where {T<:Integer,U<:AbstractFloat} =
     PowerDivergenceTest(reshape(x, length(x), 1), lambda=lambda, theta0=theta0)
 
 #ChisqTest
@@ -367,21 +367,21 @@ Note that the entries of `x` (and `y` if provided) must be non-negative integers
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
-function ChisqTest{T<:Integer}(x::AbstractMatrix{T})
+function ChisqTest(x::AbstractMatrix{T}) where T<:Integer
     PowerDivergenceTest(x, lambda=1.0)
 end
 
-function ChisqTest{T<:Integer}(x::AbstractVector{T}, y::AbstractVector{T}, levels::Levels{T})
+function ChisqTest(x::AbstractVector{T}, y::AbstractVector{T}, levels::Levels{T}) where T<:Integer
     d = counts(x, y, levels)
     PowerDivergenceTest(d, lambda=1.0)
 end
 
-function ChisqTest{T<:Integer}(x::AbstractVector{T}, y::AbstractVector{T}, k::T)
+function ChisqTest(x::AbstractVector{T}, y::AbstractVector{T}, k::T) where T<:Integer
     d = counts(x, y, k)
     PowerDivergenceTest(d, lambda=1.0)
 end
 
-ChisqTest{T<:Integer,U<:AbstractFloat}(x::AbstractVector{T}, theta0::Vector{U} = ones(length(x))/length(x)) =
+ChisqTest(x::AbstractVector{T}, theta0::Vector{U} = ones(length(x))/length(x)) where {T<:Integer,U<:AbstractFloat} =
     PowerDivergenceTest(reshape(x, length(x), 1), lambda=1.0, theta0=theta0)
 
 #MultinomialLRT
@@ -407,21 +407,21 @@ Note that the entries of `x` (and `y` if provided) must be non-negative integers
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
-function MultinomialLRT{T<:Integer}(x::AbstractMatrix{T})
+function MultinomialLRT(x::AbstractMatrix{T}) where T<:Integer
     PowerDivergenceTest(x, lambda=0.0)
 end
 
-function MultinomialLRT{T<:Integer}(x::AbstractVector{T}, y::AbstractVector{T}, levels::Levels{T})
+function MultinomialLRT(x::AbstractVector{T}, y::AbstractVector{T}, levels::Levels{T}) where T<:Integer
     d = counts(x, y, levels)
     PowerDivergenceTest(d, lambda=0.0)
 end
 
-function MultinomialLRT{T<:Integer}(x::AbstractVector{T}, y::AbstractVector{T}, k::T)
+function MultinomialLRT(x::AbstractVector{T}, y::AbstractVector{T}, k::T) where T<:Integer
     d = counts(x, y, k)
     PowerDivergenceTest(d, lambda=0.0)
 end
 
-MultinomialLRT{T<:Integer,U<:AbstractFloat}(x::AbstractVector{T}, theta0::Vector{U} = ones(length(x))/length(x)) =
+MultinomialLRT(x::AbstractVector{T}, theta0::Vector{U} = ones(length(x))/length(x)) where {T<:Integer,U<:AbstractFloat} =
     PowerDivergenceTest(reshape(x, length(x), 1), lambda=0.0, theta0=theta0)
 
 function show_params(io::IO, x::PowerDivergenceTest, ident="")

@@ -51,7 +51,7 @@ Implements: [`pvalue`](@ref), [`confint`](@ref)
     Blaker’s exact tests". Biostatistics, Volume 11, Issue 2, 1 April 2010, Pages 373–374,
     [link](https://doi.org/10.1093/biostatistics/kxp050)
 """
-immutable FisherExactTest <: HypothesisTest
+struct FisherExactTest <: HypothesisTest
     # Format:
     # X1  X2
     # Y1  a  b

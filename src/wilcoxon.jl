@@ -43,7 +43,7 @@ directly.
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
-function SignedRankTest{T<:Real}(x::AbstractVector{T})
+function SignedRankTest(x::AbstractVector{T}) where T<:Real
     (W, ranks, signs, tie_adjustment, n, median) = signedrankstats(x)
     n_nonzero = length(ranks)
     if n_nonzero <= 15 || (n_nonzero <= 50 && tie_adjustment == 0)
@@ -52,10 +52,10 @@ function SignedRankTest{T<:Real}(x::AbstractVector{T})
         ApproximateSignedRankTest(x, W, ranks, signs, tie_adjustment, n, median)
     end
 end
-SignedRankTest{T<:Real,S<:Real}(x::AbstractVector{T}, y::AbstractVector{S}) = SignedRankTest(x - y)
+SignedRankTest(x::AbstractVector{T}, y::AbstractVector{S}) where {T<:Real,S<:Real} = SignedRankTest(x - y)
 
 # Get W and absolute ranks for signed rank test
-function signedrankstats{S<:Real}(x::AbstractVector{S})
+function signedrankstats(x::AbstractVector{S}) where S<:Real
    nonzero_x = x[x .!= 0]
    (ranks, tieadj) = tiedrank_adj(abs.(nonzero_x))
    W = 0.0
@@ -69,7 +69,7 @@ end
 
 ## EXACT WILCOXON SIGNED RANK TEST
 
-immutable ExactSignedRankTest{T<:Real} <: HypothesisTest
+struct ExactSignedRankTest{T<:Real} <: HypothesisTest
     vals::Vector{T} # original values
     W::Float64              # test statistic: Wilcoxon rank-sum statistic
     ranks::Vector{Float64}           # ranks without ties (zero values)
@@ -91,9 +91,9 @@ enumeration of permutations, which can be very slow for even moderately sized da
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
-ExactSignedRankTest{T<:Real}(x::AbstractVector{T}) =
+ExactSignedRankTest(x::AbstractVector{T}) where {T<:Real} =
     ExactSignedRankTest(x, signedrankstats(x)...)
-ExactSignedRankTest{S<:Real,T<:Real}(x::AbstractVector{S}, y::AbstractVector{T}) =
+ExactSignedRankTest(x::AbstractVector{S}, y::AbstractVector{T}) where {S<:Real,T<:Real} =
     ExactSignedRankTest(x - y)
 
 testname(::ExactSignedRankTest) = "Exact Wilcoxon signed rank test"
@@ -164,7 +164,7 @@ StatsBase.confint(x::ExactSignedRankTest, alpha::Real=0.05; tail=:both) = calcul
 
 ## APPROXIMATE SIGNED RANK TEST
 
-immutable ApproximateSignedRankTest{T<:Real} <: HypothesisTest
+struct ApproximateSignedRankTest{T<:Real} <: HypothesisTest
     vals::Vector{T} # original values
     W::Float64              # test statistic: Wilcoxon rank-sum statistic
     ranks::Vector{Float64} # ranks without ties (zero values)
@@ -195,15 +195,15 @@ where ``\\mathcal{T}`` is the set of the counts of tied values at each tied posi
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
-function ApproximateSignedRankTest{T<:Real}(x::Vector, W::Float64, ranks::Vector{T}, signs::BitArray{1}, tie_adjustment::Float64, n::Int, median::Float64)
+function ApproximateSignedRankTest(x::Vector, W::Float64, ranks::Vector{T}, signs::BitArray{1}, tie_adjustment::Float64, n::Int, median::Float64) where T<:Real
     nz = length(ranks) # num non-zeros
     mu = W - nz * (nz + 1)/4
     std = sqrt(nz * (nz + 1) * (2 * nz + 1) / 24 - tie_adjustment / 48)
     ApproximateSignedRankTest(x, W, ranks, signs, tie_adjustment, n, median, mu, std)
 end
-ApproximateSignedRankTest{T<:Real}(x::AbstractVector{T}) =
+ApproximateSignedRankTest(x::AbstractVector{T}) where {T<:Real} =
     ApproximateSignedRankTest(x, signedrankstats(x)...)
-ApproximateSignedRankTest{S<:Real,T<:Real}(x::AbstractVector{S}, y::AbstractVector{T}) =
+ApproximateSignedRankTest(x::AbstractVector{S}, y::AbstractVector{T}) where {S<:Real,T<:Real} =
     ApproximateSignedRankTest(x - y)
 
 testname(::ApproximateSignedRankTest) = "Approximate Wilcoxon signed rank test"

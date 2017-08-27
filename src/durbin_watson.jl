@@ -24,7 +24,7 @@
 
 export DurbinWatsonTest
 
-immutable DurbinWatsonTest <: HypothesisTest
+struct DurbinWatsonTest <: HypothesisTest
     xmat::Array{Float64}  # regressor matrix
     n::Int                # number of observations
     DW::Float64           # test statistic
@@ -73,8 +73,8 @@ and `:right` (positive serial correlation).
   https://en.wikipedia.org/wiki/Durbin–Watson_statistic
   ](https://en.wikipedia.org/wiki/Durbin–Watson_statistic)
 """
-function DurbinWatsonTest{T<:Real}(xmat::AbstractArray{T}, e::AbstractArray{T};
-    p_compute::Symbol = :ndep)
+function DurbinWatsonTest(xmat::AbstractArray{T}, e::AbstractArray{T};
+    p_compute::Symbol = :ndep) where T<:Real
 
     n = length(e)
     DW = sum(diff(e) .^2) / sum(e .^2)
