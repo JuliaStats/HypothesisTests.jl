@@ -2,11 +2,7 @@
 
 ## Anderson-Darling test
 
-The null hypothesis of the Anderson–Darling test is that a dataset comes from a certain
-distribution; the reference distribution can be specified explicitly (one-sample test).
-``k``-sample Anderson–Darling tests are available for testing whether several samples are
-coming from a single population drawn from the distribution function which does not have to
-be specified.
+Available are both one-sample and ``k``-sample tests.
 
 ```@docs
 OneSampleADTest
@@ -27,13 +23,8 @@ FisherExactTest
 
 ## Kolmogorov–Smirnov test
 
-The null hypothesis of the Kolmogorov–Smirnov test is that a dataset comes from a certain
-distribution; the reference distribution can be specified explicitly (one-sample test) or by
-an empirical sample (two-sample test). The alternative hypothesis is that the cumulative
-distributions of the sample is different (`tail = :both`: default), smaller (`tail = :left`),
-or larger (`tail = :right`) than the reference cumulative distribution. The exact test is
-based on the exact distribution of the differences whereas the approximate test is derived
-from its asymptotic distribution.
+Available are an exact one-sample test and approximate (i.e. asymptotic) one- and two-sample
+tests.
 
 ```@docs
 ExactOneSampleKSTest
