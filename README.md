@@ -35,4 +35,6 @@ pvalue(SignedRankTest(x))
 
 ## Documentation
 
-Full documentation available at [Read the Docs](http://hypothesistestsjl.readthedocs.org/en/latest/index.html).
+Full documentation available at
+[https://JuliaStats.github.io/HypothesisTests.jl/latest/
+](https://JuliaStats.github.io/HypothesisTests.jl/latest/).
