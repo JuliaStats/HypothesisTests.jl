@@ -42,9 +42,9 @@ Set `start0` to specify how the starting values for the lagged residuals are han
 `start0 = true` (default) sets them to zero (as in Godfrey, 1978); `start0 = false`
 uses the first `lag` residuals as starting values, i.e. shortening the sample by `lag`.
 
-External links
+# External links
 
-* [Breusch-Godfrey test on Wikipedia](https://en.wikipedia.org/wiki/Breusch–Godfrey_test)
+  * [Breusch-Godfrey test on Wikipedia](https://en.wikipedia.org/wiki/Breusch–Godfrey_test)
 """
 function BreuschGodfreyTest(xmat::AbstractArray{T}, e::AbstractVector{T},
                             lag::Int, start0::Bool=true) where T<:Real
