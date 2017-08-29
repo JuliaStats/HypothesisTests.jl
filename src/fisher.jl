@@ -43,7 +43,7 @@ The contingency table is structured as:
     odds ratio rather than the sample odds ratio; it maximizes the likelihood given by
     Fisher's non-central hypergeometric distribution.
 
-Implements: [`pvalue`](@ref), [`confint`](@ref)
+Implements: [`pvalue(::FisherExactTest)`](@ref), [`confint(::FisherExactTest)`](@ref)
 
 # References
 

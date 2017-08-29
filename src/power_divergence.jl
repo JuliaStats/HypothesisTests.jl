@@ -272,7 +272,7 @@ real number determining the nature of the test to be performed:
 Under regularity conditions, the asymptotic distributions are identical (see Drost et. al.
 1989). The ``χ^2`` null approximation works best for ``λ`` near ``2/3``.
 
-Implements: [`pvalue`](@ref), [`confint`](@ref)
+Implements: [`pvalue`](@ref), [`confint(::PowerDivergenceTest)`](@ref)
 
 # References
 

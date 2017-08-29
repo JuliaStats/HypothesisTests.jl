@@ -45,9 +45,9 @@ testing the residuals of an estimated model, `dof` has to be set to the number
 of estimated parameters. E.g., when testing the residuals of an ARIMA(p,0,q)
 model, set `dof=p+q`.
 
-External links
+# External links
 
-* [Box-Pierce test on Wikipedia](https://en.wikipedia.org/wiki/Ljung–Box_test#Box-Pierce_test)
+  * [Box-Pierce test on Wikipedia](https://en.wikipedia.org/wiki/Ljung–Box_test#Box-Pierce_test)
 """
 function BoxPierceTest(y::AbstractVector{T}, lag::Int, dof::Int=0) where T<:Real
     if dof>=lag
@@ -94,9 +94,9 @@ testing the residuals of an estimated model, `dof` has to be set to the number
 of estimated parameters. E.g., when testing the residuals of an ARIMA(p,0,q)
 model, set `dof=p+q`.
 
-External links
+# External links
 
-* [Ljung-Box test on Wikipedia](https://en.wikipedia.org/wiki/Ljung–Box_test)
+  * [Ljung-Box test on Wikipedia](https://en.wikipedia.org/wiki/Ljung–Box_test)
 """
 function LjungBoxTest(y::AbstractVector{T}, lag::Int, dof::Int=0) where T<:Real
     if dof>=lag
