@@ -377,6 +377,30 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "nonparametric.html#HypothesisTests.ExactPermutationTest",
+    "page": "Nonparametric tests",
+    "title": "HypothesisTests.ExactPermutationTest",
+    "category": "Function",
+    "text": "ExactPermutationTest(x::Vector, y::Vector, f::Function)\n\nPerform a permutation test (a.k.a. randomization test) of the null hypothesis that f(x) is equal to f(y).  All possible permutations are sampled.\n\n\n\n"
+},
+
+{
+    "location": "nonparametric.html#HypothesisTests.ApproximatePermutationTest",
+    "page": "Nonparametric tests",
+    "title": "HypothesisTests.ApproximatePermutationTest",
+    "category": "Function",
+    "text": "ApproximatePermutationTest(x::Vector, y::Vector, f::Function, n::Int)\n\nPerform a permutation test (a.k.a. randomization test) of the null hypothesis that f(x) is equal to f(y).  n of the factorial(length(x)+length(y)) permutations are sampled at random.\n\n\n\n"
+},
+
+{
+    "location": "nonparametric.html#Permutation-test-1",
+    "page": "Nonparametric tests",
+    "title": "Permutation test",
+    "category": "section",
+    "text": "ExactPermutationTest\nApproximatePermutationTest"
+},
+
+{
     "location": "time_series.html#",
     "page": "Time series tests",
     "title": "Time series tests",
