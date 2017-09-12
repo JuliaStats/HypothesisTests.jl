@@ -27,7 +27,7 @@ __precompile__()
 module HypothesisTests
 
 using Distributions, Roots, StatsBase, Compat
-using Combinatorics: combinations
+using Combinatorics: combinations, permutations
 using Rmath: pwilcox, psignrank
 
 import StatsBase.confint
@@ -175,4 +175,5 @@ include("breusch_godfrey.jl")
 include("augmented_dickey_fuller.jl")
 include("jarque_bera.jl")
 include("durbin_watson.jl")
+include("permutation.jl")
 end

@@ -59,3 +59,10 @@ SignedRankTest
 ExactSignedRankTest
 ApproximateSignedRankTest
 ```
+
+## Permutation test
+
+```@docs
+ExactPermutationTest
+ApproximatePermutationTest
+```
