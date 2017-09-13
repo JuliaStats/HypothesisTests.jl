@@ -348,8 +348,8 @@ PowerDivergenceTest(x::AbstractVector{T}; lambda::U=1.0, theta0::Vector{U} = one
 """
     ChisqTest(x[, y][, theta0 = ones(length(x))/length(x)])
 
-Perform a [`PowerDivergenceTest`](@ref) with ``λ = 1``, i.e. in the form of Pearson's
-chi-squared statistic.
+Perform a Pearson chi-squared test (equivalent to a [`PowerDivergenceTest`](@ref)
+with ``λ = 1``).
 
 If `y` is not given and `x` is a matrix with one row or column, or `x` is a vector, then
 a goodness-of-fit test is performed (`x` is treated as a one-dimensional contingency
@@ -388,8 +388,8 @@ ChisqTest(x::AbstractVector{T}, theta0::Vector{U} = ones(length(x))/length(x)) w
 """
     MultinomialLRT(x[, y][, theta0 = ones(length(x))/length(x)])
 
-Perform a [`PowerDivergenceTest`](@ref) with ``λ = 0``, i.e. in the form of the likelihood
-ratio test statistic.
+Perform a multinomial likelihood ratio test (equivalent to a [`PowerDivergenceTest`](@ref)
+with ``λ = 0``).
 
 If `y` is not given and `x` is a matrix with one row or column, or `x` is a vector, then
 a goodness-of-fit test is performed (`x` is treated as a one-dimensional contingency
