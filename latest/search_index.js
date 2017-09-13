@@ -121,11 +121,27 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "parametric.html#Power-divergence-test-1",
+    "page": "Parametric tests",
+    "title": "Power divergence test",
+    "category": "section",
+    "text": "PowerDivergenceTest"
+},
+
+{
     "location": "parametric.html#HypothesisTests.ChisqTest",
     "page": "Parametric tests",
     "title": "HypothesisTests.ChisqTest",
     "category": "Function",
-    "text": "ChisqTest(x[, y][, theta0 = ones(length(x))/length(x)])\n\nPerform a PowerDivergenceTest with  = 1, i.e. in the form of Pearson's chi-squared statistic.\n\nIf y is not given and x is a matrix with one row or column, or x is a vector, then a goodness-of-fit test is performed (x is treated as a one-dimensional contingency table). In this case, the hypothesis tested is whether the population probabilities equal those in theta0, or are all equal if theta0 is not given.\n\nIf x is a matrix with at least two rows and columns, it is taken as a two-dimensional contingency table. Otherwise, x and y must be vectors of the same length. The contingency table is calculated using counts function from the StatsBase package. Then the power divergence test is conducted under the null hypothesis that the joint distribution of the cell counts in a 2-dimensional contingency table is the product of the row and column marginals.\n\nNote that the entries of x (and y if provided) must be non-negative integers.\n\nImplements: pvalue, confint\n\n\n\n"
+    "text": "ChisqTest(x[, y][, theta0 = ones(length(x))/length(x)])\n\nPerform a Pearson chi-squared test (equivalent to a PowerDivergenceTest with  = 1).\n\nIf y is not given and x is a matrix with one row or column, or x is a vector, then a goodness-of-fit test is performed (x is treated as a one-dimensional contingency table). In this case, the hypothesis tested is whether the population probabilities equal those in theta0, or are all equal if theta0 is not given.\n\nIf x is a matrix with at least two rows and columns, it is taken as a two-dimensional contingency table. Otherwise, x and y must be vectors of the same length. The contingency table is calculated using counts function from the StatsBase package. Then the power divergence test is conducted under the null hypothesis that the joint distribution of the cell counts in a 2-dimensional contingency table is the product of the row and column marginals.\n\nNote that the entries of x (and y if provided) must be non-negative integers.\n\nImplements: pvalue, confint\n\n\n\n"
+},
+
+{
+    "location": "parametric.html#Pearson-chi-squared-test-1",
+    "page": "Parametric tests",
+    "title": "Pearson chi-squared test",
+    "category": "section",
+    "text": "ChisqTest"
 },
 
 {
@@ -133,15 +149,15 @@ var documenterSearchIndex = {"docs": [
     "page": "Parametric tests",
     "title": "HypothesisTests.MultinomialLRT",
     "category": "Function",
-    "text": "MultinomialLRT(x[, y][, theta0 = ones(length(x))/length(x)])\n\nPerform a PowerDivergenceTest with  = 0, i.e. in the form of the likelihood ratio test statistic.\n\nIf y is not given and x is a matrix with one row or column, or x is a vector, then a goodness-of-fit test is performed (x is treated as a one-dimensional contingency table). In this case, the hypothesis tested is whether the population probabilities equal those in theta0, or are all equal if theta0 is not given.\n\nIf x is a matrix with at least two rows and columns, it is taken as a two-dimensional contingency table. Otherwise, x and y must be vectors of the same length. The contingency table is calculated using counts function from the StatsBase package. Then the power divergence test is conducted under the null hypothesis that the joint distribution of the cell counts in a 2-dimensional contingency table is the product of the row and column marginals.\n\nNote that the entries of x (and y if provided) must be non-negative integers.\n\nImplements: pvalue, confint\n\n\n\n"
+    "text": "MultinomialLRT(x[, y][, theta0 = ones(length(x))/length(x)])\n\nPerform a multinomial likelihood ratio test (equivalent to a PowerDivergenceTest with  = 0).\n\nIf y is not given and x is a matrix with one row or column, or x is a vector, then a goodness-of-fit test is performed (x is treated as a one-dimensional contingency table). In this case, the hypothesis tested is whether the population probabilities equal those in theta0, or are all equal if theta0 is not given.\n\nIf x is a matrix with at least two rows and columns, it is taken as a two-dimensional contingency table. Otherwise, x and y must be vectors of the same length. The contingency table is calculated using counts function from the StatsBase package. Then the power divergence test is conducted under the null hypothesis that the joint distribution of the cell counts in a 2-dimensional contingency table is the product of the row and column marginals.\n\nNote that the entries of x (and y if provided) must be non-negative integers.\n\nImplements: pvalue, confint\n\n\n\n"
 },
 
 {
-    "location": "parametric.html#Power-divergence-test-1",
+    "location": "parametric.html#Multinomial-likelihood-ratio-test-1",
     "page": "Parametric tests",
-    "title": "Power divergence test",
+    "title": "Multinomial likelihood ratio test",
     "category": "section",
-    "text": "PowerDivergenceTest\nChisqTest\nMultinomialLRT"
+    "text": "MultinomialLRT"
 },
 
 {
