@@ -159,10 +159,7 @@ function ci_sison_glaz(x::PowerDivergenceTest, alpha::Float64; skew_correct::Boo
 
         poly = 1 + g1 * (z^3 - 3z) / 6 + g2 * (z^4 - 6z^2 + 3) / 24 + g1^2 * (z^6 - 15z^4 + 45z^2 - 15) / 72
         f = poly * exp(-z^2 / 2) / sqrt(2π)
-        probx = 1.0
-        for i in 1:k
-            probx *= m5[i]
-        end
+        probx = prod(m5)
 
         p = probn * probx * f / sqrt(s2)
         # end of truncpoi
