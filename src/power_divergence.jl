@@ -128,8 +128,9 @@ end
 function ci_sison_glaz(x::PowerDivergenceTest, alpha::Float64; skew_correct::Bool=true)
     k = length(x.thetahat)
     probn = inv(pdf(Poisson(x.n), x.n))
-
+    
     c = 0
+    p = 0.0
     p_old = 0.0
     m1, m2, m3, m4, m5 = zeros(k), zeros(k), zeros(k), zeros(k), zeros(k)
     mu = zeros(4)
@@ -141,30 +142,23 @@ function ci_sison_glaz(x::PowerDivergenceTest, alpha::Float64; skew_correct::Boo
             #run moments
             a = lambda + c
             b = max(lambda - c, 0)
-            if lambda > 0
-                poislama = cdf(Poisson(lambda), a)
-                poislamb = cdf(Poisson(lambda), b - 1)
-            else
-                poislama = poislamb = 1.0
-            end
-            den = b > 0 ? poislama-poislamb : poislama
+            poislama = cdf(Poisson(lambda), a)
+            poislamb = cdf(Poisson(lambda), b - 1)
+            den = b > 0.0 ? poislama-poislamb : poislama
 
             for r in 1:4
-                if lambda > 0
-                    plar = cdf(Poisson(lambda), a - r)
-                    plbr = cdf(Poisson(lambda), b - r - 1)
-                else
-                    plar = plbr = 1.0
-                end
-                poisA = ifelse(a - r >= 0, poislama - plar, poislama)
+                plar = cdf(Poisson(lambda), a - r)
+                plbr = cdf(Poisson(lambda), b - r - 1)
+                
+                poisA = ifelse( (a - r) >= 0, poislama - plar, poislama)
                 poisB = 0.0
-                if  b - r - 1 >= 0
+                if  (b - r - 1) >= 0
                     poisB = poislamb - plbr
                 end
-                if b - r - 1 < 0 && b - 1 >= 0
+                if (b - r - 1) < 0 && b - 1 >= 0
                     poisB = poislamb
                 end
-                if b - r - 1 < 0 && b - 1 < 0
+                if (b - r - 1) < 0 && (b - 1) < 0
                     poisB = 0.0
                 end
                 mu[r] = lambda^r * (1 - (poisA - poisB) / den)
@@ -182,14 +176,11 @@ function ci_sison_glaz(x::PowerDivergenceTest, alpha::Float64; skew_correct::Boo
         s1, s2, s3, s4 = sum(m1), sum(m2), sum(m3), sum(m4)
         z  = (x.n - s1) / sqrt(s2)
         g1 = s3 / s2^(3/2)
-        g2 = s4 * s2^2
+        g2 = s4 / s2^2
 
         poly = 1 + g1 * (z^3 - 3z) / 6 + g2 * (z^4 - 6z^2 + 3) / 24 + g1^2 * (z^6 - 15z^4 + 45z^2 - 15) / 72
         f = poly * exp(-z^2 / 2) / sqrt(2π)
-        probx = 1.0
-        for i in 1:k
-            probx *= probx * m5[i]
-        end
+        probx = prod(m5)
 
         p = probn * probx * f / sqrt(s2)
         # end of truncpoi
@@ -198,7 +189,7 @@ function ci_sison_glaz(x::PowerDivergenceTest, alpha::Float64; skew_correct::Boo
         p_old = p
     end
 
-    delta = (1 - alpha - p_old) / p_old
+    delta = (1 - alpha - p_old) / (p - p_old)
     out = zeros(k, 5)
     num = zeros(k, 1)
 
