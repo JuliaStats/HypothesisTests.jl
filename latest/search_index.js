@@ -193,6 +193,38 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "parametric.html#HypothesisTests.OneSampleZTest",
+    "page": "Parametric tests",
+    "title": "HypothesisTests.OneSampleZTest",
+    "category": "Type",
+    "text": "OneSampleZTest(xbar::Real, stddev::Real, n::Int, μ0::Real = 0)\n\nPerform a one sample z-test of the null hypothesis that n values with mean xbar and population standard deviation stddev  come from a distribution with mean μ0 against the alternative hypothesis that the distribution does not have mean μ0.\n\nImplements: pvalue, confint\n\n\n\nOneSampleZTest(v::AbstractVector{T<:Real}, μ0::Real = 0)\n\nPerform a one sample z-test of the null hypothesis that the data in vector v comes from a distribution with mean μ0 against the alternative hypothesis that the distribution does not have mean μ0.\n\nImplements: pvalue, confint\n\n\n\nOneSampleZTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real}, μ0::Real = 0)\n\nPerform a paired sample z-test of the null hypothesis that the differences between pairs of values in vectors x and y come from a distribution with mean μ0 against the alternative hypothesis that the distribution does not have mean μ0.\n\nImplements: pvalue, confint\n\n\n\n"
+},
+
+{
+    "location": "parametric.html#HypothesisTests.EqualVarianceZTest",
+    "page": "Parametric tests",
+    "title": "HypothesisTests.EqualVarianceZTest",
+    "category": "Type",
+    "text": "EqualVarianceZTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real})\n\nPerform a two-sample z-test of the null hypothesis that x and y come from distributions with equal means and variances against the alternative hypothesis that the distributions have different means but equal variances.\n\nImplements: pvalue, confint\n\n\n\n"
+},
+
+{
+    "location": "parametric.html#HypothesisTests.UnequalVarianceZTest",
+    "page": "Parametric tests",
+    "title": "HypothesisTests.UnequalVarianceZTest",
+    "category": "Type",
+    "text": "UnequalVarianceZTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real})\n\nPerform an unequal variance two-sample z-test of the null hypothesis that x and y come from distributions with equal means against the alternative hypothesis that the distributions have different means.\n\nImplements: pvalue, confint\n\n\n\n"
+},
+
+{
+    "location": "parametric.html#z-test-1",
+    "page": "Parametric tests",
+    "title": "z-test",
+    "category": "section",
+    "text": "OneSampleZTest\nEqualVarianceZTest\nUnequalVarianceZTest"
+},
+
+{
     "location": "nonparametric.html#",
     "page": "Nonparametric tests",
     "title": "Nonparametric tests",
