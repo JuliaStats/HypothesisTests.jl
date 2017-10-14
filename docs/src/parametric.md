@@ -21,3 +21,10 @@ OneSampleTTest
 EqualVarianceTTest
 UnequalVarianceTTest
 ```
+
+## z-test
+```@docs
+OneSampleZTest
+EqualVarianceZTest
+UnequalVarianceZTest
+```
