@@ -31,6 +31,9 @@ Perform Fisher's exact test of the null hypothesis that the success probabilitie
 and ``b/d`` are equal, that is the odds ratio ``(a/c) / (b/d)`` is one, against the
 alternative hypothesis that they are not equal.
 
+See [`pvalue(::FisherExactTest)`](@ref) and [`confint(::FisherExactTest)`](@ref) for details
+about the computation of the default p-value and confidence interval, respectively.
+
 The contingency table is structured as:
 
 | -  | X1 | X2 |
