@@ -25,6 +25,7 @@ t = OneSampleADTest(x, Normal())
 @test pvalue(t) < 1e-100
 
 # k-sample test
+srand(948574875)
 samples = Any[
     [38.7, 41.5, 43.8, 44.5, 45.5, 46.0, 47.7, 58.0],
     [39.2, 39.3, 39.7, 41.4, 41.8, 42.9, 43.3, 45.8],
@@ -38,10 +39,17 @@ t = KSampleADTest(samples...)
 @test isapprox(pvalue(t), 0.0020, atol=0.1^4)
 @test default_tail(t) == :right
 
+ts = KSampleADTest(samples..., nsim = 20000);
+@test isapprox(pvalue(ts), 0.00150, atol=0.1^3)
+
 t = KSampleADTest(samples..., modified = false)
 @test isapprox(t.A²k, 8.3559, atol=0.1^4)
 @test isapprox(t.σ, 1.2038, atol=0.1^4)
 @test isapprox(pvalue(t), 0.0021, atol=0.1^4)
+
+ts = KSampleADTest(samples..., modified = false, nsim = 20000);
+@test isapprox(pvalue(ts), 0.00150, atol=0.1^3)
+
 
 srand(31412455)
 samples = Any[rand(Normal(), 50), rand(Normal(0.5), 30)]

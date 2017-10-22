@@ -72,15 +72,19 @@ function pvalue(x::OneSampleADTest)
 end
 
 ## K-SAMPLE ANDERSON DARLING TEST
-struct KSampleADTest <: ADTest
-    k::Int        # number of samples
-    n::Int        # number of observations
-    σ::Float64   # variance A²k
-    A²k::Float64 # Anderson-Darling test statistic
+struct KSampleADTest{T<:Real} <: ADTest
+    k::Int             # number of samples
+    n::Int             # number of observations
+    σ::Float64         # variance A²k
+    A²k::Float64       # Anderson-Darling test statistic
+    modified::Bool     # Modified test statistic
+    nsim::Int          # Number of simulations for P-value calculation (0 - for asymptotic calculation)
+    samples::Vector{T} # Pooled samples
+    sizes::Vector{Int} # sizes of samples
 end
 
 """
-    KSampleADTest(xs::AbstractVector{<:Real}...; modified = true)
+    KSampleADTest(xs::AbstractVector{<:Real}...; modified = true, nsim=0)
 
 Perform a ``k``-sample Anderson–Darling test of the null hypothesis that the data in the
 ``k`` vectors `xs` come from the same distribution against the alternative hypothesis that
@@ -89,6 +93,12 @@ the samples come from different distributions.
 `modified` parameter enables a modified test calculation for samples whose observations
 do not all coincide.
 
+`nsim` parameter if equals to 0, specifies an asymptotic calculation of P-value.
+If greater than zero, enables an estimation of P-values by generating `nsim` random splits
+of the pooled data on ``k`` samples, evaluating the AD statistics for each split, and
+computing proportion of simulated values >= observed AD values, which is reported as
+a P-value estimate.
+
 Implements: [`pvalue`](@ref)
 
 # References
@@ -96,9 +106,8 @@ Implements: [`pvalue`](@ref)
   * F. W. Scholz and M. A. Stephens, K-Sample Anderson-Darling Tests, Journal of the
     American Statistical Association, Vol. 82, No. 399. (Sep., 1987), pp. 918-924.
 """
-function KSampleADTest(xs::AbstractVector{T}...; modified=true) where T<:Real
-    KSampleADTest(a2_ksample(xs, modified)...)
-end
+KSampleADTest(xs::AbstractVector{T}...; modified=true, nsim=0) where T<:Real =
+    a2_ksample(xs, modified, nsim)
 
 testname(::KSampleADTest) = "k-sample Anderson-Darling test"
 default_tail(test::KSampleADTest) = :right
@@ -106,11 +115,37 @@ default_tail(test::KSampleADTest) = :right
 function show_params(io::IO, x::KSampleADTest, ident="")
     println(io, ident, "number of samples:        $(x.k)")
     println(io, ident, "number of observations:   $(x.n)")
-    println(io, ident, "SD of A²k:               $(x.σ)")
-    println(io, ident, "A²k statistic:           $(x.A²k)")
+    println(io, ident, "SD of A²k:                $(x.σ)")
+    println(io, ident, "A²k statistic:            $(x.A²k)")
+    println(io, ident, "Standardized statistic:   $((x.A²k - x.k + 1) / x.σ)")
+    println(io, ident, "Modified:                 $(x.modified)")
+    println(io, ident, "P-value calculation:      $(x.nsim == 0 ? "asymptotic" : "simulation" )")
+    x.nsim != 0 && println(io, ident, "Number of simulations:    $(x.nsim)")
 end
 
-function pvalue(x::KSampleADTest)
+"""Monte-Carlo simulation of the p-value for AD test"""
+function pvaluesim(x::KSampleADTest)
+    Z = sort(x.samples)
+    Z⁺ = unique(Z)
+
+    cn = [0, cumsum(x.sizes)...]
+    Xr = [cn[i]+1:cn[i+1] for i in 1:x.k]
+    idxs = collect(1:x.n)
+    IV = [view(idxs, Xr[i]) for i in 1:x.k]
+    Xr = [view(x.samples, IV[i]) for i in 1:x.k]
+
+    pv = 0
+    for j in 1:x.nsim
+        shuffle!(idxs)
+        A²k, A²km = adkvals(Z⁺, x.n, Xr)
+        adv = x.modified ? A²km : A²k
+        adv >= x.A²k && (pv += 1)
+    end
+    return pv/x.nsim
+end
+
+"""Asymptotic evaluation of the p-value for AD test"""
+function pvalueasym(x::KSampleADTest)
     m = x.k - 1
     Tk = (x.A²k - m) / x.σ
     sig = [0.25, 0.1, 0.05, 0.025, 0.01]
@@ -128,21 +163,16 @@ function pvalue(x::KSampleADTest)
     end
     f = A \ log.(sig)
 
-    exp(f[1] + f[2]*Tk + f[3]*Tk^2)
+    pv = exp(f[1] + f[2]*Tk + f[3]*Tk^2)
+    return pv > 1 ? 1.0 : pv # cap p-value
 end
 
-function a2_ksample(samples, modified=true)
+pvalue(x::KSampleADTest) = x.nsim == 0 ? pvalueasym(x) : pvaluesim(x)
+
+function adkvals(Z⁺, N, samples)
     k = length(samples)
-    k < 2 && error("Need at least two samples")
-
     n = map(length, samples)
-    Z = sort(vcat(samples...))
-    N = length(Z)
-    Z⁺ = unique(Z)
     L = length(Z⁺)
-
-    L < 2 && error("Need more then 1 observation")
-    minimum(n) == 0 && error("One of the samples is empty")
 
     fij = zeros(Int, k, L)
     for i in 1:k
@@ -150,38 +180,46 @@ function a2_ksample(samples, modified=true)
             fij[i, searchsortedfirst(Z⁺, s)] += 1
         end
     end
+    ljs = sum(fij, 1)
 
-    A²k = 0.
-    if modified
-        for i in 1:k
-            inner = 0.
-            Mij = 0.
-            Bj = 0.
-            for j = 1:L
-                lj = sum(fij[:,j])
-                Mij += fij[i, j]
-                Bj += lj
-                Maij = Mij - fij[i, j]/2.
-                Baj = Bj - lj/2.
-                inner += lj/N * (N*Maij-n[i]*Baj)^2 / (Baj*(N-Baj) - N*lj/4.)
-            end
-            A²k += inner / n[i]
-        end
-        A²k *= (N - 1.) / N
-    else
-        for i in 1:k
-            inner = 0.
-            Mij = 0.
-            Bj = 0.
-            for j = 1:L-1
-                lj = sum(fij[:,j])
-                Mij += fij[i, j]
-                Bj += lj
+    A²k = A²km = 0.
+    for i in 1:k
+        innerm = 0.
+        inner = 0.
+        Mij = 0.
+        Bj = 0.
+        for j = 1:L
+            lj = ljs[j]
+            Mij += fij[i, j]
+            Bj += lj
+            Maij = Mij - fij[i, j]/2.
+            Baj = Bj - lj/2.
+            innerm += lj/N * (N*Maij-n[i]*Baj)^2 / (Baj*(N-Baj) - N*lj/4.)
+            if j < L
                 inner += lj/N * (N*Mij-n[i]*Bj)^2 / (Bj*(N-Bj))
             end
-            A²k += inner / n[i]
         end
+        A²km += innerm / n[i]
+        A²k += inner / n[i]
     end
+    return A²k, A²km * (N - 1.) / N
+end
+
+function a2_ksample(samples, modified, method)
+    k = length(samples)
+    k < 2 && error("Need at least two samples")
+
+    n = map(length, samples)
+    pooled = vcat(samples...)
+    Z = sort(pooled)
+    N = length(Z)
+    Z⁺ = unique(Z)
+    L = length(Z⁺)
+
+    L < 2 && error("Need more then 1 observation")
+    minimum(n) == 0 && error("One of the samples is empty")
+
+    A²k, A²km = adkvals(Z⁺, N, samples)
 
     H = sum(map(i->1./i, n))
     h = sum(1./(1:N-1))
@@ -196,7 +234,7 @@ function a2_ksample(samples, modified=true)
     b = (2*g - 4)*k^2 + 8*h*k + (2*g - 14*h - 4)*H - 8*h + 4*g - 6
     c = (6*h + 2*g - 2)*k^2 + (4*h - 4*g + 6)*k + (2*h - 6)*H + 4*h
     d = (2*h + 6)*k^2 - 4*h*k
-    σ²n = (a*N^3 + b*N^2 + c*N + d) / ((N - 1.) * (N - 2.) * (N - 3.))
+    σ² = (a*N^3 + b*N^2 + c*N + d) / ((N - 1.) * (N - 2.) * (N - 3.))
 
-    (k, N, sqrt(σ²n), A²k)
+    KSampleADTest(k, N, sqrt(σ²), (modified ? A²km : A²k), modified, method, pooled, [n...])
 end
