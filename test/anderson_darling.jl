@@ -36,16 +36,16 @@ samples = Any[
 t = KSampleADTest(samples...)
 @test isapprox(t.A²k, 8.3926, atol=0.1^4)
 @test isapprox(t.σ, 1.2038, atol=0.1^4)
-@test isapprox(pvalue(t), 0.0020, atol=0.1^4)
+@test isapprox(pvalue(t), 0.0022, atol=0.1^4)
 @test default_tail(t) == :right
 
 ts = KSampleADTest(samples..., nsim = 20000);
-@test isapprox(pvalue(ts), 0.00150, atol=0.1^3)
+@test isapprox(pvalue(ts), 0.00155, atol=0.1^3)
 
 t = KSampleADTest(samples..., modified = false)
 @test isapprox(t.A²k, 8.3559, atol=0.1^4)
 @test isapprox(t.σ, 1.2038, atol=0.1^4)
-@test isapprox(pvalue(t), 0.0021, atol=0.1^4)
+@test isapprox(pvalue(t), 0.0023, atol=0.1^4)
 
 ts = KSampleADTest(samples..., modified = false, nsim = 20000);
 @test isapprox(pvalue(ts), 0.00150, atol=0.1^3)
