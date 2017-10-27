@@ -9,18 +9,13 @@ abstract type ADTest <: HypothesisTest end
 
 function adstats(x::AbstractVector{T}, d::UnivariateDistribution) where T<:Real
     n = length(x)
-    y = sort(x)
-    μ = mean(y)
-    σ = std(y)
-    A² = convert(typeof(μ), -n)
+    A² = convert(eltype(x), -n)
     for i = 1:n
-        zi = (y[i] - μ)/σ
-        zni1 = (y[n - i + 1] - μ)/σ
-        lcdfz = logcdf(d, zi)
-        lccdfz = logccdf(d, zni1)
-        A² -= (2*i - 1)/n * (lcdfz + lccdfz)
+        lcdfz = logcdf(d, x[i])
+        lccdfz = logccdf(d, x[n - i + 1])
+        A² -= (i+i - 1)/n * (lcdfz + lccdfz)
     end
-    (n, μ, σ, A²)
+    return A²
 end
 
 struct OneSampleADTest <: ADTest
@@ -40,7 +35,22 @@ is not drawn from `d`.
 Implements: [`pvalue`](@ref)
 """
 function OneSampleADTest(x::AbstractVector{T}, d::UnivariateDistribution) where T<:Real
-    OneSampleADTest(adstats(x, d)...)
+    n = length(x)
+    μ, σ = StatsBase.mean_and_std(x)
+    y = sort(x)
+    if isa(d, Uniform)
+        m = y[1]
+        r = y[end]-m
+        broadcast!(x->(x-m)/r, y, y)
+        y[1] += eps()   # to avoid log(0.0)
+        y[end] -= eps() # to avoid log(0.0)
+    elseif isa(d, Exponential)
+        broadcast!(x->x/μ, y, y)
+    else
+        StatsBase.zscore!(y, μ, σ)
+    end
+
+    OneSampleADTest(n, μ, σ, adstats(y, d))
 end
 
 testname(::OneSampleADTest) = "One sample Anderson-Darling test"
@@ -53,22 +63,32 @@ function show_params(io::IO, x::OneSampleADTest, ident="")
     println(io, ident, "A² statistic:             $(x.A²)")
 end
 
-### Ralph B. D'Agostino, Goodness-of-Fit-Techniques, CRC Press, Jun 2, 1986
-### https://books.google.com/books?id=1BSEaGVBj5QC&pg=PA97, p.127
-function pvalue(x::OneSampleADTest)
-    z = x.A²*(1.0 + .75/x.n + 2.25/x.n/x.n)
+### G. and J. Marsaglia, "Evaluating the Anderson-Darling Distribution", Journal of Statistical Software, 2004
+function pvalue(t::OneSampleADTest)
+    g1(x) = sqrt(x)*(1.0-x)*(49.0x-102.0)
+    g2(x) = -0.00022633 + (6.54034 - (14.6538 - (14.458 - (8.259 - 1.91864x)x)x)x)x
+    g3(x) = -130.2137 + (745.2337 - (1705.091 - (1950.646 - (1116.360 - 255.7844x)x)x)x)x
 
-    if z < .200
-        1.0 - exp(-13.436+101.14z-223.73z^2)
-    elseif .200 < z < .340
-        1.0 - exp(-8.318+42.796z-59.938z^2)
-    elseif .340 < z < .600
-        exp(0.9177-4.279z-1.38z^2)
-    elseif z < 153.467
-        exp(1.2937-5.709z+0.0186z^2)
+    n = t.n
+    z = t.A²
+    y = if z < 2.0
+        exp(-1.2337141/z)*(2.00012+(0.247105-(.0649821-(.0347962-(.0116720-.00168691*z)*z)*z)*z)*z)/sqrt(z)
     else
-        0.0
+        exp(-exp(1.0776-(2.30695-(.43424-(.082433-(.008056-.0003146*z)*z)*z)*z)*z))
     end
+
+    pv = y
+    if y > 0.8
+        pv += g3(y)/n
+    else
+        c = 0.01265 + 0.1757/n
+        if y < c
+            pv += (0.0037/n^3 + 0.00078/n^2 + 0.00006/n)*g1(y/c)
+        else
+            pv += (0.04213/n + 0.01365/n^2)*g2((y - c)/(0.8 - c))
+        end
+    end
+    return 1.0 - pv
 end
 
 ## K-SAMPLE ANDERSON DARLING TEST
