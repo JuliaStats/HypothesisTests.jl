@@ -122,11 +122,11 @@ function Base.show(io::IO, test::T) where T<:HypothesisTest
     println(io, "Test summary:")
     println(io, "    outcome with 95% confidence: $outcome h_0")
     if tail == :both
-        println(io, "    two-sided p-value:           $p")
+        println(io, "    two-sided p-value:           $(StatsBase.PValue(p))")
     elseif tail == :left || tail == :right
-        println(io, "    one-sided p-value:           $p")
+        println(io, "    one-sided p-value:           $(StatsBase.PValue(p))")
     else
-        println(io, "    p-value:                     $p")
+        println(io, "    p-value:                     $(StatsBase.PValue(p))")
     end
     println(io)
 
