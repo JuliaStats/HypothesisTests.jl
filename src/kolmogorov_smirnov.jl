@@ -38,7 +38,7 @@ default_tail(test::KSTest) = :both
 # compute supremum of differences between target and empirical cdf before and after the jump of the empirical cdf.
 function ksstats(x::AbstractVector{T}, d::UnivariateDistribution) where T<:Real
     n = length(x)
-    cdfs = cdf(d, sort(x))
+    cdfs = cdf.(d, sort(x))
     δp = maximum((1:n) / n - cdfs)
     δn = -minimum((0:n-1) / n - cdfs)
     δ = max(δn, δp)
