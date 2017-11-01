@@ -111,7 +111,8 @@ function Base.show(io::IO, test::T) where T<:HypothesisTest
     println(io, "    value under h_0:         $param_under_h0")
     println(io, "    point estimate:          $param_estimate")
     if has_ci
-        println(io, "    95% confidence interval: $(StatsBase.confint(test))")
+        println(io,
+            "    95% confidence interval: $((x -> round.(x, 4)).(StatsBase.confint(test)))")
     end
     println(io)
 
