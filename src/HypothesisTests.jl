@@ -111,7 +111,8 @@ function Base.show(io::IO, test::T) where T<:HypothesisTest
     println(io, "    value under h_0:         $param_under_h0")
     println(io, "    point estimate:          $param_estimate")
     if has_ci
-        println(io, "    95% confidence interval: $(StatsBase.confint(test))")
+        ci = map(x -> round.(x, 4), StatsBase.confint(test))
+        println(io, "    95% confidence interval: $ci")
     end
     println(io)
 
@@ -119,14 +120,15 @@ function Base.show(io::IO, test::T) where T<:HypothesisTest
     p = pvalue(test)
     outcome = if p > 0.05 "fail to reject" else "reject" end
     tail = default_tail(test)
+    pval = StatsBase.PValue(p)
     println(io, "Test summary:")
     println(io, "    outcome with 95% confidence: $outcome h_0")
     if tail == :both
-        println(io, "    two-sided p-value:           $p")
+        println(io, "    two-sided p-value:           $pval")
     elseif tail == :left || tail == :right
-        println(io, "    one-sided p-value:           $p")
+        println(io, "    one-sided p-value:           $pval")
     else
-        println(io, "    p-value:                     $p")
+        println(io, "    p-value:                     $pval")
     end
     println(io)
 
