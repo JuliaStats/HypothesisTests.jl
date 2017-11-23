@@ -114,7 +114,7 @@ the samples come from different distributions.
 `modified` parameter enables a modified test calculation for samples whose observations
 do not all coincide.
 
-`nsim` parameter if it is equal to 0 (the default) the asymptotic calculation of p-value is used.
+If `nsim` is equal to 0 (the default) the asymptotic calculation of p-value is used.
 If it is greater than 0, an estimation of p-values is used by generating `nsim` random splits
 of the pooled data on ``k`` samples, evaluating the AD statistics for each split, and
 computing the proportion of simulated values which are greater or equal to observed.
