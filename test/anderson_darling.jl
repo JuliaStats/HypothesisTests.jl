@@ -73,3 +73,6 @@ t = KSampleADTest(samples...)
 @test pvalue(t) > 0.05
 
 @test pvalue(OneSampleADTest(vcat(rand(Normal(),500), rand(Beta(2,2),500)), Beta(2,2))) ≈ 0.0 atol=0.1^4
+
+@test pvalue(KSampleADTest(rand(1000),randn(1000))) ≈ 0.0 atol=eps()
+@test pvalue(KSampleADTest(x,x,x,x,x,x)) ≈ 1.0 atol=eps()
