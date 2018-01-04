@@ -33,4 +33,54 @@ TH = 3/8 # 0.375E0
 SMALL = eps(1.0) # 1E-19
 PI6 = π/6 # 0.1909859E1
 STQR = asin(sqrt(0.75)) # 0.1047198E1
-#=
+=#
+
+struct SWCoeffs
+    N::Int
+    A::Vector{Float64}
+end
+
+Base.length(SWc::SWCoeffs) = SWc.N
+Base.endof(SWc::SWCoeffs) = length(SWc)
+
+function Base.getindex(SWc::SWCoeffs, i::Int)
+    if i <= endof(SWc.A)
+        return SWc.A[i]
+    elseif i <= endof(SWc)
+        if isodd(SWc.N) && i == div(SWc.N, 2) + 1
+            return 0.0
+        else
+            return -SWc.A[SWc.N+1-i]
+        end
+    else
+        throw(BoundsError(SWc, i))
+    end
+end
+
+function SWCoeffs(N::Int)
+    if N == 3 # exact
+        A = [sqrt(2.0)/2.0]
+    elseif N > 3 # Weisberg&Bingham 1975 statistic
+        m = [norminvcdf((i - 3/8)/(N + 1/4)) for i in 1:div(N,2)]
+
+        mm = 2sum(abs2, m)
+        sqrt_mm = sqrt(mm)
+
+        x = 1/sqrt(N)
+        a₁ = _C1(x) - m[1]/sqrt_mm
+
+        if N ≤ 5
+            ϕ = (mm - 2m[1]^2)/(1 - 2a₁^2)
+            A = -m/sqrt(ϕ)
+            A[1] = a₁
+        else
+            a₂ = -m[2]/sqrt_mm + _C2(x)
+            ϕ = (mm - 2m[1]^2 - 2m[2]^2)/(1 - 2a₁^2 - 2a₂^2)
+            A = -m/sqrt(ϕ)
+            A[1], A[2] = a₁, a₂
+        end
+    else
+        throw(ArgumentError("N must be greater than or equal to 3: $N"))
+    end
+    return SWCoeffs(N, A)
+end
