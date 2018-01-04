@@ -1,3 +1,5 @@
+export ShapiroWilkTest, SWCoeffs
+
 #=
 From:
 PATRICK ROYSTON
