@@ -124,3 +124,55 @@ function pvalue(W::Float64, A::SWCoeffs, N1=A.N)
 
     return normccdf((w - m)/sd)
 end
+
+struct ShapiroWilkTest <: HypothesisTest
+    SWc::SWCoeffs            # Expectation of order statistics for Shapiro-Wilk test
+    W::Float64            # test statistic
+    N1::Int               #
+end
+
+testname(::ShapiroWilkTest) = "Shapiro-Wilk normality test"
+population_param_of_interest(t::ShapiroWilkTest) =
+("Squared correlation of data and SWCoeffes (W)", 1.0, t.W)
+
+default_tail(::ShapiroWilkTest) = :left
+
+function show_params(io::IO, t::ShapiroWilkTest, ident)
+    println(io, ident, "number of observations:         ", t.SWc.N)
+    println(io, ident, "censored ratio:                 ", (t.SWc.N - t.N1)/t.SWc.N)
+    println(io, ident, "W-statistic:                    ", t.W)
+end
+
+pvalue(t::ShapiroWilkTest) = pvalue(t.W, t.SWc, t.N1)
+
+function ShapiroWilkTest(
+    X::AbstractArray{T}, SWc::SWCoeffs=SWCoeffs(length(X)), N1=length(X)) where {T<:Real}
+
+    N = length(X)
+    #fatal errors
+    if N < 3
+        throw("Need at least 3 samples.")
+    elseif N1 > N
+        throw("N1 must be less than or equal to length(X)")
+    elseif length(SWc) ≠ length(X)
+        throw("Length of the sample differs from Shapiro-Wilk coefficients!")
+    end
+
+    #non-fatal errors
+    if N > 5000
+        warn("p-value may be unreliable for samples larger than 5000 points")
+    elseif (N1 < N) && (N < 20)
+        warn("Number of samples is < 20. Censoring may produce unreliable p-value.")
+    elseif (N - N1)/N > 0.8
+        warn("(N - N1)/N > 0.8. Censoring too much data may produce unreliable p-value.")
+    end
+
+    if !issorted(view(X, 1:N1))
+        warn("Shapiro-Wilk requires sorted data")
+        W = swstat(sort(X[1:N1]), SWc)
+    else
+        W = swstat(view(X, 1:N1), SWc)
+    end
+
+    return ShapiroWilkTest(SWc, W, N1)
+end
