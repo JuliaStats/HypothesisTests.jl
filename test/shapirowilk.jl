@@ -28,7 +28,7 @@ S = SWCoeffs(20)
 @test all([S[i] == -S[end-i+1] for i in 1:length(S)])
 
 
-# Values obtained by calling directly `_swilk` fortran subroutine directly.
+# Values obtained by calling `_swilk` fortran subroutine directly.
 
 SWc10 = SWCoeffs(10)
 a = SWc10.A .- [0.573715, 0.32897, 0.214349, 0.122791, 0.0400887]
@@ -43,7 +43,6 @@ srand(1)
 X = sort(rand(Float64, 10))
 @test HypothesisTests.swstat(X, SWc10) ≈ 0.8453033192812377 atol=1.2e-8
 @test pvalue(HypothesisTests.swstat(X, SWc10), SWc10) ≈ 0.05106360837817192 atol=4.9e-8
-
 
 # **Worked Example** (Section 4) from
 # PATRICK ROYSTON Approximating the Shapiro-Wilk W-test for non-normality

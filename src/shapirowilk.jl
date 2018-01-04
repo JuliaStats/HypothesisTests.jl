@@ -178,3 +178,42 @@ function ShapiroWilkTest(
 
     return ShapiroWilkTest(SWc, W, N1)
 end
+
+#=
+# To compare with the standard ALGORITHM AS R94 fortran subroutine
+#  * grab scipys (swilk.f)[https://github.com/scipy/scipy/blob/master/scipy/stats/statlib/swilk.f];
+#  * compile (to use Int64/Float64 You need a few trivial changes to swilk.f)
+#  ```
+#  gfortran -shared -fPIC -o swilk.so swilk.f
+#  gfortran -shared -fPIC -o swilk64.so swilk64.f
+#  ```
+#
+
+for (lib, I, F) in (("./swilk64.so", Int64, Float64),
+                    ("./swilk.so"  , Int32, Float32))
+    @eval begin
+        function swilkfort!(X::AbstractVector{$F}, A::AbstractVector{$F}, computeA=true)
+
+            w, pval = Ref{$F}(0.0), Ref{$F}(0.0)
+            ifault = Ref{$I}(0)
+
+            ccall((:swilk_, $lib),
+                Void,
+                (
+                Ref{Bool},  # INIT if false compute SWCoeffs in A, else use A
+                Ref{$F},    # X    sample
+                Ref{$I},    # N    samples length
+                Ref{$I},    # N1   (upper) uncensored data length
+                Ref{$I},    # N2   length of A
+                Ref{$F},    # A    A
+                Ref{$F},    # W    W-statistic
+                Ref{$F},    # PW   p-value
+                Ref{$I},    # IFAULT error code (see swilk.f for meaning)
+                ),
+                !computeA, X, length(X), length(X), length(A), A, w, pval, ifault)
+            return (w[], pval[], ifault[], A)
+        end
+        swilkfort(X::Vector{$F}) = swilkfort!(X, zeros($F, div(length(X),2)))
+    end
+end
+=#
