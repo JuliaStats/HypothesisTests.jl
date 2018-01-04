@@ -84,3 +84,43 @@ function SWCoeffs(N::Int)
     end
     return SWCoeffs(N, A)
 end
+
+function swstat(X::AbstractArray{T}, A::SWCoeffs) where T<:Real
+
+    if X[end] - X[1] < endof(X)*eps(eltype(X))
+        throw("Data seems to be constant!")
+    end
+
+    AX = sum([A[i]*X[i] for i in 1:endof(X)])
+    S² = sum(abs2, X-mean(X))
+
+    return AX^2/S²
+end
+
+function pvalue(W::Float64, A::SWCoeffs, N1=A.N)
+    N = A.N
+    logN = log(A.N)
+    if N == 3 # exact by Shapiro&Wilk 1965
+        return π/6 * (asin(sqrt(W)) - asin(sqrt(0.75)))
+    elseif N ≤ 11
+
+        γ = _G(N)
+        if log(1 - W) > γ
+            return eps(Float64)
+        end
+
+        w = -log(γ - log(1 - W))
+        m = _C3(N)
+        sd = exp(_C4(N))
+    else
+        w = log(1-W)
+        m = _C5(logN)
+        sd = exp(_C6(logN))
+    end
+
+    if (N - N1) > 0
+        throw("Not implemented yet!")
+    end
+
+    return normccdf((w - m)/sd)
+end
