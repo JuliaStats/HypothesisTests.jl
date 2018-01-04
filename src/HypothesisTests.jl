@@ -29,6 +29,7 @@ using Distributions, Roots, StatsBase
 using Combinatorics: combinations, permutations
 using Rmath: pwilcox, psignrank
 using Printf: @printf
+using StatsFuns: norminvcdf, normccdf
 
 import StatsAPI
 using StatsAPI: HypothesisTest, confint, pvalue
