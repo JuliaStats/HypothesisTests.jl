@@ -69,25 +69,25 @@ function SWCoeffs(N::Int)
     if N < 3
         throw(ArgumentError("N must be greater than or equal to 3: $N"))
     elseif N == 3 # exact
-        return SWCoeffs(N, [sqrt(2.0)/2.0])
+        return SWCoeffs(N, [sqrt(2.0) / 2.0])
     else
         # Weisberg&Bingham 1975 statistic; store only positive half of m:
         # it is (anti-)symmetric; hence '2' factor below
-        m = [-norminvcdf((i - 3/8)/(N + 1/4)) for i in 1:div(N,2)]
+        m = [-norminvcdf((i - 3 / 8) / (N + 1 / 4)) for i in 1:div(N, 2)]
         mᵀm = 2sum(abs2, m)
 
-        x = 1/sqrt(N)
+        x = 1 / sqrt(N)
 
-        a₁ = m[1]/sqrt(mᵀm) + _C1(x) # aₙ = cₙ + (...)
+        a₁ = m[1] / sqrt(mᵀm) + _C1(x) # aₙ = cₙ + (...)
 
         if N ≤ 5
-            ϕ = (mᵀm - 2m[1]^2)/(1 - 2a₁^2)
-            m = m/sqrt(ϕ) # A, but reusing m to save allocs
+            ϕ = (mᵀm - 2m[1]^2) / (1 - 2a₁^2)
+            m = m / sqrt(ϕ) # A, but reusing m to save allocs
             m[1] = a₁
         else
-            a₂ = m[2]/sqrt(mᵀm) + _C2(x) # aₙ₋₁ = cₙ₋₁ + (...)
-            ϕ = (mᵀm - 2m[1]^2 - 2m[2]^2)/(1 - 2a₁^2 - 2a₂^2)
-            m = m/sqrt(ϕ) # A, but reusing m to save allocs
+            a₂ = m[2] / sqrt(mᵀm) + _C2(x) # aₙ₋₁ = cₙ₋₁ + (...)
+            ϕ = (mᵀm - 2m[1]^2 - 2m[2]^2) / (1 - 2a₁^2 - 2a₂^2)
+            m = m / sqrt(ϕ) # A, but reusing m to save allocs
             m[1], m[2] = a₁, a₂
         end
 
@@ -106,31 +106,28 @@ function swstat(X::AbstractArray{T}, A::SWCoeffs) where {T<:Real}
     return AX^2 / S²
 end
 
-function pvalue(W::Float64, A::SWCoeffs, N1=A.N)
-    N = A.N
-    logN = log(A.N)
-    if N == 3 # exact by Shapiro&Wilk 1965
+function pvalue(W::T, A::SWCoeffs, N1=A.N) where {T<:Real}
+    if A.N == 3 # exact by Shapiro&Wilk 1965
         return π / 6 * (asin(sqrt(W)) - asin(sqrt(0.75)))
-    elseif N ≤ 11
-        γ = _G(N)
-        if log(1 - W) > γ
-            return eps(Float64)
+    elseif A.N ≤ 11
+        γ = _G(A.N)
+        if γ ≤ log(1 - W)
+            return zero(W)
         end
-
         w = -log(γ - log(1 - W))
-        m = _C3(N)
-        sd = exp(_C4(N))
+        μ = _C3(A.N)
+        σ = exp(_C4(A.N))
     else
-        w = log(1 - W)
-        m = _C5(logN)
-        sd = exp(_C6(logN))
+        w = ln(1 - W)
+        μ = _C5(log(A.N))
+        σ = exp(_C6(log(A.N)))
     end
 
-    if (N - N1) > 0
+    if (A.N - N1) > 0
         throw("Not implemented yet!")
     end
 
-    return normccdf((w - m) / sd)
+    return normccdf((w - μ) / σ)
 end
 
 struct ShapiroWilkTest <: HypothesisTest
