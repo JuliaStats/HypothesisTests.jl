@@ -66,31 +66,33 @@ function Base.getindex(SWc::SWCoeffs, i::Int)
 end
 
 function SWCoeffs(N::Int)
-    if N == 3 # exact
-        A = [sqrt(2.0) / 2.0]
-    elseif N > 3 # Weisberg&Bingham 1975 statistic
-        m = [norminvcdf((i - 3 / 8) / (N + 1 / 4)) for i in 1:div(N, 2)]
+    if N < 3
+        throw(ArgumentError("N must be greater than or equal to 3: $N"))
+    elseif N == 3 # exact
+        return SWCoeffs(N, [sqrt(2.0)/2.0])
+    else
+        # Weisberg&Bingham 1975 statistic; store only positive half of m:
+        # it is (anti-)symmetric; hence '2' factor below
+        m = [-norminvcdf((i - 3/8)/(N + 1/4)) for i in 1:div(N,2)]
+        mᵀm = 2sum(abs2, m)
 
-        mm = 2sum(abs2, m)
-        sqrt_mm = sqrt(mm)
+        x = 1/sqrt(N)
 
-        x = 1 / sqrt(N)
-        a₁ = _C1(x) - m[1] / sqrt_mm
+        a₁ = m[1]/sqrt(mᵀm) + _C1(x) # aₙ = cₙ + (...)
 
         if N ≤ 5
-            ϕ = (mm - 2m[1]^2) / (1 - 2a₁^2)
-            A = -m / sqrt(ϕ)
-            A[1] = a₁
+            ϕ = (mᵀm - 2m[1]^2)/(1 - 2a₁^2)
+            m = m/sqrt(ϕ) # A, but reusing m to save allocs
+            m[1] = a₁
         else
-            a₂ = -m[2] / sqrt_mm + _C2(x)
-            ϕ = (mm - 2m[1]^2 - 2m[2]^2) / (1 - 2a₁^2 - 2a₂^2)
-            A = -m / sqrt(ϕ)
-            A[1], A[2] = a₁, a₂
+            a₂ = m[2]/sqrt(mᵀm) + _C2(x) # aₙ₋₁ = cₙ₋₁ + (...)
+            ϕ = (mᵀm - 2m[1]^2 - 2m[2]^2)/(1 - 2a₁^2 - 2a₂^2)
+            m = m/sqrt(ϕ) # A, but reusing m to save allocs
+            m[1], m[2] = a₁, a₂
         end
-    else
-        throw(ArgumentError("N must be greater than or equal to 3: $N"))
+
+        return SWCoeffs(N, m)
     end
-    return SWCoeffs(N, A)
 end
 
 function swstat(X::AbstractArray{T}, A::SWCoeffs) where {T<:Real}
