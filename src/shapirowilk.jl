@@ -118,7 +118,7 @@ function pvalue(W::T, A::SWCoeffs, N1=A.N) where {T<:Real}
         μ = _C3(A.N)
         σ = exp(_C4(A.N))
     else
-        w = ln(1 - W)
+        w = log(1 - W)
         μ = _C5(log(A.N))
         σ = exp(_C6(log(A.N)))
     end
