@@ -100,8 +100,8 @@ function swstat(X::AbstractArray{T}, A::SWCoeffs) where {T<:Real}
         throw("Data seems to be constant!")
     end
 
-    AX = sum([A[i] * X[i] for i in 1:endof(X)])
-    S² = sum(abs2, X - mean(X))
+    AX = dot(A,X)
+    S² = sum(abs2, X-mean(X))
 
     return AX^2 / S²
 end
