@@ -185,12 +185,11 @@ end
 #=
 # To compare with the standard ALGORITHM AS R94 fortran subroutine
 #  * grab scipys (swilk.f)[https://github.com/scipy/scipy/blob/master/scipy/stats/statlib/swilk.f];
-#  * compile (to use Int64/Float64 You need a few trivial changes to swilk.f)
+#  * compile
 #  ```
 #  gfortran -shared -fPIC -o swilk.so swilk.f
-#  gfortran -shared -fPIC -o swilk64.so swilk64.f
+#  gfortran -fdefault-integer-8 -fdefault-real-8 -shared -fPIC swilk.f -o swilk64.so
 #  ```
-#
 
 for (lib, I, F) in (("./swilk64.so", Int64, Float64),
                     ("./swilk.so"  , Int32, Float32))
