@@ -43,18 +43,18 @@ PI6 = π/6 # 0.1909859E1
 STQR = asin(sqrt(0.75)) # 0.1047198E1
 =#
 
-struct SWCoeffs
+struct SWCoeffs <: AbstractVector{Float64}
     N::Int
     A::Vector{Float64}
 end
 
-Base.length(SWc::SWCoeffs) = SWc.N
-Base.endof(SWc::SWCoeffs) = length(SWc)
+Base.size(SWc::SWCoeffs) = (SWc.N,)
+Base.IndexStyle(::Type{SWCoeffs}) = IndexLinear()
 
 function Base.getindex(SWc::SWCoeffs, i::Int)
     if i <= endof(SWc.A)
         return SWc.A[i]
-    elseif i <= endof(SWc)
+    elseif i <= length(SWc)
         if isodd(SWc.N) && i == div(SWc.N, 2) + 1
             return 0.0
         else
