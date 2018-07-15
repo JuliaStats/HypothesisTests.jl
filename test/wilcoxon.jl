@@ -51,6 +51,10 @@ show(IOBuffer(), SignedRankTest([1:10;], [2:2:20;]))
 # P-value computed using R wilcox.test
 @test abs(pvalue(SignedRankTest([1,2,3,4,5,6,7,10,10,10,10,10,13,14,15,16] - 10.1)) - 0.1021964) <= 1e-4
 
+# Issue 128
+@test pvalue(SignedRankTest([54.5, 54.5, 95.0, 51.5]), tail=:left)  == 1
+@test pvalue(SignedRankTest([54.5, 54.5, 95.0, 51.5]), tail=:right) == 0.0625
+
 # Test confidence interval
 x = [-7.8, -6.9, -4.7, 3.7, 6.5, 8.7, 9.1, 10.1, 10.8, 13.6, 14.4, 16.6, 20.2, 22.4, 23.5]
 @test isapprox(confint(ExactSignedRankTest(x))[1], 3.3, atol=1e-4)

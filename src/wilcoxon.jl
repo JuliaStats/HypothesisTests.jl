@@ -152,9 +152,9 @@ function pvalue(x::ExactSignedRankTest; tail=:both)
         if tail == :both
             min(1, 2 * minimum(signedrankenumerate(x)))
         elseif tail == :left
-            singedrankenumerate(x.W, x.ranks)[1]
+            first(signedrankenumerate(x))
         elseif tail == :right
-            signedrankenumerate(x.W, x.ranks)[2]
+            last(signedrankenumerate(x))
         end
     end
 end
