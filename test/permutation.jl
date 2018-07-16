@@ -1,4 +1,4 @@
-using HypothesisTests, Base.Test
+using HypothesisTests, Compat.Test
 
 @testset "Permutation" begin
 @test isapprox(pvalue(ExactPermutationTest([1,2,3],[4,5,6],mean), tail=:both), 1.0)

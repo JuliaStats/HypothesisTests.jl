@@ -26,6 +26,7 @@ __precompile__()
 
 module HypothesisTests
 
+using Compat.Random, Compat.LinearAlgebra
 using Distributions, Roots, StatsBase, Compat
 using Combinatorics: combinations, permutations
 using Rmath: pwilcox, psignrank
@@ -111,7 +112,7 @@ function Base.show(io::IO, test::T) where T<:HypothesisTest
     println(io, "    value under h_0:         $param_under_h0")
     println(io, "    point estimate:          $param_estimate")
     if has_ci
-        ci = map(x -> round.(x, 4), StatsBase.confint(test))
+        ci = map(x -> Compat.round.(x, digits=4, base=10), StatsBase.confint(test))
         println(io, "    95% confidence interval: $ci")
     end
     println(io)

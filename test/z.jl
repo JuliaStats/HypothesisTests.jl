@@ -1,4 +1,4 @@
-using HypothesisTests, Base.Test
+using HypothesisTests, Compat.Test
 using Distributions
 using HypothesisTests: default_tail
 

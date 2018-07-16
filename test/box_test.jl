@@ -1,4 +1,4 @@
-using HypothesisTests, Base.Test
+using HypothesisTests, Compat.Test
 using HypothesisTests: default_tail
 
 @testset "Box-Pierce and Ljung-Box" begin

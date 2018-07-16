@@ -97,17 +97,17 @@ end
 
 # Bootstrap
 function ci_bootstrap(x::PowerDivergenceTest,alpha::Float64, iters::Int64)
-    m = mapslices(x -> quantile(x, [alpha / 2, 1 - alpha / 2]), rand(Multinomial(x.n, convert(Vector{Float64}, x.thetahat)),iters) / x.n, 2)
+    m = Compat.mapslices(x -> quantile(x, [alpha / 2, 1 - alpha / 2]), rand(Multinomial(x.n, convert(Vector{Float64}, x.thetahat)),iters) / x.n, dims=2)
     Tuple{Float64,Float64}[(boundproportion(m[i,1]), boundproportion(m[i,2])) for i in 1:length(x.thetahat)]
 end
 
 # Quesenberry, Hurst (1964)
-function ci_quesenberry_hurst(x::PowerDivergenceTest,alpha::Float64; GC::Bool=true)
+function ci_quesenberry_hurst(x::PowerDivergenceTest, alpha::Float64; GC::Bool=true)
     m  = length(x.thetahat)
     cv = GC ? quantile(Chisq(1), 1 - alpha / m) : quantile(Chisq(m - 1), 1 - alpha)
 
-    u = (cv + 2*x.observed + sqrt.(cv * (cv + 4 * x.observed .* (x.n - x.observed) / x.n))) / (2*(x.n + cv))
-    l = (cv + 2*x.observed - sqrt.(cv * (cv + 4 * x.observed .* (x.n - x.observed) / x.n))) / (2*(x.n + cv))
+    u = (cv .+ 2 .* x.observed .+ sqrt.(cv .* (cv .+ 4 .* x.observed .* (x.n .- x.observed) ./ x.n))) ./ (2 .* (x.n .+ cv))
+    l = (cv .+ 2 .* x.observed .- sqrt.(cv .* (cv .+ 4 .* x.observed .* (x.n .- x.observed) ./ x.n))) ./ (2 .* (x.n .+ cv))
     Tuple{Float64,Float64}[(boundproportion(l[j]), boundproportion(u[j])) for j in 1:m]
 end
 
@@ -128,20 +128,20 @@ end
 function ci_sison_glaz(x::PowerDivergenceTest, alpha::Float64; skew_correct::Bool=true)
     k = length(x.thetahat)
     probn = inv(pdf(Poisson(x.n), x.n))
-    
+
     c = 0
     p = 0.0
     p_old = 0.0
     m1, m2, m3, m4, m5 = zeros(k), zeros(k), zeros(k), zeros(k), zeros(k)
     mu = zeros(4)
 
-    for c in 1:x.n
+    for _c in 1:x.n
         #run truncpoi
         for i in 1:k
             lambda = x.observed[i]
             #run moments
-            a = lambda + c
-            b = max(lambda - c, 0)
+            a = lambda + _c
+            b = max(lambda - _c, 0)
             poislama = cdf(Poisson(lambda), a)
             poislamb = cdf(Poisson(lambda), b - 1)
             den = b > 0.0 ? poislama-poislamb : poislama
@@ -149,7 +149,7 @@ function ci_sison_glaz(x::PowerDivergenceTest, alpha::Float64; skew_correct::Boo
             for r in 1:4
                 plar = cdf(Poisson(lambda), a - r)
                 plbr = cdf(Poisson(lambda), b - r - 1)
-                
+
                 poisA = ifelse( (a - r) >= 0, poislama - plar, poislama)
                 poisB = 0.0
                 if  (b - r - 1) >= 0
@@ -185,7 +185,12 @@ function ci_sison_glaz(x::PowerDivergenceTest, alpha::Float64; skew_correct::Boo
         p = probn * probx * f / sqrt(s2)
         # end of truncpoi
 
-        p > 1 - alpha && p_old < 1 - alpha && break
+        if p > 1 - alpha && p_old < 1 - alpha
+            c = _c
+            break
+        else
+            c = x.n
+        end
         p_old = p
     end
 
@@ -280,8 +285,8 @@ function PowerDivergenceTest(x::AbstractMatrix{T}; lambda::U=1.0, theta0::Vector
     (!isfinite(nrows) || !isfinite(ncols) || !isfinite(nrows*ncols)) && throw(ArgumentError("invalid number of rows or columns"))
 
     if nrows > 1 && ncols > 1
-        rowsums = sum(x, 2)
-        colsums = sum(x, 1)
+        rowsums = Compat.sum(x, dims=2)
+        colsums = Compat.sum(x, dims=1)
         df = (nrows - 1) * (ncols - 1)
         thetahat = x ./ n
         xhat = rowsums * colsums / n
@@ -291,7 +296,7 @@ function PowerDivergenceTest(x::AbstractMatrix{T}; lambda::U=1.0, theta0::Vector
         df = length(x) - 1
         xhat = reshape(n * theta0, size(x))
         thetahat = x / n
-        V = reshape(n * theta0 .* (1 - theta0), size(x))
+        V = reshape(n .* theta0 .* (1 .- theta0), size(x))
 
         abs(1 - sum(theta0)) <= sqrt(eps()) || throw(ArgumentError("Probabilities must sum to one"))
     else

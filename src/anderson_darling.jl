@@ -244,7 +244,7 @@ function pvalueasym(x::KSampleADTest)
     fitlin = (Tk < Tm[1] || Tk > Tm[end])
 
     # locate curve area for extrapolation
-    _, j = findmin(abs(tm - Tk) for tm in Tm[2:end-1])
+    _, j = findmin([abs(tm - Tk) for tm in Tm[2:end-1]])
     A = [ Tm[i]^p for i = j:j+2, p = 0:(fitlin ? 1 : 2) ] # fit p-values
     C = A \ logP[j:j+2]
     lp0 = C[1] + C[2]*Tk + (fitlin ? 0.0 : C[3]*Tk^2)
@@ -264,7 +264,7 @@ function adkvals(Z⁺, N, samples)
             fij[i, searchsortedfirst(Z⁺, s)] += 1
         end
     end
-    ljs = sum(fij, 1)
+    ljs = Compat.sum(fij, dims=1)
 
     A²k = A²km = 0.
     for i in 1:k
@@ -305,8 +305,8 @@ function a2_ksample(samples, modified, method)
 
     A²k, A²km = adkvals(Z⁺, N, samples)
 
-    H = sum(map(i->1./i, n))
-    h = sum(1./(1:N-1))
+    H = sum(map(i->1 ./ i, n))
+    h = sum(1 ./ (1:N-1))
     g = 0.
     for i in 1:N-2
         for j in i+1:N-1

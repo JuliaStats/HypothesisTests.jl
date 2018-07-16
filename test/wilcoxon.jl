@@ -1,4 +1,4 @@
-using HypothesisTests, Base.Test
+using HypothesisTests, Compat.Test
 using HypothesisTests: default_tail
 
 @testset "Wilcoxon" begin
@@ -47,16 +47,16 @@ end
 
 @testset "One Sample tests" begin
 	# P-value computed using R wilcox.test
-	@test abs(pvalue(SignedRankTest([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15] - 10.1)) - 0.09460449) <= 1e-4
+	@test abs(pvalue(SignedRankTest([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15] .- 10.1)) - 0.09460449) <= 1e-4
 	# P-value computed using R wilcox.test
-	@test abs(pvalue(SignedRankTest([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16] - 10.1)) - 0.1928101) <= 1e-4
+	@test abs(pvalue(SignedRankTest([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16] .- 10.1)) - 0.1928101) <= 1e-4
 end
 
 @testset "One Sample tests with ties" begin
 	# P-value computed using R package exactRankTests wilcox.exact
-	@test abs(pvalue(SignedRankTest([1,2,3,4,5,6,7,10,10,10,10,10,13,14,15] - 10.1)) - 0.04052734) <= 1e-4
+	@test abs(pvalue(SignedRankTest([1,2,3,4,5,6,7,10,10,10,10,10,13,14,15] .- 10.1)) - 0.04052734) <= 1e-4
 	# P-value computed using R wilcox.test
-	@test abs(pvalue(SignedRankTest([1,2,3,4,5,6,7,10,10,10,10,10,13,14,15,16] - 10.1)) - 0.1021964) <= 1e-4
+	@test abs(pvalue(SignedRankTest([1,2,3,4,5,6,7,10,10,10,10,10,13,14,15,16] .- 10.1)) - 0.1021964) <= 1e-4
 end
 
 @testset "Issue 128" begin
