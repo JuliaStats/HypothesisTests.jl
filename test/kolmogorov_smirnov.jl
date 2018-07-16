@@ -1,5 +1,6 @@
 using HypothesisTests, Distributions, Base.Test
 
+@testset "Kolmogorov-Smirnov" begin
 # sample drawn from uniform distribution
 x = [0.3500, 0.1966, 0.2511, 0.6160, 0.4733,
      0.3517, 0.8308, 0.5853, 0.5497, 0.9172,
@@ -80,3 +81,4 @@ t = ExactOneSampleKSTest(x, Uniform())
 @test pvalue(t) ≈ 0.4351284228580825
 @test pvalue(t; tail=:left) ≈ 0.3013310572470338
 @test pvalue(t; tail=:right) ≈ 0.2193143479950862
+end

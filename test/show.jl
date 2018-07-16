@@ -1,5 +1,6 @@
 using HypothesisTests, Base.Test
 
+@testset "Show" begin
 # based on power_divergence.jl tests
 d = [[762,484] [327,239] [468,477]]
 m = PowerDivergenceTest(d)
@@ -74,3 +75,5 @@ tst = OneSampleTTest(-5:10)
         degrees of freedom:       15
         empirical standard error: 1.1902380714238083
     """
+
+end
