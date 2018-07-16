@@ -205,7 +205,8 @@ function pvalueasym(x::KSampleADTest)
     #
     # Next, the quadratic polynomial is used to fit the log((1-p)/p) to above
     # interpolated quantiles and the value fitted to the estimated standardized
-    # AD statistics Tₘ.
+    # AD statistics Tₘ. If p-value outside of [.00001, .99999] range then
+    # linear extrapolation is used.
     #
     # The p-values from Table 1 of the original paper were reproduced with
     # relative error bounded bounded by 1% in 85% of cases (see the relative
@@ -239,11 +240,14 @@ function pvalueasym(x::KSampleADTest)
     end
     logP =  log.((1 .- PV) ./ PV )
 
+    # perform linear extrapolation with p-value outside of [.00001, .99999]
+    fitlin = (Tk < Tm[1] || Tk > Tm[end])
+
     # locate curve area for extrapolation
-    _, j = findmin(abs(tm - Tk) for tm in Tm)
-    A = [ Tm[i]^p for i = j-1:j+1, p = 0:2 ] # fit in quadratic
-    C = A \ logP[j-1:j+1]
-    lp0 = C[1] + C[2]*Tk + C[3]*Tk^2
+    _, j = findmin(abs(tm - Tk) for tm in Tm[2:end-1])
+    A = [ Tm[i]^p for i = j:j+2, p = 0:(fitlin ? 1 : 2) ] # fit p-values
+    C = A \ logP[j:j+2]
+    lp0 = C[1] + C[2]*Tk + (fitlin ? 0.0 : C[3]*Tk^2)
     return exp(lp0)/(1 + exp(lp0))
 end
 
