@@ -1,6 +1,7 @@
 using HypothesisTests, Base.Test
 using HypothesisTests: default_tail
 
+@testset "Kruskal-Wallis" begin
 # www.uni-siegen.de/phil/sozialwissenschaften/soziologie/mitarbeiter/ludwig-mayerhofer/statistik/statistik_downloads/statistik_ii_7.pdf
 u5 = [620, 5350, 7220]
 u250 = [3580, 4180, 5690]
@@ -44,3 +45,4 @@ t = KruskalWallisTest(t1, t2, t3)
 @test t.tie_adjustment ≈ 0.9916666666666667
 @test pvalue(t) ≈ 0.3607363776845705
 show(IOBuffer(), t)
+end

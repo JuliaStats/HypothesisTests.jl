@@ -1,5 +1,6 @@
 using HypothesisTests, Base.Test
 
+@testset "Augmented Dickey-Fuller" begin
 sim_data_h0 = [
     0.3823959677906078, -0.2152385089376233, -0.22568375357499895, -1.064710607963763,
     -0.7535992694654291, 1.5414885543718815, -0.7255977944286491, -0.19563221826190302,
@@ -29,49 +30,57 @@ sim_data_h0 = [
     -5.205900331311935
 ]
 
-t = ADFTest(sim_data_h0, :none, 0)
+@testset "No deterministic term" begin
+    t = ADFTest(sim_data_h0, :none, 0)
 
-@test t.n == 100
-@test t.deterministic == :none
-@test t.lag == 0
-@test t.stat ≈ -0.6050597112208628
-@test t.coef ≈ -0.009972855420884913
-@test t.cv ≈ [ -2.5882321870404863, -1.9439589708250309, -1.614431731329 ]
-@test pvalue(t) ≈ 0.4525095990064268
-show(IOBuffer(), t)
+    @test t.n == 100
+    @test t.deterministic == :none
+    @test t.lag == 0
+    @test t.stat ≈ -0.6050597112208628
+    @test t.coef ≈ -0.009972855420884913
+    @test t.cv ≈ [ -2.5882321870404863, -1.9439589708250309, -1.614431731329 ]
+    @test pvalue(t) ≈ 0.4525095990064268
+    show(IOBuffer(), t)
+end
 
-t = ADFTest(sim_data_h0, :constant, 4)
+@testset "Constant term" begin
+    t = ADFTest(sim_data_h0, :constant, 4)
 
-@test t.n == 96
-@test t.deterministic == :constant
-@test t.lag == 4
-@test t.stat ≈ -1.3432252172180439
-@test t.coef ≈ -0.034891024784937275
-@test t.cv ≈ [ -3.49681816639021, -2.8906107514600103, -2.5822770483285953 ]
-@test pvalue(t) ≈ 0.6091721848538273
-show(IOBuffer(), t)
+    @test t.n == 96
+    @test t.deterministic == :constant
+    @test t.lag == 4
+    @test t.stat ≈ -1.3432252172180439
+    @test t.coef ≈ -0.034891024784937275
+    @test t.cv ≈ [ -3.49681816639021, -2.8906107514600103, -2.5822770483285953 ]
+    @test pvalue(t) ≈ 0.6091721848538273
+    show(IOBuffer(), t)
+end
 
-t = ADFTest(sim_data_h0, :trend, 1)
+@testset "Linear trend term" begin
+    t = ADFTest(sim_data_h0, :trend, 1)
 
-@test t.n == 99
-@test t.deterministic == :trend
-@test t.lag == 1
-@test t.stat ≈ -1.643937136091079
-@test t.coef ≈ -0.06200340824254233
-@test t.cv ≈ [ -4.051321648595895, -3.4548891419983088, -3.1530564880069027 ]
-@test pvalue(t) ≈ 0.7747580288456625
-show(IOBuffer(), t)
+    @test t.n == 99
+    @test t.deterministic == :trend
+    @test t.lag == 1
+    @test t.stat ≈ -1.643937136091079
+    @test t.coef ≈ -0.06200340824254233
+    @test t.cv ≈ [ -4.051321648595895, -3.4548891419983088, -3.1530564880069027 ]
+    @test pvalue(t) ≈ 0.7747580288456625
+    show(IOBuffer(), t)
+end
 
-t = ADFTest(sim_data_h0, :squared_trend, 10)
+@testset "Quadratic trend term" begin
+    t = ADFTest(sim_data_h0, :squared_trend, 10)
 
-@test t.n == 90
-@test t.deterministic == :squared_trend
-@test t.lag == 10
-@test t.stat ≈ -2.0185041960365777
-@test t.coef ≈ -0.11370011315231617
-@test t.cv ≈ [ -4.489700198611862, -3.8922014722784897, -3.5900742238045 ]
-@test pvalue(t) ≈ 0.8095687207005545
-show(IOBuffer(), t)
+    @test t.n == 90
+    @test t.deterministic == :squared_trend
+    @test t.lag == 10
+    @test t.stat ≈ -2.0185041960365777
+    @test t.coef ≈ -0.11370011315231617
+    @test t.cv ≈ [ -4.489700198611862, -3.8922014722784897, -3.5900742238045 ]
+    @test pvalue(t) ≈ 0.8095687207005545
+    show(IOBuffer(), t)
+end
 
 sim_data_h1 = [
     0.3823959677906078, -0.4064364928329272, -0.21366349105383925, -0.9458585999156837,
@@ -102,46 +111,55 @@ sim_data_h1 = [
     -0.3850795292384054
 ]
 
-t = ADFTest(sim_data_h1, :none, 2)
+@testset "No deterministic term" begin
+    t = ADFTest(sim_data_h1, :none, 2)
 
-@test t.n == 98
-@test t.deterministic == :none
-@test t.lag == 2
-@test t.stat ≈ -4.856134193950414
-@test t.coef ≈ -0.5258695197499671
-@test t.cv ≈ [ -2.5882321870404863, -1.9439589708250309, -1.614431731329 ]
-@test pvalue(t) ≈ 2.011399607967822e-6
-show(IOBuffer(), t)
+    @test t.n == 98
+    @test t.deterministic == :none
+    @test t.lag == 2
+    @test t.stat ≈ -4.856134193950414
+    @test t.coef ≈ -0.5258695197499671
+    @test t.cv ≈ [ -2.5882321870404863, -1.9439589708250309, -1.614431731329 ]
+    @test pvalue(t) ≈ 2.011399607967822e-6
+    show(IOBuffer(), t)
+end
 
-t = ADFTest(sim_data_h1, :constant, 0)
+@testset "Constant term" begin
+    t = ADFTest(sim_data_h1, :constant, 0)
 
-@test t.n == 100
-@test t.deterministic == :constant
-@test t.lag == 0
-@test t.stat ≈ -5.371126891727986
-@test t.coef ≈ -0.45433645147215723
-@test t.cv ≈ [ -3.49681816639021, -2.8906107514600103, -2.5822770483285953 ]
-@test pvalue(t) ≈ 3.8937264616617045e-6
-show(IOBuffer(), t)
+    @test t.n == 100
+    @test t.deterministic == :constant
+    @test t.lag == 0
+    @test t.stat ≈ -5.371126891727986
+    @test t.coef ≈ -0.45433645147215723
+    @test t.cv ≈ [ -3.49681816639021, -2.8906107514600103, -2.5822770483285953 ]
+    @test pvalue(t) ≈ 3.8937264616617045e-6
+    show(IOBuffer(), t)
+end
 
-t = ADFTest(sim_data_h1, :trend, 7)
+@testset "Linear trend term" begin
+    t = ADFTest(sim_data_h1, :trend, 7)
 
-@test t.n == 93
-@test t.deterministic == :trend
-@test t.lag == 7
-@test t.stat ≈ -2.636305455046
-@test t.coef ≈ -0.4407260538688699
-@test t.cv ≈ [ -4.051321648595895, -3.4548891419983088, -3.1530564880069027 ]
-@test pvalue(t) ≈ 0.2634673926249714
-show(IOBuffer(), t)
+    @test t.n == 93
+    @test t.deterministic == :trend
+    @test t.lag == 7
+    @test t.stat ≈ -2.636305455046
+    @test t.coef ≈ -0.4407260538688699
+    @test t.cv ≈ [ -4.051321648595895, -3.4548891419983088, -3.1530564880069027 ]
+    @test pvalue(t) ≈ 0.2634673926249714
+    show(IOBuffer(), t)
+end
 
-t = ADFTest(sim_data_h1, :squared_trend, 4)
+@testset "Quadratic trend term" begin
+    t = ADFTest(sim_data_h1, :squared_trend, 4)
 
-@test t.n == 96
-@test t.deterministic == :squared_trend
-@test t.lag == 4
-@test t.stat ≈ -4.300112549464304
-@test t.coef ≈ -0.6759438045021552
-@test t.cv ≈ [ -4.489700198611862, -3.8922014722784897, -3.5900742238045 ]
-@test pvalue(t) ≈ 0.012662962461719612
-show(IOBuffer(), t)
+    @test t.n == 96
+    @test t.deterministic == :squared_trend
+    @test t.lag == 4
+    @test t.stat ≈ -4.300112549464304
+    @test t.coef ≈ -0.6759438045021552
+    @test t.cv ≈ [ -4.489700198611862, -3.8922014722784897, -3.5900742238045 ]
+    @test pvalue(t) ≈ 0.012662962461719612
+    show(IOBuffer(), t)
+end
+end

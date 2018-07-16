@@ -1,6 +1,7 @@
 using HypothesisTests, Base.Test
 using HypothesisTests: default_tail
 
+@testset "Breusch-Godfrey" begin
 # data simulated under H_1
 data_h1 = [
     -2.1844072302156263 1 -0.02187576598418861 1.4250842322231618 -2.0224314101114222
@@ -269,3 +270,4 @@ t = BreuschGodfreyTest(data_h0[:,3:end],res_vec,10)
 @test t.BG ≈ 11.156984521656943
 @test pvalue(t) ≈ 0.3454190353708124
 show(IOBuffer(), t)
+end

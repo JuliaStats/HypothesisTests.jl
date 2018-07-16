@@ -1,6 +1,7 @@
 using HypothesisTests, Base.Test
 using HypothesisTests: default_tail
 
+@testset "Jarque-Bera" begin
 sim_data_h0 = 1.0 .+ [
     0.2972879845354616, 0.3823959677906078, -0.5976344767282311, -0.01044524463737564,
     -0.839026854388764, 0.31111133849833383, 2.2950878238373105, -2.2670863488005306,
@@ -56,3 +57,4 @@ t = JarqueBeraTest(sim_data_h1)
 @test pvalue(t) ≈ 0.00020338498134114293
 @test default_tail(t) == :right
 show(IOBuffer(), t)
+end

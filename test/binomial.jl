@@ -1,6 +1,7 @@
 using HypothesisTests, Base.Test
 using HypothesisTests: default_tail
 
+@testset "Binomial" begin
 t = BinomialTest(26, 78)
 @test pvalue(t) ≈ 0.004334880883507431
 @test pvalue(t, tail=:left) ≈ 0.002167440441753716
@@ -82,3 +83,4 @@ x = [-4.7, 3.7, 22.4, 13.6, 8.7, 9.1, -7.8, 10.8, 15.6, 23.5, 14.4, 20.2, 6.5, 1
 @test_ci_approx confint(SignTest(x), 1-0.7) (8.7, 13.6)
 @test_ci_approx confint(SignTest(x), 1-0.6) (9.1, 10.8)
 show(IOBuffer(), SignTest(x))
+end

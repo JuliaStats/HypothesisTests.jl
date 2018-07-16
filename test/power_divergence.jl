@@ -2,6 +2,7 @@ using HypothesisTests, Base.Test
 using StatsBase
 using HypothesisTests: default_tail
 
+@testset "Power Divergence" begin
 #Example 1 in R
 #Agresti (2007) p. 39
 
@@ -179,3 +180,4 @@ MultinomialLRT(x,y,(1:3,1:3))
 d = [113997 1031298
      334453 37471]
 PowerDivergenceTest(d)
+end

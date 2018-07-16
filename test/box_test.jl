@@ -1,6 +1,7 @@
 using HypothesisTests, Base.Test
 using HypothesisTests: default_tail
 
+@testset "Box-Pierce and Ljung-Box" begin
 sim_data_h0=[
     0.297287984535462;0.382395967790608;-0.597634476728231;-0.0104452446373756;
     -0.839026854388764;0.311111338498334;2.29508782383731;-2.26708634880053;
@@ -29,25 +30,29 @@ sim_data_h0=[
     0.156194494887636;-0.814315294376699
     ]
 
-t = HypothesisTests.BoxPierceTest(sim_data_h0,2,1)
+@testset "Box-Pierce" begin
+    t = HypothesisTests.BoxPierceTest(sim_data_h0,2,1)
 
-@test t.n == 98
-@test t.lag == 2
-@test t.dof == 1
-@test t.Q ≈ 1.233942980734545
-@test pvalue(t) ≈ 0.2666415904008932
-@test default_tail(t) == :right
-show(IOBuffer(), t)
+    @test t.n == 98
+    @test t.lag == 2
+    @test t.dof == 1
+    @test t.Q ≈ 1.233942980734545
+    @test pvalue(t) ≈ 0.2666415904008932
+    @test default_tail(t) == :right
+    show(IOBuffer(), t)
+end
 
-t = HypothesisTests.LjungBoxTest(sim_data_h0,5,2)
+@testset "Ljung-Box" begin
+    t = HypothesisTests.LjungBoxTest(sim_data_h0,5,2)
 
-@test t.n == 98
-@test t.lag == 5
-@test t.dof == 2
-@test t.Q ≈ 3.2090126519163626
-@test pvalue(t) ≈ 0.36050846449240337
-@test default_tail(t) == :right
-show(IOBuffer(), t)
+    @test t.n == 98
+    @test t.lag == 5
+    @test t.dof == 2
+    @test t.Q ≈ 3.2090126519163626
+    @test pvalue(t) ≈ 0.36050846449240337
+    @test default_tail(t) == :right
+    show(IOBuffer(), t)
+end
 
 sim_data_h1 = [
     0.297287984535462;0.739141549233162;0.200148986990924;0.00799107498178517;
@@ -77,20 +82,25 @@ sim_data_h1 = [
     4.42876751091166;3.04538591485831
     ]
 
-t = HypothesisTests.BoxPierceTest(sim_data_h1,3)
+@testset "Box-Pierce" begin
+    t = HypothesisTests.BoxPierceTest(sim_data_h1,3)
 
-@test t.n == 98
-@test t.lag == 3
-@test t.dof == 0
-@test t.Q ≈ 176.16899390632153
-@test pvalue(t) ≈ 5.925682677971866e-38
-show(IOBuffer(), t)
+    @test t.n == 98
+    @test t.lag == 3
+    @test t.dof == 0
+    @test t.Q ≈ 176.16899390632153
+    @test pvalue(t) ≈ 5.925682677971866e-38
+    show(IOBuffer(), t)
+end
 
-t = HypothesisTests.LjungBoxTest(sim_data_h1,12)
+@testset "Ljung-Box" begin
+    t = HypothesisTests.LjungBoxTest(sim_data_h1,12)
 
-@test t.n == 98
-@test t.lag == 12
-@test t.dof == 0
-@test t.Q ≈ 271.8894095341075
-@test pvalue(t) ≈ 3.6622231247462687e-51
-show(IOBuffer(), t)
+    @test t.n == 98
+    @test t.lag == 12
+    @test t.dof == 0
+    @test t.Q ≈ 271.8894095341075
+    @test pvalue(t) ≈ 3.6622231247462687e-51
+    show(IOBuffer(), t)
+end
+end

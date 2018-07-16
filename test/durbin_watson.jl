@@ -1,6 +1,7 @@
 using HypothesisTests, Base.Test
 using HypothesisTests: default_tail
 
+@testset "Durbin-Watson" begin
 x_sim = [
     0.2972879845354616, 0.3823959677906078, -0.5976344767282311, -0.01044524463737564,
     -0.839026854388764, 0.31111133849833383, 2.2950878238373105, -2.2670863488005306,
@@ -215,3 +216,4 @@ t1 = DurbinWatsonTest(X, size(X,1), 4.00, :exact)
 @test pvalue(t1, tail = :left) == 0.00
 @test pvalue(t1, tail = :right) == 1.00
 show(IOBuffer(), t1)
+end
