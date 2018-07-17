@@ -22,6 +22,10 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+if VERSION < v"0.7.0-DEV.4591"
+    tr(A::AbstractMatrix) = trace(A)
+end
+
 export DurbinWatsonTest
 
 struct DurbinWatsonTest <: HypothesisTest
@@ -115,7 +119,7 @@ elements in `a`, and `n` the number of approximation terms (see Farebrother, 198
 function pan_algorithm(a::AbstractArray, x::Float64, m::Int, n::Int)
 
     ν = findfirst(ai -> ai >= x, a)
-    if ν == 0
+    if ν == 0 || ν === nothing
         return 1.0
     elseif ν == 1
         return 0.0
@@ -184,16 +188,16 @@ function pvalue(x::DurbinWatsonTest; tail=:both)
         # p-vales based on Pan's algorithm (see Farebrother, 1980)
 
         # the following setup is, e.g, described in Durbin and Watson (1971)
-        A = diagm(-ones(x.n - 1), -1) + diagm(-ones(x.n - 1), 1) +diagm(2 * ones(x.n), 0)
+        A = diagm(-1 => -ones(x.n - 1), 0 => 2 * ones(x.n), 1 => -ones(x.n - 1))
         A[1, 1] = 1
         A[x.n, x.n] = 1
-        EV_temp = sort(real(eig((I - (x.xmat / (x.xmat' * x.xmat) * x.xmat')) *A)[1]))
+        EV_temp = sort(real(eigvals(A - x.xmat / (x.xmat' * x.xmat) * (x.xmat'*A))))
         EV = EV_temp[EV_temp .> 1e-10]
         p_temp = pan_algorithm(EV, x.DW, length(EV), 15)
 
         if p_temp < 0.0 || p_temp > 1.0
             # println(p_temp)
-            warn("Exact p-values outside [0,1]. Approximate p-values reported instead.")
+            Compat.@warn("Exact p-values outside [0,1]. Approximate p-values reported instead.")
             exact_problem_flag = 1
         end
     end
@@ -205,7 +209,7 @@ function pvalue(x::DurbinWatsonTest; tail=:both)
         # the following derivations follow Durbin and Watson (1951, p. 164)
         X = x.xmat
         k = size(X, 2)
-        inv_XX = (X' * X) \ eye(k)
+        inv_XX = inv(X' * X)
 
         AX = zeros(x.n, k)
         AX[[1, x.n], :] = X[[1, x.n], :] - X[[2, x.n - 1], :]
@@ -214,9 +218,9 @@ function pvalue(x::DurbinWatsonTest; tail=:both)
         end
 
         temp_mat = X' * AX * inv_XX
-        P = 2 * (x.n - 1) - trace(temp_mat) # first term: trace(A)
-        Q = 2 * (3 * x.n - 4) - 2 * trace(AX' * AX * inv_XX) + trace(temp_mat^2)
-        # first term: trace(A^2)
+        P = 2 * (x.n - 1) - tr(temp_mat) # first term: tr(A)
+        Q = 2 * (3 * x.n - 4) - 2 * tr(AX' * AX * inv_XX) + tr(temp_mat^2)
+        # first term: tr(A^2)
 
         dw_mean = P / (x.n - k)
         dw_var = 2 / ((x.n - k) * (x.n - k + 2)) * (Q - P * dw_mean)

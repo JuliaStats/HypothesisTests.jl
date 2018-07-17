@@ -70,7 +70,7 @@ Implements: [`pvalue`](@ref)
 function KruskalWallisTest(groups::AbstractVector{T}...) where T<:Real
     (H, R_i, tieadj, n_i) = kwstats(groups...)
     if length(groups)<=3 && any(n_i .< 6)
-        warn("This test is only asymptotically correct and might be inaccurate for the given group size")
+        Compat.@warn("This test is only asymptotically correct and might be inaccurate for the given group size")
     end
     df = length(groups) - 1
     KruskalWallisTest(n_i, df, R_i, H, tieadj)
@@ -103,15 +103,15 @@ function kwstats(groups::AbstractVector{T}...) where T<:Real
     C = 1-tieadj/(n^3 - n)
 
     # compute rank sums
-    R_i = Vector{Float64}(length(groups))
+    R_i = Vector{Float64}(undef, length(groups))
     n_end = 0
-    for i=1:length(groups)
+    for i in 1:length(groups)
         R_i[i] = sum(ranks[n_end+1:n_end+n_i[i]])
         n_end += n_i[i]
     end
 
     # compute test statistic and correct for ties
-    H = 12 * sum(R_i.^2./n_i) / (n * (n + 1)) - 3 * (n + 1)
+    H = 12 * sum(R_i .^ 2 ./ n_i) / (n * (n + 1)) - 3 * (n + 1)
     H /= C
 
     (H, R_i, C, n_i)

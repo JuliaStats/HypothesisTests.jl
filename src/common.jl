@@ -56,4 +56,4 @@ function tiedrank_adj!(ord::AbstractVector, v::AbstractArray)
     (ord, tieadj)
 end
 
-tiedrank_adj(v::AbstractArray) = tiedrank_adj!(Vector{Float64}(length(v)), v)
+tiedrank_adj(v::AbstractArray) = tiedrank_adj!(Vector{Float64}(undef, length(v)), v)

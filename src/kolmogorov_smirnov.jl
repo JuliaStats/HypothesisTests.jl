@@ -38,7 +38,7 @@ default_tail(test::KSTest) = :both
 # compute supremum of differences between target and empirical cdf before and after the jump of the empirical cdf.
 function ksstats(x::AbstractVector{T}, d::UnivariateDistribution) where T<:Real
     n = length(x)
-    cdfs = cdf.(d, sort(x))
+    cdfs = cdf.(Ref(d), sort(x))
     δp = maximum((1:n) / n - cdfs)
     δn = -minimum((0:n-1) / n - cdfs)
     δ = max(δn, δp)
@@ -65,7 +65,7 @@ Implements: [`pvalue`](@ref)
 """
 function ExactOneSampleKSTest(x::AbstractVector{T}, d::UnivariateDistribution) where T<:Real
     if length(x) > length(unique(x))
-        warn("This test is inaccurate with ties")
+        Compat.@warn("This test is inaccurate with ties")
     end
 
     ExactOneSampleKSTest(ksstats(x, d)...)
@@ -109,7 +109,7 @@ Implements: [`pvalue`](@ref)
 """
 function ApproximateOneSampleKSTest(x::AbstractVector{T}, d::UnivariateDistribution) where T<:Real
     if length(x) > length(unique(x))
-        warn("This test is inaccurate with ties")
+        Compat.@warn("This test is inaccurate with ties")
     end
 
     ApproximateOneSampleKSTest(ksstats(x, d)...)
@@ -164,7 +164,7 @@ Implements: [`pvalue`](@ref)
 function ApproximateTwoSampleKSTest(x::AbstractVector{T}, y::AbstractVector{S}) where {T<:Real, S<:Real}
     n_x, n_y = length(x), length(y)
     if n_x+n_y > length(unique([x; y]))
-        warn("This test is inaccurate with ties")
+        Compat.@warn("This test is inaccurate with ties")
     end
 
     ApproximateTwoSampleKSTest(ksstats(x, y)...)

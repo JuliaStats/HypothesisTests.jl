@@ -1,5 +1,6 @@
-using HypothesisTests, Distributions, Base.Test
+using HypothesisTests, Distributions, Compat.Test
 using HypothesisTests: default_tail
+using Compat.Random
 
 @testset "Anderson-Darling" begin
 @testset "One sample test" begin
@@ -80,7 +81,7 @@ end
 	n = 1000
 	x = rand(Exponential(), n)
 	@test pvalue(KSampleADTest(rand(1000),randn(1000))) ≈ 0.0 atol=eps()
-	@test pvalue(KSampleADTest(x,x,x,x,x,x)) ≈ 1.0 atol=eps()
+	@test pvalue(KSampleADTest(x,x,x,x,x,x)) ≈ 1.0
 end
 
 end

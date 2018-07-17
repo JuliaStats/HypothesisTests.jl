@@ -72,10 +72,10 @@ struct FisherTLinearAssociation{S <: Real, T <: Real} <: HypothesisTest
     rho_t::Float64                              # circular correlation coefficient
     theta::Vector{S}                            # radians of group 1
     phi::Vector{T}                              # radians of group 2
-    uniformly_distributed::Union{Bool,Void}     # is distribution of theta and phi uniform?
+    uniformly_distributed::Union{Bool,Nothing}     # is distribution of theta and phi uniform?
 end
 function FisherTLinearAssociation(theta::Vector{Stheta},
-        phi::Vector{Sphi}, uniformly_distributed::Union{Bool,Void}) where {Stheta <: Real, Sphi <: Real}
+        phi::Vector{Sphi}, uniformly_distributed::Union{Bool,Nothing}) where {Stheta <: Real, Sphi <: Real}
     check_same_length(theta, phi)
 
     A = sum(cos.(theta).*cos.(phi))
