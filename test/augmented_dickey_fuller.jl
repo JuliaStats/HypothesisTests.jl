@@ -1,4 +1,4 @@
-using HypothesisTests, Compat.LinearAlgebra, Compat.Test
+using HypothesisTests, LinearAlgebra, Test
 
 @testset "Augmented Dickey-Fuller" begin
 sim_data_h0 = [

@@ -65,7 +65,7 @@ Implements: [`pvalue`](@ref)
 """
 function ExactOneSampleKSTest(x::AbstractVector{T}, d::UnivariateDistribution) where T<:Real
     if length(x) > length(unique(x))
-        Compat.@warn("This test is inaccurate with ties")
+        @warn("This test is inaccurate with ties")
     end
 
     ExactOneSampleKSTest(ksstats(x, d)...)
@@ -109,7 +109,7 @@ Implements: [`pvalue`](@ref)
 """
 function ApproximateOneSampleKSTest(x::AbstractVector{T}, d::UnivariateDistribution) where T<:Real
     if length(x) > length(unique(x))
-        Compat.@warn("This test is inaccurate with ties")
+        @warn("This test is inaccurate with ties")
     end
 
     ApproximateOneSampleKSTest(ksstats(x, d)...)
@@ -164,7 +164,7 @@ Implements: [`pvalue`](@ref)
 function ApproximateTwoSampleKSTest(x::AbstractVector{T}, y::AbstractVector{S}) where {T<:Real, S<:Real}
     n_x, n_y = length(x), length(y)
     if n_x+n_y > length(unique([x; y]))
-        Compat.@warn("This test is inaccurate with ties")
+        @warn("This test is inaccurate with ties")
     end
 
     ApproximateTwoSampleKSTest(ksstats(x, y)...)

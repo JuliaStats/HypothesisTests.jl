@@ -22,10 +22,6 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-if VERSION < v"0.7.0-DEV.4591"
-    tr(A::AbstractMatrix) = trace(A)
-end
-
 export DurbinWatsonTest
 
 struct DurbinWatsonTest <: HypothesisTest
@@ -197,7 +193,7 @@ function pvalue(x::DurbinWatsonTest; tail=:both)
 
         if p_temp < 0.0 || p_temp > 1.0
             # println(p_temp)
-            Compat.@warn("Exact p-values outside [0,1]. Approximate p-values reported instead.")
+            @warn("Exact p-values outside [0,1]. Approximate p-values reported instead.")
             exact_problem_flag = 1
         end
     end

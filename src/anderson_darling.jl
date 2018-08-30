@@ -264,7 +264,7 @@ function adkvals(Z⁺, N, samples)
             fij[i, searchsortedfirst(Z⁺, s)] += 1
         end
     end
-    ljs = Compat.sum(fij, dims=1)
+    ljs = sum(fij, dims=1)
 
     A²k = A²km = 0.
     for i in 1:k

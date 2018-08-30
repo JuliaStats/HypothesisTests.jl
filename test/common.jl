@@ -1,4 +1,4 @@
-using HypothesisTests, Compat.Test
+using HypothesisTests, Test
 
 mutable struct TestTest <: HypothesisTests.HypothesisTest end
 

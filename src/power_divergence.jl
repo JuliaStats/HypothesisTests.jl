@@ -97,7 +97,7 @@ end
 
 # Bootstrap
 function ci_bootstrap(x::PowerDivergenceTest,alpha::Float64, iters::Int64)
-    m = Compat.mapslices(x -> quantile(x, [alpha / 2, 1 - alpha / 2]), rand(Multinomial(x.n, convert(Vector{Float64}, x.thetahat)),iters) / x.n, dims=2)
+    m = mapslices(x -> quantile(x, [alpha / 2, 1 - alpha / 2]), rand(Multinomial(x.n, convert(Vector{Float64}, x.thetahat)),iters) / x.n, dims=2)
     Tuple{Float64,Float64}[(boundproportion(m[i,1]), boundproportion(m[i,2])) for i in 1:length(x.thetahat)]
 end
 
@@ -285,8 +285,8 @@ function PowerDivergenceTest(x::AbstractMatrix{T}; lambda::U=1.0, theta0::Vector
     (!isfinite(nrows) || !isfinite(ncols) || !isfinite(nrows*ncols)) && throw(ArgumentError("invalid number of rows or columns"))
 
     if nrows > 1 && ncols > 1
-        rowsums = Compat.sum(x, dims=2)
-        colsums = Compat.sum(x, dims=1)
+        rowsums = sum(x, dims=2)
+        colsums = sum(x, dims=1)
         df = (nrows - 1) * (ncols - 1)
         thetahat = x ./ n
         xhat = rowsums * colsums / n

@@ -70,7 +70,7 @@ Implements: [`pvalue`](@ref)
 function KruskalWallisTest(groups::AbstractVector{T}...) where T<:Real
     (H, R_i, tieadj, n_i) = kwstats(groups...)
     if length(groups)<=3 && any(n_i .< 6)
-        Compat.@warn("This test is only asymptotically correct and might be inaccurate for the given group size")
+        @warn("This test is only asymptotically correct and might be inaccurate for the given group size")
     end
     df = length(groups) - 1
     KruskalWallisTest(n_i, df, R_i, H, tieadj)
