@@ -1,4 +1,4 @@
-using HypothesisTests, Compat.Test
+using HypothesisTests, Test
 using HypothesisTests: default_tail
 
 @testset "Kruskal-Wallis" begin

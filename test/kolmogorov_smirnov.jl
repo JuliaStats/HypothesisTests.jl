@@ -1,4 +1,4 @@
-using HypothesisTests, Distributions, Compat.Test
+using HypothesisTests, Distributions, Test
 
 @testset "Kolmogorov-Smirnov" begin
 # sample drawn from uniform distribution

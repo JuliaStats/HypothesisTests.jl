@@ -1,13 +1,14 @@
-using Compat
+using Test, Random, Statistics
+
 # Confidence intervals should be tested component-wise against
 # expected results; splatting them into arrays and checking for
 # approximate array equality is incorrect when either limit is
 # infinite.
 macro test_ci_approx(x::Expr, y::Expr)
     return quote
-        Compat.Test.@test typeof($(esc(x))) <: Tuple{Real,Real}
-        Compat.Test.@test typeof($(esc(x))) == typeof($(esc(y)))
-        Compat.Test.@test all(map(isapprox, $(esc(x)), $(esc(y))))
+        Test.@test typeof($(esc(x))) <: Tuple{Real,Real}
+        Test.@test typeof($(esc(x))) == typeof($(esc(y)))
+        Test.@test all(map(isapprox, $(esc(x)), $(esc(y))))
     end
 end
 

@@ -1,4 +1,4 @@
-using HypothesisTests, Compat.Test
+using HypothesisTests, Test
 
 @testset "Show" begin
 # based on power_divergence.jl tests
