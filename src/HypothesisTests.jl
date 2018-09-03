@@ -143,7 +143,7 @@ population_param_of_interest(test::T) where {T<:HypothesisTest} = ("not implemen
 default_tail(test::HypothesisTest) = :undefined
 
 function show_params(io::IO, test::T, ident="") where T<:HypothesisTest
-    fieldidx = find(Bool[t<:Number for t in T.types])
+    fieldidx = findall(Bool[t<:Number for t in T.types])
     if !isempty(fieldidx)
         lengths = [length(string(T.names[i])) for i in fieldidx]
         maxlen = maximum(lengths)
