@@ -38,19 +38,6 @@ function OneSampleADTest(x::AbstractVector{T}, d::UnivariateDistribution) where 
     n = length(x)
     μ, σ = mean_and_std(x)
     y = sort(x)
-    if isa(d, Uniform)
-        m = y[1]
-        r = y[end]-m
-        broadcast!(x->(x-m)/r, y, y)
-        # to avoid -Inf when calculated logccdf(d, 1.0) or logcdf(d, 0.0) in the test.
-        y[1] += eps()
-        y[end] -= eps()
-    elseif isa(d, Exponential)
-        broadcast!(x->x/μ, y, y)
-    else
-        zscore!(y, μ, σ)
-    end
-
     OneSampleADTest(n, μ, σ, adstats(y, d))
 end
 
