@@ -6,36 +6,48 @@ using HypothesisTests: default_tail
     n = 1000
     Random.seed!(1984948)
 
-    x = rand(Normal(), n)
-    t = OneSampleADTest(x, Normal())
-    @test t.A² ≈ 0.2013 atol=0.1^4
-    @test pvalue(t) ≈ 0.99 atol=0.1^4
+    d = Normal(1000, 100)
+    x = rand(d, n)
+    t = OneSampleADTest(x, d)
+    @test t.A² ≈ 0.3078 atol=0.1^4
+    @test pvalue(t) ≈ 0.9321 atol=0.1^4
     @test default_tail(t) == :right
 
-    x = rand(DoubleExponential(), n)
-    t = OneSampleADTest(x, Normal())
-    @test t.A² ≈ 10.7439 atol=0.1^4
+    d = DoubleExponential()
+    x = rand(d, n)
+    t = OneSampleADTest(x, Normal(mean(d), std(d)))
+    @test t.A² ≈ 10.9678 atol=0.1^4
     @test pvalue(t) ≈ 0.0 atol=0.1^4
+    t = OneSampleADTest(x, d)
+    @test t.A² ≈ 0.21942 atol=0.1^4
+    @test pvalue(t) ≈ 0.9842 atol=0.1^4
 
+    d = Cauchy()
     x = rand(Cauchy(), n)
     t = OneSampleADTest(x, Normal())
     @test pvalue(t) ≈ 0.0 atol=0.1^4
+    t = OneSampleADTest(x, d)
+    @test pvalue(t) ≈ 0.4228 atol=0.1^4
 
-    x = rand(LogNormal(), n)
-    t = OneSampleADTest(x, Normal())
+    d = LogNormal()
+    x = rand(d, n)
+    t = OneSampleADTest(x, Normal(mean(d), std(d)))
     @test pvalue(t) ≈ 0.0 atol=0.1^4
+    t = OneSampleADTest(x, d)
+    @test pvalue(t) ≈ 0.1569 atol=0.1^4
 
-    x = rand(Uniform(), n)
-    t = OneSampleADTest(x, Uniform())
-    @test pvalue(t) ≈ 0.145 atol=0.1^4
+    d = Uniform(-pi, 2pi)
+    x = rand(d, n)
+    t = OneSampleADTest(x, d)
+    @test pvalue(t) ≈ 0.2046 atol=0.1^4
 
     x = rand(Uniform(0, 1.8), n)
     t = OneSampleADTest(x, Uniform())
-    @test pvalue(t) ≈ 0.5112 atol=0.1^4
+    @test pvalue(t) ≈ 0.0 atol=0.1^4
 
     x = rand(Exponential(), n)
     t = OneSampleADTest(x, Exponential())
-    @test pvalue(t) ≈ 0.9427 atol=0.1^4
+    @test pvalue(t) ≈ 0.9665 atol=0.1^4
 end
 
 @testset "k-sample test" begin
