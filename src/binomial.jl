@@ -130,7 +130,8 @@ end
 
 # Clopper-Pearson interval (confidence interval by inversion)
 function ci_clopper_pearson(x::BinomialTest, alpha::Float64=0.05)
-    (quantile(Beta(x.x, x.n - x.x + 1), alpha/2), quantile(Beta(x.x + 1, x.n - x.x), 1-alpha/2))
+    (x.x == 0 ? 0.0 : quantile(Beta(x.x, x.n - x.x + 1), alpha/2),
+     x.x == x.n ? 1.0 : quantile(Beta(x.x + 1, x.n - x.x), 1-alpha/2))
 end
 
 # Wald interval / normal approximation interval
