@@ -52,7 +52,7 @@ Base.size(SWc::SWCoeffs) = (SWc.N,)
 Base.IndexStyle(::Type{SWCoeffs}) = IndexLinear()
 
 function Base.getindex(SWc::SWCoeffs, i::Int)
-    if i <= endof(SWc.A)
+    if i <= lastindex(SWc.A)
         return SWc.A[i]
     elseif i <= length(SWc)
         if isodd(SWc.N) && i == div(SWc.N, 2) + 1
@@ -95,13 +95,14 @@ function SWCoeffs(N::Int)
     end
 end
 
-function swstat(X::AbstractArray{T}, A::SWCoeffs) where {T<:Real}
-    if X[end] - X[1] < endof(X) * eps(eltype(X))
+function swstat(X::AbstractArray{T}, A::SWCoeffs) where T<:Real
+
+    if X[end] - X[1] < lastindex(X)*eps(eltype(X))
         throw("Data seems to be constant!")
     end
 
     AX = dot(A,X)
-    S² = sum(abs2, X-mean(X))
+    S² = sum(abs2, X.-mean(X))
 
     return AX^2 / S²
 end
@@ -165,15 +166,15 @@ function ShapiroWilkTest(X::AbstractArray{T}, SWc::SWCoeffs=SWCoeffs(length(X)),
 
     #non-fatal errors
     if N > 5000
-        warn("p-value may be unreliable for samples larger than 5000 points")
+        @warn("p-value may be unreliable for samples larger than 5000 points")
     elseif (N1 < N) && (N < 20)
-        warn("Number of samples is < 20. Censoring may produce unreliable p-value.")
-    elseif (N - N1) / N > 0.8
-        warn("(N - N1)/N > 0.8. Censoring too much data may produce unreliable p-value.")
+        @warn("Number of samples is < 20. Censoring may produce unreliable p-value.")
+    elseif (N - N1)/N > 0.8
+        @warn("(N - N1)/N > 0.8. Censoring too much data may produce unreliable p-value.")
     end
 
     if !issorted(view(X, 1:N1))
-        warn("Shapiro-Wilk requires sorted data")
+        @warn("Shapiro-Wilk requires sorted data")
         W = swstat(sort(X[1:N1]), SWc)
     else
         W = swstat(view(X, 1:N1), SWc)
