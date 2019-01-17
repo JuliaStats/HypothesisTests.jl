@@ -68,7 +68,7 @@ one of the following methods. Possible values for `method` are:
     Mathematical Statistics, 30:56-74, 1963.
 """
 function StatsBase.confint(x::PowerDivergenceTest, alpha::Float64=0.05;
-                           tail::Symbol=:both, method::Symbol=:sison_glaz, correct::Bool=true,
+                           tail::Symbol=:both, method::Symbol=:auto, correct::Bool=true,
                            bootstrap_iters::Int64=10000, GC::Bool=true)
     check_alpha(alpha)
 
@@ -82,7 +82,7 @@ function StatsBase.confint(x::PowerDivergenceTest, alpha::Float64=0.05;
         Tuple{Float64,Float64}[(i[j][1], 1.0) for j in 1:m]
     elseif tail == :both
         if method == :auto
-            method = minimum(x.expected) > 100 ? :gold : :sison_glaz
+            method = minimum(x.expected) > 100 ? :quesenberry_hurst : :sison_glaz
         end
         if method == :gold
             ci_gold(x,alpha,correct=correct,GC=GC)
