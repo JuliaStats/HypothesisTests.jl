@@ -62,6 +62,14 @@ show(IOBuffer(), m)
 m = ChisqTest(d)
 m = MultinomialLRT(d)
 
+confint(m)
+confint(m, tail=:left)
+confint(m, tail=:right)
+
+confint(m, method = :auto)
+confint(m, method = :auto, tail=:left)
+confint(m, method = :auto, tail=:right)
+
 confint(m, method = :bootstrap)
 confint(m, method = :bootstrap, tail=:left)
 confint(m, method = :bootstrap, tail=:right)
@@ -82,7 +90,7 @@ confint(m, method = :sison_glaz, tail=:right)
 @test_throws ArgumentError confint(m, method=:FOO)
 @test_throws ArgumentError confint(m, tail=:fox)
 
-
+@test confint(m, method = :quesenberry_hurst) == confint(m, method = :auto) == confint(m)
 
 
 #Example 3 in R
@@ -138,6 +146,14 @@ show(IOBuffer(), m)
 m = ChisqTest(d)
 m = MultinomialLRT(d)
 
+confint(m)
+confint(m, tail=:left)
+confint(m, tail=:right)
+
+confint(m, method = :auto)
+confint(m, method = :auto, tail=:left)
+confint(m, method = :auto, tail=:right)
+
 confint(m, method = :bootstrap)
 confint(m, method = :bootstrap, tail=:left)
 confint(m, method = :bootstrap, tail=:right)
@@ -157,6 +173,8 @@ confint(m, method = :sison_glaz, tail=:right)
 
 @test_throws ArgumentError confint(m, method=:FOO)
 @test_throws ArgumentError confint(m, tail=:fox)
+
+@test confint(m, method = :sison_glaz) == confint(m, method = :auto) == confint(m)
 
 #
 x=[1,2,3,1,2,3]
