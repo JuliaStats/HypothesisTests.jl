@@ -1,7 +1,7 @@
 var documenterSearchIndex = {"docs": [
 
 {
-    "location": "index.html#",
+    "location": "#",
     "page": "HypothesisTests package",
     "title": "HypothesisTests package",
     "category": "page",
@@ -9,7 +9,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "index.html#HypothesisTests-package-1",
+    "location": "#HypothesisTests-package-1",
     "page": "HypothesisTests package",
     "title": "HypothesisTests package",
     "category": "section",
@@ -17,7 +17,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "methods.html#",
+    "location": "methods/#",
     "page": "Methods",
     "title": "Methods",
     "category": "page",
@@ -25,7 +25,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "methods.html#Methods-1",
+    "location": "methods/#Methods-1",
     "page": "Methods",
     "title": "Methods",
     "category": "section",
@@ -33,7 +33,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "methods.html#StatsBase.confint",
+    "location": "methods/#StatsBase.confint",
     "page": "Methods",
     "title": "StatsBase.confint",
     "category": "function",
@@ -41,7 +41,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "methods.html#StatsBase.confint-Tuple{BinomialTest}",
+    "location": "methods/#StatsBase.confint-Tuple{BinomialTest}",
     "page": "Methods",
     "title": "StatsBase.confint",
     "category": "method",
@@ -49,7 +49,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "methods.html#StatsBase.confint-Tuple{PowerDivergenceTest}",
+    "location": "methods/#StatsBase.confint-Tuple{PowerDivergenceTest}",
     "page": "Methods",
     "title": "StatsBase.confint",
     "category": "method",
@@ -57,7 +57,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "methods.html#StatsBase.confint-Tuple{FisherExactTest}",
+    "location": "methods/#StatsBase.confint-Tuple{FisherExactTest}",
     "page": "Methods",
     "title": "StatsBase.confint",
     "category": "method",
@@ -65,7 +65,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "methods.html#Confidence-interval-1",
+    "location": "methods/#Confidence-interval-1",
     "page": "Methods",
     "title": "Confidence interval",
     "category": "section",
@@ -73,7 +73,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "methods.html#HypothesisTests.pvalue",
+    "location": "methods/#HypothesisTests.pvalue",
     "page": "Methods",
     "title": "HypothesisTests.pvalue",
     "category": "function",
@@ -81,7 +81,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "methods.html#HypothesisTests.pvalue-Tuple{FisherExactTest}",
+    "location": "methods/#HypothesisTests.pvalue-Tuple{FisherExactTest}",
     "page": "Methods",
     "title": "HypothesisTests.pvalue",
     "category": "method",
@@ -89,7 +89,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "methods.html#p-value-1",
+    "location": "methods/#p-value-1",
     "page": "Methods",
     "title": "p-value",
     "category": "section",
@@ -97,7 +97,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "parametric.html#",
+    "location": "parametric/#",
     "page": "Parametric tests",
     "title": "Parametric tests",
     "category": "page",
@@ -105,7 +105,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "parametric.html#Parametric-tests-1",
+    "location": "parametric/#Parametric-tests-1",
     "page": "Parametric tests",
     "title": "Parametric tests",
     "category": "section",
@@ -113,7 +113,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "parametric.html#HypothesisTests.PowerDivergenceTest",
+    "location": "parametric/#HypothesisTests.PowerDivergenceTest",
     "page": "Parametric tests",
     "title": "HypothesisTests.PowerDivergenceTest",
     "category": "type",
@@ -121,7 +121,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "parametric.html#Power-divergence-test-1",
+    "location": "parametric/#Power-divergence-test-1",
     "page": "Parametric tests",
     "title": "Power divergence test",
     "category": "section",
@@ -129,7 +129,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "parametric.html#HypothesisTests.ChisqTest",
+    "location": "parametric/#HypothesisTests.ChisqTest",
     "page": "Parametric tests",
     "title": "HypothesisTests.ChisqTest",
     "category": "function",
@@ -137,7 +137,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "parametric.html#Pearson-chi-squared-test-1",
+    "location": "parametric/#Pearson-chi-squared-test-1",
     "page": "Parametric tests",
     "title": "Pearson chi-squared test",
     "category": "section",
@@ -145,7 +145,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "parametric.html#HypothesisTests.MultinomialLRT",
+    "location": "parametric/#HypothesisTests.MultinomialLRT",
     "page": "Parametric tests",
     "title": "HypothesisTests.MultinomialLRT",
     "category": "function",
@@ -153,7 +153,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "parametric.html#Multinomial-likelihood-ratio-test-1",
+    "location": "parametric/#Multinomial-likelihood-ratio-test-1",
     "page": "Parametric tests",
     "title": "Multinomial likelihood ratio test",
     "category": "section",
@@ -161,7 +161,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "parametric.html#HypothesisTests.OneSampleTTest",
+    "location": "parametric/#HypothesisTests.OneSampleTTest",
     "page": "Parametric tests",
     "title": "HypothesisTests.OneSampleTTest",
     "category": "type",
@@ -169,7 +169,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "parametric.html#HypothesisTests.EqualVarianceTTest",
+    "location": "parametric/#HypothesisTests.EqualVarianceTTest",
     "page": "Parametric tests",
     "title": "HypothesisTests.EqualVarianceTTest",
     "category": "type",
@@ -177,7 +177,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "parametric.html#HypothesisTests.UnequalVarianceTTest",
+    "location": "parametric/#HypothesisTests.UnequalVarianceTTest",
     "page": "Parametric tests",
     "title": "HypothesisTests.UnequalVarianceTTest",
     "category": "type",
@@ -185,7 +185,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "parametric.html#t-test-1",
+    "location": "parametric/#t-test-1",
     "page": "Parametric tests",
     "title": "t-test",
     "category": "section",
@@ -193,7 +193,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "parametric.html#HypothesisTests.OneSampleZTest",
+    "location": "parametric/#HypothesisTests.OneSampleZTest",
     "page": "Parametric tests",
     "title": "HypothesisTests.OneSampleZTest",
     "category": "type",
@@ -201,7 +201,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "parametric.html#HypothesisTests.EqualVarianceZTest",
+    "location": "parametric/#HypothesisTests.EqualVarianceZTest",
     "page": "Parametric tests",
     "title": "HypothesisTests.EqualVarianceZTest",
     "category": "type",
@@ -209,7 +209,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "parametric.html#HypothesisTests.UnequalVarianceZTest",
+    "location": "parametric/#HypothesisTests.UnequalVarianceZTest",
     "page": "Parametric tests",
     "title": "HypothesisTests.UnequalVarianceZTest",
     "category": "type",
@@ -217,7 +217,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "parametric.html#z-test-1",
+    "location": "parametric/#z-test-1",
     "page": "Parametric tests",
     "title": "z-test",
     "category": "section",
@@ -225,7 +225,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "nonparametric.html#",
+    "location": "nonparametric/#",
     "page": "Nonparametric tests",
     "title": "Nonparametric tests",
     "category": "page",
@@ -233,7 +233,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "nonparametric.html#Nonparametric-tests-1",
+    "location": "nonparametric/#Nonparametric-tests-1",
     "page": "Nonparametric tests",
     "title": "Nonparametric tests",
     "category": "section",
@@ -241,7 +241,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "nonparametric.html#HypothesisTests.OneSampleADTest",
+    "location": "nonparametric/#HypothesisTests.OneSampleADTest",
     "page": "Nonparametric tests",
     "title": "HypothesisTests.OneSampleADTest",
     "category": "type",
@@ -249,7 +249,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "nonparametric.html#HypothesisTests.KSampleADTest",
+    "location": "nonparametric/#HypothesisTests.KSampleADTest",
     "page": "Nonparametric tests",
     "title": "HypothesisTests.KSampleADTest",
     "category": "type",
@@ -257,7 +257,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "nonparametric.html#Anderson-Darling-test-1",
+    "location": "nonparametric/#Anderson-Darling-test-1",
     "page": "Nonparametric tests",
     "title": "Anderson-Darling test",
     "category": "section",
@@ -265,7 +265,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "nonparametric.html#HypothesisTests.BinomialTest",
+    "location": "nonparametric/#HypothesisTests.BinomialTest",
     "page": "Nonparametric tests",
     "title": "HypothesisTests.BinomialTest",
     "category": "type",
@@ -273,7 +273,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "nonparametric.html#Binomial-test-1",
+    "location": "nonparametric/#Binomial-test-1",
     "page": "Nonparametric tests",
     "title": "Binomial test",
     "category": "section",
@@ -281,7 +281,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "nonparametric.html#HypothesisTests.FisherExactTest",
+    "location": "nonparametric/#HypothesisTests.FisherExactTest",
     "page": "Nonparametric tests",
     "title": "HypothesisTests.FisherExactTest",
     "category": "type",
@@ -289,7 +289,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "nonparametric.html#Fisher-exact-test-1",
+    "location": "nonparametric/#Fisher-exact-test-1",
     "page": "Nonparametric tests",
     "title": "Fisher exact test",
     "category": "section",
@@ -297,7 +297,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "nonparametric.html#HypothesisTests.ExactOneSampleKSTest",
+    "location": "nonparametric/#HypothesisTests.ExactOneSampleKSTest",
     "page": "Nonparametric tests",
     "title": "HypothesisTests.ExactOneSampleKSTest",
     "category": "type",
@@ -305,7 +305,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "nonparametric.html#HypothesisTests.ApproximateOneSampleKSTest",
+    "location": "nonparametric/#HypothesisTests.ApproximateOneSampleKSTest",
     "page": "Nonparametric tests",
     "title": "HypothesisTests.ApproximateOneSampleKSTest",
     "category": "type",
@@ -313,7 +313,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "nonparametric.html#HypothesisTests.ApproximateTwoSampleKSTest",
+    "location": "nonparametric/#HypothesisTests.ApproximateTwoSampleKSTest",
     "page": "Nonparametric tests",
     "title": "HypothesisTests.ApproximateTwoSampleKSTest",
     "category": "type",
@@ -321,7 +321,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "nonparametric.html#Kolmogorov–Smirnov-test-1",
+    "location": "nonparametric/#Kolmogorov–Smirnov-test-1",
     "page": "Nonparametric tests",
     "title": "Kolmogorov–Smirnov test",
     "category": "section",
@@ -329,7 +329,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "nonparametric.html#HypothesisTests.KruskalWallisTest",
+    "location": "nonparametric/#HypothesisTests.KruskalWallisTest",
     "page": "Nonparametric tests",
     "title": "HypothesisTests.KruskalWallisTest",
     "category": "type",
@@ -337,7 +337,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "nonparametric.html#Kruskal-Wallis-rank-sum-test-1",
+    "location": "nonparametric/#Kruskal-Wallis-rank-sum-test-1",
     "page": "Nonparametric tests",
     "title": "Kruskal-Wallis rank sum test",
     "category": "section",
@@ -345,7 +345,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "nonparametric.html#HypothesisTests.MannWhitneyUTest",
+    "location": "nonparametric/#HypothesisTests.MannWhitneyUTest",
     "page": "Nonparametric tests",
     "title": "HypothesisTests.MannWhitneyUTest",
     "category": "function",
@@ -353,7 +353,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "nonparametric.html#HypothesisTests.ExactMannWhitneyUTest",
+    "location": "nonparametric/#HypothesisTests.ExactMannWhitneyUTest",
     "page": "Nonparametric tests",
     "title": "HypothesisTests.ExactMannWhitneyUTest",
     "category": "type",
@@ -361,7 +361,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "nonparametric.html#HypothesisTests.ApproximateMannWhitneyUTest",
+    "location": "nonparametric/#HypothesisTests.ApproximateMannWhitneyUTest",
     "page": "Nonparametric tests",
     "title": "HypothesisTests.ApproximateMannWhitneyUTest",
     "category": "type",
@@ -369,7 +369,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "nonparametric.html#Mann-Whitney-U-test-1",
+    "location": "nonparametric/#Mann-Whitney-U-test-1",
     "page": "Nonparametric tests",
     "title": "Mann-Whitney U test",
     "category": "section",
@@ -377,7 +377,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "nonparametric.html#HypothesisTests.SignTest",
+    "location": "nonparametric/#HypothesisTests.SignTest",
     "page": "Nonparametric tests",
     "title": "HypothesisTests.SignTest",
     "category": "type",
@@ -385,7 +385,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "nonparametric.html#Sign-test-1",
+    "location": "nonparametric/#Sign-test-1",
     "page": "Nonparametric tests",
     "title": "Sign test",
     "category": "section",
@@ -393,7 +393,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "nonparametric.html#HypothesisTests.SignedRankTest",
+    "location": "nonparametric/#HypothesisTests.SignedRankTest",
     "page": "Nonparametric tests",
     "title": "HypothesisTests.SignedRankTest",
     "category": "function",
@@ -401,7 +401,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "nonparametric.html#HypothesisTests.ExactSignedRankTest",
+    "location": "nonparametric/#HypothesisTests.ExactSignedRankTest",
     "page": "Nonparametric tests",
     "title": "HypothesisTests.ExactSignedRankTest",
     "category": "type",
@@ -409,7 +409,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "nonparametric.html#HypothesisTests.ApproximateSignedRankTest",
+    "location": "nonparametric/#HypothesisTests.ApproximateSignedRankTest",
     "page": "Nonparametric tests",
     "title": "HypothesisTests.ApproximateSignedRankTest",
     "category": "type",
@@ -417,7 +417,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "nonparametric.html#Wilcoxon-signed-rank-test-1",
+    "location": "nonparametric/#Wilcoxon-signed-rank-test-1",
     "page": "Nonparametric tests",
     "title": "Wilcoxon signed rank test",
     "category": "section",
@@ -425,7 +425,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "nonparametric.html#HypothesisTests.ExactPermutationTest",
+    "location": "nonparametric/#HypothesisTests.ExactPermutationTest",
     "page": "Nonparametric tests",
     "title": "HypothesisTests.ExactPermutationTest",
     "category": "function",
@@ -433,7 +433,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "nonparametric.html#HypothesisTests.ApproximatePermutationTest",
+    "location": "nonparametric/#HypothesisTests.ApproximatePermutationTest",
     "page": "Nonparametric tests",
     "title": "HypothesisTests.ApproximatePermutationTest",
     "category": "function",
@@ -441,7 +441,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "nonparametric.html#Permutation-test-1",
+    "location": "nonparametric/#Permutation-test-1",
     "page": "Nonparametric tests",
     "title": "Permutation test",
     "category": "section",
@@ -449,7 +449,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "time_series.html#",
+    "location": "time_series/#",
     "page": "Time series tests",
     "title": "Time series tests",
     "category": "page",
@@ -457,7 +457,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "time_series.html#Time-series-tests-1",
+    "location": "time_series/#Time-series-tests-1",
     "page": "Time series tests",
     "title": "Time series tests",
     "category": "section",
@@ -465,7 +465,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "time_series.html#HypothesisTests.DurbinWatsonTest",
+    "location": "time_series/#HypothesisTests.DurbinWatsonTest",
     "page": "Time series tests",
     "title": "HypothesisTests.DurbinWatsonTest",
     "category": "type",
@@ -473,7 +473,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "time_series.html#Durbin-Watson-test-1",
+    "location": "time_series/#Durbin-Watson-test-1",
     "page": "Time series tests",
     "title": "Durbin-Watson test",
     "category": "section",
@@ -481,7 +481,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "time_series.html#HypothesisTests.BoxPierceTest",
+    "location": "time_series/#HypothesisTests.BoxPierceTest",
     "page": "Time series tests",
     "title": "HypothesisTests.BoxPierceTest",
     "category": "type",
@@ -489,7 +489,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "time_series.html#HypothesisTests.LjungBoxTest",
+    "location": "time_series/#HypothesisTests.LjungBoxTest",
     "page": "Time series tests",
     "title": "HypothesisTests.LjungBoxTest",
     "category": "type",
@@ -497,7 +497,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "time_series.html#Box-Pierce-and-Ljung-Box-tests-1",
+    "location": "time_series/#Box-Pierce-and-Ljung-Box-tests-1",
     "page": "Time series tests",
     "title": "Box-Pierce and Ljung-Box tests",
     "category": "section",
@@ -505,7 +505,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "time_series.html#HypothesisTests.BreuschGodfreyTest",
+    "location": "time_series/#HypothesisTests.BreuschGodfreyTest",
     "page": "Time series tests",
     "title": "HypothesisTests.BreuschGodfreyTest",
     "category": "type",
@@ -513,7 +513,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "time_series.html#Breusch-Godfrey-test-1",
+    "location": "time_series/#Breusch-Godfrey-test-1",
     "page": "Time series tests",
     "title": "Breusch-Godfrey test",
     "category": "section",
@@ -521,7 +521,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "time_series.html#HypothesisTests.JarqueBeraTest",
+    "location": "time_series/#HypothesisTests.JarqueBeraTest",
     "page": "Time series tests",
     "title": "HypothesisTests.JarqueBeraTest",
     "category": "type",
@@ -529,7 +529,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "time_series.html#Jarque-Bera-test-1",
+    "location": "time_series/#Jarque-Bera-test-1",
     "page": "Time series tests",
     "title": "Jarque-Bera test",
     "category": "section",
@@ -537,7 +537,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "time_series.html#HypothesisTests.ADFTest",
+    "location": "time_series/#HypothesisTests.ADFTest",
     "page": "Time series tests",
     "title": "HypothesisTests.ADFTest",
     "category": "type",
@@ -545,7 +545,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "time_series.html#Augmented-Dickey-Fuller-test-1",
+    "location": "time_series/#Augmented-Dickey-Fuller-test-1",
     "page": "Time series tests",
     "title": "Augmented Dickey-Fuller test",
     "category": "section",
