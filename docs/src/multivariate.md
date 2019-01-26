@@ -16,3 +16,9 @@ This is equivalent to Box's ``M``-test for two groups.
 ```@docs
 BartlettTest
 ```
+
+## Partial correlation test
+
+```@docs
+PartialCorTest
+```
