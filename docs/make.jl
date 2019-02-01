@@ -8,7 +8,8 @@ makedocs(
         "methods.md",
         "parametric.md",
         "nonparametric.md",
-        "time_series.md"
+        "time_series.md",
+        "multivariate.md",
     ]
 )
 

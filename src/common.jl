@@ -57,3 +57,11 @@ function tiedrank_adj!(ord::AbstractVector, v::AbstractArray)
 end
 
 tiedrank_adj(v::AbstractArray) = tiedrank_adj!(Vector{Float64}(undef, length(v)), v)
+
+# Pool covariance matrices, overwriting the first
+function poolcov!(Sx::AbstractMatrix, nxm1::Int, Sy::AbstractMatrix, nym1::Int)
+    @inbounds for i = eachindex(Sx, Sy)
+        Sx[i] = (Sx[i] * nxm1 + Sy[i] * nym1) / (nxm1 + nym1)
+    end
+    Sx
+end
