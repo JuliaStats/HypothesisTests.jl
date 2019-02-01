@@ -13,7 +13,7 @@ var documenterSearchIndex = {"docs": [
     "page": "HypothesisTests package",
     "title": "HypothesisTests package",
     "category": "section",
-    "text": "This package implements several hypothesis tests in Julia.Pages = [\"methods.md\", \"parametric.md\", \"nonparametric.md\", \"time_series.md\"]\nDepth = 2"
+    "text": "This package implements several hypothesis tests in Julia.Pages = [\"methods.md\", \"parametric.md\", \"nonparametric.md\", \"time_series.md\", \"multivariate.md\"]\nDepth = 2"
 },
 
 {
@@ -550,6 +550,54 @@ var documenterSearchIndex = {"docs": [
     "title": "Augmented Dickey-Fuller test",
     "category": "section",
     "text": "ADFTest"
+},
+
+{
+    "location": "multivariate/#",
+    "page": "Multivariate tests",
+    "title": "Multivariate tests",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "multivariate/#Multivariate-tests-1",
+    "page": "Multivariate tests",
+    "title": "Multivariate tests",
+    "category": "section",
+    "text": ""
+},
+
+{
+    "location": "multivariate/#HypothesisTests.OneSampleHotellingT2",
+    "page": "Multivariate tests",
+    "title": "HypothesisTests.OneSampleHotellingT2",
+    "category": "type",
+    "text": "OneSampleHotellingT2(X::AbstractMatrix, μ₀=<zero vector>)\n\nPerform a one sample Hotelling\'s T^2 test of the hypothesis that the vector of column means of X is equal to μ₀.\n\n\n\n\n\nOneSampleHotellingT2(X::AbstractMatrix, Y::AbstractMatrix, μ₀=<zero vector>)\n\nPerform a paired Hotelling\'s T^2 test of the hypothesis that the vector of mean column differences between X and Y is equal to μ₀.\n\n\n\n\n\n"
+},
+
+{
+    "location": "multivariate/#HypothesisTests.EqualCovHotellingT2",
+    "page": "Multivariate tests",
+    "title": "HypothesisTests.EqualCovHotellingT2",
+    "category": "type",
+    "text": "EqualCovHotellingT2(X::AbstractMatrix, Y::AbstractMatrix)\n\nPerform a two sample Hotelling\'s T^2 test of the hypothesis that the difference in the mean vectors of X and Y is zero, assuming that X and Y have equal covariance matrices.\n\n\n\n\n\n"
+},
+
+{
+    "location": "multivariate/#HypothesisTests.UnequalCovHotellingT2",
+    "page": "Multivariate tests",
+    "title": "HypothesisTests.UnequalCovHotellingT2",
+    "category": "type",
+    "text": "UnequalCovHotellingT2(X::AbstractMatrix, Y::AbstractMatrix)\n\nPerform a two sample Hotelling\'s T^2 test of the hypothesis that the difference in the mean vectors of X and Y is zero, without assuming that X and Y have equal covariance matrices.\n\n\n\n\n\n"
+},
+
+{
+    "location": "multivariate/#Hotelling\'s-T2-test-1",
+    "page": "Multivariate tests",
+    "title": "Hotelling\'s T^2 test",
+    "category": "section",
+    "text": "OneSampleHotellingT2\nEqualCovHotellingT2\nUnequalCovHotellingT2"
 },
 
 ]}
