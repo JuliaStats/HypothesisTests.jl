@@ -48,6 +48,11 @@ function StatsBase.confint(x::TTest; level::Float64=0.95, tail=:both)
     end
 end
 
+# The standard error of the difference
+StatsBase.stderror(x::TTest) = x.stderr
+
+# The magnitude of the difference
+meandiff(x::TTest) = x.xbar
 
 ## ONE SAMPLE T-TEST
 
