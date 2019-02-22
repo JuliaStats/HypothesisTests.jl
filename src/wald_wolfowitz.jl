@@ -32,18 +32,18 @@ Implements: [`pvalue`](@ref)
 function WaldWolfowitzTest(x::AbstractVector{T}) where T<:Real
     n = length(x)
     med = median(x)
-    num_above = count(x .>= med)
-    num_below = count(x .< med)
 
+    num_above = count(v -> v >= med, x)
+    num_below = n - num_above
+    
     # Get the expected value and standard deviation
-    μ = 1 + 2 * num_above * num_below / n
+    μ = 1 + 2 * num_above * (num_below / n)
     σ = sqrt((μ - 1) * (μ - 2) / (n - 1))
 
     # Get the number of runs
-    signs = sign.(x .- med)
     num_runs = 1
     for k in 1:(n-1)
-        if signs[k] != signs[k+1]
+        if sign(x[k] - med) != sign(x[k+1] - med)
             num_runs += 1
         end
     end
