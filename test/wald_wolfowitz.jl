@@ -1,4 +1,4 @@
-using HypothesisTests, Test
+using .HypothesisTests, Test
 using Distributions
 
 @testset "Wald-Wolfowitz test" begin
@@ -12,9 +12,9 @@ using Distributions
     @test pvalue(tst) > 0.05
 
     # Test consistency of z-statistics
-    @test pvalue(tst) == pvalue(Normal(tst.μ, tst.σ), tst.N_runs)
-    @test pvalue(tst, tail=:left) == pvalue(Normal(tst.μ, tst.σ), tst.N_runs, tail=:left)
-    @test pvalue(tst, tail=:right) == pvalue(Normal(tst.μ, tst.σ), tst.N_runs, tail=:right)
+    @test pvalue(tst) == pvalue(Normal(tst.μ, tst.σ), tst.nruns)
+    @test pvalue(tst, tail=:left) == pvalue(Normal(tst.μ, tst.σ), tst.nruns, tail=:left)
+    @test pvalue(tst, tail=:right) == pvalue(Normal(tst.μ, tst.σ), tst.nruns, tail=:right)
     show(IOBuffer(), tst)
 end
 
@@ -27,9 +27,9 @@ end
     @test pvalue(tst) < 0.05
 
     # Test consistency of z-statistics
-    @test pvalue(tst) == pvalue(Normal(tst.μ, tst.σ), tst.N_runs)
-    @test pvalue(tst, tail=:left) == pvalue(Normal(tst.μ, tst.σ), tst.N_runs, tail=:left)
-    @test pvalue(tst, tail=:right) == pvalue(Normal(tst.μ, tst.σ), tst.N_runs, tail=:right)
+    @test pvalue(tst) == pvalue(Normal(tst.μ, tst.σ), tst.nruns)
+    @test pvalue(tst, tail=:left) == pvalue(Normal(tst.μ, tst.σ), tst.nruns, tail=:left)
+    @test pvalue(tst, tail=:right) == pvalue(Normal(tst.μ, tst.σ), tst.nruns, tail=:right)
     show(IOBuffer(), tst)
 end
 
