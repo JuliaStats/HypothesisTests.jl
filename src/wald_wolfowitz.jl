@@ -1,14 +1,12 @@
-export 
-    WaldWolfowitzTest
-    TwoValuedWaldWolfowitzTest
+export WaldWolfowitzTest
 
 struct WaldWolfowitzTest <: HypothesisTest
-    nabove::Int
-    nbelow::Int
-    nruns::Int
-    μ::Real
-    σ::Real
-    z::Real
+    nabove::Int     # Number of points above median (or of value a)
+    nbelow::Int     # Number of points below median (or of value b)
+    nruns::Int      # Number of runs
+    μ::Real         # Expected mean
+    σ::Real         # Expected variance
+    z::Real         # test z-statistic from Normal distribution
 end
 
 testname(::WaldWolfowitzTest) = "Wald-Wolfowitz Test"
@@ -36,14 +34,14 @@ function WaldWolfowitzTest(x::AbstractVector{T}) where T<:Real
 end
 
 """
-    TwoValuedWaldWolfowitzTest(x::Vector{::bool})
+    TwoValuedWaldWolfowitzTest(x::AbstractVector{<:Bool})
 
 Performs the Wald-Wolfowitz (or Runs) test of the null hypothesis that the given data is random, or independent.
 This test assumes two-valued boolean data.
 
 Implements: [`pvalue`](@ref)
 """
-function TwoValuedWaldWolfowitzTest(x::Vector{::bool))
+function TwoValuedWaldWolfowitzTest(x::AbstractVector{T}) where T<:Bool
     n = length(x)
     nabove = sum(x)
     nbelow = n - nabove
