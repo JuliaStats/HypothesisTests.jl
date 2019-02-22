@@ -50,7 +50,7 @@ function WaldWolfowitzTest(x::AbstractVector{T}) where T<:Real
 
     # calculate simple z-statistic
     z = (num_runs - μ) / σ
-    WaldWolfowitzTest(num_above, num_below, R, μ, σ, z)
+    WaldWolfowitzTest(num_above, num_below, num_runs, μ, σ, z)
 end
 
 pvalue(test::WaldWolfowitzTest; tail=:both) = pvalue(Normal(0.0, 1.0), test.z; tail=tail)
