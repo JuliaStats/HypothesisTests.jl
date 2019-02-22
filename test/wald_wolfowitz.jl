@@ -1,7 +1,7 @@
 using HypothesisTests, Test
 using Distributions
 
-@testset "WW test" begin
+@testset "Wald-Wolfowitz test" begin
 
 @testset "Independent Observations" begin
     # Get set of independent observations
