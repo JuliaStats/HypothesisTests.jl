@@ -1,56 +1,69 @@
 export 
     WaldWolfowitzTest
+    TwoValuedWaldWolfowitzTest
 
 struct WaldWolfowitzTest <: HypothesisTest
-    N_above::Int
-    N_below::Int
-    N_runs::Int
+    nabove::Int
+    nbelow::Int
+    nruns::Int
     μ::Real
     σ::Real
     z::Real
 end
 
 testname(::WaldWolfowitzTest) = "Wald-Wolfowitz Test"
-population_param_of_interest(x::WaldWolfowitzTest) = ("Number of runs", x.μ, x.N_runs) # parameter of interest: name, value under h0, point estimate
+population_param_of_interest(x::WaldWolfowitzTest) = ("Number of runs", x.μ, x.nruns) # parameter of interest: name, value under h0, point estimate
 default_tail(::WaldWolfowitzTest) = :both
 
 
 function show_params(io::IO, x::WaldWolfowitzTest, ident="")
-    println(io, ident, "number of runs:  $(x.N_runs)")
+    println(io, ident, "number of runs:  $(x.nruns)")
     println(io, ident, "z-statistic:     $(x.z)")
 end
 
 """
-    WaldWolfowitzTest(x::AbstractVector{T<:Real})
+    WaldWolfowitzTest(x::AbstractVector{<:Real})
 
-Performs the Wald-Wolfowitz (or Runs) test to determine
-randommness for a data-sequence. The null hypothesis is that the data is random, 
-or independent.
+Performs the Wald-Wolfowitz (or Runs) test of the null hypothesis that the given data is random, or independent.
+The data is transformed to two-valued data by labelling a point as above or below the median of the data.
 
 Implements: [`pvalue`](@ref)
 """
 function WaldWolfowitzTest(x::AbstractVector{T}) where T<:Real
-    n = length(x)
     med = median(x)
+    transformed = x .>= med
+    TwoValuedWaldWolfowitzTest(transformed)
+end
 
-    num_above = count(v -> v >= med, x)
-    num_below = n - num_above
+"""
+    TwoValuedWaldWolfowitzTest(x::Vector{::bool})
+
+Performs the Wald-Wolfowitz (or Runs) test of the null hypothesis that the given data is random, or independent.
+This test assumes two-valued boolean data.
+
+Implements: [`pvalue`](@ref)
+"""
+function TwoValuedWaldWolfowitzTest(x::Vector{::bool))
+    n = length(x)
+    nabove = sum(x)
+    nbelow = n - nabove
     
     # Get the expected value and standard deviation
-    μ = 1 + 2 * num_above * (num_below / n)
+    μ = 1 + 2 * nabove * (nbelow / n)
     σ = sqrt((μ - 1) * (μ - 2) / (n - 1))
 
     # Get the number of runs
-    num_runs = 1
+    nruns = 1
     for k in 1:(n-1)
-        if sign(x[k] - med) != sign(x[k+1] - med)
-            num_runs += 1
+        if x[k] != x[k+1]
+            nruns += 1
         end
     end
 
     # calculate simple z-statistic
-    z = (num_runs - μ) / σ
-    WaldWolfowitzTest(num_above, num_below, num_runs, μ, σ, z)
+    z = (nruns - μ) / σ
+    WaldWolfowitzTest(nabove, nbelow, nruns, μ, σ, z)
+
 end
 
 pvalue(test::WaldWolfowitzTest; tail=:both) = pvalue(Normal(0.0, 1.0), test.z; tail=tail)
