@@ -1,4 +1,4 @@
-export WaldWolfowitzTest
+export WaldWolfowitzTest, TwoValuedWaldWolfowitzTest
 
 struct WaldWolfowitzTest <: HypothesisTest
     nabove::Int     # Number of points above median (or of value a)

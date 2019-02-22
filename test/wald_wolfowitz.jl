@@ -3,13 +3,14 @@ using Distributions
 
 @testset "Wald-Wolfowitz test" begin
 
-@testset "Independent Observations" begin
-    # Get set of independent observations
-    x = randn(1000)
+@testset "Many-Valued Observations" begin
+    # Get set of dependent observations
+    x = 1:1000
     tst = WaldWolfowitzTest(x)
-
-    # Should not be significant dependence
-    @test pvalue(tst) > 0.05
+    
+    # Should have significant dependence
+    @test tst.z ≈ -31.575 atol=1e-3
+    @test pvalue(tst) < 2.2e-16
 
     # Test consistency of z-statistics
     @test pvalue(tst) == pvalue(Normal(tst.μ, tst.σ), tst.nruns)
@@ -18,13 +19,14 @@ using Distributions
     show(IOBuffer(), tst)
 end
 
-@testset "Dependent Observations" begin
-    # Get set of dependent observations
-    x = 1:1000
-    tst = WaldWolfowitzTest(x)
+@testset "Two-Valued Observations" begin
+    # equivalent data as above (half under median half over)
+    x = [falses(500); trues(500)]
+    tst = TwoValuedWaldWolfowitzTest(x)
     
     # Should have significant dependence
-    @test pvalue(tst) < 0.05
+    @test tst.z ≈ -31.575 atol=1e-3
+    @test pvalue(tst) < 2.2e-16
 
     # Test consistency of z-statistics
     @test pvalue(tst) == pvalue(Normal(tst.μ, tst.σ), tst.nruns)
