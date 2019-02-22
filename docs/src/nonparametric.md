@@ -55,6 +55,7 @@ SignTest
 ## Wald-Wolfowitz independence test
 ```@docs
 WaldWolfowitzTest
+TwoValuedWaldWolfowitzTest
 ```
 
 ## Wilcoxon signed rank test
