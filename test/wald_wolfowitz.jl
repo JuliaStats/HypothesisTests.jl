@@ -5,7 +5,7 @@ using Distributions
 
 @testset "Independent Observations" begin
     # Get set of independent observations
-    x = randn(100)
+    x = randn(1000)
     tst = WaldWolfowitzTest(x)
 
     # Should not be significant dependence
@@ -19,11 +19,8 @@ using Distributions
 end
 
 @testset "Dependent Observations" begin
-    # Get set of independent observations
-    x = randn(1)
-    for i in 2:100
-        append!(x, x[i-1] + randn())
-    end
+    # Get set of dependent observations
+    x = 1:1000
     tst = WaldWolfowitzTest(x)
     
     # Should have significant dependence
