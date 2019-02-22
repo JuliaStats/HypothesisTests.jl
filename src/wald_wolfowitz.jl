@@ -1,12 +1,12 @@
 export WaldWolfowitzTest, TwoValuedWaldWolfowitzTest
 
-struct WaldWolfowitzTest <: HypothesisTest
+struct WaldWolfowitzTest{T<:Real} <: HypothesisTest
     nabove::Int     # Number of points above median (or of value a)
     nbelow::Int     # Number of points below median (or of value b)
     nruns::Int      # Number of runs
-    μ::Real         # Expected mean
-    σ::Real         # Expected variance
-    z::Real         # test z-statistic from Normal distribution
+    μ::T            # Expected mean
+    σ::T            # Expected variance
+    z::T            # test z-statistic from Normal distribution
 end
 
 testname(::WaldWolfowitzTest) = "Wald-Wolfowitz Test"
