@@ -1,4 +1,4 @@
-using .HypothesisTests, Test
+using HypothesisTests, Test
 using Distributions
 
 @testset "Wald-Wolfowitz test" begin
