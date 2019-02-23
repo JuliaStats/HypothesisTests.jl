@@ -1,4 +1,4 @@
-export WaldWolfowitzTest, TwoValuedWaldWolfowitzTest
+export WaldWolfowitzTest, RunsTest
 
 struct WaldWolfowitzTest{T<:Real} <: HypothesisTest
     nabove::Int     # Number of points above median (or of value a)
@@ -12,6 +12,7 @@ end
 testname(::WaldWolfowitzTest) = "Wald-Wolfowitz Test"
 population_param_of_interest(x::WaldWolfowitzTest) = ("Number of runs", x.μ, x.nruns) # parameter of interest: name, value under h0, point estimate
 default_tail(::WaldWolfowitzTest) = :both
+pvalue(test::WaldWolfowitzTest; tail=:both) = pvalue(Normal(0.0, 1.0), test.z; tail=tail)
 
 
 function show_params(io::IO, x::WaldWolfowitzTest, ident="")
@@ -22,26 +23,12 @@ end
 """
     WaldWolfowitzTest(x::AbstractVector{<:Real})
 
-Performs the Wald-Wolfowitz (or Runs) test of the null hypothesis that the given data is random, or independent.
-The data is transformed to two-valued data by labelling a point as above or below the median of the data.
+Performs the Wald-Wolfowitz (or Runs) test of the null hypothesis that the given data is random, or independently sampled.
+The data must be two-valued. 
 
 Implements: [`pvalue`](@ref)
 """
-function WaldWolfowitzTest(x::AbstractVector{T}) where T<:Real
-    med = median(x)
-    transformed = x .>= med
-    TwoValuedWaldWolfowitzTest(transformed)
-end
-
-"""
-    TwoValuedWaldWolfowitzTest(x::AbstractVector{<:Bool})
-
-Performs the Wald-Wolfowitz (or Runs) test of the null hypothesis that the given data is random, or independent.
-This test assumes two-valued boolean data.
-
-Implements: [`pvalue`](@ref)
-"""
-function TwoValuedWaldWolfowitzTest(x::AbstractVector{T}) where T<:Bool
+function WaldWolfowitzTest(x::AbstractVector{T}) where T<:Bool
     n = length(x)
     nabove = sum(x)
     nbelow = n - nabove
@@ -64,5 +51,23 @@ function TwoValuedWaldWolfowitzTest(x::AbstractVector{T}) where T<:Bool
 
 end
 
-pvalue(test::WaldWolfowitzTest; tail=:both) = pvalue(Normal(0.0, 1.0), test.z; tail=tail)
+"""
+    WaldWolfowitzTest(x::AbstractVector{<:Real})
+
+Performs the Wald-Wolfowitz (or Runs) test of the null hypothesis that the given data is random, or independently sampled.
+The data can come as many-valued. If the data is transformed by labelling each
+element as above or below the median of the sample.
+
+Implements: [`pvalue`](@ref)
+"""
+function WaldWolfowitzTest(x::AbstractVector{T}) where T<:Real
+    med = median(x)
+    transformed = x .>= med
+    WaldWolfowitzTest(transformed)
+end
+
+# Allow an alias for WaldWolfowitzTest called RunsTest
+const RunsTest = WaldWolfowitzTest
+
+
 
