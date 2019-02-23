@@ -53,6 +53,7 @@ SignTest
 ```
 
 ## Wald-Wolfowitz independence test
+
 ```@docs
 WaldWolfowitzTest
 RunsTest
