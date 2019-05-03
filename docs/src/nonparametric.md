@@ -56,7 +56,6 @@ SignTest
 
 ```@docs
 WaldWolfowitzTest
-RunsTest
 ```
 
 ## Wilcoxon signed rank test
