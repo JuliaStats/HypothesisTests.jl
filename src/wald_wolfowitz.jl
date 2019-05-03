@@ -21,16 +21,16 @@ function show_params(io::IO, x::WaldWolfowitzTest, ident="")
 end
 
 """
-    WaldWolfowitzTest(x::AbstractVector{<:Bool})
+    WaldWolfowitzTest(x::AbstractVector{Bool})
     WaldWolfowitzTest(x::AbstractVector{<:Real})
 
 Performs the Wald-Wolfowitz (or Runs) test of the null hypothesis that the given data is random, or independently sampled.
-The data can come as many-valued or two-valued (boolean). If many-valued, the sample is transfromed by labelling each
+The data can come as many-valued or two-valued (Boolean). If many-valued, the sample is transfromed by labelling each
 element as above or below the median.
 
 Implements: [`pvalue`](@ref)
 """
-function WaldWolfowitzTest(x::AbstractVector{T}) where T<:Bool
+function WaldWolfowitzTest(x::AbstractVector{Bool})
     n = length(x)
     nabove = sum(x)
     nbelow = n - nabove
@@ -53,16 +53,8 @@ function WaldWolfowitzTest(x::AbstractVector{T}) where T<:Bool
 
 end
 
-function WaldWolfowitzTest(x::AbstractVector{T}) where T<:Real
+function WaldWolfowitzTest(x::AbstractVector{<:Real})
     med = median(x)
     transformed = x .>= med
     WaldWolfowitzTest(transformed)
 end
-
-"""
-Alias for: [`WaldWolfowitzTest`](@ref)
-"""
-const RunsTest = WaldWolfowitzTest
-
-
-
