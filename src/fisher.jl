@@ -26,10 +26,14 @@ export FisherExactTest
 
 """
     FisherExactTest(a::Integer, b::Integer, c::Integer, d::Integer)
+    FisherExactTest(x)
 
 Perform Fisher's exact test of the null hypothesis that the success probabilities ``a/c``
 and ``b/d`` are equal, that is the odds ratio ``(a/c) / (b/d)`` is one, against the
 alternative hypothesis that they are not equal.
+
+If `x` is a matrix with at least two rows and columns, it is taken as a two-dimensional
+contingency table.
 
 See [`pvalue(::FisherExactTest)`](@ref) and [`confint(::FisherExactTest)`](@ref) for details
 about the computation of the default p-value and confidence interval, respectively.
@@ -41,10 +45,11 @@ The contingency table is structured as:
 |*Y1*| a  | b  |
 |*Y2*| c  | d  |
 
-!!! note
+!!! Note:
     The `show` function output contains the conditional maximum likelihood estimate of the
     odds ratio rather than the sample odds ratio; it maximizes the likelihood given by
     Fisher's non-central hypergeometric distribution.
+    The entries must be non-negative integers.
 
 Implements: [`pvalue(::FisherExactTest)`](@ref), [`confint(::FisherExactTest)`](@ref)
 
