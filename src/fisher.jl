@@ -73,6 +73,10 @@ struct FisherExactTest <: HypothesisTest
     end
 end
 
+function FisherExactTest(x::AbstractMatrix{T}) where T<:Integer
+    FisherExactTest(x[1,1], x[1,2], x[2,1], x[2,2])
+end
+
 testname(::FisherExactTest) = "Fisher's exact test"
 population_param_of_interest(x::FisherExactTest) = ("Odds ratio", 1.0, x.ω) # parameter of interest: name, value under h0, point estimate
 default_tail(test::FisherExactTest) = :both
