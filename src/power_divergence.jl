@@ -1,4 +1,4 @@
-export PowerDivergenceTest, ChisqTest, MultinomialLRT
+export PowerDivergenceTest, ChisqTest, MultinomialLRTest
 
 const Levels{T} = Tuple{UnitRange{T},UnitRange{T}}
 
@@ -380,9 +380,9 @@ end
 ChisqTest(x::AbstractVector{T}, theta0::Vector{U} = ones(length(x))/length(x)) where {T<:Integer,U<:AbstractFloat} =
     PowerDivergenceTest(reshape(x, length(x), 1), lambda=1.0, theta0=theta0)
 
-#MultinomialLRT
+#MultinomialLRTest
 """
-    MultinomialLRT(x[, y][, theta0 = ones(length(x))/length(x)])
+    MultinomialLRTest(x[, y][, theta0 = ones(length(x))/length(x)])
 
 Perform a multinomial likelihood ratio test (equivalent to a [`PowerDivergenceTest`](@ref)
 with ``λ = 0``).
@@ -403,21 +403,21 @@ Note that the entries of `x` (and `y` if provided) must be non-negative integers
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
-function MultinomialLRT(x::AbstractMatrix{T}) where T<:Integer
+function MultinomialLRTest(x::AbstractMatrix{T}) where T<:Integer
     PowerDivergenceTest(x, lambda=0.0)
 end
 
-function MultinomialLRT(x::AbstractVector{T}, y::AbstractVector{T}, levels::Levels{T}) where T<:Integer
+function MultinomialLRTest(x::AbstractVector{T}, y::AbstractVector{T}, levels::Levels{T}) where T<:Integer
     d = counts(x, y, levels)
     PowerDivergenceTest(d, lambda=0.0)
 end
 
-function MultinomialLRT(x::AbstractVector{T}, y::AbstractVector{T}, k::T) where T<:Integer
+function MultinomialLRTest(x::AbstractVector{T}, y::AbstractVector{T}, k::T) where T<:Integer
     d = counts(x, y, k)
     PowerDivergenceTest(d, lambda=0.0)
 end
 
-MultinomialLRT(x::AbstractVector{T}, theta0::Vector{U} = ones(length(x))/length(x)) where {T<:Integer,U<:AbstractFloat} =
+MultinomialLRTest(x::AbstractVector{T}, theta0::Vector{U} = ones(length(x))/length(x)) where {T<:Integer,U<:AbstractFloat} =
     PowerDivergenceTest(reshape(x, length(x), 1), lambda=0.0, theta0=theta0)
 
 function show_params(io::IO, x::PowerDivergenceTest, ident="")
