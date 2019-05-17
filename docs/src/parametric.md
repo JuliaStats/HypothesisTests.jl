@@ -12,7 +12,7 @@ ChisqTest
 
 ## Multinomial likelihood ratio test
 ```@docs
-MultinomialLRT
+MultinomialLRTest
 ```
 
 ## t-test
