@@ -5,12 +5,12 @@
 PowerDivergenceTest
 ```
 
-### Pearson chi-squared test
+## Pearson chi-squared test
 ```@docs
 ChisqTest
 ```
 
-### Multinomial likelihood ratio test
+## Multinomial likelihood ratio test
 ```@docs
 MultinomialLRT
 ```
