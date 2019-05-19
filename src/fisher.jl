@@ -33,7 +33,9 @@ and ``b/d`` are equal, that is the odds ratio ``(a/c) / (b/d)`` is one, against 
 alternative hypothesis that they are not equal.
 
 If `x` is a matrix with at least two rows and columns, it is taken as a two-dimensional
-contingency table.
+contingency table. Otherwise, `x` and `y` must be vectors of the same length. The contingency
+table is calculated using `counts` function from the `StatsBase` package.
+Note that the entries of `x` (and `y` if provided) must be non-negative integers.
 
 See [`pvalue(::FisherExactTest)`](@ref) and [`confint(::FisherExactTest)`](@ref) for details
 about the computation of the default p-value and confidence interval, respectively.
@@ -45,11 +47,10 @@ The contingency table is structured as:
 |*Y1*| a  | b  |
 |*Y2*| c  | d  |
 
-!!! Note:
+!!! note
     The `show` function output contains the conditional maximum likelihood estimate of the
     odds ratio rather than the sample odds ratio; it maximizes the likelihood given by
     Fisher's non-central hypergeometric distribution.
-    The entries must be non-negative integers.
 
 Implements: [`pvalue(::FisherExactTest)`](@ref), [`confint(::FisherExactTest)`](@ref)
 
@@ -80,6 +81,11 @@ end
 
 function FisherExactTest(x::AbstractMatrix{T}) where T<:Integer
     FisherExactTest(x[1,1], x[1,2], x[2,1], x[2,2])
+end
+
+function FisherExactTest(x::AbstractVector{T}, y::AbstractVector{T}) where T<:Integer
+    d = counts(x, y)
+    FisherExactTest(d[1,1], d[1,2], d[2,1], d[2,2])
 end
 
 testname(::FisherExactTest) = "Fisher's exact test"
