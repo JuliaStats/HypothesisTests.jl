@@ -145,11 +145,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "parametric/#HypothesisTests.MultinomialLRT",
+    "location": "parametric/#HypothesisTests.MultinomialLRTest",
     "page": "Parametric tests",
-    "title": "HypothesisTests.MultinomialLRT",
+    "title": "HypothesisTests.MultinomialLRTest",
     "category": "function",
-    "text": "MultinomialLRT(x[, y][, theta0 = ones(length(x))/length(x)])\n\nPerform a multinomial likelihood ratio test (equivalent to a PowerDivergenceTest with λ = 0).\n\nIf y is not given and x is a matrix with one row or column, or x is a vector, then a goodness-of-fit test is performed (x is treated as a one-dimensional contingency table). In this case, the hypothesis tested is whether the population probabilities equal those in theta0, or are all equal if theta0 is not given.\n\nIf x is a matrix with at least two rows and columns, it is taken as a two-dimensional contingency table. Otherwise, x and y must be vectors of the same length. The contingency table is calculated using counts function from the StatsBase package. Then the power divergence test is conducted under the null hypothesis that the joint distribution of the cell counts in a 2-dimensional contingency table is the product of the row and column marginals.\n\nNote that the entries of x (and y if provided) must be non-negative integers.\n\nImplements: pvalue, confint\n\n\n\n\n\n"
+    "text": "MultinomialLRTest(x[, y][, theta0 = ones(length(x))/length(x)])\n\nPerform a multinomial likelihood ratio test (equivalent to a PowerDivergenceTest with λ = 0).\n\nIf y is not given and x is a matrix with one row or column, or x is a vector, then a goodness-of-fit test is performed (x is treated as a one-dimensional contingency table). In this case, the hypothesis tested is whether the population probabilities equal those in theta0, or are all equal if theta0 is not given.\n\nIf x is a matrix with at least two rows and columns, it is taken as a two-dimensional contingency table. Otherwise, x and y must be vectors of the same length. The contingency table is calculated using counts function from the StatsBase package. Then the power divergence test is conducted under the null hypothesis that the joint distribution of the cell counts in a 2-dimensional contingency table is the product of the row and column marginals.\n\nNote that the entries of x (and y if provided) must be non-negative integers.\n\nImplements: pvalue, confint\n\n\n\n\n\n"
 },
 
 {
@@ -157,7 +157,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Parametric tests",
     "title": "Multinomial likelihood ratio test",
     "category": "section",
-    "text": "MultinomialLRT"
+    "text": "MultinomialLRTest"
 },
 
 {
@@ -569,27 +569,27 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "multivariate/#HypothesisTests.OneSampleHotellingT2",
+    "location": "multivariate/#HypothesisTests.OneSampleHotellingT2Test",
     "page": "Multivariate tests",
-    "title": "HypothesisTests.OneSampleHotellingT2",
+    "title": "HypothesisTests.OneSampleHotellingT2Test",
     "category": "type",
-    "text": "OneSampleHotellingT2(X::AbstractMatrix, μ₀=<zero vector>)\n\nPerform a one sample Hotelling\'s T^2 test of the hypothesis that the vector of column means of X is equal to μ₀.\n\n\n\n\n\nOneSampleHotellingT2(X::AbstractMatrix, Y::AbstractMatrix, μ₀=<zero vector>)\n\nPerform a paired Hotelling\'s T^2 test of the hypothesis that the vector of mean column differences between X and Y is equal to μ₀.\n\n\n\n\n\n"
+    "text": "OneSampleHotellingT2Test(X::AbstractMatrix, μ₀=<zero vector>)\n\nPerform a one sample Hotelling\'s T^2 test of the hypothesis that the vector of column means of X is equal to μ₀.\n\n\n\n\n\nOneSampleHotellingT2Test(X::AbstractMatrix, Y::AbstractMatrix, μ₀=<zero vector>)\n\nPerform a paired Hotelling\'s T^2 test of the hypothesis that the vector of mean column differences between X and Y is equal to μ₀.\n\n\n\n\n\n"
 },
 
 {
-    "location": "multivariate/#HypothesisTests.EqualCovHotellingT2",
+    "location": "multivariate/#HypothesisTests.EqualCovHotellingT2Test",
     "page": "Multivariate tests",
-    "title": "HypothesisTests.EqualCovHotellingT2",
+    "title": "HypothesisTests.EqualCovHotellingT2Test",
     "category": "type",
-    "text": "EqualCovHotellingT2(X::AbstractMatrix, Y::AbstractMatrix)\n\nPerform a two sample Hotelling\'s T^2 test of the hypothesis that the difference in the mean vectors of X and Y is zero, assuming that X and Y have equal covariance matrices.\n\n\n\n\n\n"
+    "text": "EqualCovHotellingT2Test(X::AbstractMatrix, Y::AbstractMatrix)\n\nPerform a two sample Hotelling\'s T^2 test of the hypothesis that the difference in the mean vectors of X and Y is zero, assuming that X and Y have equal covariance matrices.\n\n\n\n\n\n"
 },
 
 {
-    "location": "multivariate/#HypothesisTests.UnequalCovHotellingT2",
+    "location": "multivariate/#HypothesisTests.UnequalCovHotellingT2Test",
     "page": "Multivariate tests",
-    "title": "HypothesisTests.UnequalCovHotellingT2",
+    "title": "HypothesisTests.UnequalCovHotellingT2Test",
     "category": "type",
-    "text": "UnequalCovHotellingT2(X::AbstractMatrix, Y::AbstractMatrix)\n\nPerform a two sample Hotelling\'s T^2 test of the hypothesis that the difference in the mean vectors of X and Y is zero, without assuming that X and Y have equal covariance matrices.\n\n\n\n\n\n"
+    "text": "UnequalCovHotellingT2Test(X::AbstractMatrix, Y::AbstractMatrix)\n\nPerform a two sample Hotelling\'s T^2 test of the hypothesis that the difference in the mean vectors of X and Y is zero, without assuming that X and Y have equal covariance matrices.\n\n\n\n\n\n"
 },
 
 {
@@ -597,7 +597,23 @@ var documenterSearchIndex = {"docs": [
     "page": "Multivariate tests",
     "title": "Hotelling\'s T^2 test",
     "category": "section",
-    "text": "OneSampleHotellingT2\nEqualCovHotellingT2\nUnequalCovHotellingT2"
+    "text": "OneSampleHotellingT2Test\nEqualCovHotellingT2Test\nUnequalCovHotellingT2Test"
+},
+
+{
+    "location": "multivariate/#HypothesisTests.BartlettsTest",
+    "page": "Multivariate tests",
+    "title": "HypothesisTests.BartlettsTest",
+    "category": "type",
+    "text": "BartlettsTest(X::AbstractMatrix, Y::AbstractMatrix)\n\nPerform Bartlett\'s test of the hypothesis that the covariance matrices of X and Y are equal.\n\nnote: Note\nBartlett\'s test is sensitive to departures from multivariate normality.\n\n\n\n\n\n"
+},
+
+{
+    "location": "multivariate/#Equality-of-covariance-matrices-1",
+    "page": "Multivariate tests",
+    "title": "Equality of covariance matrices",
+    "category": "section",
+    "text": "Bartlett\'s test for equality of two covariance matrices is provided. This is equivalent to Box\'s M-test for two groups.BartlettsTest"
 },
 
 ]}
