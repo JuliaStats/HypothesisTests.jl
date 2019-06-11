@@ -40,7 +40,7 @@ end
     # Columns are calcium, iron, protein, vitamin A, vitamin C
     nutrient = readdlm(joinpath(@__DIR__, "data", "nutrient.txt"))[:,2:end]
 
-    t = OneSampleHotellingT2(nutrient, [1000, 15, 60, 800, 75])
+    t = OneSampleHotellingT2Test(nutrient, [1000, 15, 60, 800, 75])
     @test nobs(t) == 737
     @test dof(t) == (5, 732)
     @test pvalue(t) ≈ 0.0 atol=eps()
@@ -54,7 +54,7 @@ end
     spouse = readdlm(joinpath(@__DIR__, "data", "spouse.txt"))
 
     # Paired
-    p = OneSampleHotellingT2(spouse[:,1:4], spouse[:,5:end])
+    p = OneSampleHotellingT2Test(spouse[:,1:4], spouse[:,5:end])
     @test nobs(p) == 30
     @test dof(p) == (4, 26)
     @test pvalue(p) ≈ 0.039369144 atol=1e-6
@@ -71,7 +71,7 @@ end
     genuine = convert(Matrix{Float64}, swiss[view(swiss, :, 1) .== "real", 2:end])
     counterfeit = convert(Matrix{Float64}, swiss[view(swiss, :, 1) .== "fake", 2:end])
 
-    eq = EqualCovHotellingT2(genuine, counterfeit)
+    eq = EqualCovHotellingT2Test(genuine, counterfeit)
     @test nobs(eq) == (100, 100)
     @test dof(eq) == (6, 193)
     @test pvalue(eq) ≈ 0.0 atol=eps()
@@ -79,7 +79,7 @@ end
     @test eq.F ≈ 391.9217023 atol=1e-6
     @test occursin("reject h_0", sprint(show, eq))
 
-    un = UnequalCovHotellingT2(genuine, counterfeit)
+    un = UnequalCovHotellingT2Test(genuine, counterfeit)
     @test nobs(un) == (100, 100)
     @test dof(un) == (6, 193)
     @test pvalue(un) ≈ 0.0 atol=eps()

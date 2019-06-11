@@ -1,13 +1,13 @@
 # Hotelling T² test
 
-export OneSampleHotellingT2, EqualCovHotellingT2, UnequalCovHotellingT2
+export OneSampleHotellingT2Test, EqualCovHotellingT2Test, UnequalCovHotellingT2Test
 
-abstract type HotellingT2Test <: HypothesisTest end
+abstract type HotellingT2TestTest <: HypothesisTest end
 
-default_tail(::HotellingT2Test) = :right
-pvalue(T::HotellingT2Test; tail=:right) = pvalue(FDist(dof(T)...), T.F, tail=tail)
+default_tail(::HotellingT2TestTest) = :right
+pvalue(T::HotellingT2TestTest; tail=:right) = pvalue(FDist(dof(T)...), T.F, tail=tail)
 
-function show_params(io::IO, T::HotellingT2Test, indent="")
+function show_params(io::IO, T::HotellingT2TestTest, indent="")
     println(io, indent, "number of observations: ", nobs(T))
     println(io, indent, "number of variables:    ", T.p)
     println(io, indent, "T² statistic:           ", T.T²)
@@ -32,7 +32,7 @@ At_Binv_A(A::AbstractArray, B::AbstractArray) = A'*(B \ A)
 
 ## One sample
 
-struct OneSampleHotellingT2 <: HotellingT2Test
+struct OneSampleHotellingT2Test <: HotellingT2TestTest
     T²::Real
     F::Real
     n::Int
@@ -42,16 +42,16 @@ struct OneSampleHotellingT2 <: HotellingT2Test
     S::Matrix
 end
 
-StatsBase.nobs(T::OneSampleHotellingT2) = T.n
-StatsBase.dof(T::OneSampleHotellingT2) = (T.p, T.n - T.p)
+StatsBase.nobs(T::OneSampleHotellingT2Test) = T.n
+StatsBase.dof(T::OneSampleHotellingT2Test) = (T.p, T.n - T.p)
 
 """
-    OneSampleHotellingT2(X::AbstractMatrix, μ₀=<zero vector>)
+    OneSampleHotellingT2Test(X::AbstractMatrix, μ₀=<zero vector>)
 
 Perform a one sample Hotelling's ``T^2`` test of the hypothesis that the vector of
 column means of `X` is equal to `μ₀`.
 """
-function OneSampleHotellingT2(X::AbstractMatrix{T},
+function OneSampleHotellingT2Test(X::AbstractMatrix{T},
                               μ₀::AbstractVector=fill(middle(zero(T)), size(X, 2))) where T
     n, p = size(X)
     p == length(μ₀) ||
@@ -61,32 +61,32 @@ function OneSampleHotellingT2(X::AbstractMatrix{T},
     S = cov(X)
     T² = n * At_Binv_A(x̄ .- μ₀, S)
     F = (n - p) * T² / (p * (n - 1))
-    return OneSampleHotellingT2(T², F, n, p, μ₀, x̄, S)
+    return OneSampleHotellingT2Test(T², F, n, p, μ₀, x̄, S)
 end
 
 """
-    OneSampleHotellingT2(X::AbstractMatrix, Y::AbstractMatrix, μ₀=<zero vector>)
+    OneSampleHotellingT2Test(X::AbstractMatrix, Y::AbstractMatrix, μ₀=<zero vector>)
 
 Perform a paired Hotelling's ``T^2`` test of the hypothesis that the vector of mean
 column differences between `X` and `Y` is equal to `μ₀`.
 """
-function OneSampleHotellingT2(X::AbstractMatrix{T}, Y::AbstractMatrix{S},
+function OneSampleHotellingT2Test(X::AbstractMatrix{T}, Y::AbstractMatrix{S},
                               μ₀::AbstractVector=fill(middle(zero(T), zero(S)), size(X, 2))) where {T,S}
     p, nx, ny = checkdims(X, Y)
     nx == ny || throw(DimensionMismatch("Inconsistent number of observations: $nx, $ny"))
     p == length(μ₀) ||
         throw(DimensionMismatch("Number of variables does not match number of means"))
-    return OneSampleHotellingT2(X .- Y, μ₀)
+    return OneSampleHotellingT2Test(X .- Y, μ₀)
 end
 
-testname(::OneSampleHotellingT2) = "One sample Hotelling's T² test"
-population_param_of_interest(T::OneSampleHotellingT2) = ("Mean vector", T.μ₀, T.x̄)
+testname(::OneSampleHotellingT2Test) = "One sample Hotelling's T² test"
+population_param_of_interest(T::OneSampleHotellingT2Test) = ("Mean vector", T.μ₀, T.x̄)
 
 ## Two sample
 
 ## Two sample: equal covariance
 
-struct EqualCovHotellingT2 <: HotellingT2Test
+struct EqualCovHotellingT2Test <: HotellingT2TestTest
     T²::Real
     F::Real
     nx::Int
@@ -97,34 +97,34 @@ struct EqualCovHotellingT2 <: HotellingT2Test
 end
 
 """
-    EqualCovHotellingT2(X::AbstractMatrix, Y::AbstractMatrix)
+    EqualCovHotellingT2Test(X::AbstractMatrix, Y::AbstractMatrix)
 
 Perform a two sample Hotelling's ``T^2`` test of the hypothesis that the difference in
 the mean vectors of `X` and `Y` is zero, assuming that `X` and `Y` have equal covariance
 matrices.
 """
-function EqualCovHotellingT2(X::AbstractMatrix, Y::AbstractMatrix)
+function EqualCovHotellingT2Test(X::AbstractMatrix, Y::AbstractMatrix)
     p, nx, ny = checkdims(X, Y)
     Δ = vec(mean(X, dims=1) .- mean(Y, dims=1))
     S = poolcov!(cov(X), nx - 1, cov(Y), ny - 1) .* (inv(nx) .+ inv(ny))
     T² = At_Binv_A(Δ, S)
     F = T² * (nx + ny - p - 1) / (p * (nx + ny - 2))
-    return EqualCovHotellingT2(T², F, nx, ny, p, Δ, S)
+    return EqualCovHotellingT2Test(T², F, nx, ny, p, Δ, S)
 end
 
-StatsBase.nobs(T::EqualCovHotellingT2) = (T.nx, T.ny)
-StatsBase.dof(T::EqualCovHotellingT2) = (T.p, T.nx + T.ny - T.p - 1)
+StatsBase.nobs(T::EqualCovHotellingT2Test) = (T.nx, T.ny)
+StatsBase.dof(T::EqualCovHotellingT2Test) = (T.p, T.nx + T.ny - T.p - 1)
 
-testname(::EqualCovHotellingT2) =
+testname(::EqualCovHotellingT2Test) =
     "Two sample Hotelling's T² test (equal covariance matrices)"
-population_param_of_interest(T::EqualCovHotellingT2) =
+population_param_of_interest(T::EqualCovHotellingT2Test) =
     ("Difference in mean vectors", zeros(eltype(T.Δ), T.p), T.Δ)
 
 ## Two sample: unequal covariance
 
 # Store the denominator degrees of freedom in the type, since the computation
 # is expensive and we don't want to redo it every time the user calls dof
-struct UnequalCovHotellingT2 <: HotellingT2Test
+struct UnequalCovHotellingT2Test <: HotellingT2TestTest
     T²::Real
     F::Real
     nx::Int
@@ -136,13 +136,13 @@ struct UnequalCovHotellingT2 <: HotellingT2Test
 end
 
 """
-    UnequalCovHotellingT2(X::AbstractMatrix, Y::AbstractMatrix)
+    UnequalCovHotellingT2Test(X::AbstractMatrix, Y::AbstractMatrix)
 
 Perform a two sample Hotelling's ``T^2`` test of the hypothesis that the difference in
 the mean vectors of `X` and `Y` is zero, without assuming that `X` and `Y` have equal
 covariance matrices.
 """
-function UnequalCovHotellingT2(X::AbstractMatrix, Y::AbstractMatrix)
+function UnequalCovHotellingT2Test(X::AbstractMatrix, Y::AbstractMatrix)
     p, nx, ny = checkdims(X, Y)
     Δ = vec(mean(X, dims=1) .- mean(Y, dims=1))
     Sx = cov(X) ./ nx
@@ -153,13 +153,13 @@ function UnequalCovHotellingT2(X::AbstractMatrix, Y::AbstractMatrix)
     tmp = Symmetric(ST) \ Δ
     iν = (dot(tmp, Sx * tmp) / T²)^2 / (nx - 1) + (dot(tmp, Sy * tmp) / T²)^2 / (ny - 1)
     ν = trunc(Int, inv(iν))
-    return UnequalCovHotellingT2(T², F, nx, ny, p, ν, Δ, ST)
+    return UnequalCovHotellingT2Test(T², F, nx, ny, p, ν, Δ, ST)
 end
 
-StatsBase.nobs(T::UnequalCovHotellingT2) = (T.nx, T.ny)
-StatsBase.dof(T::UnequalCovHotellingT2) = (T.p, T.ν)
+StatsBase.nobs(T::UnequalCovHotellingT2Test) = (T.nx, T.ny)
+StatsBase.dof(T::UnequalCovHotellingT2Test) = (T.p, T.ν)
 
-testname(::UnequalCovHotellingT2) =
+testname(::UnequalCovHotellingT2Test) =
     "Two sample Hotelling's T² test (unequal covariance matrices)"
-population_param_of_interest(T::UnequalCovHotellingT2) =
+population_param_of_interest(T::UnequalCovHotellingT2Test) =
     ("Difference in mean vectors", zeros(eltype(T.Δ), T.p), T.Δ)
