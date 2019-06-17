@@ -52,6 +52,12 @@ ApproximateMannWhitneyUTest
 SignTest
 ```
 
+## Wald-Wolfowitz independence test
+
+```@docs
+WaldWolfowitzTest
+```
+
 ## Wilcoxon signed rank test
 
 ```@docs

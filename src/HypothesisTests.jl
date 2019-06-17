@@ -178,5 +178,7 @@ include("jarque_bera.jl")
 include("durbin_watson.jl")
 include("permutation.jl")
 include("hotelling.jl")
+include("wald_wolfowitz.jl")
 include("bartlett.jl")
+include("wald_wolfowitz.jl")
 end
