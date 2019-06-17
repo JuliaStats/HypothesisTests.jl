@@ -1,4 +1,4 @@
-export WaldWolfowitzTest, RunsTest
+export WaldWolfowitzTest
 
 struct WaldWolfowitzTest{T <: Real} <: HypothesisTest
     nabove::Int     # Number of points above median (or of value a)
