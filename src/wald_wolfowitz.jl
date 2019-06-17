@@ -12,10 +12,10 @@ end
 testname(::WaldWolfowitzTest) = "Wald-Wolfowitz Test"
 population_param_of_interest(x::WaldWolfowitzTest) = ("Number of runs", x.μ, x.nruns) # parameter of interest: name, value under h0, point estimate
 default_tail(::WaldWolfowitzTest) = :both
-pvalue(test::WaldWolfowitzTest; tail = :both) = pvalue(Normal(0.0, 1.0), test.z; tail = tail)
+pvalue(test::WaldWolfowitzTest; tail=:both) = pvalue(Normal(0.0, 1.0), test.z; tail=tail)
 
 
-function show_params(io::IO, x::WaldWolfowitzTest, ident = "")
+function show_params(io::IO, x::WaldWolfowitzTest, ident="")
     println(io, ident, "number of runs:  $(x.nruns)")
     println(io, ident, "z-statistic:     $(x.z)")
 end
