@@ -180,5 +180,4 @@ include("permutation.jl")
 include("hotelling.jl")
 include("wald_wolfowitz.jl")
 include("bartlett.jl")
-include("wald_wolfowitz.jl")
 end
