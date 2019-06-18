@@ -9,7 +9,7 @@ using DelimitedFiles
     genuine = convert(Matrix{Float64}, swiss[view(swiss, :, 1) .== "real", 2:end])
     counterfeit = convert(Matrix{Float64}, swiss[view(swiss, :, 1) .== "fake", 2:end])
 
-    b = BartlettsTest(genuine, counterfeit)
+    b = BartlettTest(genuine, counterfeit)
     @test nobs(b) == (100, 100)
     @test dof(b) == 21
     @test pvalue(b) ≈ 0.0 atol=1e-10

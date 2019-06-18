@@ -6,3 +6,5 @@ using Base: @deprecate
 @deprecate OneSampleHotellingT2 OneSampleHotellingT2Test
 @deprecate EqualCovHotellingT2 EqualCovHotellingT2Test
 @deprecate UnequalCovHotellingT2 UnequalCovHotellingT2Test
+
+@deprecate BartlettsTest BartlettTest

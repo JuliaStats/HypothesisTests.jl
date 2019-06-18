@@ -14,5 +14,5 @@ Bartlett's test for equality of two covariance matrices is provided.
 This is equivalent to Box's ``M``-test for two groups.
 
 ```@docs
-BartlettsTest
+BartlettTest
 ```
