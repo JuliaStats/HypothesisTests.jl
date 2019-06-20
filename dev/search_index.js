@@ -601,11 +601,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "multivariate/#HypothesisTests.BartlettsTest",
+    "location": "multivariate/#HypothesisTests.BartlettTest",
     "page": "Multivariate tests",
-    "title": "HypothesisTests.BartlettsTest",
+    "title": "HypothesisTests.BartlettTest",
     "category": "type",
-    "text": "BartlettsTest(X::AbstractMatrix, Y::AbstractMatrix)\n\nPerform Bartlett\'s test of the hypothesis that the covariance matrices of X and Y are equal.\n\nnote: Note\nBartlett\'s test is sensitive to departures from multivariate normality.\n\n\n\n\n\n"
+    "text": "BartlettTest(X::AbstractMatrix, Y::AbstractMatrix)\n\nPerform Bartlett\'s test of the hypothesis that the covariance matrices of X and Y are equal.\n\nnote: Note\nBartlett\'s test is sensitive to departures from multivariate normality.\n\n\n\n\n\n"
 },
 
 {
@@ -613,7 +613,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Multivariate tests",
     "title": "Equality of covariance matrices",
     "category": "section",
-    "text": "Bartlett\'s test for equality of two covariance matrices is provided. This is equivalent to Box\'s M-test for two groups.BartlettsTest"
+    "text": "Bartlett\'s test for equality of two covariance matrices is provided. This is equivalent to Box\'s M-test for two groups.BartlettTest"
 },
 
 ]}
