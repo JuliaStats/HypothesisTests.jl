@@ -81,9 +81,13 @@ population_param_of_interest(x::KruskalWallisTest) = ("Location parameters", "al
 default_tail(test::KruskalWallisTest) = :right
 
 function show_params(io::IO, x::KruskalWallisTest, ident)
-    println(io, ident, "number of observation in each group: ", x.n_i)
+    print(io, ident, "number of observation in each group: ")
+    show(io, x.n_i)
+    println(io)
     println(io, ident, "χ²-statistic:                        ", x.H)
-    println(io, ident, "rank sums:                           ", x.R_i)
+    print(io, ident, "rank sums:                           ")
+    show(io, x.R_i)
+    println(io)
     println(io, ident, "degrees of freedom:                  ", x.df)
     println(io, ident, "adjustment for ties:                 ", x.tie_adjustment)
 end
