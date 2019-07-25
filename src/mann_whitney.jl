@@ -105,9 +105,13 @@ population_param_of_interest(x::ExactMannWhitneyUTest) = ("Location parameter (p
 default_tail(test::ExactMannWhitneyUTest) = :both
 
 function show_params(io::IO, x::ExactMannWhitneyUTest, ident)
-    println(io, ident, "number of observations in each group: ", [x.nx, x.ny])
+    print(io, ident, "number of observations in each group: ")
+    show(io, [x.nx, x.ny])
+    println(io)
     println(io, ident, "Mann-Whitney-U statistic:             ", x.U)
-    println(io, ident, "rank sums:                            ", [sum(x.ranks[1:x.nx]), sum(x.ranks[x.nx+1:end])])
+    print(io, ident, "rank sums:                            ")
+    show(io, [sum(x.ranks[1:x.nx]), sum(x.ranks[x.nx+1:end])])
+    println(io)
     println(io, ident, "adjustment for ties:                  ", x.tie_adjustment)
 end
 

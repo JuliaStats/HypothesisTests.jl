@@ -212,7 +212,9 @@ function show_params(io::IO, x::ADFTest, ident)
     println(io, ident, "sample size in regression:          ", x.n)
     println(io, ident, "number of lags:                     ", x.lag)
     println(io, ident, "ADF statistic:                      ", x.stat)
-    println(io, ident, "Critical values at 1%, 5%, and 10%: ", x.cv')
+    print(io, ident, "Critical values at 1%, 5%, and 10%: ")
+    show(io, x.cv')
+    println(io)
 end
 
 pvalue(x::ADFTest) = HypothesisTests.pvalue(Normal(0, 1), adf_pv_aux(x.stat, x.deterministic); tail=:left)

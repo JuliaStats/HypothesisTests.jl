@@ -55,5 +55,7 @@ testname(::PermutationTest) = "Permutation Test"
 
 function show_params(io::IO, apt::PermutationTest, ident)
     println(io, ident, "observation: ", apt.observation)
-    println(io, ident, "samples: ", apt.samples)
+    print(io, ident, "samples: ")
+    show(io, apt.samples)
+    println(io)
 end
