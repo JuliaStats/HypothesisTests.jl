@@ -321,9 +321,9 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "nonparametric/#Kolmogorov–Smirnov-test-1",
+    "location": "nonparametric/#Kolmogorov-Smirnov-test-1",
     "page": "Nonparametric tests",
-    "title": "Kolmogorov–Smirnov test",
+    "title": "Kolmogorov-Smirnov test",
     "category": "section",
     "text": "Available are an exact one-sample test and approximate (i.e. asymptotic) one- and two-sample tests.ExactOneSampleKSTest\nApproximateOneSampleKSTest\nApproximateTwoSampleKSTest"
 },
@@ -390,6 +390,22 @@ var documenterSearchIndex = {"docs": [
     "title": "Sign test",
     "category": "section",
     "text": "SignTest"
+},
+
+{
+    "location": "nonparametric/#HypothesisTests.WaldWolfowitzTest",
+    "page": "Nonparametric tests",
+    "title": "HypothesisTests.WaldWolfowitzTest",
+    "category": "type",
+    "text": "WaldWolfowitzTest(x::AbstractVector{Bool})\nWaldWolfowitzTest(x::AbstractVector{<:Real})\n\nPerform the Wald-Wolfowitz (or Runs) test of the null hypothesis that the given data is random, or independently sampled. The data can come as many-valued or two-valued (Boolean). If many-valued, the sample is transformed by labelling each element as above or below the median.\n\nImplements: pvalue\n\n\n\n\n\n"
+},
+
+{
+    "location": "nonparametric/#Wald-Wolfowitz-independence-test-1",
+    "page": "Nonparametric tests",
+    "title": "Wald-Wolfowitz independence test",
+    "category": "section",
+    "text": "WaldWolfowitzTest"
 },
 
 {
