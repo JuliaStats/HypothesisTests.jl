@@ -21,7 +21,7 @@ BinomialTest
 FisherExactTest
 ```
 
-## Kolmogorov–Smirnov test
+## Kolmogorov-Smirnov test
 
 Available are an exact one-sample test and approximate (i.e. asymptotic) one- and two-sample
 tests.
@@ -50,6 +50,12 @@ ApproximateMannWhitneyUTest
 
 ```@docs
 SignTest
+```
+
+## Wald-Wolfowitz independence test
+
+```@docs
+WaldWolfowitzTest
 ```
 
 ## Wilcoxon signed rank test
