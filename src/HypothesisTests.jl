@@ -107,11 +107,18 @@ function Base.show(io::IO, test::T) where T<:HypothesisTest
     (param_name, param_under_h0, param_estimate) = population_param_of_interest(test)
     println(io, "Population details:")
     println(io, "    parameter of interest:   $param_name")
-    println(io, "    value under h_0:         $param_under_h0")
-    println(io, "    point estimate:          $param_estimate")
+    print(io, "    value under h_0:         ")
+    show(io, param_under_h0)
+    println(io)
+    print(io, "    point estimate:          ")
+    show(io, param_estimate)
+    println(io)
+
     if has_ci
         ci = map(x -> round.(x, digits=4, base=10), StatsBase.confint(test))
-        println(io, "    95% confidence interval: $ci")
+        print(io, "    95% confidence interval: ")
+        show(io, ci)
+        println(io)
     end
     println(io)
 
@@ -150,9 +157,10 @@ function show_params(io::IO, test::T, ident="") where T<:HypothesisTest
 
         for i = 1:length(fieldidx)
             name = T.names[fieldidx[i]]
-            println(io, ident, repeat(" ", maxlen-lengths[i]),
-                      replace(string(name), "_", " "),
-                      " = $(getfield(test, name))")
+            print(io, ident, repeat(" ", maxlen-lengths[i]),
+                      replace(string(name), "_", " ", " = "))
+            show(io, getfield(test, name))
+            println(io)
         end
     end
 end

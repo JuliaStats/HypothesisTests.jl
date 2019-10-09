@@ -5,7 +5,7 @@ using HypothesisTests, Test
 d = [[762,484] [327,239] [468,477]]
 m = PowerDivergenceTest(d)
 
-@test sprint(show, m) ==
+@test sprint(show, m, context=:compact => true) ==
     """
     Pearson's Chi-square Test
     -------------------------
@@ -30,7 +30,7 @@ m = PowerDivergenceTest(d)
 d = [ 20, 15, 25 ]
 m = PowerDivergenceTest(d)
 
-@test sprint(show, m) ==
+@test sprint(show, m, context=:compact => true) ==
     """
     Pearson's Chi-square Test
     -------------------------
