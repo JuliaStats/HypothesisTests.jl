@@ -44,12 +44,14 @@ default_tail(test::PowerDivergenceTest) = :right
 pvalue(x::PowerDivergenceTest; tail=:right) = pvalue(Chisq(x.df),x.stat; tail=tail)
 
 """
-    confint(test::PowerDivergenceTest, alpha = 0.05; tail = :both, method = :sison_glaz)
+    confint(test::PowerDivergenceTest, alpha = 0.05; tail = :both, method = :auto)
 
 Compute a confidence interval with coverage 1-`alpha` for multinomial proportions using
 one of the following methods. Possible values for `method` are:
 
-  - `:sison_glaz` (default): Sison-Glaz intervals
+  - `:auto` (default): If the minimum of the expected cell counts exceeds 100, Quesenberry-Hurst
+    intervals are used, otherwise Sison-Glaz.
+  - `:sison_glaz`: Sison-Glaz intervals
   - `:bootstrap`: Bootstrap intervals
   - `:quesenberry_hurst`: Quesenberry-Hurst intervals
   - `:gold`: Gold intervals (asymptotic simultaneous intervals)
@@ -66,7 +68,7 @@ one of the following methods. Possible values for `method` are:
     Mathematical Statistics, 30:56-74, 1963.
 """
 function StatsBase.confint(x::PowerDivergenceTest, alpha::Float64=0.05;
-                           tail::Symbol=:both, method::Symbol=:sison_glaz, correct::Bool=true,
+                           tail::Symbol=:both, method::Symbol=:auto, correct::Bool=true,
                            bootstrap_iters::Int64=10000, GC::Bool=true)
     check_alpha(alpha)
 
@@ -79,6 +81,9 @@ function StatsBase.confint(x::PowerDivergenceTest, alpha::Float64=0.05;
         i = StatsBase.confint(x, alpha*2,method=method, GC=GC)
         Tuple{Float64,Float64}[(i[j][1], 1.0) for j in 1:m]
     elseif tail == :both
+        if method == :auto
+            method = minimum(x.expected) > 100 ? :quesenberry_hurst : :sison_glaz
+        end
         if method == :gold
             ci_gold(x,alpha,correct=correct,GC=GC)
         elseif method == :sison_glaz

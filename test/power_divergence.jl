@@ -13,7 +13,7 @@ m = PowerDivergenceTest(d)
 @test m.theta0 ≈ [0.25523082406125785,0.19670969099133556,0.11593952361049113,0.08935608756107216,0.1935739395970214,0.1491899341788219]
 @test m.thetahat ≈ [0.2763873775843308,0.1755531374682626,0.11860718171926006,0.08668842945230323,0.16974972796517954,0.17301414581066377]
 
-c = confint(m)
+c = confint(m, method=:sison_glaz)
 c0 = [(.25788900979, .29554669435),
       (.15705476968, .19471245423),
       (.10010881393, .13776649848),
@@ -62,6 +62,14 @@ show(IOBuffer(), m)
 m = ChisqTest(d)
 m = MultinomialLRTest(d)
 
+confint(m)
+confint(m, tail=:left)
+confint(m, tail=:right)
+
+confint(m, method = :auto)
+confint(m, method = :auto, tail=:left)
+confint(m, method = :auto, tail=:right)
+
 confint(m, method = :bootstrap)
 confint(m, method = :bootstrap, tail=:left)
 confint(m, method = :bootstrap, tail=:right)
@@ -82,7 +90,7 @@ confint(m, method = :sison_glaz, tail=:right)
 @test_throws ArgumentError confint(m, method=:FOO)
 @test_throws ArgumentError confint(m, tail=:fox)
 
-
+@test confint(m, method = :quesenberry_hurst) == confint(m, method = :auto) == confint(m)
 
 
 #Example 3 in R
@@ -138,6 +146,14 @@ show(IOBuffer(), m)
 m = ChisqTest(d)
 m = MultinomialLRTest(d)
 
+confint(m)
+confint(m, tail=:left)
+confint(m, tail=:right)
+
+confint(m, method = :auto)
+confint(m, method = :auto, tail=:left)
+confint(m, method = :auto, tail=:right)
+
 confint(m, method = :bootstrap)
 confint(m, method = :bootstrap, tail=:left)
 confint(m, method = :bootstrap, tail=:right)
@@ -157,6 +173,8 @@ confint(m, method = :sison_glaz, tail=:right)
 
 @test_throws ArgumentError confint(m, method=:FOO)
 @test_throws ArgumentError confint(m, tail=:fox)
+
+@test confint(m, method = :sison_glaz) == confint(m, method = :auto) == confint(m)
 
 #
 x=[1,2,3,1,2,3]
