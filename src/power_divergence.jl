@@ -49,8 +49,8 @@ pvalue(x::PowerDivergenceTest; tail=:right) = pvalue(Chisq(x.df),x.stat; tail=ta
 Compute a confidence interval with coverage 1-`alpha` for multinomial proportions using
 one of the following methods. Possible values for `method` are:
 
-  - `:auto` (default): Sison-Glaz intervals unless the minimum of expected cell counts
-     is greater than 100 when Quesenberry-Hurst invervals are selected
+  - `:auto` (default): If the minimum of the expected cell counts exceeds 100, Sison-Glaz
+    intervals are used, otherwise Quesenberry-Hurst.
   - `:sison_glaz`: Sison-Glaz intervals
   - `:bootstrap`: Bootstrap intervals
   - `:quesenberry_hurst`: Quesenberry-Hurst intervals
