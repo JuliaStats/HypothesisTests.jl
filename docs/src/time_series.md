@@ -23,3 +23,8 @@ JarqueBeraTest
 ```@docs
 ADFTest
 ```
+
+## Homoscedasticity test
+```@docs
+HomoscedasticityTest
+```
