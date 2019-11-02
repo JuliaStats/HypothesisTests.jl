@@ -63,4 +63,9 @@ using HypothesisTests: default_tail
     @test t.H ≈ 2.642482 rtol = 1e-4
     @test pvalue(t) ≈ 2.124530e-5 rtol = 1e-4
     @test default_tail(t) == :both
+
+    @test_throws ArgumentError HomoscedasticityTest(y_h1, 101)
+
+    @test pvalue(t; tail = :left) > 0.99
+    @test pvalue(t; tail = :right) < 2e-5
 end

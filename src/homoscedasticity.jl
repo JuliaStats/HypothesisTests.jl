@@ -45,9 +45,9 @@ vector `y` has constant variance.
 
   * [Homoscedasticity on Wikipedia](https://en.wikipedia.org/wiki/Homoscedasticity)
 """
-function HomoscedasticityTest(y::AbstractVector{T}, h::Int) where T <: Real
+function HomoscedasticityTest(y::AbstractVector{<: Real}, h::Integer)
     n = length(y)
-    @assert h <= n/2
+    h > n/2 && throw(ArgumentError("The number of observations considered in each end must not be more than half the total number of observations"))
     H = sum(y[t]^2 for t = n-h+1:n)/sum(y[t]^2 for t = 1:h)
     return HomoscedasticityTest(n, h, H)
 end
