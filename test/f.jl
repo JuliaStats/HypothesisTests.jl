@@ -4,6 +4,7 @@ using HypothesisTests: default_tail
 @testset "F-tests" begin
 
     @testset "Basic F-test" begin
+        Random.seed!(123)
         y1_h0 = 4 .+ randn(500)
         y2_h0 = 4 .+ randn(400)
 
@@ -11,8 +12,8 @@ using HypothesisTests: default_tail
 
         @test t.n1 == 500
         @test t.n2 == 400
-        @test t.F ≈ 1.13643 rtol = 1e-4
-        @test pvalue(t) ≈ 0.18068 rtol = 1e-4
+        @test t.F ≈ 1.234701 rtol = 1e-4
+        @test pvalue(t) ≈ 0.027496 rtol = 1e-4
         @test default_tail(t) == :both
 
         y1_h1 = 0.8*randn(200)
@@ -22,7 +23,7 @@ using HypothesisTests: default_tail
 
         @test t.n1 == 200
         @test t.n2 == 120
-        @test t.F ≈ 0.47996 rtol = 1e-4
+        @test t.F ≈ 0.436056 rtol = 1e-4
         @test pvalue(t) < 1e-5
         @test default_tail(t) == :both
         @test pvalue(t; tail = :left) < 1e-5
