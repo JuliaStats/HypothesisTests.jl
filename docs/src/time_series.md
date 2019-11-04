@@ -24,7 +24,8 @@ JarqueBeraTest
 ADFTest
 ```
 
-## Homoscedasticity test
+## F-tests
 ```@docs
-HomoscedasticityTest
+FTest
+HomoscedasticityFTest
 ```
