@@ -188,5 +188,5 @@ include("permutation.jl")
 include("hotelling.jl")
 include("bartlett.jl")
 include("wald_wolfowitz.jl")
-include("homoscedasticity.jl")
+include("f.jl")
 end
