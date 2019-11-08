@@ -47,7 +47,7 @@ Compute the test statistic of an F test: the null hypothesis is that two real-va
 
   * [F-test of equality of variances on Wikipedia](https://en.wikipedia.org/wiki/F-test_of_equality_of_variances)
 """
-function VarianceFTest(y1::AbstractVector{<: Real}, y2::AbstractVector{<: Real}; F0::Real = 0)
+function VarianceFTest(y1::AbstractVector{<: Real}, y2::AbstractVector{<: Real}; F0::Real = 1.0)
     n1, n2 = length(y1), length(y2)
     F = var(y1) / var(y2)
     return VarianceFTest(n1, n2, n1-1, n2-1, F, F0)
