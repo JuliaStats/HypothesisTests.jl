@@ -3,15 +3,17 @@ using HypothesisTests: default_tail
 
 @testset "F-tests" begin
 
-    @testset "Basic F-test" begin
+    @testset "Basic variance F-test" begin
         Random.seed!(12)
         y1_h0 = 4 .+ randn(500)
         y2_h0 = 4 .+ randn(400)
 
-        t = FTest(y1_h0, y2_h0)
+        t = VarianceFTest(y1_h0, y2_h0)
 
-        @test t.n1 == 500
-        @test t.n2 == 400
+        @test t.n_x == 500
+        @test t.n_y == 400
+        @test t.df_x == 499
+        @test t.df_y == 399
         @test t.F ≈ 0.974693 rtol = 1e-4
         @test pvalue(t) ≈ 0.784563 rtol = 1e-4
         @test default_tail(t) == :both
@@ -19,10 +21,12 @@ using HypothesisTests: default_tail
         y1_h1 = 0.7*randn(200)
         y2_h1 = 1.3*randn(120)
 
-        t = FTest(y1_h1, y2_h1)
+        t = VarianceFTest(y1_h1, y2_h1)
 
-        @test t.n1 == 200
-        @test t.n2 == 120
+        @test t.n_x == 200
+        @test t.n_y == 120
+        @test t.df_x == 199
+        @test t.df_y == 119
         @test t.F ≈ 0.36754 rtol = 1e-4
         @test pvalue(t) < 1e-5
         @test default_tail(t) == :both
@@ -55,10 +59,12 @@ using HypothesisTests: default_tail
             1.67222, -0.685274, -0.742184, 0.488662, 0.805217, -1.22203, -1.11926, 1.29633, -0.415697, 
             -0.319425, -1.14136, -0.59144, -0.350336, -0.426482, 0.275284, 1.58645]
 
-        t = HomoscedasticityFTest(y_h0, 100)
+        t = VarianceFTest(y_h0, 100)
 
-        @test t.n1 == 100
-        @test t.n2 == 100
+        @test t.n_x == 100
+        @test t.n_y == 100
+        @test t.df_x == 99
+        @test t.df_y == 99
         @test t.F ≈ 1.11576 rtol = 1e-4
         @test pvalue(t) ≈ 0.58681 rtol = 1e-4
         @test default_tail(t) == :both
@@ -85,15 +91,17 @@ using HypothesisTests: default_tail
             1.90633, 0.193938, -1.11014, -2.12503,-1.77391, 0.478253, 0.804435, 1.33476, -1.42924, 0.697926, 
             -0.347439, 0.0500163, -0.41421, 0.972537, 1.66392, 0.818117]
 
-        t = HomoscedasticityFTest(y_h1, 80)
+        t = VarianceFTest(y_h1, 80)
 
-        @test t.n1 == 80
-        @test t.n2 == 80
+        @test t.n_x == 80
+        @test t.n_y == 80
+        @test t.df_x == 79
+        @test t.df_y == 79
         @test t.F ≈ 2.61080 rtol = 1e-4
         @test pvalue(t) ≈ 2.99304e-5 rtol = 1e-4
         @test default_tail(t) == :both
 
-        @test_throws ArgumentError HomoscedasticityFTest(y_h1, 101)
+        @test_throws ArgumentError VarianceFTest(y_h1, 101)
 
         @test pvalue(t; tail = :left) > 0.999
         @test pvalue(t; tail = :right) < 2e-5

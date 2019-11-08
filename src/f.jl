@@ -22,16 +22,19 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-export FTest, HomoscedasticityFTest
+export VarianceFTest
 
-struct FTest <: HypothesisTest
-    n1::Float64   # sample size of sample 1
-    n2::Float64   # sample size of sample 2
-    F::Float64    # test statistic
+struct VarianceFTest <: HypothesisTest
+    n_x::Int   # size of sample 1
+    n_y::Int   # size of sample 2
+    df_x::Int  # degrees of freedom 1
+    df_y::Int  # degrees of freedom 2
+    F::Real    # test statistic
+    F0::Real   # variance ratio under h_0
 end
 
 """
-    FTest(y1::AbstractVector{<: Real}, y2::AbstractVector{<: Real})
+    VarianceFTest(y1::AbstractVector{<: Real}, y2::AbstractVector{<: Real})
 
 Compute the test statistic of an F test: the null hypothesis is that two real-valued vectors
 `y1` and `y2` have equal variances.
@@ -42,16 +45,16 @@ Compute the test statistic of an F test: the null hypothesis is that two real-va
 
 # External links
 
-  * [F-test on Wikipedia](https://en.wikipedia.org/wiki/F-test)
+  * [F-test of equality of variances on Wikipedia](https://en.wikipedia.org/wiki/F-test_of_equality_of_variances)
 """
-function FTest(y1::AbstractVector{<: Real}, y2::AbstractVector{<: Real})
+function VarianceFTest(y1::AbstractVector{<: Real}, y2::AbstractVector{<: Real}; F0::Real = 0)
     n1, n2 = length(y1), length(y2)
     F = var(y1) / var(y2)
-    return FTest(n1, n2, F)
+    return VarianceFTest(n1, n2, n1-1, n2-1, F, F0)
 end
 
 """
-    HomoscedasticityFTest(y::AbstractVector{<: Real}, h::Integer)
+    VarianceFTest(y::AbstractVector{<: Real}, h::Integer)
 
 Compute the test statistic of an homoscedasticity F test: the null hypothesis is that a real-valued
 vector `y` has constant variance. The test is conducted over the ratio of the sample variances of the
@@ -66,26 +69,26 @@ first `h` observations and the last `h` observations of the series.
 
   * [Homoscedasticity on Wikipedia](https://en.wikipedia.org/wiki/Homoscedasticity)
 """
-function HomoscedasticityFTest(y::AbstractVector{<: Real}, h::Integer)
+function VarianceFTest(y::AbstractVector{<: Real}, h::Integer)
     n = length(y)
     h > n/2 && throw(ArgumentError("The number of observations considered in each end must not be more than half the total number of observations"))
     y1 = y[n-h+1:n]
     y2 = y[1:h]
-    return FTest(y1, y2)
+    return VarianceFTest(y1, y2)
 end
 
-testname(::FTest) = "F-test"
-population_param_of_interest(x::FTest) = ("variance ratio", "1.0", "$(x.F)")
-default_tail(test::FTest) = :both
+testname(::VarianceFTest) = "Variance F-test"
+population_param_of_interest(x::VarianceFTest) = ("variance ratio", x.F0, x.F)
+default_tail(test::VarianceFTest) = :both
 
-function show_params(io::IO, x::FTest, ident)
-    println(io, ident, "sample size 1:                  ", x.n1)
-    println(io, ident, "sample size 2:                  ", x.n2)
-    println(io, ident, "F statistic:                    ", x.F)
+function show_params(io::IO, x::VarianceFTest, ident)
+    println(io, ident, "number of observations: [$(x.n_x), $(x.n_y)]")
+    println(io, ident, "F statistic:            $(x.F)")
+    println(io, ident, "degrees of freedom:     [$(x.df_x), $(x.df_y)]")
 end
 
-function pvalue(x::FTest; tail = :both)
-    dist = FDist(x.n1-1, x.n2-1)
+function pvalue(x::VarianceFTest; tail = :both)
+    dist = FDist(x.df_x, x.df_y)
     if tail == :both
         Δ = abs(cdf(dist, x.F) - 0.5)
         F1 = quantile(dist, 0.5 - Δ)

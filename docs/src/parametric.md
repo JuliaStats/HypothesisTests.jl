@@ -28,3 +28,8 @@ OneSampleZTest
 EqualVarianceZTest
 UnequalVarianceZTest
 ```
+
+## F-test
+```@docs
+VarianceFTest
+```
