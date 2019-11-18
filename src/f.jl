@@ -36,8 +36,9 @@ end
 """
     VarianceFTest(y1::AbstractVector{<: Real}, y2::AbstractVector{<: Real})
 
-Compute the test statistic of an F test: the null hypothesis is that two real-valued vectors
-`y1` and `y2` have equal variances.
+Perform an F-test of the null hypothesis that two real-valued vectors `y1` and `y2` have equal variances.
+
+Implements: [`pvalue`](@ref)
 
 # References
 
@@ -54,11 +55,13 @@ function VarianceFTest(y1::AbstractVector{<: Real}, y2::AbstractVector{<: Real};
 end
 
 """
-    VarianceFTest(y::AbstractVector{<: Real}, h::Integer)
+    VarianceFTest(y::AbstractVector{<: Real}, firstlast::Integer = div(length(y), 2))
 
-Compute the test statistic of an homoscedasticity F test: the null hypothesis is that a real-valued
-vector `y` has constant variance. The test is conducted over the ratio of the sample variances of the
-first `h` observations and the last `h` observations of the series.
+Perform an homoscedasticity F-test of the null hypothesis that a real-valued vector `y` has constant variance. 
+The test is conducted over the ratio of the sample variances of the first and the last `firstlast` observations 
+of the series.
+
+Implements: [`pvalue`](@ref)
 
 # References
 
@@ -69,11 +72,11 @@ first `h` observations and the last `h` observations of the series.
 
   * [Homoscedasticity on Wikipedia](https://en.wikipedia.org/wiki/Homoscedasticity)
 """
-function VarianceFTest(y::AbstractVector{<: Real}, h::Integer)
+function VarianceFTest(y::AbstractVector{<: Real}; firstlast::Integer = div(length(y), 2))
     n = length(y)
-    h > n/2 && throw(ArgumentError("The number of observations considered in each end must not be more than half the total number of observations"))
-    y1 = y[n-h+1:n]
-    y2 = y[1:h]
+    firstlast > n/2 && throw(ArgumentError("The number of observations considered in each end must not be more than half the total number of observations"))
+    y1 = view(y, 1:firstlast)
+    y2 = view(y, n-firstlast+1:n)
     return VarianceFTest(y1, y2)
 end
 
