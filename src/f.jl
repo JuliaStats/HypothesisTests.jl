@@ -54,32 +54,6 @@ function VarianceFTest(y1::AbstractVector{<: Real}, y2::AbstractVector{<: Real};
     return VarianceFTest(n1, n2, n1-1, n2-1, F, F0)
 end
 
-"""
-    VarianceFTest(y::AbstractVector{<: Real}, firstlast::Integer = div(length(y), 2))
-
-Perform an homoscedasticity F-test of the null hypothesis that a real-valued vector `y` has constant variance. 
-The test is conducted over the ratio of the sample variances of the first and the last `firstlast` observations 
-of the series.
-
-Implements: [`pvalue`](@ref)
-
-# References
-
-  * James Durbin and Siem Jan Koopman, "Time Series Analysis by State Space Methods", 2nd Ed.,
-    2012, Oxford Statistical Science Series.
-
-# External links
-
-  * [Homoscedasticity on Wikipedia](https://en.wikipedia.org/wiki/Homoscedasticity)
-"""
-function VarianceFTest(y::AbstractVector{<: Real}; firstlast::Integer = div(length(y), 2))
-    n = length(y)
-    firstlast > n/2 && throw(ArgumentError("The number of observations considered in each end must not be more than half the total number of observations"))
-    y1 = view(y, 1:firstlast)
-    y2 = view(y, n-firstlast+1:n)
-    return VarianceFTest(y1, y2)
-end
-
 testname(::VarianceFTest) = "Variance F-test"
 population_param_of_interest(x::VarianceFTest) = ("variance ratio", x.F0, x.F)
 default_tail(test::VarianceFTest) = :both
