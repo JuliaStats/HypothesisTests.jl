@@ -15,6 +15,8 @@ using HypothesisTests: default_tail
         @test t.df_y == 399
         @test t.F ≈ 0.974693 rtol = 1e-5
         @test pvalue(t) ≈ 0.784563 rtol = 1e-5
+        @test pvalue(t; tail=:left) ≈ 0.392281 rtol = 1e-5
+        @test pvalue(t; tail=:right) ≈ 0.607718 rtol = 1e-5
         @test default_tail(t) == :both
 
         y1_h1 = 0.7*randn(200)

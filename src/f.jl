@@ -48,7 +48,7 @@ Implements: [`pvalue`](@ref)
 
   * [F-test of equality of variances on Wikipedia](https://en.wikipedia.org/wiki/F-test_of_equality_of_variances)
 """
-function VarianceFTest(y1::AbstractVector{<: Real}, y2::AbstractVector{<: Real}; F0::Real = 1.0)
+function VarianceFTest(y1::AbstractVector{<: Real}, y2::AbstractVector{<: Real}; F0::Real=1.0)
     n1, n2 = length(y1), length(y2)
     F = var(y1) / var(y2)
     return VarianceFTest(n1, n2, n1-1, n2-1, F, F0)
@@ -64,7 +64,7 @@ function show_params(io::IO, x::VarianceFTest, ident)
     println(io, ident, "degrees of freedom:     [$(x.df_x), $(x.df_y)]")
 end
 
-function pvalue(x::VarianceFTest; tail = :both)
+function pvalue(x::VarianceFTest; tail=:both)
     dist = FDist(x.df_x, x.df_y)
     if tail == :both
         Δ = abs(cdf(dist, x.F) - 0.5)
