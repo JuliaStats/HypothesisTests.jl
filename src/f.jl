@@ -30,7 +30,6 @@ struct VarianceFTest <: HypothesisTest
     df_x::Int  # degrees of freedom 1
     df_y::Int  # degrees of freedom 2
     F::Real    # test statistic
-    F0::Real   # variance ratio under h_0
 end
 
 """
@@ -48,14 +47,14 @@ Implements: [`pvalue`](@ref)
 
   * [F-test of equality of variances on Wikipedia](https://en.wikipedia.org/wiki/F-test_of_equality_of_variances)
 """
-function VarianceFTest(y1::AbstractVector{<: Real}, y2::AbstractVector{<: Real}; F0::Real=1.0)
+function VarianceFTest(y1::AbstractVector{<: Real}, y2::AbstractVector{<: Real})
     n1, n2 = length(y1), length(y2)
     F = var(y1) / var(y2)
-    return VarianceFTest(n1, n2, n1-1, n2-1, F, F0)
+    return VarianceFTest(n1, n2, n1-1, n2-1, F)
 end
 
 testname(::VarianceFTest) = "Variance F-test"
-population_param_of_interest(x::VarianceFTest) = ("variance ratio", x.F0, x.F)
+population_param_of_interest(x::VarianceFTest) = ("variance ratio", 1.0, x.F)
 default_tail(test::VarianceFTest) = :both
 
 function show_params(io::IO, x::VarianceFTest, ident)
