@@ -66,10 +66,7 @@ end
 function pvalue(x::VarianceFTest; tail=:both)
     dist = FDist(x.df_x, x.df_y)
     if tail == :both
-        Δ = abs(cdf(dist, x.F) - 0.5)
-        F1 = quantile(dist, 0.5 - Δ)
-        F2 = quantile(dist, 0.5 + Δ)
-        return cdf(dist, F1) + (1 - cdf(dist, F2))
+        return 1 - 2*abs(cdf(dist, x.F) - 0.5)
     elseif tail == :right
         return 1 - cdf(dist, x.F)
     elseif tail == :left
