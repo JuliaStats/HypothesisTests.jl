@@ -55,7 +55,7 @@ function StatsBase.confint(test::PartialCorTest{T}, alpha::Float64=0.05) where T
     dof(test) > 1 || return (-one(T), one(T))  # Otherwise we can get NaNs
     q = quantile(Normal(), 1 - alpha / 2)
     fisher = atanh(test.r)
-    bound = q / sqrt(test.n - 3 - test.k)
+    bound = q / sqrt(dof(test) - 1)
     elo = clampcor(tanh(fisher - bound))
     ehi = clampcor(tanh(fisher + bound))
     return (elo, ehi)
