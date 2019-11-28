@@ -46,11 +46,11 @@ struct CorrelationTest{T<:Real} <: HypothesisTest
     end
 end
 
-testname(t::CorrelationTest) =
-    string("Test for nonzero ", t.k == 0 ? "partial " : "", " correlation")
+testname(p::CorrelationTest) =
+    string("Test for nonzero ", p.k == 0 ? "partial " : "", " correlation")
 
 function population_param_of_interest(p::CorrelationTest)
-    param = t.k == 0 ? "Partial correlation" : "Correlation"
+    param = p.k == 0 ? "Partial correlation" : "Correlation"
     (param, zero(p.r), p.r)
 end
 
