@@ -189,5 +189,5 @@ include("hotelling.jl")
 include("bartlett.jl")
 include("wald_wolfowitz.jl")
 include("f.jl")
-include("partialcor.jl")
+include("correlation.jl")
 end
