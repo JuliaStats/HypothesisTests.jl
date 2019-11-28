@@ -1,4 +1,5 @@
-# Partial correlation
+# Correlation
+# TODO: Implement `CorrelationTest` for two arguments
 
 using Statistics: clampcor
 
