@@ -20,5 +20,5 @@ BartlettTest
 ## Partial correlation test
 
 ```@docs
-PartialCorTest
+CorrelationTest
 ```
