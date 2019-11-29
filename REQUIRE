@@ -1,6 +1,6 @@
 julia 0.7
 Distributions 0.16.3
 Roots
-StatsBase 0.25.0
+StatsBase 0.27.0
 Rmath 0.5.0
 Combinatorics 0.7.0
