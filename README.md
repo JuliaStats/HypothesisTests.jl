@@ -2,11 +2,6 @@
 
 *HypothesisTests.jl* is a Julia package that implements a wide range of hypothesis tests.
 
-- **Current Release**:
-  [![HypothesisTests](http://pkg.julialang.org/badges/HypothesisTests_0.5.svg)
-  ](http://pkg.julialang.org/?pkg=HypothesisTests)
-  [![HypothesisTests](http://pkg.julialang.org/badges/HypothesisTests_0.6.svg)
-  ](http://pkg.julialang.org/?pkg=HypothesisTests)
 - **Build & Testing Status:**
   [![Build Status](https://travis-ci.org/JuliaStats/HypothesisTests.jl.svg?branch=master)
   ](https://travis-ci.org/JuliaStats/HypothesisTests.jl)
