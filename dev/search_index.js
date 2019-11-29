@@ -648,4 +648,20 @@ var documenterSearchIndex = {"docs": [
     "text": "Bartlett\'s test for equality of two covariance matrices is provided. This is equivalent to Box\'s M-test for two groups.BartlettTest"
 },
 
+{
+    "location": "multivariate/#HypothesisTests.CorrelationTest",
+    "page": "Multivariate tests",
+    "title": "HypothesisTests.CorrelationTest",
+    "category": "type",
+    "text": "CorrelationTest(x, y, Z)\n\nPerform a t-test for the hypothesis that textCor(xyZ=z) = 0, i.e. the partial correlation of vectors x and y given the matrix Z is zero.\n\nImplements pvalue for the t-test. Implements confint using an approximate confidence interval based on Fisher\'s z-transform.\n\nSee also partialcor from StatsBase.\n\nExternal resources\n\nPartial correlation on Wikipedia (for the construction of the confidence interval)\nSection testing using Student\'s t-distribution from Pearson correlation coefficient on Wikipedia\nK.J. Levy and S.C. Narula (1978): Testing Hypotheses concerning Partial Correlations: Some Methods and Discussion. International Statistical Review 46(2).\n\n\n\n\n\n"
+},
+
+{
+    "location": "multivariate/#Partial-correlation-test-1",
+    "page": "Multivariate tests",
+    "title": "Partial correlation test",
+    "category": "section",
+    "text": "CorrelationTest"
+},
+
 ]}
