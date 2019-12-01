@@ -33,9 +33,9 @@ struct VarianceFTest <: HypothesisTest
 end
 
 """
-    VarianceFTest(y1::AbstractVector{<: Real}, y2::AbstractVector{<: Real})
+    VarianceFTest(x::AbstractVector{<:Real}, y::AbstractVector{<:Real})
 
-Perform an F-test of the null hypothesis that two real-valued vectors `y1` and `y2` have equal variances.
+Perform an F-test of the null hypothesis that two real-valued vectors `x` and `y` have equal variances.
 
 Implements: [`pvalue`](@ref)
 
@@ -47,9 +47,9 @@ Implements: [`pvalue`](@ref)
 
   * [F-test of equality of variances on Wikipedia](https://en.wikipedia.org/wiki/F-test_of_equality_of_variances)
 """
-function VarianceFTest(y1::AbstractVector{<: Real}, y2::AbstractVector{<: Real})
-    n1, n2 = length(y1), length(y2)
-    F = var(y1) / var(y2)
+function VarianceFTest(x::AbstractVector{<:Real}, y::AbstractVector{<:Real})
+    n1, n2 = length(x), length(y)
+    F = var(x) / var(y)
     return VarianceFTest(n1, n2, n1-1, n2-1, F)
 end
 
