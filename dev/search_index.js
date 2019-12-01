@@ -229,7 +229,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Parametric tests",
     "title": "HypothesisTests.VarianceFTest",
     "category": "type",
-    "text": "VarianceFTest(y1::AbstractVector{<: Real}, y2::AbstractVector{<: Real})\n\nPerform an F-test of the null hypothesis that two real-valued vectors y1 and y2 have equal variances.\n\nImplements: pvalue\n\nReferences\n\nGeorge E. P. Box, \"Non-Normality and Tests on Variances\", Biometrika 40 (3/4): 318–335, 1953.\n\nExternal links\n\nF-test of equality of variances on Wikipedia\n\n\n\n\n\n"
+    "text": "VarianceFTest(x::AbstractVector{<:Real}, y::AbstractVector{<:Real})\n\nPerform an F-test of the null hypothesis that two real-valued vectors x and y have equal variances.\n\nImplements: pvalue\n\nReferences\n\nGeorge E. P. Box, \"Non-Normality and Tests on Variances\", Biometrika 40 (3/4): 318–335, 1953.\n\nExternal links\n\nF-test of equality of variances on Wikipedia\n\n\n\n\n\n"
 },
 
 {
