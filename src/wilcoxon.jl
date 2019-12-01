@@ -29,7 +29,7 @@ export SignedRankTest, ExactSignedRankTest, ApproximateSignedRankTest
 # Automatic exact/normal selection
 """
     SignedRankTest(x::AbstractVector{<:Real})
-    SignedRankTest(x::AbstractVector{<:Real}, y::AbstractVector{T<:Real})
+    SignedRankTest(x::AbstractVector{<:Real}, y::AbstractVector{<:Real})
 
 Perform a Wilcoxon signed rank test of the null hypothesis that the distribution of `x`
 (or the difference `x - y` if `y` is provided) has zero median against the alternative
