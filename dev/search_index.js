@@ -429,7 +429,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Nonparametric tests",
     "title": "HypothesisTests.SignedRankTest",
     "category": "function",
-    "text": "SignedRankTest(x::AbstractVector{<:Real})\nSignedRankTest(x::AbstractVector{<:Real}, y::AbstractVector{T<:Real})\n\nPerform a Wilcoxon signed rank test of the null hypothesis that the distribution of x (or the difference x - y if y is provided) has zero median against the alternative hypothesis that the median is non-zero.\n\nWhen there are no tied ranks and ≤50 samples, or tied ranks and ≤15 samples, SignedRankTest performs an exact signed rank test. In all other cases, SignedRankTest performs an approximate signed rank test. Behavior may be further controlled by using ExactSignedRankTest or ApproximateSignedRankTest directly.\n\nImplements: pvalue, confint\n\n\n\n\n\n"
+    "text": "SignedRankTest(x::AbstractVector{<:Real})\nSignedRankTest(x::AbstractVector{<:Real}, y::AbstractVector{<:Real})\n\nPerform a Wilcoxon signed rank test of the null hypothesis that the distribution of x (or the difference x - y if y is provided) has zero median against the alternative hypothesis that the median is non-zero.\n\nWhen there are no tied ranks and ≤50 samples, or tied ranks and ≤15 samples, SignedRankTest performs an exact signed rank test. In all other cases, SignedRankTest performs an approximate signed rank test. Behavior may be further controlled by using ExactSignedRankTest or ApproximateSignedRankTest directly.\n\nImplements: pvalue, confint\n\n\n\n\n\n"
 },
 
 {
