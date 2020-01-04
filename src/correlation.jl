@@ -82,6 +82,7 @@ end
 
 default_tail(::CorrelationTest) = :both
 pvalue(test::CorrelationTest; tail=:both) = pvalue(TDist(dof(test)), test.t, tail=tail)
+StatsBase.stderror(test::CorrelationTest) = sqrt(1/dof(test))
 
 function show_params(io::IO, test::CorrelationTest, indent="")
     println(io, indent, "number of observations:          ", nobs(test))

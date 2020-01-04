@@ -51,9 +51,6 @@ end
 # The standard error of the difference
 StatsBase.stderror(x::TTest) = x.stderr
 
-# The magnitude of the difference
-meandiff(x::TTest) = x.xbar
-
 ## ONE SAMPLE T-TEST
 
 struct OneSampleTTest <: TTest
