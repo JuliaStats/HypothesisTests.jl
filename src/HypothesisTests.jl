@@ -29,9 +29,9 @@ using Distributions, Roots, StatsBase
 using Combinatorics: combinations, permutations
 using Rmath: pwilcox, psignrank
 
-import StatsBase.confint
+import StatsBase.confint, StatsBase.stderror
 
-export testname, pvalue, confint
+export testname, pvalue, confint, stderror
 abstract type HypothesisTest end
 
 check_same_length(x::AbstractVector, y::AbstractVector) = if length(x) != length(y)
