@@ -65,6 +65,11 @@ function show_params(io::IO, x::BinomialTest, ident="")
 end
 
 pvalue(x::BinomialTest; tail=:both) = pvalue(Binomial(x.n, x.p), x.x; tail=tail)
+function StatsBase.stderror(b::BinomialTest) 
+    n = b.n
+    phat = b.x / n
+    sqrt((phat * (1 - phat)) / n)
+end
 
 # Confidence interval
 """
