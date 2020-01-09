@@ -68,9 +68,9 @@ pvalue(x::BinomialTest; tail=:both) = pvalue(Binomial(x.n, x.p), x.x; tail=tail)
 
 # Confidence interval
 """
-    confint(test::BinomialTest; alpha = 0.05, tail = :both, method = :clopper_pearson)
+    confint(test::BinomialTest; level = 0.95, tail = :both, method = :clopper_pearson)
 
-Compute a confidence interval with coverage 1-`alpha` for a binomial proportion using one
+Compute a confidence interval with coverage `level` for a binomial proportion using one
 of the following methods. Possible values for `method` are:
 
   - `:clopper_pearson` (default): Clopper-Pearson interval is based on the binomial
@@ -100,26 +100,26 @@ of the following methods. Possible values for `method` are:
   * [Binomial confidence interval on Wikipedia](https://en.wikipedia.org/wiki/
     Binomial_proportion_confidence_interval)
 """
-function StatsBase.confint(x::BinomialTest; alpha::Float64=0.05, tail=:both, method=:clopper_pearson)
-    check_alpha(alpha)
+function StatsBase.confint(x::BinomialTest; level::Float64=0.95, tail=:both, method=:clopper_pearson)
+    check_level(level)
 
     if tail == :left
-        (0.0, StatsBase.confint(x, alpha=alpha*2, method=method)[2])
+        (0.0, StatsBase.confint(x, level=1-(1-level)*2, method=method)[2])
     elseif tail == :right
-        (StatsBase.confint(x, alpha=alpha*2, method=method)[1], 1.0)
+        (StatsBase.confint(x, level=1-(1-level)*2, method=method)[1], 1.0)
     elseif tail == :both
         if method == :clopper_pearson
-            ci_clopper_pearson(x, alpha)
+            ci_clopper_pearson(x, 1-level)
         elseif method == :wald
-            ci_wald(x, alpha)
+            ci_wald(x, 1-level)
         elseif method == :wilson
-            ci_wilson(x, alpha)
+            ci_wilson(x, 1-level)
         elseif method == :jeffrey
-            ci_jeffrey(x, alpha)
+            ci_jeffrey(x, 1-level)
         elseif method == :agresti_coull
-            ci_agresti_coull(x, alpha)
+            ci_agresti_coull(x, 1-level)
         elseif method == :arcsine
-            ci_arcsine(x, alpha)
+            ci_arcsine(x, 1-level)
         else
             throw(ArgumentError("method=$(method) is not implemented yet"))
         end
@@ -214,17 +214,17 @@ end
 
 pvalue(x::SignTest; tail=:both) = pvalue(Binomial(x.n, 0.5), x.x; tail=tail)
 
-function StatsBase.confint(x::SignTest; alpha::Float64=0.05, tail=:both)
-    check_alpha(alpha)
+function StatsBase.confint(x::SignTest; level::Float64=0.95, tail=:both)
+    check_level(level)
 
     if tail == :left
-        q = Int(quantile(Binomial(x.n, 0.5), alpha))
+        q = Int(quantile(Binomial(x.n, 0.5), 1-level))
         (x.data[q+1], x.median)
     elseif tail == :right
-        q = Int(quantile(Binomial(x.n, 0.5), alpha))
+        q = Int(quantile(Binomial(x.n, 0.5), 1-level))
         (x.median, x.data[end-q])
     elseif tail == :both
-        q = Int(quantile(Binomial(x.n, 0.5), alpha/2))
+        q = Int(quantile(Binomial(x.n, 0.5), (1-level)/2))
         (x.data[q+1], x.data[end-q])
     else
         throw(ArgumentError("tail=$(tail) is invalid"))

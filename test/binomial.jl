@@ -71,7 +71,7 @@ end
     @test pvalue(SignTest(x, 70), tail=:right) ≈ 0.9996356964111328
     @test default_tail(SignTest(x)) == :both
     @test_ci_approx confint(SignTest(x, 70)) (62, 69)
-    @test_ci_approx confint(SignTest(x, 70), alpha=0.0002) (61, 71)
+    @test_ci_approx confint(SignTest(x, 70), level=0.9998) (61, 71)
     show(IOBuffer(), SignTest(x, 70))
 
     x = [9, 2, 7, 5]
@@ -85,12 +85,12 @@ end
     @test pvalue(SignTest(x)) ≈ 0.03515625
     @test pvalue(SignTest(x), tail=:left) ≈ 0.996307373046875
     @test pvalue(SignTest(x), tail=:right) ≈ 0.017578125000000007
-    @test_ci_approx confint(SignTest(x), alpha=1-0.99995) (-7.8, 23.5)
-    @test_ci_approx confint(SignTest(x), alpha=1-0.9999) (-6.9, 22.4)
-    @test_ci_approx confint(SignTest(x), alpha=1-0.993) (-4.7, 20.2)
-    @test_ci_approx confint(SignTest(x), alpha=1-0.965) (3.7, 15.6)
-    @test_ci_approx confint(SignTest(x), alpha=1-0.882) (6.5, 14.4)
-    @test_ci_approx confint(SignTest(x), alpha=1-0.7) (8.7, 13.6)
-    @test_ci_approx confint(SignTest(x), alpha=1-0.6) (9.1, 10.8)
+    @test_ci_approx confint(SignTest(x), level=0.99995) (-7.8, 23.5)
+    @test_ci_approx confint(SignTest(x), level=0.9999) (-6.9, 22.4)
+    @test_ci_approx confint(SignTest(x), level=0.993) (-4.7, 20.2)
+    @test_ci_approx confint(SignTest(x), level=0.965) (3.7, 15.6)
+    @test_ci_approx confint(SignTest(x), level=0.882) (6.5, 14.4)
+    @test_ci_approx confint(SignTest(x), level=0.7) (8.7, 13.6)
+    @test_ci_approx confint(SignTest(x), level=0.6) (9.1, 10.8)
     show(IOBuffer(), SignTest(x))
 end

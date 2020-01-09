@@ -9,4 +9,4 @@ using Base: @deprecate
 
 @deprecate BartlettsTest BartlettTest
 
-@deprecate confint(x::HypothesisTest, alpha::Real; kwargs...) confint(x; alpha=alpha, kwargs...)
+@deprecate confint(x::HypothesisTest, alpha::Real; kwargs...) confint(x; level=1-alpha, kwargs...)

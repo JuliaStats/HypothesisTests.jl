@@ -91,9 +91,9 @@ pvalue(dist::DiscreteUnivariateDistribution, x::Number; tail=:both) =
         throw(ArgumentError("tail=$(tail) is invalid"))
     end
 
-function check_alpha(alpha::Float64)
-    if alpha <= 0 || alpha >= 0.5
-        throw(ArgumentError("alpha $alpha not in range (0, 0.5)"))
+function check_level(level::Float64)
+    if level >= 1 || level <= 0.5
+        throw(ArgumentError("coverage level $level not in range (0.5, 1)"))
     end
 end
 
