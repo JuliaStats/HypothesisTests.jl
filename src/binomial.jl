@@ -68,7 +68,7 @@ pvalue(x::BinomialTest; tail=:both) = pvalue(Binomial(x.n, x.p), x.x; tail=tail)
 
 # Confidence interval
 """
-    confint(test::BinomialTest, alpha = 0.05; tail = :both, method = :clopper_pearson)
+    confint(test::BinomialTest; alpha = 0.05, tail = :both, method = :clopper_pearson)
 
 Compute a confidence interval with coverage 1-`alpha` for a binomial proportion using one
 of the following methods. Possible values for `method` are:
@@ -100,13 +100,13 @@ of the following methods. Possible values for `method` are:
   * [Binomial confidence interval on Wikipedia](https://en.wikipedia.org/wiki/
     Binomial_proportion_confidence_interval)
 """
-function StatsBase.confint(x::BinomialTest, alpha::Float64=0.05; tail=:both, method=:clopper_pearson)
+function StatsBase.confint(x::BinomialTest; alpha::Float64=0.05, tail=:both, method=:clopper_pearson)
     check_alpha(alpha)
 
     if tail == :left
-        (0.0, StatsBase.confint(x, alpha*2, method=method)[2])
+        (0.0, StatsBase.confint(x, alpha=alpha*2, method=method)[2])
     elseif tail == :right
-        (StatsBase.confint(x, alpha*2, method=method)[1], 1.0)
+        (StatsBase.confint(x, alpha=alpha*2, method=method)[1], 1.0)
     elseif tail == :both
         if method == :clopper_pearson
             ci_clopper_pearson(x, alpha)
@@ -214,7 +214,7 @@ end
 
 pvalue(x::SignTest; tail=:both) = pvalue(Binomial(x.n, 0.5), x.x; tail=tail)
 
-function StatsBase.confint(x::SignTest, alpha::Float64=0.05; tail=:both)
+function StatsBase.confint(x::SignTest; alpha::Float64=0.05, tail=:both)
     check_alpha(alpha)
 
     if tail == :left

@@ -159,7 +159,7 @@ end
 
 # confidence interval by inversion of p-value
 """
-    confint(x::FisherExactTest, alpha::Float64=0.05; tail=:both, method=:central)
+    confint(x::FisherExactTest; alpha::Float64=0.05, tail=:both, method=:central)
 
 Compute a confidence interval with coverage 1 - `alpha`. One-sided intervals are based on
 Fisher's non-central hypergeometric distribution. For `tail = :both`, the only
@@ -177,7 +177,7 @@ Fisher's non-central hypergeometric distribution. For `tail = :both`, the only
     Blaker’s exact tests". Biostatistics, Volume 11, Issue 2, 1 April 2010, Pages 373–374,
     [link](https://doi.org/10.1093/biostatistics/kxp050)
 """
-function StatsBase.confint(x::FisherExactTest, alpha::Float64=0.05; tail=:both, method=:central)
+function StatsBase.confint(x::FisherExactTest; alpha::Float64=0.05, tail=:both, method=:central)
     check_alpha(alpha)
     dist(ω) = FisherNoncentralHypergeometric(x.a+x.b, x.c+x.d, x.a+x.c, ω)
     obj(ω) = pvalue(dist(ω), x.a, tail=tail) - alpha
@@ -196,7 +196,8 @@ function StatsBase.confint(x::FisherExactTest, alpha::Float64=0.05; tail=:both, 
         end
     elseif tail == :both
         if method == :central
-            (StatsBase.confint(x, alpha/2; tail=:right)[1], StatsBase.confint(x, alpha/2; tail=:left)[2])
+            (StatsBase.confint(x, alpha=alpha/2, tail=:right)[1],
+             StatsBase.confint(x, alpha=alpha/2, tail=:left)[2])
         else
             throw(ArgumentError("method=$(method) is not implemented yet"))
         end

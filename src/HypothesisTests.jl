@@ -39,7 +39,7 @@ check_same_length(x::AbstractVector, y::AbstractVector) = if length(x) != length
 end
 
 """
-    confint(test::HypothesisTest, alpha = 0.05; tail = :both)
+    confint(test::HypothesisTest; alpha = 0.05, tail = :both)
 
 Compute a confidence interval C with coverage 1-`alpha`.
 

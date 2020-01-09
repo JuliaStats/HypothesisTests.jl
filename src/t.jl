@@ -33,13 +33,13 @@ pvalue(x::TTest; tail=:both) = pvalue(TDist(x.df), x.t; tail=tail)
 default_tail(test::TTest) = :both
 
 # confidence interval by inversion
-function StatsBase.confint(x::TTest, alpha::Float64=0.05; tail=:both)
+function StatsBase.confint(x::TTest; alpha::Float64=0.05, tail=:both)
     check_alpha(alpha)
 
     if tail == :left
-        (-Inf, StatsBase.confint(x, alpha*2)[2])
+        (-Inf, StatsBase.confint(x, alpha=alpha*2)[2])
     elseif tail == :right
-        (StatsBase.confint(x, alpha*2)[1], Inf)
+        (StatsBase.confint(x, alpha=alpha*2)[1], Inf)
     elseif tail == :both
         q = quantile(TDist(x.df), 1-alpha/2)
         (x.xbar-q*x.stderr, x.xbar+q*x.stderr)

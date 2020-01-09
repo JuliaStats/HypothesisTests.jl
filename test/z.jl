@@ -27,8 +27,8 @@ null = Normal(0.0, 1.0)
 	@test pvalue(tst) ≈ 2 * min(cdf(null, z), ccdf(null, z))
 	@test confint(tst)[1] ≈ m + quantile(null, 0.05 / 2) * se
 	@test confint(tst)[2] ≈ m + cquantile(null, 0.05 / 2) * se
-	@test confint(tst, 0.10)[1] ≈ m + quantile(null, 0.10 / 2) * se
-	@test confint(tst, 0.10)[2] ≈ m + cquantile(null, 0.10 / 2) * se
+	@test confint(tst; alpha=0.10)[1] ≈ m + quantile(null, 0.10 / 2) * se
+	@test confint(tst; alpha=0.10)[2] ≈ m + cquantile(null, 0.10 / 2) * se
 	@test confint(tst; tail=:left)[1] ≈ -Inf
 	@test confint(tst; tail=:left)[2] ≈ m + cquantile(null, 0.05) * se
 	@test confint(tst; tail=:right)[1] ≈ m + quantile(null, 0.05) * se
@@ -50,8 +50,8 @@ null = Normal(0.0, 1.0)
 	@test pvalue(tst) ≈ 2 * min(cdf(null, z), ccdf(null, z))
 	@test confint(tst)[1] ≈ m + quantile(null, 0.05 / 2) * se
 	@test confint(tst)[2] ≈ m + cquantile(null, 0.05 / 2) * se
-	@test confint(tst, 0.10)[1] ≈ m + quantile(null, 0.10 / 2) * se
-	@test confint(tst, 0.10)[2] ≈ m + cquantile(null, 0.10 / 2) * se
+	@test confint(tst; alpha=0.10)[1] ≈ m + quantile(null, 0.10 / 2) * se
+	@test confint(tst; alpha=0.10)[2] ≈ m + cquantile(null, 0.10 / 2) * se
 	@test confint(tst; tail=:left)[1] ≈ -Inf
 	@test confint(tst; tail=:left)[2] ≈ m + cquantile(null, 0.05) * se
 	@test confint(tst; tail=:right)[1] ≈ m + quantile(null, 0.05) * se

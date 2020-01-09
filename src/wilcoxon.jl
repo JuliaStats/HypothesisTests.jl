@@ -161,7 +161,7 @@ function pvalue(x::ExactSignedRankTest; tail=:both)
     end
 end
 
-StatsBase.confint(x::ExactSignedRankTest, alpha::Real=0.05; tail=:both) = calculate_ci(x.vals, alpha; tail=tail)
+StatsBase.confint(x::ExactSignedRankTest; alpha::Real=0.05, tail=:both) = calculate_ci(x.vals, alpha, tail=tail)
 
 
 ## APPROXIMATE SIGNED RANK TEST
@@ -236,7 +236,7 @@ function pvalue(x::ApproximateSignedRankTest; tail=:both)
     end
 end
 
-StatsBase.confint(x::ApproximateSignedRankTest, alpha::Real=0.05; tail=:both) = calculate_ci(x.vals, alpha; tail=tail)
+StatsBase.confint(x::ApproximateSignedRankTest; alpha::Real=0.05, tail=:both) = calculate_ci(x.vals, alpha; tail=tail)
 
 # implementation method inspired by these notes: http://www.stat.umn.edu/geyer/old03/5102/notes/rank.pdf
 function calculate_ci(x::AbstractVector, alpha::Real=0.05; tail=:both)
