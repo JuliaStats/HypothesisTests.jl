@@ -44,9 +44,9 @@ default_tail(test::PowerDivergenceTest) = :right
 pvalue(x::PowerDivergenceTest; tail=:right) = pvalue(Chisq(x.df),x.stat; tail=tail)
 
 """
-    confint(test::PowerDivergenceTest, alpha = 0.05; tail = :both, method = :auto)
+    confint(test::PowerDivergenceTest; alpha = 0.05, tail = :both, method = :auto)
 
-Compute a confidence interval with coverage 1-`alpha` for multinomial proportions using
+Compute a confidence interval with coverage `level` for multinomial proportions using
 one of the following methods. Possible values for `method` are:
 
   - `:auto` (default): If the minimum of the expected cell counts exceeds 100, Quesenberry-Hurst
@@ -67,31 +67,31 @@ one of the following methods. Possible values for `method` are:
   * Gold, R. Z. Tests Auxiliary to ``χ^2`` Tests in a Markov Chain. Annals of
     Mathematical Statistics, 30:56-74, 1963.
 """
-function StatsBase.confint(x::PowerDivergenceTest, alpha::Float64=0.05;
+function StatsBase.confint(x::PowerDivergenceTest; level::Float64=0.95,
                            tail::Symbol=:both, method::Symbol=:auto, correct::Bool=true,
                            bootstrap_iters::Int64=10000, GC::Bool=true)
-    check_alpha(alpha)
+    check_level(level)
 
     m  = length(x.thetahat)
 
     if tail == :left
-        i = StatsBase.confint(x, alpha*2,method=method, GC=GC)
+        i = StatsBase.confint(x, level=1-(1-level)*2, method=method, GC=GC)
         Tuple{Float64,Float64}[(0.0, i[j][2]) for j in 1:m]
     elseif tail == :right
-        i = StatsBase.confint(x, alpha*2,method=method, GC=GC)
+        i = StatsBase.confint(x, level=1-(1-level)*2, method=method, GC=GC)
         Tuple{Float64,Float64}[(i[j][1], 1.0) for j in 1:m]
     elseif tail == :both
         if method == :auto
             method = minimum(x.expected) > 100 ? :quesenberry_hurst : :sison_glaz
         end
         if method == :gold
-            ci_gold(x,alpha,correct=correct,GC=GC)
+            ci_gold(x, 1-level, correct=correct, GC=GC)
         elseif method == :sison_glaz
-            ci_sison_glaz(x,alpha, skew_correct=correct)
+            ci_sison_glaz(x, 1-level, skew_correct=correct)
         elseif method == :quesenberry_hurst
-            ci_quesenberry_hurst(x,alpha,GC=GC)
+            ci_quesenberry_hurst(x, 1-level, GC=GC)
         elseif method == :bootstrap
-            ci_bootstrap(x,alpha,bootstrap_iters)
+            ci_bootstrap(x, 1-level, bootstrap_iters)
         else
             throw(ArgumentError("method=$(method) is invalid or not implemented yet"))
         end

@@ -8,3 +8,5 @@ using Base: @deprecate
 @deprecate UnequalCovHotellingT2 UnequalCovHotellingT2Test
 
 @deprecate BartlettsTest BartlettTest
+
+@deprecate confint(x::HypothesisTest, alpha::Real; kwargs...) confint(x; level=1-alpha, kwargs...)

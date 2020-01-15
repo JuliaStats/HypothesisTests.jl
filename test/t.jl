@@ -17,7 +17,7 @@ using HypothesisTests: default_tail
 	@test abs(pvalue(tst) - 0.0530) <= 1e-4
 
 	@test all(abs.([confint(tst)...;] - [-0.0369, 5.0369]) .<= 1e-4)
-	@test all(abs.([confint(tst, 0.1)...;] - [0.4135, 4.5865]) .<= 1e-4)
+	@test all(abs.([confint(tst, level=0.9)...;] - [0.4135, 4.5865]) .<= 1e-4)
 	c = confint(tst; tail=:left)
 	@test c[1] == -Inf
 	@test abs(c[2] - 4.5865) .<= 1e-4
