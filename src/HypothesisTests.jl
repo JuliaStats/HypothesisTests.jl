@@ -190,4 +190,6 @@ include("bartlett.jl")
 include("wald_wolfowitz.jl")
 include("f.jl")
 include("correlation.jl")
+include("diebold_mariano.jl")
+
 end
