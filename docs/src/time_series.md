@@ -23,3 +23,8 @@ JarqueBeraTest
 ```@docs
 ADFTest
 ```
+
+## Diebold-Mariano test
+```@docs
+DieboldMarianoTest
+```
