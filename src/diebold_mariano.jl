@@ -24,10 +24,10 @@
 
 export DieboldMarianoTest
 
-struct DieboldMarianoTest <: HypothesisTest
+struct DieboldMarianoTest <: TTest
     n::Integer     # number of observations
-    dof::Integer   # degrees of freedom
-    stat::Real     # test statistic
+    df::Integer    # degrees of freedom
+    t::Real        # test statistic
 end
 
 """
@@ -72,19 +72,6 @@ default_tail(test::DieboldMarianoTest) = :both
 
 function show_params(io::IO, x::DieboldMarianoTest, ident)
     println(io, ident, "number of observations: $(x.n)")
-    println(io, ident, "DM statistic:           $(x.stat)")
-    println(io, ident, "degrees of freedom:     $(x.dof)")
-end
-
-function pvalue(x::DieboldMarianoTest; tail=:both)
-    dist = TDist(x.dof)
-    if tail == :both
-        return 1 - 2*abs(cdf(dist, x.stat) - 0.5)
-    elseif tail == :right
-        return 1 - cdf(dist, x.stat)
-    elseif tail == :left
-        return cdf(dist, x.stat)
-    else
-        throw(ArgumentError("tail=$(tail) is invalid"))
-    end
+    println(io, ident, "DM statistic:           $(x.st)")
+    println(io, ident, "degrees of freedom:     $(x.df)")
 end
