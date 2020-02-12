@@ -72,6 +72,6 @@ default_tail(test::DieboldMarianoTest) = :both
 
 function show_params(io::IO, x::DieboldMarianoTest, ident)
     println(io, ident, "number of observations: $(x.n)")
-    println(io, ident, "DM statistic:           $(x.st)")
+    println(io, ident, "DM statistic:           $(x.t)")
     println(io, ident, "degrees of freedom:     $(x.df)")
 end
