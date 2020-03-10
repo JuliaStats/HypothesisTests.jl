@@ -34,7 +34,7 @@ struct ADFTest <: HypothesisTest
 end
 
 """
-    ADFTest(y, deterministic, lag)
+    ADFTest(y::AbstractVector{T}, deterministic::Symbol, lag::Int) where T<:Real
 
 Compute the augmented Dickey-Fuller unit root test.
 
