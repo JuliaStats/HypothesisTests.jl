@@ -34,12 +34,12 @@ struct ADFTest <: HypothesisTest
 end
 
 """
-    ADFTest(y, deterministic, lag)
+    ADFTest(y::AbstractVector{T}, deterministic::Symbol, lag::Int) where T<:Real
 
 Compute the augmented Dickey-Fuller unit root test.
 
 `y` is the time series to be tested, `deterministic` determines the deterministic terms
-(options: `none`, `constant`, `trend`, `squared_trend`) and `lag` the number of lagged
+(options: `:none`, `:constant`, `:trend`, `:squared_trend`) and `lag` the number of lagged
 first-differences included in the test regression, respectively.
 
 Critical values and asymptotic p-values are computed based on response surface regressions
