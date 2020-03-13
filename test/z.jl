@@ -21,6 +21,7 @@ null = Normal(0.0, 1.0)
 	@test pvalue(tst; tail=:left) ≈ cdf(null, z)
 	@test pvalue(tst; tail=:right) ≈ ccdf(null, z)
 	@test default_tail(tst) == :both
+	@test stderror(tst) ≈ tst.stderr ≈ 1.1902380714238083
 	show(IOBuffer(), tst)
 
 	tst = OneSampleZTest(m, s, n)
@@ -33,6 +34,7 @@ null = Normal(0.0, 1.0)
 	@test confint(tst; tail=:left)[2] ≈ m + cquantile(null, 0.05) * se
 	@test confint(tst; tail=:right)[1] ≈ m + quantile(null, 0.05) * se
 	@test confint(tst; tail=:right)[2] ≈ Inf
+	@test stderror(tst) ≈ tst.stderr ≈ 1.1902380714238083
 	show(IOBuffer(), tst)
 
 	x = -10:5
@@ -44,6 +46,7 @@ null = Normal(0.0, 1.0)
 	@test pvalue(tst) ≈ 2 * min(cdf(null, z), ccdf(null, z))
 	@test pvalue(tst; tail=:left) ≈ cdf(null, z)
 	@test pvalue(tst; tail=:right) ≈ ccdf(null, z)
+	@test stderror(tst) ≈ tst.stderr ≈ 1.1902380714238083
 	show(IOBuffer(), tst)
 
 	tst = OneSampleZTest(m, s, n)
@@ -56,6 +59,7 @@ null = Normal(0.0, 1.0)
 	@test confint(tst; tail=:left)[2] ≈ m + cquantile(null, 0.05) * se
 	@test confint(tst; tail=:right)[1] ≈ m + quantile(null, 0.05) * se
 	@test confint(tst; tail=:right)[2] ≈ Inf
+	@test stderror(tst) ≈ tst.stderr ≈ 1.1902380714238083	
 	show(IOBuffer(), tst)
 end
 
@@ -66,6 +70,7 @@ end
 	z = (m - 0) / se
 	tst = OneSampleZTest(x, y)
 	@test pvalue(tst) ≈ 2 * min(cdf(null, z), ccdf(null, z))
+	@test stderror(tst) ≈ tst.stderr ≈ 0.24494897427831783
 end
 
 @testset "Two sample" begin
@@ -87,6 +92,7 @@ end
 	@test default_tail(tst) == :both
 	@test confint(tst)[1] ≈ xbar + quantile(null, 0.05 / 2) * se
 	@test confint(tst)[2] ≈ xbar + cquantile(null, 0.05 / 2) * se
+	@test stderror(tst) ≈ tst.stderr ≈ 0.048493985881413015
 	show(IOBuffer(), tst)
 
 	tst = UnequalVarianceZTest(a1, a2)
@@ -98,6 +104,7 @@ end
 	@test pvalue(tst; tail=:right) ≈ ccdf(null, z)
 	@test confint(tst)[1] ≈ xbar + quantile(null, 0.05 / 2) * se
 	@test confint(tst)[2] ≈ xbar + cquantile(null, 0.05 / 2) * se
+	@test stderror(tst) ≈ tst.stderr ≈ 0.048493985881413015	
 	show(IOBuffer(), tst)
 end
 end
