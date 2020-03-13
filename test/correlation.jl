@@ -41,6 +41,7 @@ end
     @test nobs(w) == 37
     @test dof(w) == 33
     @test pvalue(w) < 0.00001
+    @test stderror(w) ≈ 0.17407765595569785
 
     X = [ 2 1 0
           4 2 0
@@ -52,4 +53,5 @@ end
     @test nobs(x) == 4
     @test dof(x) == 1
     @test pvalue(x) ≈ 0.25776212 atol=1e-6
+    @test stderror(x) ≈ 1.0
 end

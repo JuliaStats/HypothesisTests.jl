@@ -49,7 +49,7 @@ function StatsBase.confint(x::ZTest; level::Float64=0.95, tail=:both)
 end
 
 # The standard error of the difference
-StatsBase.stderror(x::TTest) = x.stderr
+StatsBase.stderror(x::ZTest) = x.stderr
 
 ## ONE SAMPLE Z-TEST
 
