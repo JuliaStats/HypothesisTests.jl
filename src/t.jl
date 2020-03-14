@@ -71,7 +71,7 @@ function show_params(io::IO, x::OneSampleTTest, ident="")
 end
 
 """
-    OneSampleTTest(xbar::Real, stddev::Real, n::Int, μ0::Real = 0)
+    OneSampleTTest(xbar::Real, stddev::Real, n::Int, μ0::Real = 0, df::Int = n-1)
 
 Perform a one sample t-test of the null hypothesis that `n` values with mean `xbar` and
 sample standard deviation `stddev`  come from a distribution with mean `μ0` against the
@@ -79,10 +79,9 @@ alternative hypothesis that the distribution does not have mean `μ0`.
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
-function OneSampleTTest(xbar::Real, stddev::Real, n::Int, μ0::Real=0)
+function OneSampleTTest(xbar::Real, stddev::Real, n::Int, μ0::Real=0, df::Int=n-1)
     stderr = stddev/sqrt(n)
     t = (xbar-μ0)/stderr
-    df = n-1
     OneSampleTTest(n, xbar, df, stderr, t, μ0)
 end
 
@@ -144,13 +143,12 @@ have different means but equal variances.
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
-function EqualVarianceTTest(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0) where {T<:Real,S<:Real}
+function EqualVarianceTTest(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0, df::Int=length(x)+length(y)-2) where {T<:Real,S<:Real}
     nx, ny = length(x), length(y)
     xbar = mean(x) - mean(y)
     stddev = sqrt(((nx - 1) * var(x) + (ny - 1) * var(y)) / (nx + ny - 2))
     stderr = stddev * sqrt(1/nx + 1/ny)
     t = (xbar - μ0) / stderr
-    df = nx + ny - 2
     EqualVarianceTTest(nx, ny, xbar, df, stderr, t, μ0)
 end
 
