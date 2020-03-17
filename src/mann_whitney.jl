@@ -120,16 +120,12 @@ end
 function mwuenumerate(x::ExactMannWhitneyUTest)
     # Get the other U if inverted by mwu_stats
     n = min(x.nx, x.ny)
-    U = x.U
-    if x.ny > x.nx
-        U = x.nx*x.ny -x.U
-    end
+    U = (x.nx >= x.ny ? x.U : x.nx * x.ny - x.U) + n*(n + 1)/2
     le = 0
     gr = 0
     tot = 0
-    k = n*(n+1)/2
     for comb in combinations(x.ranks, n)
-        Up = sum(comb) - k
+        Up = sum(comb)
         tot += 1
         le += Up <= U
         gr += Up >= U
