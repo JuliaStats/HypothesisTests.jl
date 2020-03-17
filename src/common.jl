@@ -29,13 +29,16 @@
 # sum(n^3-n) where n is the number of ties for each data point
 function tiedrank_adj!(ord::AbstractVector, v::AbstractArray)
     n     = length(v)
+    (n == length(ord)) ||
+        throw(DimensionMismatch("The length of ord ($(length(ord))) differs from v length ($n)"))
     place = sortperm(v)
     tieadj = 0.0
 
     i = 1
-    while i <= n
+    @inbounds while i <= n
         j = i
-        while j + 1 <= n && v[place[i]] == v[place[j + 1]]
+        vi = v[place[i]]
+        while (j + 1 <= n) && (vi == v[place[j + 1]])
             j += 1
         end
 
