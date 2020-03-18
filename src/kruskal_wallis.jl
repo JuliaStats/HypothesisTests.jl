@@ -93,6 +93,7 @@ function show_params(io::IO, x::KruskalWallisTest, ident)
 end
 
 pvalue(x::KruskalWallisTest) = pvalue(Chisq(x.df), x.H; tail=:right)
+StatsBase.dof(x::KruskalWallisTest) = x.df
 
 
 ## helper

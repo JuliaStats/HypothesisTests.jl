@@ -72,3 +72,9 @@ ApproximateSignedRankTest
 ExactPermutationTest
 ApproximatePermutationTest
 ```
+
+## Dunn test
+
+```@docs
+DunnTest
+```
