@@ -3,9 +3,9 @@
 export DunnTest
 
 struct DunnTest <: HypothesisTest
-    kw::KruskalWallisTest           # results of Kruskal-Wallis test
-    adjustment::Symbol              # correction
-    zscores::Vector{Float64}        # z-test statistics
+    df::Int                     # degrees of freedom
+    adjustment::Symbol          # adjustment type
+    zscores::Vector{Float64}    # z-test statistics
 end
 
 """
@@ -13,7 +13,7 @@ end
 
 Perform Dunn test for the `groups` ``\\mathcal{G}``. It's a non-parametric pairwise multiple comparisons procedure based on rank sums, often used as a *post hoc* procedure following rejection of a Kruskal–Wallis test. As such, it is a non-parametric analog to multiple pairwise *t* tests following rejection of an ANOVA null hypothesis.
 
-Implements: [`pvalue`](@ref)
+Implements: [`pvalues`](@ref), [`zscores`](@ref)
 
 # References
 
@@ -26,9 +26,9 @@ Implements: [`pvalue`](@ref)
     ](https://stats.stackexchange.com/tags/dunn-test/info)
 """
 function DunnTest(groups::AbstractVector{T}...; adj=:none) where T<:Real
-    kw = KruskalWallisTest(groups...)
-    k = dof(kw) + 1
-    n_i = kw.n_i
+    df = length(groups) - 1
+    k = df + 1
+    n_i = collect(map(length, groups))
     n = sum(n_i)
 
     # get ties
@@ -49,24 +49,17 @@ function DunnTest(groups::AbstractVector{T}...; adj=:none) where T<:Real
         end
     end
 
-    DunnTest(kw, adj, Z)
+    DunnTest(df, adj, Z)
 end
 
 testname(::DunnTest) = "Dunn's test"
 population_param_of_interest(x::DunnTest) = ("Location parameters", "all equal", NaN)
 default_tail(test::DunnTest) = :right
-pvalue(t::DunnTest) = pvalue(t.kw)
-StatsBase.dof(t::DunnTest) = dof(t.kw)
+pvalue(t::DunnTest) = NaN
+StatsBase.dof(t::DunnTest) = t.df
 
 function show_params(io::IO, x::DunnTest, ident)
-    kwname = testname(x.kw)
-    sep = "-"^length(kwname)
-    println(io, ident, kwname)
-    println(io, ident, sep)
-    show_params(io::IO, x.kw, ident)
-    println(io, ident, "p-value:                             ", pvalue(x))
-    println(io, ident, sep)
-    println(io, ident, "Adjustment:                          ", x.adjustment)
+    println(io, ident, "Adjustment: ", x.adjustment)
     println(io, ident, "Pairwise comparisons [i - j = Z-score (p-value)]:")
     Z = zscores(x)
     P = pvalues(x)
