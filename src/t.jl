@@ -28,7 +28,7 @@ export OneSampleTTest, TwoSampleTTest, EqualVarianceTTest,
 abstract type TTest <: HypothesisTest end
 abstract type TwoSampleTTest <: TTest end
 
-pvalue(x::TTest; tail=:both) = pvalue(TDist(x.df), x.t; tail=tail)
+pvalue(x::TTest; tail=:both) = pvalue(TDist(x.dof), x.t; tail=tail)
 
 default_tail(test::TTest) = :both
 
@@ -41,7 +41,7 @@ function StatsBase.confint(x::TTest; level::Float64=0.95, tail=:both)
     elseif tail == :right
         (StatsBase.confint(x, level=1-(1-level)*2)[1], Inf)
     elseif tail == :both
-        q = quantile(TDist(x.df), 1-(1-level)/2)
+        q = quantile(TDist(x.dof), 1-(1-level)/2)
         (x.xbar-q*x.stderr, x.xbar+q*x.stderr)
     else
         throw(ArgumentError("tail=$(tail) is invalid"))
@@ -54,7 +54,7 @@ end
 struct OneSampleTTest <: TTest
     n::Int       # number of observations
     xbar::Real   # estimated mean
-    df::Int      # degrees of freedom
+    dof::Int      # degrees of freedom
     stderr::Real # empirical standard error
     t::Real      # t-statistic
     μ0::Real     # mean under h_0
@@ -66,12 +66,12 @@ population_param_of_interest(x::OneSampleTTest) = ("Mean", x.μ0, x.xbar) # para
 function show_params(io::IO, x::OneSampleTTest, ident="")
     println(io, ident, "number of observations:   $(x.n)")
     println(io, ident, "t-statistic:              $(x.t)")
-    println(io, ident, "degrees of freedom:       $(x.df)")
+    println(io, ident, "degrees of freedom:       $(x.dof)")
     println(io, ident, "empirical standard error: $(x.stderr)")
 end
 
 """
-    OneSampleTTest(xbar::Real, stddev::Real, n::Int, μ0::Real = 0, df::Int = n-1)
+    OneSampleTTest(xbar::Real, stddev::Real, n::Int, μ0::Real = 0, dof::Int = n-1)
 
 Perform a one sample t-test of the null hypothesis that `n` values with mean `xbar` and
 sample standard deviation `stddev`  come from a distribution with mean `μ0` against the
@@ -79,10 +79,10 @@ alternative hypothesis that the distribution does not have mean `μ0`.
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
-function OneSampleTTest(xbar::Real, stddev::Real, n::Int, μ0::Real=0, df::Int=n-1)
+function OneSampleTTest(xbar::Real, stddev::Real, n::Int, μ0::Real=0, dof::Int=n-1)
     stderr = stddev/sqrt(n)
     t = (xbar-μ0)/stderr
-    OneSampleTTest(n, xbar, df, stderr, t, μ0)
+    OneSampleTTest(n, xbar, dof, stderr, t, μ0)
 end
 
 """
@@ -118,7 +118,7 @@ struct EqualVarianceTTest <: TwoSampleTTest
     n_x::Int     # number of observations
     n_y::Int     # number of observations
     xbar::Real   # estimated mean difference
-    df::Int      # degrees of freedom
+    dof::Int      # degrees of freedom
     stderr::Real # empirical standard error
     t::Real      # t-statistic
     μ0::Real     # mean difference under h_0
@@ -127,7 +127,7 @@ end
 function show_params(io::IO, x::TwoSampleTTest, ident="")
     println(io, ident, "number of observations:   [$(x.n_x),$(x.n_y)]")
     println(io, ident, "t-statistic:              $(x.t)")
-    println(io, ident, "degrees of freedom:       $(x.df)")
+    println(io, ident, "degrees of freedom:       $(x.dof)")
     println(io, ident, "empirical standard error: $(x.stderr)")
 end
 
@@ -143,13 +143,14 @@ have different means but equal variances.
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
-function EqualVarianceTTest(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0, df::Int=length(x)+length(y)-2) where {T<:Real,S<:Real}
+function EqualVarianceTTest(x::AbstractVector{<:Real}, y::AbstractVector{<:Real}, μ0::Real=0,
+                            dof::Int=length(x)+length(y)-2)
     nx, ny = length(x), length(y)
     xbar = mean(x) - mean(y)
     stddev = sqrt(((nx - 1) * var(x) + (ny - 1) * var(y)) / (nx + ny - 2))
     stderr = stddev * sqrt(1/nx + 1/ny)
     t = (xbar - μ0) / stderr
-    EqualVarianceTTest(nx, ny, xbar, df, stderr, t, μ0)
+    EqualVarianceTTest(nx, ny, xbar, dof, stderr, t, μ0)
 end
 
 
@@ -159,7 +160,7 @@ struct UnequalVarianceTTest <: TwoSampleTTest
     n_x::Int     # number of observations
     n_y::Int     # number of observations
     xbar::Real   # estimated mean
-    df::Real     # degrees of freedom
+    dof::Real     # degrees of freedom
     stderr::Real # empirical standard error
     t::Real      # t-statistic
     μ0::Real     # mean under h_0
@@ -190,6 +191,6 @@ function UnequalVarianceTTest(x::AbstractVector{T}, y::AbstractVector{S}, μ0::R
     varx, vary = var(x), var(y)
     stderr = sqrt(varx/nx + vary/ny)
     t = (xbar-μ0)/stderr
-    df = (varx / nx + vary / ny)^2 / ((varx / nx)^2 / (nx - 1) + (vary / ny)^2 / (ny - 1))
-    UnequalVarianceTTest(nx, ny, xbar, df, stderr, t, μ0)
+    dof = (varx / nx + vary / ny)^2 / ((varx / nx)^2 / (nx - 1) + (vary / ny)^2 / (ny - 1))
+    UnequalVarianceTTest(nx, ny, xbar, dof, stderr, t, μ0)
 end
