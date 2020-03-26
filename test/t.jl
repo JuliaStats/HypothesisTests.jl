@@ -47,7 +47,7 @@ end
 	a2 = [29.89, 29.93, 29.72, 29.98, 30.02, 29.98]
 
 	tst = EqualVarianceTTest(a1, a2)
-	@test tst.df == 10
+	@test tst.dof == 10
 	@test abs(tst.t - 1.959) <= 1e-3
 	@test abs(pvalue(tst) - 0.078) <= 1e-3
 	@test all(abs.([confint(tst)...] - [-0.0131, 0.2031]) .<= 1e-4)
@@ -55,7 +55,7 @@ end
 	show(IOBuffer(), tst)
 
 	tst = UnequalVarianceTTest(a1, a2)
-	@test abs(tst.df - 7.03) <= 0.01
+	@test abs(tst.dof - 7.03) <= 0.01
 	@test abs(tst.t - 1.959) <= 1e-3
 	@test abs(pvalue(tst) - 0.091) <= 1e-3
 	@test all(abs.([confint(tst)...] - [-0.0196, 0.2096]) .<= 1e-4)
