@@ -75,7 +75,8 @@ end
 
 Perform a one sample t-test of the null hypothesis that `n` values with mean `xbar` and
 sample standard deviation `stddev`  come from a distribution with mean `μ0` against the
-alternative hypothesis that the distribution does not have mean `μ0`.
+alternative hypothesis that the distribution does not have mean `μ0`. Degrees of freedom
+`dof` may be specified.
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
@@ -135,11 +136,12 @@ testname(::EqualVarianceTTest) = "Two sample t-test (equal variance)"
 population_param_of_interest(x::TwoSampleTTest) = ("Mean difference", x.μ0, x.xbar) # parameter of interest: name, value under h0, point estimate
 
 """
-    EqualVarianceTTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real})
+    EqualVarianceTTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real},
+                       dof::Int = length(x)+length(y)-2)
 
 Perform a two-sample t-test of the null hypothesis that `x` and `y` come from distributions
 with equal means and variances against the alternative hypothesis that the distributions
-have different means but equal variances.
+have different means but equal variances. Degrees of freedom `dof` may be specified.
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
