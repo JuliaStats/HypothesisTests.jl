@@ -79,7 +79,7 @@ Perform a one sample t-test of the null hypothesis that `n` values with mean `xb
 sample standard deviation `stddev`  come from a distribution with mean `μ0` against the
 alternative hypothesis that the distribution does not have mean `μ0`.
 
-Implements: [`pvalue`](@ref), [`confint`](@ref)
+Implements: [`pvalue`](@ref), [`confint`](@ref), [`stderror`](@ref)
 """
 function OneSampleTTest(xbar::Real, stddev::Real, n::Int, μ0::Real=0)
     stderr = stddev/sqrt(n)
@@ -95,7 +95,7 @@ Perform a one sample t-test of the null hypothesis that the data in vector `v` c
 a distribution with mean `μ0` against the alternative hypothesis that the distribution
 does not have mean `μ0`.
 
-Implements: [`pvalue`](@ref), [`confint`](@ref)
+Implements: [`pvalue`](@ref), [`confint`](@ref), [`stderror`](@ref)
 """
 OneSampleTTest(v::AbstractVector{T}, μ0::Real=0) where {T<:Real} = OneSampleTTest(mean(v), std(v), length(v), μ0)
 
@@ -106,7 +106,7 @@ Perform a paired sample t-test of the null hypothesis that the differences betwe
 values in vectors `x` and `y` come from a distribution with mean `μ0` against the
 alternative hypothesis that the distribution does not have mean `μ0`.
 
-Implements: [`pvalue`](@ref), [`confint`](@ref)
+Implements: [`pvalue`](@ref), [`confint`](@ref), [`stderror`](@ref)
 """
 function OneSampleTTest(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0) where {T<:Real, S<:Real}
     check_same_length(x, y)
@@ -144,7 +144,7 @@ Perform a two-sample t-test of the null hypothesis that `x` and `y` come from di
 with equal means and variances against the alternative hypothesis that the distributions
 have different means but equal variances.
 
-Implements: [`pvalue`](@ref), [`confint`](@ref)
+Implements: [`pvalue`](@ref), [`confint`](@ref), [`stderror`](@ref)
 """
 function EqualVarianceTTest(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0) where {T<:Real,S<:Real}
     nx, ny = length(x), length(y)
@@ -186,7 +186,7 @@ equation:
         \\frac{(k_i s_i^2)^2}{ν_i}}
 ```
 
-Implements: [`pvalue`](@ref), [`confint`](@ref)
+Implements: [`pvalue`](@ref), [`confint`](@ref), [`stderror`](@ref)
 """
 function UnequalVarianceTTest(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0) where {T<:Real,S<:Real}
     nx, ny = length(x), length(y)

@@ -11,7 +11,7 @@ export CorrelationTest
 Perform a t-test for the hypothesis that ``\\text{Cor}(x,y|Z=z) = 0``, i.e. the partial
 correlation of vectors `x` and `y` given the matrix `Z` is zero.
 
-Implements `pvalue` for the t-test.
+Implements `pvalue` for the t-test, as well as `stderror`. 
 Implements `confint` using an approximate confidence interval based on Fisher's
 ``z``-transform.
 

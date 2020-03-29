@@ -45,7 +45,7 @@ probability is not equal to `p`.
 
 Computed confidence intervals ([`confint`](@ref)) by default are Clopper-Pearson intervals.
 
-Implements: [`pvalue`](@ref), [`confint(::BinomialTest)`](@ref)
+Implements: [`pvalue`](@ref), [`confint(::BinomialTest)`](@ref), [`stderror`](@ref)
 """
 BinomialTest(x::AbstractVector{Bool}, p=0.5) =
     BinomialTest(sum(x), length(x), p)
