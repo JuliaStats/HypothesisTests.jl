@@ -68,6 +68,13 @@ If `tail` is `:both` (default), then the p-value for the two-sided test is retur
 """
 function pvalue end
 
+"""
+    stderror(test::HypothesisTest)
+
+Compute the standard error for the point estimate of interest for a test. 
+"""
+function stderror end
+
 # Basic function for finding a p-value given a distribution and tail
 pvalue(dist::ContinuousUnivariateDistribution, x::Number; tail=:both) =
     if tail == :both

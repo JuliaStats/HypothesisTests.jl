@@ -77,7 +77,7 @@ Perform a one sample z-test of the null hypothesis that `n` values with mean `xb
 population standard deviation `stddev`  come from a distribution with mean `μ0` against the
 alternative hypothesis that the distribution does not have mean `μ0`.
 
-Implements: [`pvalue`](@ref), [`confint`](@ref)
+Implements: [`pvalue`](@ref), [`confint`](@ref), [`stderror`](@ref)
 """
 function OneSampleZTest(xbar::Real, stddev::Real, n::Int, μ0::Real=0)
     stderr = stddev/sqrt(n)
@@ -92,7 +92,7 @@ Perform a one sample z-test of the null hypothesis that the data in vector `v` c
 a distribution with mean `μ0` against the alternative hypothesis that the distribution
 does not have mean `μ0`.
 
-Implements: [`pvalue`](@ref), [`confint`](@ref)
+Implements: [`pvalue`](@ref), [`confint`](@ref), [`stderror`](@ref)
 """
 OneSampleZTest(v::AbstractVector{T}, μ0::Real=0) where {T<:Real} = OneSampleZTest(mean(v), std(v), length(v), μ0)
 
@@ -103,7 +103,7 @@ Perform a paired sample z-test of the null hypothesis that the differences betwe
 values in vectors `x` and `y` come from a distribution with mean `μ0` against the
 alternative hypothesis that the distribution does not have mean `μ0`.
 
-Implements: [`pvalue`](@ref), [`confint`](@ref)
+Implements: [`pvalue`](@ref), [`confint`](@ref), [`stderror`](@ref)
 """
 function OneSampleZTest(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0) where {T<:Real, S<:Real}
     check_same_length(x, y)
@@ -139,7 +139,7 @@ Perform a two-sample z-test of the null hypothesis that `x` and `y` come from di
 with equal means and variances against the alternative hypothesis that the distributions
 have different means but equal variances.
 
-Implements: [`pvalue`](@ref), [`confint`](@ref)
+Implements: [`pvalue`](@ref), [`confint`](@ref), [`stderror`](@ref)
 """
 function EqualVarianceZTest(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0) where {T<:Real,S<:Real}
     nx, ny = length(x), length(y)
@@ -171,7 +171,7 @@ Perform an unequal variance two-sample z-test of the null hypothesis that `x` an
 from distributions with equal means against the alternative hypothesis that the
 distributions have different means.
 
-Implements: [`pvalue`](@ref), [`confint`](@ref)
+Implements: [`pvalue`](@ref), [`confint`](@ref), [`stderror`](@ref)
 """
 function UnequalVarianceZTest(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0) where {T<:Real,S<:Real}
     nx, ny = length(x), length(y)
