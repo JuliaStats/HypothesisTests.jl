@@ -42,7 +42,7 @@ end
 
 function pvalue(apt::PermutationTest; tail=:both)
     if tail == :both
-        count = sum(abs(apt.observation) >= abs(x) for x in apt.samples)
+        count = sum(abs(apt.observation) <= abs(x) for x in apt.samples)
     elseif tail == :left
         count = sum(apt.observation >= x for x in apt.samples)
     elseif tail == :right
