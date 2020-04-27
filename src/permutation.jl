@@ -59,3 +59,32 @@ function show_params(io::IO, apt::PermutationTest, ident)
     show(io, apt.samples)
     println(io)
 end
+
+function buildind(xs)
+    i1 = 1
+    y = Vector{UnitRange{Int64}}(undef, length(xs))
+    for (i,x) in enumerate(xs)
+        i2 = i1 + length(x) - 1
+        y[i] = i1:i2
+        i1 = i2 + 1
+    end
+    return y
+end
+
+function ExactPermutationTest(data::AbstractVector{T}, 
+                              f::Function) where {T<:AbstractVector}
+    xy = vcat(data...)
+    r = buildind(data)
+    P = permutations(xy)
+    samples = [mapreduce(i -> f(view(p, i)), -, r) for p in P]
+    PermutationTest(mapreduce(i -> f(view(xy, i)), -, r), samples)
+end
+
+function ApproximatePermutationTest(data::AbstractVector{T}, f::Function,
+                                    n::Int) where {T<:AbstractVector}
+    xy = vcat(data...)
+    r = buildind(data)
+    observation = mapreduce(i -> f(view(xy, i)), -, r)
+    samples = [(shuffle!(xy); mapreduce(i -> f(view(xy, i)), -, r)) for _ in 1:n]
+    PermutationTest(observation, samples)
+end
