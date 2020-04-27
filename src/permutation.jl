@@ -1,6 +1,6 @@
 export ExactPermutationTest, ApproximatePermutationTest
 
-function ptstats(x,y,f)
+function ptstats(x,y)
     xy = vcat(x,y)
     rx = 1:length(x)
     ry = (length(xy)-length(y)+1):length(xy)
@@ -20,7 +20,7 @@ that `f(x)` is equal to `f(y)`.  All possible permutations are sampled.
 """
 function ExactPermutationTest(x::AbstractVector{R}, y::AbstractVector{S},
                               f::Function) where {R<:Real,S<:Real}
-    xy, rx, ry = ptstats(x,y,f)
+    xy, rx, ry = ptstats(x,y)
     P = permutations(xy)
     samples = [f(view(p,rx)) - f(view(p,ry)) for p in P]
     PermutationTest(f(x) - f(y), samples)
@@ -35,7 +35,7 @@ permutations are sampled at random.
 """
 function ApproximatePermutationTest(x::AbstractVector{R}, y::AbstractVector{S},
                                     f::Function, n::Int) where {R<:Real,S<:Real}
-    xy, rx, ry = ptstats(x,y,f)
+    xy, rx, ry = ptstats(x,y)
     samples = [(shuffle!(xy); f(view(xy,rx)) - f(view(xy,ry))) for i = 1:n]
     PermutationTest(f(x) - f(y), samples)
 end
