@@ -73,7 +73,7 @@ the data using the statistics of interest.
 # Examples
 Say you want to test the difference in means between 3 groups (1,1), (2,2), 
 and (9,9,9,9), you'll first need to concatenate your data into a vector.
-Then you'll need to create a function that accumalativly subtracts the 
+Then you'll need to create a function that accumulatively subtracts the 
 mean of the 1:2, 3:4, and 5:8 values of a given vector. 
 
 ```julia-repl
@@ -136,7 +136,7 @@ the data using the statistics of interest.
 # Examples
 Say you want to test the difference in means between 3 groups (1,1), (2,2), 
 and (9,9,9,9), you'll first need to concatenate your data into a vector.
-Then you'll need to create a function that accumalativly subtracts the 
+Then you'll need to create a function that accumulatively subtracts the 
 mean of the 1:2, 3:4, and 5:8 values of a given vector. 
 
 ```julia-repl
