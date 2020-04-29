@@ -71,15 +71,20 @@ The function `f` should reduce on the indices that comprise the groups in
 the data using the statistics of interest.
 
 # Examples
+Say you want to test the difference in means between 3 groups (1,1), (2,2), 
+and (9,9,9,9), you'll first need to concatenate your data into a vector.
+Then you'll need to create a function that accumalativly subtracts the 
+mean of the 1:2, 3:4, and 5:8 values of a given vector. 
+
 ```julia-repl
 
-julia> indices = [1:2, 3:4, 5:8]
+julia> indices = [1:2, 3:4, 5:8] # indices to the vector
 3-element Array{UnitRange{Int64},1}:
  1:2
  3:4
  5:8
 
-julia> data = [1,1,2,2,9,9,9,9]
+julia> data = [1,1,2,2,9,9,9,9] # the data vector
 8-element Array{Int64,1}:
  1
  1
@@ -90,7 +95,8 @@ julia> data = [1,1,2,2,9,9,9,9]
  9
  9
 
-julia> f(x) = mapreduce(i -> mean(view(x, i)), -, indices)
+julia> f(x) = mapreduce(i -> mean(view(x, i)), -, indices) # calculate the cumalative
+# difference between the means of the 1:2, 3:4, and 5:8 elements of vector `x`
 f (generic function with 1 method)
 
 julia> ExactPermutationTest(data, f)
@@ -128,6 +134,11 @@ The function `f` should reduce on the indices that comprise the groups in
 the data using the statistics of interest.
 
 # Examples
+Say you want to test the difference in means between 3 groups (1,1), (2,2), 
+and (9,9,9,9), you'll first need to concatenate your data into a vector.
+Then you'll need to create a function that accumalativly subtracts the 
+mean of the 1:2, 3:4, and 5:8 values of a given vector. 
+
 ```julia-repl
 julia> indices = [1:20, 21:40, 41:80]
 3-element Array{UnitRange{Int64},1}:
@@ -137,7 +148,9 @@ julia> indices = [1:20, 21:40, 41:80]
 
 julia> data = [fill(1,20); fill(2, 20); fill(9, 40)];
 
-julia> f(x) = mapreduce(i -> mean(view(x, i)), -, indices)
+julia> f(x) = mapreduce(i -> mean(view(x, i)), -, indices) # calculate the cumalative
+# difference between the means of the 1:2, 3:4, and 5:8 elements of vector `x`
+
 f (generic function with 1 method)
 
 julia> ApproximatePermutationTest(data, f, 10^5)
