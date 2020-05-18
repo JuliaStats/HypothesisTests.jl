@@ -34,7 +34,7 @@ end
     DieboldMarianoTest(x::AbstractVector{<:Real}, y::AbstractVector{<:Real})
 
 Perform the modified Diebold-Mariano test proposed by Harvey, Leybourne and Newbold of the null 
-hypothesis that the two methods have the same forecast accuracy. `g` is the loss function described
+hypothesis that the two methods have the same forecast accuracy. `loss` is the loss function described
 in Diebold, F.X. and Mariano, R.S. (1995) Comparing predictive accuracy. Journal of Business and 
 Economic Statistics, 13, 253-263. and `h` is the number of steps ahead of the forecast.
 
@@ -50,12 +50,12 @@ Implements: [`pvalue`](@ref)
   
 """
 function DieboldMarianoTest(e1::AbstractVector{<:Real}, e2::AbstractVector{<:Real}; 
-                            g::Function = x -> abs(x)^2, h::Integer = 1)
+                            loss::Function=abs2, h::Integer=1)
 
     @assert length(e1) == length(e2)
     n = length(e1)
     # Calculate the loss diferential series based on the loss function g
-    d = g.(e1) .- g.(e2)
+    d = loss.(e1) .- loss.(e2)
     dm_cov = autocov(d, collect(0:h - 1))
     dm_var = sum([dm_cov[1]; 2 * dm_cov[2:end]])/n
     # Statistic from the original Diebold-Mariano test 
