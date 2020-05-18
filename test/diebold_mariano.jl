@@ -23,7 +23,7 @@ using HypothesisTests: default_tail
     @test pvalue(dm_test, tail = :right) ≈ 0.5319 atol = atol
     @test pvalue(dm_test, tail = :left) ≈ 0.4681 atol = atol
 
-    dm_test = DieboldMarianoTest(e_ets, e_arima; g = x -> abs(x))
+    dm_test = DieboldMarianoTest(e_ets, e_arima; loss=abs)
     @test pvalue(dm_test) ≈ 0.7818 atol = atol
     @test pvalue(dm_test, tail = :right) ≈ 0.3909 atol = atol
     @test pvalue(dm_test, tail = :left) ≈ 0.6091 atol = atol
