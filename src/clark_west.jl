@@ -1,5 +1,5 @@
-# diebold_mariano.jl
-# Diebold-Mariano
+# clark_west.jl
+# Clark-West
 #
 # Copyright (C) 2020   Guilherme Bodin
 #
@@ -22,16 +22,16 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-export DieboldMarianoTest
+export ClarkWestTest
 
-struct DieboldMarianoTest <: TTest
+struct ClarkWestTest <: TTest
     n::Integer     # number of observations
     df::Integer    # degrees of freedom
     t::Real        # test statistic
 end
 
 """
-    DieboldMarianoTest(x::AbstractVector{<:Real}, y::AbstractVector{<:Real})
+    ClarkWestTest(x::AbstractVector{<:Real}, y::AbstractVector{<:Real})
 
 Perform the modified Diebold-Mariano test proposed by Harvey, Leybourne and Newbold of the null 
 hypothesis that the two methods have the same forecast accuracy. `g` is the loss function described
@@ -49,7 +49,7 @@ Implements: [`pvalue`](@ref)
     mean squared errors. International Journal of forecasting, 13(2), 281-291.
   
 """
-function DieboldMarianoTest(e1::AbstractVector{<:Real}, e2::AbstractVector{<:Real}; 
+function ClarkWestTest(e1::AbstractVector{<:Real}, e2::AbstractVector{<:Real}; 
                             g::Function = x -> abs(x)^2, h::Integer = 1)
 
     @assert length(e1) == length(e2)
@@ -63,14 +63,14 @@ function DieboldMarianoTest(e1::AbstractVector{<:Real}, e2::AbstractVector{<:Rea
     k = sqrt((1 + (1 - 2*h + (h/n)*(h - 1))/n))
     # Statistic from the modified Diebold-Mariano test proposed by Harvey, Leybourne and Newbold
     statistic_hln = statistic_dm * k
-    return DieboldMarianoTest(n, n - 1, statistic_hln)
+    return ClarkWestTest(n, n - 1, statistic_hln)
 end
 
-testname(::DieboldMarianoTest) = "Diebold Mariano test"
-population_param_of_interest(x::DieboldMarianoTest) = ("mean", 0.0, x.t)
-default_tail(test::DieboldMarianoTest) = :both
+testname(::ClarkWestTest) = "Diebold Mariano test"
+population_param_of_interest(x::ClarkWestTest) = ("mean", 0.0, x.t)
+default_tail(test::ClarkWestTest) = :both
 
-function show_params(io::IO, x::DieboldMarianoTest, ident)
+function show_params(io::IO, x::ClarkWestTest, ident)
     println(io, ident, "number of observations: $(x.n)")
     println(io, ident, "DM statistic:           $(x.t)")
     println(io, ident, "degrees of freedom:     $(x.df)")
