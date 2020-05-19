@@ -65,7 +65,7 @@ function DieboldMarianoTest(e1::AbstractVector{<:Real}, e2::AbstractVector{<:Rea
     return DieboldMarianoTest(n, n - 1, statistic_hln)
 end
 
-testname(::DieboldMarianoTest) = "Diebold Mariano test"
+testname(::DieboldMarianoTest) = "Diebold-Mariano test"
 population_param_of_interest(x::DieboldMarianoTest) = ("mean", 0.0, x.t)
 default_tail(test::DieboldMarianoTest) = :both
 
