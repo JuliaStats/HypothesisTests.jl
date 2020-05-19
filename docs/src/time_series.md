@@ -23,3 +23,8 @@ JarqueBeraTest
 ```@docs
 ADFTest
 ```
+
+## Clark-West test
+```@docs
+ClarkWestTest
+```
