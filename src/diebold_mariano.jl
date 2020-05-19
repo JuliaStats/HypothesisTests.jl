@@ -57,7 +57,7 @@ function DieboldMarianoTest(e1::AbstractVector{<:Real}, e2::AbstractVector{<:Rea
     # Calculate the loss diferential series based on the loss function g
     d = loss.(e1) .- loss.(e2)
     dm_cov = autocov(d, collect(0:h - 1))
-    dm_var = sum([dm_cov[1]; 2 * dm_cov[2:end]])/n
+    dm_var = (dm_cov[1] + 2 * sum(dm_cov[2:end]))/n
     # Statistic from the original Diebold-Mariano test 
     statistic_dm = mean(d)/sqrt(dm_var)
     k = sqrt((1 + (1 - 2*h + (h/n)*(h - 1))/n))
