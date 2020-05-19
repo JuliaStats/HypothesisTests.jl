@@ -36,7 +36,7 @@ end
 Perform the modified Diebold-Mariano test proposed by Harvey, Leybourne and Newbold of the null 
 hypothesis that the two methods have the same forecast accuracy. `loss` is the loss function described
 in Diebold, F.X. and Mariano, R.S. (1995) Comparing predictive accuracy. Journal of Business and 
-Economic Statistics, 13, 253-263. and `h` is the number of steps ahead of the forecast.
+Economic Statistics, 13, 253-263. and `lookahead` is the number of steps ahead of the forecast.
 
 Implements: [`pvalue`](@ref)
 
@@ -50,16 +50,16 @@ Implements: [`pvalue`](@ref)
   
 """
 function DieboldMarianoTest(e1::AbstractVector{<:Real}, e2::AbstractVector{<:Real}; 
-                            loss::Function=abs2, h::Integer=1)
+                            loss::Function=abs2, lookahead::Integer=1)
     length(e1) == length(e2) || throw(DimensionMismatch("inputs must have the same length"))
     n = length(e1)
     # Calculate the loss diferential series based on the loss function g
     d = loss.(e1) .- loss.(e2)
-    dm_cov = autocov(d, collect(0:h - 1))
+    dm_cov = autocov(d, collect(0:lookahead-1))
     dm_var = (dm_cov[1] + 2 * sum(dm_cov[2:end]))/n
     # Statistic from the original Diebold-Mariano test 
     statistic_dm = mean(d)/sqrt(dm_var)
-    k = sqrt((1 + (1 - 2*h + (h/n)*(h - 1))/n))
+    k = sqrt((1 + (1 - 2*lookahead + (lookahead/n)*(lookahead - 1))/n))
     # Statistic from the modified Diebold-Mariano test proposed by Harvey, Leybourne and Newbold
     statistic_hln = statistic_dm * k
     return DieboldMarianoTest(n, n - 1, statistic_hln)

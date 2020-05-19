@@ -18,7 +18,7 @@ using HypothesisTests: default_tail
     @test pvalue(dm_test, tail=:right) ≈ 0.5565 atol=atol
     @test pvalue(dm_test, tail=:left) ≈ 0.4435 atol=atol
 
-    dm_test = DieboldMarianoTest(e_ets, e_arima; h=10)
+    dm_test = DieboldMarianoTest(e_ets, e_arima; lookahead=10)
     @test pvalue(dm_test) ≈ 0.9362 atol=atol
     @test pvalue(dm_test, tail=:right) ≈ 0.5319 atol=atol
     @test pvalue(dm_test, tail=:left) ≈ 0.4681 atol=atol
