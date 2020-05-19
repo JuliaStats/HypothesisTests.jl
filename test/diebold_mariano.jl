@@ -40,4 +40,6 @@ using HypothesisTests: default_tail
     @test pvalue(dm_test) ≈ 0.012 atol=atol
     @test pvalue(dm_test, tail=:right) ≈ 0.0062 atol=atol
     @test pvalue(dm_test, tail=:left) ≈ 0.9937 atol=atol
+
+    @test_throws DimensionMismatch DieboldMarianoTest(rand(3), rand(4))
 end
