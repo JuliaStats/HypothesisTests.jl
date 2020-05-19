@@ -51,8 +51,7 @@ Implements: [`pvalue`](@ref)
 """
 function DieboldMarianoTest(e1::AbstractVector{<:Real}, e2::AbstractVector{<:Real}; 
                             loss::Function=abs2, h::Integer=1)
-
-    @assert length(e1) == length(e2)
+    length(e1) == length(e2) || throw(DimensionMismatch("inputs must have the same length"))
     n = length(e1)
     # Calculate the loss diferential series based on the loss function g
     d = loss.(e1) .- loss.(e2)
