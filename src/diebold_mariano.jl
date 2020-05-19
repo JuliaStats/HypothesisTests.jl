@@ -25,9 +25,9 @@
 export DieboldMarianoTest
 
 struct DieboldMarianoTest <: TTest
-    n::Integer     # number of observations
-    df::Integer    # degrees of freedom
-    t::Real        # test statistic
+    n::Int         # number of observations
+    df::Int        # degrees of freedom
+    t::Float64     # test statistic
 end
 
 """
