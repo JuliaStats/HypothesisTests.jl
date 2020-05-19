@@ -31,7 +31,7 @@ struct DieboldMarianoTest <: TTest
 end
 
 """
-    DieboldMarianoTest(x::AbstractVector{<:Real}, y::AbstractVector{<:Real})
+    DieboldMarianoTest(x::AbstractVector{<:Real}, y::AbstractVector{<:Real}; loss=abs2, h=1)
 
 Perform the modified Diebold-Mariano test proposed by Harvey, Leybourne and Newbold of the null 
 hypothesis that the two methods have the same forecast accuracy. `loss` is the loss function described
