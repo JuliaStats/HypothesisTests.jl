@@ -28,3 +28,8 @@ ADFTest
 ```@docs
 ClarkWestTest
 ```
+
+## Diebold-Mariano test
+```@docs
+DieboldMarianoTest
+```
