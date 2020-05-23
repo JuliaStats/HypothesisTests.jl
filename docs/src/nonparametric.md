@@ -72,3 +72,11 @@ ApproximateSignedRankTest
 ExactPermutationTest
 ApproximatePermutationTest
 ```
+
+## Test for equality of variances
+
+```@docs
+LeveneTest
+BrownForsytheTest
+FlignerKilleenTest
+```
