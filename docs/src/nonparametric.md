@@ -73,7 +73,7 @@ ExactPermutationTest
 ApproximatePermutationTest
 ```
 
-## Test for equality of variances
+## Tests for homogeneity of variances
 
 ```@docs
 LeveneTest
