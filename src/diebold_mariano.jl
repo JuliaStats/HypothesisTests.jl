@@ -26,19 +26,20 @@ export DieboldMarianoTest
 
 struct DieboldMarianoTest <: TTest
     n::Int         # number of observations
+    xbar::Real     # estimated mean
     df::Int        # degrees of freedom
-    t::Float64     # test statistic
+    t::Real        # test statistic
+    stderr::Real   # empirical standard error
+    μ0::Real       # mean under h_0
 end
 
 """
-    DieboldMarianoTest(x::AbstractVector{<:Real}, y::AbstractVector{<:Real}; loss=abs2, h=1)
+    DieboldMarianoTest(e1::AbstractVector{<:Real}, e2::AbstractVector{<:Real}; loss=abs2, lookahead=1)
 
 Perform the modified Diebold-Mariano test proposed by Harvey, Leybourne and Newbold of the null 
 hypothesis that the two methods have the same forecast accuracy. `loss` is the loss function described
 in Diebold, F.X. and Mariano, R.S. (1995) Comparing predictive accuracy. Journal of Business and 
 Economic Statistics, 13, 253-263. and `lookahead` is the number of steps ahead of the forecast.
-
-Implements: [`pvalue`](@ref)
 
 # References
 
@@ -58,15 +59,19 @@ function DieboldMarianoTest(e1::AbstractVector{<:Real}, e2::AbstractVector{<:Rea
     dm_cov = autocov(d, collect(0:lookahead-1))
     dm_var = (dm_cov[1] + 2 * sum(dm_cov[2:end]))/n
     # Statistic from the original Diebold-Mariano test 
-    statistic_dm = mean(d)/sqrt(dm_var)
+    xbar_dm = mean(d)
+    stderr_dm = sqrt(dm_var)
+    statistic_dm = xbar_dm/stderr_dm
     k = sqrt((1 + (1 - 2*lookahead + (lookahead/n)*(lookahead - 1))/n))
     # Statistic from the modified Diebold-Mariano test proposed by Harvey, Leybourne and Newbold
     statistic_hln = statistic_dm * k
-    return DieboldMarianoTest(n, n - 1, statistic_hln)
+    xbar = xbar_dm * k
+    stderr = stderr_dm
+    return DieboldMarianoTest(n, xbar, n - 1, statistic_hln, stderr, 0.0)
 end
 
 testname(::DieboldMarianoTest) = "Diebold-Mariano test"
-population_param_of_interest(x::DieboldMarianoTest) = ("mean", 0.0, x.t)
+population_param_of_interest(x::DieboldMarianoTest) = ("Mean", x.μ0, x.xbar)
 default_tail(test::DieboldMarianoTest) = :both
 
 function show_params(io::IO, x::DieboldMarianoTest, ident)
