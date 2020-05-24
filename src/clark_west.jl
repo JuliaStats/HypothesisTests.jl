@@ -25,17 +25,18 @@
 export ClarkWestTest
 
 struct ClarkWestTest <: TTest
-    n::Integer     # number of observations
-    df::Integer    # degrees of freedom
+    n::Int         # number of observations
+    xbar::Real     # estimated mean
+    df::Int        # degrees of freedom
     t::Real        # test statistic
+    stderr::Real   # empirical standard error
+    μ0::Real       # mean under h_0
 end
 
 """
-    ClarkWestTest(x::AbstractVector{<:Real}, y::AbstractVector{<:Real})
+    ClarkWestTest(e1::AbstractVector{<:Real}, e2::AbstractVector{<:Real}; lookahead::Int=1)
 
 Perform the Clark-West test ...
-
-Implements: [`pvalue`](@ref)
 
 # References
 
@@ -46,18 +47,18 @@ Implements: [`pvalue`](@ref)
    in nested models. Journal of Econometrics, 138(1): 291–311. 
 """
 function ClarkWestTest(e1::AbstractVector{<:Real}, e2::AbstractVector{<:Real}; 
-                        h::Integer=1)
+                        lookahead::Int=1)
 
     @assert length(e1) == length(e2)
     n = length(e1)
     
     
     
-    return ClarkWestTest(n, n - 1, statistic_cw)
+    return ClarkWestTest(n, xbar, n - 1, statistic_cw, stderr, 0.0)
 end
 
 testname(::ClarkWestTest) = "Clark West test"
-population_param_of_interest(x::ClarkWestTest) = ("mean", 0.0, x.t)
+population_param_of_interest(x::ClarkWestTest) = ("Mean", 0.0, x.xbar)
 default_tail(test::ClarkWestTest) = :both
 
 function show_params(io::IO, x::ClarkWestTest, ident)
