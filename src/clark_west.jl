@@ -24,45 +24,53 @@
 
 export ClarkWestTest
 
-struct ClarkWestTest <: TTest
-    n::Int         # number of observations
-    xbar::Real     # estimated mean
-    df::Int        # degrees of freedom
-    t::Real        # test statistic
-    stderr::Real   # empirical standard error
-    μ0::Real       # mean under h_0
+struct ClarkWestTest <: ZTest
+    n::Int       # number of observations
+    xbar::Real   # estimated mean
+    stderr::Real # population standard error
+    z::Real      # t-statistic
+    μ0::Real     # mean under h_0
 end
 
 """
-    ClarkWestTest(e1::AbstractVector{<:Real}, e2::AbstractVector{<:Real}; lookahead::Int=1)
+    ClarkWestTest(e1::AbstractVector{<:Real}, e2::AbstractVector{<:Real};lookahead::Integer=1)
 
-Perform the Clark-West test ...
+Perform the Clark-West test of equal performance of two nested predition models, in terms of the
+out-of-sample mean squared prediction errors.
 
+`e1` is a vector of forecasts from the smaller (nested) model, `e2` is a vector of forecast
+errors from the larger model, and `lookahead` is the number of steps ahead of the forecast.
+Typically, the null hypothesis is that the two models perform equally well (a two-sided test),
+but sometimes we test whether the larger model performs better, which is indicated by a
+positive test statistic, for instance, above 1.645 for the 5% significance level (right tail test).
+
+Implements: [`pvalue`](@ref)
 # References
-
- * Clark, T. E., West, K. D. 2006, Using out-of-sample mean squared prediction errors to test 
+ * Clark, T. E., West, K. D. 2006, Using out-of-sample mean squared prediction errors to test
    the martingale difference hypothesis. Journal of Econometrics, 135(1): 155–186.
+ * Clark, T. E., West, K. D. 2007, Approximately normal tests for equal predictive accuracy
+   in nested models. Journal of Econometrics, 138(1): 291–311.
 
- * Clark, T. E., West, K. D. 2007, Approximately normal tests for equal predictive accuracy 
-   in nested models. Journal of Econometrics, 138(1): 291–311. 
 """
-function ClarkWestTest(e1::AbstractVector{<:Real}, e2::AbstractVector{<:Real}; 
-                        lookahead::Int=1)
-
-    @assert length(e1) == length(e2)
-    n = length(e1)
-    
-    
-    
-    return ClarkWestTest(n, xbar, n - 1, statistic_cw, stderr, 0.0)
+function ClarkWestTest(e1::AbstractVector{<:Real}, e2::AbstractVector{<:Real};
+                       lookahead::Integer=1)
+    length(e1) == length(e2) || throw(DimensionMismatch("inputs must have the same length"))
+    n            = length(e1)
+    d            = 2*e1.*(e1 - e2)
+    cw_cov       = HypothesisTests.autocov(d, collect(0:lookahead-1))
+    cw_var       = (cw_cov[1] + 2 * sum(cw_cov[2:end]))/n
+    xbar         = mean(d)
+    stderr       = sqrt(cw_var)
+    statistic_cw = xbar/stderr
+    return ClarkWestTest(n, xbar, stderr, statistic_cw, 0.0)
 end
 
 testname(::ClarkWestTest) = "Clark West test"
-population_param_of_interest(x::ClarkWestTest) = ("Mean", 0.0, x.xbar)
+population_param_of_interest(x::ClarkWestTest) = ("Mean", x.μ0, x.xbar)
 default_tail(test::ClarkWestTest) = :both
 
 function show_params(io::IO, x::ClarkWestTest, ident)
-    println(io, ident, "number of observations: $(x.n)")
-    println(io, ident, "CW statistic:           $(x.t)")
-    println(io, ident, "degrees of freedom:     $(x.df)")
+    println(io, ident, "number of observations:    $(x.n)")
+    println(io, ident, "CW statistic:              $(x.z)")
+    println(io, ident, "population standard error: $(x.stderr)")
 end
