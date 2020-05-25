@@ -27,19 +27,6 @@ using HypothesisTests: default_tail
     @test pvalue(dm_test) ≈ 0.7818 atol=atol
     @test pvalue(dm_test, tail=:right) ≈ 0.3909 atol=atol
     @test pvalue(dm_test, tail=:left) ≈ 0.6091 atol=atol
-
-    # Random forecast must be worse then ets and arima
-    Random.seed!(1)
-    e_rand = rand(20)
-    dm_test = DieboldMarianoTest(e_ets, e_rand)
-    @test pvalue(dm_test) ≈ 0.0045 atol=atol
-    @test pvalue(dm_test, tail=:right) ≈ 0.0024 atol=atol
-    @test pvalue(dm_test, tail=:left) ≈ 0.9975 atol=atol
-
-    dm_test = DieboldMarianoTest(e_arima, e_rand)
-    @test pvalue(dm_test) ≈ 0.012 atol=atol
-    @test pvalue(dm_test, tail=:right) ≈ 0.0062 atol=atol
-    @test pvalue(dm_test, tail=:left) ≈ 0.9937 atol=atol
     show(IOBuffer(), dm_test)
 
     @test_throws DimensionMismatch DieboldMarianoTest(rand(3), rand(4))
