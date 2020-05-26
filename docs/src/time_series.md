@@ -28,3 +28,8 @@ ADFTest
 ```@docs
 DieboldMarianoTest
 ```
+
+## White test
+```@docs
+WhiteTest
+```
