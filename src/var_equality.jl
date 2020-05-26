@@ -58,6 +58,23 @@ function anova(scores::AbstractVector{<:Real}...)
     (Nᵢ, SStᵢ, SSeᵢ)
 end
 
+"""
+    OneWayANOVATest(groups::AbstractVector{<:Real}...)
+
+Perform one-way analysis of variance test of the hypothesis that that the `groups` means are equal.
+
+The one-way analysis of variance (one-way ANOVA) is a technique that can be used to compare means of two or more samples.
+The ANOVA tests the null hypothesis, which states that samples in all groups are drawn from populations with the same mean values.
+To do this, two estimates are made of the population variance.
+The ANOVA produces an F-statistic, the ratio of the variance calculated among the means to the variance within the samples.
+
+Implements: [`pvalue`](@ref)
+
+# External links
+
+  * [One-way analysis of variance on Wikipedia
+    ](https://en.wikipedia.org/wiki/One-way_analysis_of_variance)
+"""
 function OneWayANOVATest(groups::AbstractVector{<:Real}...)
     Nᵢ, SStᵢ, SSeᵢ = anova(groups...)
     k = length(Nᵢ)
@@ -87,6 +104,8 @@ where
 * ``Z_{\\cdot\\cdot} = \\frac{1}{N} \\sum_{i=1}^k \\sum_{j=1}^{N_i} Z_{ij}`` is the mean of all ``Z_{ij}``.
 
 The test statistic ``W`` is approximately ``F``-distributed with ``k-1`` and ``N-k`` degrees of freedom.
+
+Implements: [`pvalue`](@ref)
 
 # References
 
@@ -134,7 +153,7 @@ function BrownForsytheTest(groups::AbstractVector{<:Real}...)
     # anova
     Nᵢ, SStᵢ, SSeᵢ = anova(Zᵢⱼ...)
     k = length(Nᵢ)
-    VarianceEqualityTest{FDist}(Nᵢ, SStᵢ, SSeᵢ, k-1, sum(Nᵢ)-k, ("Brown-Forsythe test","Variances","W"))
+    VarianceEqualityTest{FDist}(Nᵢ, SStᵢ, SSeᵢ, k-1, sum(Nᵢ)-k, ("Brown-Forsythe test","Variances","F"))
 end
 
 """

@@ -73,10 +73,8 @@ ExactPermutationTest
 ApproximatePermutationTest
 ```
 
-## Tests for homogeneity of variances
+## Fligner-Killeen test
 
 ```@docs
-LeveneTest
-BrownForsytheTest
 FlignerKilleenTest
 ```
