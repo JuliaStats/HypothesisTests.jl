@@ -6,31 +6,59 @@ using DelimitedFiles
 
 @testset "Equality of Variances" begin
 
+    # https://en.wikipedia.org/wiki/One-way_analysis_of_variance#Example
+    groups = [
+        [6, 8, 4, 5, 3, 4],
+        [8, 12, 9, 11, 6, 8],
+        [13, 9, 11, 8, 7, 12]
+    ]
+    t = OneWayANOVATest(groups...)
+    @test nobs(t) == fill(6, 3)
+    @test dof(t) == (2,15)
+    @test pvalue(t) ≈ 0.002 atol=1e-3
+    @test occursin("reject h_0", sprint(show, t))
+
+    show(IOContext(IOBuffer(), :table => true), t)
+    show(IOBuffer(), t)
+
+    # http://www.real-statistics.com/one-way-analysis-of-variance-anova/confidence-interval-anova/
+    groups = [
+        [51, 87, 50, 48, 79, 61, 53],
+        [82, 91, 92, 80, 52, 79, 73, 74],
+        [79, 84, 74, 98, 63, 83, 85, 58],
+        [85, 80, 65, 71, 67, 51],
+    ]
+    t = OneWayANOVATest(groups...)
+    @test nobs(t) == [7, 8, 8, 6]
+    @test dof(t) == (3,25)
+    @test pvalue(t) ≈ 0.072 atol=1e-3
+    @test occursin("reject h_0", sprint(show, t))
+
     # http://www.real-statistics.com/one-way-analysis-of-variance-anova/homogeneity-variances/levenes-test/
-    groups1 = [
+    groups = [
         [51, 87, 50, 48, 79, 61, 53, 54],
         [82, 91, 92, 80, 52, 79, 73, 74],
         [79, 84, 74, 98, 63, 83, 85, 58],
         [85, 80, 65, 71, 67, 51, 63, 93],
     ]
     # with means
-    l = LeveneTest(groups1...; statistic=mean)
+    l = LeveneTest(groups...; statistic=mean)
     @test nobs(l) == fill(8, 4)
     @test dof(l) == (3,28)
     @test pvalue(l) ≈ 0.90357 atol=1e-4
     # with medians
-    l = LeveneTest(groups1...; statistic=median)
+    l = LeveneTest(groups...; statistic=median)
     @test pvalue(l) ≈ 0.97971 atol=1e-4
     # with 10% trimmed means
-    l = LeveneTest(groups1...; statistic=v->mean(trim(v, prop=0.1)))
+    l = LeveneTest(groups...; statistic=v->mean(trim(v, prop=0.1)))
     @test pvalue(l) ≈ 0.90357 atol=1e-4
 
     # Fligner-Killeen Test
-    t = FlignerKilleenTest(groups1...)
+    t = FlignerKilleenTest(groups...)
     @test nobs(t) == fill(8, 4)
     @test dof(t) == 3
     @test pvalue(t) ≈ 0.9878 atol=1e-4
-    @test t.FK ≈ 0.1311 atol=1e-5
+    @test HypothesisTests.teststatistic(t) ≈ 0.1311 atol=1e-5
     @test occursin("reject h_0", sprint(show, t))
 
     # https://www.itl.nist.gov/div898/handbook/eda/section3/eda35a.htm
@@ -44,7 +72,7 @@ using DelimitedFiles
     l = BrownForsytheTest(groups2...)
     @test nobs(l) == fill(10, 10)
     @test dof(l) == (9,90)
-    @test l.W ≈ 1.705910 atol=1e-5
+    @test HypothesisTests.teststatistic(l) ≈ 1.705910 atol=1e-5
     @test pvalue(l) ≈ 0.0991 atol=1e-4
     @test occursin("reject h_0", sprint(show, l))
 end
