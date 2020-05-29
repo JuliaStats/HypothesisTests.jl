@@ -60,10 +60,10 @@ function WhiteTest(X::AbstractVecOrMat{<:Real}, e::AbstractVector{<:Real}, TestT
 
     if TestType == :Linear
         z  = X
-        TestDescription = string("Breusch-Pagan's test for heteroskedasticity (linear)")
+        TestDescription = "Breusch-Pagan's test for heteroskedasticity (linear)"
     elseif TestType == :LinearAndSquares
         z = [X X.^2]
-        TestDescription = string("White's test for heteroskedasticity (linear and squares)")
+        TestDescription = "White's test for heteroskedasticity (linear and squares)"
     else               #linear, squares and cross-products
         z = fill(NaN,n,round(Int,K*(K+1)/2))   #loop is easier and quicker than index tricks
         vv = 1
@@ -71,7 +71,7 @@ function WhiteTest(X::AbstractVecOrMat{<:Real}, e::AbstractVector{<:Real}, TestT
             z[:,vv] = X[:,i].*X[:,j]             #eg. x1*x1, x1*x2, x2*x2
             vv      = vv + 1
         end
-        TestDescription = string("White's test for heteroskedasticity (linear, squares, cross products)")
+        TestDescription = "White's test for heteroskedasticity (linear, squares, cross products)"
     end
 
     dof  = rank(z) - 1                         #number of independent regressors in z
