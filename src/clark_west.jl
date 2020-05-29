@@ -35,7 +35,7 @@ end
 """
     ClarkWestTest(e1::AbstractVector{<:Real}, e2::AbstractVector{<:Real}; lookahead::Integer=1)
 
-Perform the Clark-West test of equal performance of two nested predition models, in terms of the
+Perform the Clark-West test of equal performance of two nested prediction models, in terms of the
 out-of-sample mean squared prediction errors.
 
 `e1` is a vector of forecasts from the smaller (nested) model, `e2` is a vector of forecast
