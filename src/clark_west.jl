@@ -33,7 +33,7 @@ struct ClarkWestTest <: ZTest
 end
 
 """
-    ClarkWestTest(e1::AbstractVector{<:Real}, e2::AbstractVector{<:Real};lookahead::Integer=1)
+    ClarkWestTest(e1::AbstractVector{<:Real}, e2::AbstractVector{<:Real}; lookahead::Integer=1)
 
 Perform the Clark-West test of equal performance of two nested predition models, in terms of the
 out-of-sample mean squared prediction errors.
