@@ -147,14 +147,7 @@ Implements: [`pvalue`](@ref)
   * [Brown–Forsythe test on Wikipedia
     ](https://en.wikipedia.org/wiki/Brown%E2%80%93Forsythe_test)
 """
-function BrownForsytheTest(groups::AbstractVector{<:Real}...)
-    # calculate scores
-    Zᵢⱼ = [abs.(g .- median(g)) for g in groups]
-    # anova
-    Nᵢ, SStᵢ, SSeᵢ = anova(Zᵢⱼ...)
-    k = length(Nᵢ)
-    VarianceEqualityTest{FDist}(Nᵢ, SStᵢ, SSeᵢ, k-1, sum(Nᵢ)-k, ("Brown-Forsythe test","Variances","F"))
-end
+BrownForsytheTest(groups::AbstractVector{<:Real}...) = LeveneTest(groups...; statistic=median)
 
 """
     FlignerKilleenTest(groups::AbstractVector{<:Real}...)
