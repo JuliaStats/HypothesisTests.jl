@@ -1,4 +1,4 @@
-export ExactPermutationTest, ApproximatePermutationTest
+export PermutationTest
 
 function ptstats(x,y)
     xy = vcat(x,y)
@@ -13,30 +13,37 @@ struct PermutationTest{T<:Real} <: HypothesisTest
 end
 
 """
-    ExactPermutationTest(x::Vector, y::Vector, f::Function)
+    PermutationTest(f::Function, x::AbstractVector{<:Real}, y::AbstractVector{<:Real})
 
-Perform a permutation test (a.k.a. randomization test) of the null hypothesis
-that `f(x)` is equal to `f(y)`.  All possible permutations are sampled.
+Perform an exact permutation test (a.k.a. randomization test) of the null hypothesis
+that `f(x)` is equal to `f(y)`. All possible permutations are sampled.
 """
-function ExactPermutationTest(x::AbstractVector{R}, y::AbstractVector{S},
-                              f::Function) where {R<:Real,S<:Real}
-    xy, rx, ry = ptstats(x,y)
+function PermutationTest(
+    f::Function,
+    x::AbstractVector{<:Real},
+    y::AbstractVector{<:Real},
+)
+    xy, rx, ry = ptstats(x, y)
     P = permutations(xy)
-    samples = [f(view(p,rx)) - f(view(p,ry)) for p in P]
+    samples = [f(view(p, rx)) - f(view(p, ry)) for p in P]
     PermutationTest(f(x) - f(y), samples)
 end
 
 """
-    ApproximatePermutationTest(x::Vector, y::Vector, f::Function, n::Int)
+    PermutationTest(f::Function, x::AbstractVector{<:Real}, y::AbstractVector{<:Real}, n::Integer)
 
-Perform a permutation test (a.k.a. randomization test) of the null hypothesis
-that `f(x)` is equal to `f(y)`.  `n` of the `factorial(length(x)+length(y))`
+Perform an approximate permutation test (a.k.a. randomization test) of the null hypothesis
+that `f(x)` is equal to `f(y)`. `n` of the `factorial(length(x) + length(y))`
 permutations are sampled at random.
 """
-function ApproximatePermutationTest(x::AbstractVector{R}, y::AbstractVector{S},
-                                    f::Function, n::Int) where {R<:Real,S<:Real}
-    xy, rx, ry = ptstats(x,y)
-    samples = [(shuffle!(xy); f(view(xy,rx)) - f(view(xy,ry))) for i = 1:n]
+function PermutationTest(
+    f::Function,
+    x::AbstractVector{<:Real},
+    y::AbstractVector{<:Real},
+    n::Integer,
+)
+    xy, rx, ry = ptstats(x, y)
+    samples = [(shuffle!(xy); f(view(xy, rx)) - f(view(xy, ry))) for i = 1:n]
     PermutationTest(f(x) - f(y), samples)
 end
 

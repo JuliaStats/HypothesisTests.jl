@@ -10,3 +10,6 @@ using Base: @deprecate
 @deprecate BartlettsTest BartlettTest
 
 @deprecate confint(x::HypothesisTest, alpha::Real; kwargs...) confint(x; level=1-alpha, kwargs...)
+
+@deprecate ExactPermutationTest(x, y, f) PermutationTest(f, x, y)
+@deprecate ApproximatePermutationTest(x, y, f, n) PermutationTest(f, x, y, n)
