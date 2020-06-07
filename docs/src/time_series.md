@@ -32,4 +32,5 @@ DieboldMarianoTest
 ## White test
 ```@docs
 WhiteTest
+BreuschPaganTest
 ```
