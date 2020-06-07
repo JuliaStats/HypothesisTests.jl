@@ -218,4 +218,7 @@ e = [ 5.19346;
 
     @test_throws DimensionMismatch WhiteTest(rand(3), rand(4))
 
+   bp_test = BreuschPaganTest(X, e,)
+   @test pvalue(bp_test) ≈ 0.1287 atol=atol
+
 end
