@@ -69,6 +69,6 @@ ApproximateSignedRankTest
 ## Permutation test
 
 ```@docs
-ExactPermutationTest
-ApproximatePermutationTest
+PermutationTest(::Function, ::AbstractVector, ::AbstractVector)
+PermutationTest(::Function, ::AbstractVector, ::AbstractVector, ::Integer)
 ```
