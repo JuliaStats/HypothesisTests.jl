@@ -3,8 +3,8 @@ export PermutationTest
 function ptstats(x,y)
     xy = vcat(x,y)
     rx = 1:length(x)
-    ry = (length(xy)-length(y)+1):length(xy)
-    (xy, rx, ry)
+    ry = (length(xy) - length(y) + 1):length(xy)
+    return (xy, rx, ry)
 end
 
 struct PermutationTest{T<:Real} <: HypothesisTest
@@ -47,22 +47,22 @@ function PermutationTest(
     PermutationTest(f(x) - f(y), samples)
 end
 
-function pvalue(apt::PermutationTest; tail=:both)
-    if tail == :both
-        count = sum(abs(apt.observation) <= abs(x) for x in apt.samples)
+function pvalue(pt::PermutationTest; tail=:both)
+    c = if tail == :both
+        count(abs(pt.observation) ≤ abs(x) for x in pt.samples)
     elseif tail == :left
-        count = sum(apt.observation >= x for x in apt.samples)
+        count(pt.observation ≥ x for x in pt.samples)
     elseif tail == :right
-        count = sum(apt.observation <= x for x in apt.samples)
+        count(pt.observation ≤ x for x in pt.samples)
     end
-    return count / length(apt.samples)
+    return c / length(pt.samples)
 end
 
 testname(::PermutationTest) = "Permutation Test"
 
-function show_params(io::IO, apt::PermutationTest, ident)
-    println(io, ident, "observation: ", apt.observation)
+function show_params(io::IO, pt::PermutationTest, ident)
+    println(io, ident, "observation: ", pt.observation)
     print(io, ident, "samples: ")
-    show(io, apt.samples)
+    show(io, pt.samples)
     println(io)
 end
