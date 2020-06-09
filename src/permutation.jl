@@ -7,17 +7,20 @@ function ptstats(x,y)
     return (xy, rx, ry)
 end
 
+"""
+    PermutationTest(f, x::AbstractVector{<:Real}, y::AbstractVector{<:Real} [, n::Integer])
+
+Perform a permutation test (a.k.a. randomization test) of the null hypothesis
+that `f(x)` is equal to `f(y)`. If `n` is provided, an approximate permutation test is
+performed, where `n` of the `factorial(length(x) + length(y))` permutations are sampled at
+random. Otherwise, an exact permutation test is performed, where all possible permutations
+are sampled.
+"""
 struct PermutationTest{T<:Real} <: HypothesisTest
     observation::T
     samples::Vector{T}
 end
 
-"""
-    PermutationTest(f::Function, x::AbstractVector{<:Real}, y::AbstractVector{<:Real})
-
-Perform an exact permutation test (a.k.a. randomization test) of the null hypothesis
-that `f(x)` is equal to `f(y)`. All possible permutations are sampled.
-"""
 function PermutationTest(
     f::Function,
     x::AbstractVector{<:Real},
@@ -29,13 +32,6 @@ function PermutationTest(
     PermutationTest(f(x) - f(y), samples)
 end
 
-"""
-    PermutationTest(f::Function, x::AbstractVector{<:Real}, y::AbstractVector{<:Real}, n::Integer)
-
-Perform an approximate permutation test (a.k.a. randomization test) of the null hypothesis
-that `f(x)` is equal to `f(y)`. `n` of the `factorial(length(x) + length(y))`
-permutations are sampled at random.
-"""
 function PermutationTest(
     f::Function,
     x::AbstractVector{<:Real},
