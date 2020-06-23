@@ -26,23 +26,23 @@ export WhiteTest, BreuschPaganTest
 
 struct WhiteTest <: HypothesisTest
     dof::Int                 #degrees of freedom in test
-    LM::Float64              #test statistic, distributed as Chisq(dof)
-    TestDescription::String  #short description of the test
+    LM::Float64              #Lagrange Multiplier test statistic, distributed as Chisq(dof)
+    testtype::Symbol
 end
 
 """
-    WhiteTest(X, e, TestType)
+    WhiteTest(X, e; testtype = :White)
 
 Compute White's (or Breusch-Pagan's) test for heteroskedasticity.
 
-`X` is a matrix of regressors and `e` is the vector of residuals from the original model.
-`TestType` is either `:Linear` for the Breusch-Pagan/Koenker test, `:LinearAndSquares` for
-White's test with linear and squared terms only (no cross-products), or `:White` (the default)
-for the full White's test (linear, squared and cross-product terms). `X` should include a
-constant. In some applications, `X` is a subset of the regressors in the original model,
-or just the fitted values. This saves degrees of freedom and may give a more powerful test.
-The test statistic is T*R2 where R2 is from the regression of `e^2` on the terms
-mentioned above. Under the null hypothesis it is distributed as `Chisquare(dof)`
+`X` is a vector or matrix of regressors and `e` is the vector of residuals from the original model.
+The keyword argument `testtype` is either `:linear` for the Breusch-Pagan/Koenker test,
+`:linear_and_squares` for White's test with linear and squared terms only (no cross-products), or
+`:White` (the default) for the full White's test (linear, squared and cross-product terms).
+`X` should include a constant. In some applications, `X` is a subset of the regressors in
+the original model, or just the fitted values. This saves degrees of freedom and may give
+a more powerful test. The LM test statistic is T*R2 where R2 is from the regression of `e^2`
+on the terms mentioned above. Under the null hypothesis it is distributed as `Chisq(dof)`
 where `dof` is the number of independent terms (not counting the constant), so the null
 is rejected when the test statistic is large enough.
 
@@ -56,34 +56,31 @@ Implements: [`pvalue`](@ref)
 # External links
   * [White's test on Wikipedia](https://en.wikipedia.org/wiki/White_test)
 """
-function WhiteTest(X::AbstractVecOrMat{<:Real}, e::AbstractVector{<:Real}, TestType=:White)
+function WhiteTest(X::AbstractVecOrMat{<:Real}, e::AbstractVector{<:Real}; testtype = :White)
     (n,K) = (size(X,1),size(X,2))    #nobs,nvars
 
     n == length(e) || throw(DimensionMismatch("inputs must have the same length"))
 
-    if TestType == :Linear
-        z  = X
-        TestDescription = "Breusch-Pagan's test for heteroskedasticity (linear)"
-    elseif TestType == :LinearAndSquares
+    if testtype == :linear                    #Breush-Pagan/Koenker
+        z = X
+    elseif testtype == :linear_and_squares    #White with linear and squares
         z = [X X.^2]
-        TestDescription = "White's test for heteroskedasticity (linear and squares)"
-    else               #linear, squares and cross-products
-        z = fill(NaN,n,round(Int,K*(K+1)/2))   #loop is easier and quicker than index tricks
+    else                                      #White with linear, squares and cross-products
+        z = fill(NaN,n,round(Int,K*(K+1)/2))
         vv = 1
-        for i = 1:K, j = i:K
-            z[:,vv] = X[:,i].*X[:,j]             #eg. x1*x1, x1*x2, x2*x2
-            vv      = vv + 1
+        @views for i = 1:K, j = i:K
+            z[:,vv] .= X[:,i] .* X[:,j]       #eg. x1*x1, x1*x2, x2*x2
+            vv      += 1
         end
-        TestDescription = "White's test for heteroskedasticity (linear, squares, cross products)"
     end
 
-    dof  = rank(z) - 1                         #number of independent regressors in z
+    dof  = rank(z) - 1                        #number of independent regressors in z
     e2  = e.^2
     b   = z\e2
     res = e2 - z*b
     R2  = 1 - var(res)/var(e2)
-    LM  = n*R2                                 #n*R2 in original papers, could also use n*R2/(1-R2)
-    return WhiteTest(dof, LM, TestDescription)
+    LM  = n*R2
+    return WhiteTest(dof, LM, testtype)
 end
 
 """
@@ -91,19 +88,20 @@ end
 
 Compute Breusch-Pagan's test for heteroskedasticity.
 
-`X` is the matrix of regressors from the original model and `e` the vector of residuals.
+`X` is the vector or matrix of regressors from the original model and `e` the vector of residuals.
 See `WhiteTest` for further details.
 """
-BreuschPaganTest(X, e) = WhiteTest(X, e, :Linear)
+BreuschPaganTest(X, e) = WhiteTest(X, e, testtype = :linear)
 
+testname(t::WhiteTest) = "White's (or Breusch-Pagan's) test for heteroskedasticity"
 
-testname(t::WhiteTest)                     = t.TestDescription
 population_param_of_interest(t::WhiteTest) = ("T*R2", 0, t.LM)
 default_tail(test::WhiteTest)              = :right
 
-function show_params(io::IO, t::WhiteTest, ident)
+function show_params(io::IO, t::WhiteTest, ident = "")
     println(io, ident, "T*R^2 statistic:        ", t.LM)
     println(io, ident, "degrees of freedom:     ", t.dof)
+    println(io, ident, "testtype:               ", t.testtype)
 end
 
 StatsBase.dof(t::WhiteTest) = t.dof

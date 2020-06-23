@@ -205,10 +205,10 @@ e = [ 5.19346;
       0.28832 ]
 
     atol = 1e-4
-    w_test = WhiteTest(X, e, :Linear)
+    w_test = WhiteTest(X, e, testtype = :linear)
     @test pvalue(w_test) ≈ 0.1287 atol=atol
 
-    w_test = WhiteTest(X, e, :LinearAndSquares)
+    w_test = WhiteTest(X, e, testtype = :linear_and_squares)
     @test pvalue(w_test) ≈ 0.2774 atol=atol
 
     w_test = WhiteTest(X, e)
@@ -218,7 +218,7 @@ e = [ 5.19346;
 
     @test_throws DimensionMismatch WhiteTest(rand(3), rand(4))
 
-   bp_test = BreuschPaganTest(X, e,)
-   @test pvalue(bp_test) ≈ 0.1287 atol=atol
+    bp_test = BreuschPaganTest(X, e,)
+    @test pvalue(bp_test) ≈ 0.1287 atol=atol
 
 end
