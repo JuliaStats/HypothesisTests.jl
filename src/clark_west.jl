@@ -58,7 +58,7 @@ function ClarkWestTest(e1::AbstractVector{<:Real}, e2::AbstractVector{<:Real};
     n            = length(e1)
     d            = 2*e1.*(e1 - e2)
     cw_cov       = HypothesisTests.autocov(d, collect(0:lookahead-1))
-    cw_var       = (cw_cov[1] + 2 * sum(cw_cov[2:end]))/n
+    cw_var       = (cw_cov[1] + 2*sum(cw_cov[2:end]))/n
     xbar         = mean(d)
     stderr       = sqrt(cw_var)
     statistic_cw = xbar/stderr
