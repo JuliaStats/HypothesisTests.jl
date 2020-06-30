@@ -35,16 +35,17 @@ end
 
 Compute White's (or Breusch-Pagan's) test for heteroskedasticity.
 
-`X` is a vector or matrix of regressors and `e` is the vector of residuals from the original model.
+`X` is a matrix of regressors and `e` is the vector of residuals from the original model.
 The keyword argument `testtype` is either `:linear` for the Breusch-Pagan/Koenker test,
 `:linear_and_squares` for White's test with linear and squared terms only (no cross-products), or
 `:White` (the default) for the full White's test (linear, squared and cross-product terms).
-`X` should include a constant. In some applications, `X` is a subset of the regressors in
-the original model, or just the fitted values. This saves degrees of freedom and may give
-a more powerful test. The LM test statistic is T*R2 where R2 is from the regression of `e^2`
-on the terms mentioned above. Under the null hypothesis it is distributed as `Chisq(dof)`
-where `dof` is the number of independent terms (not counting the constant), so the null
-is rejected when the test statistic is large enough.
+`X` should include a constant and at least one more regressor. In some applications,
+`X` is a subset of the regressors in the original model, or just the fitted values.
+This saves degrees of freedom and may give a more powerful test. The LM test statistic
+is T*R2 where R2 is from the regression of `e^2` on the terms mentioned above.
+Under the null hypothesis it is distributed as `Chisq(dof)` where `dof` is the number
+of independent terms (not counting the constant), so the null is rejected when the
+test statistic is large enough.
 
 Implements: [`pvalue`](@ref)
 
@@ -56,10 +57,16 @@ Implements: [`pvalue`](@ref)
 # External links
   * [White's test on Wikipedia](https://en.wikipedia.org/wiki/White_test)
 """
-function WhiteTest(X::AbstractVecOrMat{<:Real}, e::AbstractVector{<:Real}; testtype = :White)
-    (n,K) = (size(X,1),size(X,2))    #nobs,nvars
+function WhiteTest(X::AbstractMatrix{<:Real}, e::AbstractVector{<:Real}; testtype = :White)
 
+    (n,K) = (size(X,1),size(X,2))    #nobs,nvars
     n == length(e) || throw(DimensionMismatch("inputs must have the same length"))
+
+    K >= 2 || throw(ArgumentError("X must have >= 2 columns"))
+
+    intercept_cols = mapslices(col->all(diff(col).==0) && (first(col) != 0),X,dims=1)
+    any(intercept_cols) || throw(ArgumentError("one of the colums of X must be a non-zero constant"))
+
 
     if testtype == :linear                    #Breush-Pagan/Koenker
         z = X
@@ -88,7 +95,7 @@ end
 
 Compute Breusch-Pagan's test for heteroskedasticity.
 
-`X` is the vector or matrix of regressors from the original model and `e` the vector of residuals.
+`X` is a matrix of regressors from the original model and `e` the vector of residuals.
 See `WhiteTest` for further details.
 """
 BreuschPaganTest(X, e) = WhiteTest(X, e, testtype = :linear)

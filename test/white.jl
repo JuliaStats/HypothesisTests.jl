@@ -216,7 +216,11 @@ e = [ 5.19346;
 
     show(IOBuffer(), w_test)
 
-    @test_throws DimensionMismatch WhiteTest(rand(3), rand(4))
+    @test_throws DimensionMismatch WhiteTest([rand(3) ones(3)], rand(4))
+
+    @test_throws ArgumentError WhiteTest(ones(4,1), rand(4))
+
+    @test_throws ArgumentError WhiteTest(rand(4,2), rand(4))
 
     bp_test = BreuschPaganTest(X, e,)
     @test pvalue(bp_test) ≈ 0.1287 atol=atol
