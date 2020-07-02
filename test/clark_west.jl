@@ -17,7 +17,7 @@ using HypothesisTests, Test
     @test pvalue(cw_test) ≈ 0.0002 atol=atol
     @test pvalue(cw_test, tail=:right) ≈ 0.0001 atol=atol
 
-    cw_test = ClarkWestTest(e1, e2; lookahead=3)
+    cw_test = ClarkWestTest(e1, e2, 3)
     @test pvalue(cw_test) ≈ 0.0157 atol=atol
     @test pvalue(cw_test, tail=:right) ≈ 0.0079 atol=atol
 

@@ -33,7 +33,7 @@ struct ClarkWestTest <: ZTest
 end
 
 """
-    ClarkWestTest(e1::AbstractVector{<:Real}, e2::AbstractVector{<:Real}; lookahead::Integer=1)
+    ClarkWestTest(e1::AbstractVector{<:Real}, e2::AbstractVector{<:Real}, lookahead::Integer=1)
 
 Perform the Clark-West test of equal performance of two nested prediction models, in terms of the
 out-of-sample mean squared prediction errors.
@@ -52,22 +52,22 @@ Implements: [`pvalue`](@ref)
    in nested models. Journal of Econometrics, 138(1): 291–311.
 
 """
-function ClarkWestTest(e1::AbstractVector{<:Real}, e2::AbstractVector{<:Real};
+function ClarkWestTest(e1::AbstractVector{<:Real}, e2::AbstractVector{<:Real},
                        lookahead::Integer=1)
     length(e1) == length(e2) || throw(DimensionMismatch("inputs must have the same length"))
     n            = length(e1)
     d            = 2*e1.*(e1 - e2)
-    cw_cov       = HypothesisTests.autocov(d, collect(0:lookahead-1))
-    cw_var       = (cw_cov[1] + 2*sum(cw_cov[2:end]))/n
+    cw_cov       = autocov(d, 0:lookahead-1)
+    cw_var       = (cw_cov[1] + 2*sum(@view(cw_cov[2:end])))/n
     xbar         = mean(d)
     stderr       = sqrt(cw_var)
     statistic_cw = xbar/stderr
-    return ClarkWestTest(n, xbar, stderr, statistic_cw, 0.0)
+    return ClarkWestTest(n, xbar, stderr, statistic_cw, 0)
 end
 
 testname(::ClarkWestTest) = "Clark West test"
 population_param_of_interest(x::ClarkWestTest) = ("Mean", x.μ0, x.xbar)
-default_tail(test::ClarkWestTest) = :both
+default_tail(::ClarkWestTest) = :both
 
 function show_params(io::IO, x::ClarkWestTest, ident)
     println(io, ident, "number of observations:    $(x.n)")
