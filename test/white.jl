@@ -212,8 +212,31 @@ e = [ 5.19346;
     @test pvalue(w_test) ≈ 0.2774 atol=atol
 
     w_test = WhiteTest(X, e)
-    @test pvalue(w_test) ≈ 0.3458 atol=atol
-    show(IOBuffer(), w_test)
+    w_pval = pvalue(w_test)
+    @test w_pval ≈ 0.3458 atol=atol
+
+    refstr = """
+White's (or Breusch-Pagan's) test for heteroskedasticity
+--------------------------------------------------------
+Population details:
+    parameter of interest:   T*R2
+    value under h_0:         0
+    point estimate:          $(round(w_test.lm,digits=4))
+
+Test summary:
+    outcome with 95% confidence: fail to reject h_0
+    one-sided p-value:           $(round(w_pval,digits=4))
+
+Details:
+    T*R^2 statistic:        $(round(w_test.lm,digits=4))
+    degrees of freedom:     $(w_test.dof)
+    type:                   $(w_test.type)
+"""
+
+    buffer = IOBuffer()
+    show(buffer, w_test)
+    str = String(take!(buffer))
+    @test str == refstr
 
     @test_throws DimensionMismatch WhiteTest([rand(3) ones(3)], rand(4))
 

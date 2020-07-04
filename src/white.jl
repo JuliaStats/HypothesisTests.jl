@@ -64,7 +64,13 @@ function WhiteTest(X::AbstractMatrix{<:Real}, e::AbstractVector{<:Real}; type = 
 
     K >= 2 || throw(ArgumentError("X must have >= 2 columns"))
 
-    intercept_col = any(col -> first(col) != 0 && all(==(first(col)), col),eachcol(X))
+   # intercept_col = any(col -> first(col) != 0 && all(==(first(col)), col),eachcol(X))
+    intercept_col = false
+    for i = 1:K
+        col           = view(X,:,i)
+        intercept_col = first(col) != 0 && all(==(first(col)), col)
+        intercept_col && break
+    end
     intercept_col || throw(ArgumentError("one of the colums of X must be a non-zero constant"))
 
     if type == :linear                    #Breush-Pagan/Koenker
@@ -80,7 +86,7 @@ function WhiteTest(X::AbstractMatrix{<:Real}, e::AbstractVector{<:Real}; type = 
         end
     end
 
-    dof  = rank(z) - 1                        #number of independent regressors in z
+    dof = rank(z) - 1                        #number of independent regressors in z
     e2  = e.^2
     b   = z\e2
     res = e2 - z*b
@@ -102,11 +108,11 @@ BreuschPaganTest(X, e) = WhiteTest(X, e, type = :linear)
 
 testname(t::WhiteTest) = "White's (or Breusch-Pagan's) test for heteroskedasticity"
 
-population_param_of_interest(t::WhiteTest) = ("T*R2", 0, t.lm)
+population_param_of_interest(t::WhiteTest) = ("T*R2", 0, round(t.lm,digits=4))
 default_tail(test::WhiteTest)              = :right
 
 function show_params(io::IO, t::WhiteTest, ident = "")
-    println(io, ident, "T*R^2 statistic:        ", t.lm)
+    println(io, ident, "T*R^2 statistic:        ", round(t.lm,digits=4))
     println(io, ident, "degrees of freedom:     ", t.dof)
     println(io, ident, "type:                   ", t.type)
 end
