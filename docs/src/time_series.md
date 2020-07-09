@@ -33,3 +33,9 @@ ClarkWestTest
 ```@docs
 DieboldMarianoTest
 ```
+
+## White test
+```@docs
+WhiteTest
+BreuschPaganTest
+```

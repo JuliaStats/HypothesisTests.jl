@@ -192,5 +192,6 @@ include("f.jl")
 include("correlation.jl")
 include("diebold_mariano.jl")
 include("clark_west.jl")
+include("white.jl")
 
 end
