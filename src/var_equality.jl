@@ -17,11 +17,14 @@ teststatisticname(t::VarianceEqualityTest{TD}) where {TD <: ContinuousDistributi
     length(t.description[3]) != 0 ? t.description[3] : (TD <: FDist ? "F" : "χ²")
 
 StatsBase.nobs(t::VarianceEqualityTest) = t.Nᵢ
-StatsBase.dof(t::VarianceEqualityTest{Chisq}) where T = t.DFt
-StatsBase.dof(t::VarianceEqualityTest{FDist}) where T = (t.DFt, t.DFe)
+StatsBase.dof(t::VarianceEqualityTest{Chisq}) = t.DFt
+StatsBase.dof(t::VarianceEqualityTest{FDist}) = (t.DFt, t.DFe)
 
 teststatistic(t::VarianceEqualityTest{FDist}) = (t.DFe/t.DFt)*sum(t.SStᵢ)/sum(t.SSeᵢ)
-teststatistic(t::VarianceEqualityTest{Chisq}) = let y=sum(t.SStᵢ)/sum(t.SSeᵢ); y*(t.DFe+t.DFt)/(1 + y) end # sum(t.SStᵢ)/t.s²
+function teststatistic(t::VarianceEqualityTest{Chisq})
+    y = sum(t.SStᵢ)/sum(t.SSeᵢ)
+    y*(t.DFe+t.DFt)/(1 + y) # sum(t.SStᵢ)/t.s²
+end
 pvalue(t::VarianceEqualityTest{TD}; tail=:right) where {TD <: ContinuousDistribution} = pvalue(TD(dof(t)...), teststatistic(t), tail=tail)
 
 function show_params(io::IO, t::VarianceEqualityTest{TD}, indent="") where {TD <: ContinuousDistribution}
@@ -82,11 +85,13 @@ function OneWayANOVATest(groups::AbstractVector{<:Real}...)
 end
 
 """
-    LeveneTest(groups::AbstractVector{<:Real}...; statistic=mean)
+    LeveneTest(groups::AbstractVector{<:Real}...; scorediff=abs, statistic=mean)
 
 Perform Levene's test of the hypothesis that that the `groups` variances are equal.
 By default the mean `statistic` is used for centering in each of the `groups`, but
 other statistics are accepted: median or truncated mean, see [`BrownForsytheTest`](@ref).
+By default the absolute value of the score difference, `scorediff`, is used, but
+other functions are accepted: x² or √|x|.
 
 The test statistic, ``W``, is equivalent to the ``F`` statistic, and is defined as follows:
 
@@ -118,9 +123,9 @@ Implements: [`pvalue`](@ref)
   * [Levene's test on Wikipedia
     ](https://en.wikipedia.org/wiki/Levene%27s_test)
 """
-function LeveneTest(groups::AbstractVector{<:Real}...; statistic=mean)
+function LeveneTest(groups::AbstractVector{<:Real}...; scorediff=abs, statistic=mean)
     # calculate scores
-    Zᵢⱼ = [abs.(g .- statistic(g)) for g in groups]
+    Zᵢⱼ = [scorediff.(g .- statistic(g)) for g in groups]
     # anova
     Nᵢ, SStᵢ, SSeᵢ = anova(Zᵢⱼ...)
     k = length(Nᵢ)
