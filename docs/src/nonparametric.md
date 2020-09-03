@@ -72,3 +72,9 @@ ApproximateSignedRankTest
 ExactPermutationTest
 ApproximatePermutationTest
 ```
+
+## Fligner-Killeen test
+
+```@docs
+FlignerKilleenTest
+```
