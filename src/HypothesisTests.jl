@@ -193,5 +193,6 @@ include("correlation.jl")
 include("diebold_mariano.jl")
 include("clark_west.jl")
 include("white.jl")
+include("var_equality.jl")
 
 end

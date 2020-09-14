@@ -1,5 +1,9 @@
 # Parametric tests
 
+```@setup ht
+using HypothesisTests
+```
+
 ## Power divergence test
 ```@docs
 PowerDivergenceTest
@@ -32,4 +36,22 @@ UnequalVarianceZTest
 ## F-test
 ```@docs
 VarianceFTest
+```
+
+## One-way ANOVA Test
+
+```@docs
+OneWayANOVATest
+```
+
+## Levene's Test
+
+```@docs
+LeveneTest
+```
+
+## Brown-Forsythe Test
+
+```@docs
+BrownForsytheTest
 ```
