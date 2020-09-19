@@ -55,7 +55,7 @@ struct OneSampleZTest <: ZTest
     n::Int       # number of observations
     xbar::Real   # estimated mean
     stderr::Real # population standard error
-    z::Real      # t-statistic
+    z::Real      # z-statistic
     μ0::Real     # mean under h_0
 end
 

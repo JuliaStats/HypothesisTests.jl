@@ -24,6 +24,11 @@ JarqueBeraTest
 ADFTest
 ```
 
+## Clark-West test
+```@docs
+ClarkWestTest
+```
+
 ## Diebold-Mariano test
 ```@docs
 DieboldMarianoTest
