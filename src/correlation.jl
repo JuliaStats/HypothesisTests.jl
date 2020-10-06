@@ -30,6 +30,14 @@ struct CorrelationTest{T<:Real} <: HypothesisTest
     k::Int
     t::T
 
+    # Error checking is done in `cor`
+    function CorrelationTest(x::AbstractVector, y::AbstractVector)
+        r = cor(x, y)
+        n = length(x)
+        t = r * sqrt((n - 2) / (1 - r^2))
+        return new{typeof(r)}(r, n, 0, t)
+    end
+
     # Error checking is done in `partialcor`
     function CorrelationTest(x::AbstractVector, y::AbstractVector, Z::AbstractMatrix)
         r = partialcor(x, y, Z)
