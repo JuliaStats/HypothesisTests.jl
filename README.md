@@ -3,8 +3,8 @@
 *HypothesisTests.jl* is a Julia package that implements a wide range of hypothesis tests.
 
 - **Build & Testing Status:**
-  [![Build Status](https://travis-ci.org/JuliaStats/HypothesisTests.jl.svg?branch=master)
-  ](https://travis-ci.org/JuliaStats/HypothesisTests.jl)
+  [![Build Status](https://travis-ci.com/JuliaStats/HypothesisTests.jl.svg?branch=master)
+  ](https://travis-ci.com/JuliaStats/HypothesisTests.jl)
   [![Coverage Status](https://coveralls.io/repos/JuliaStats/HypothesisTests.jl/badge.svg?branch=master)
   ](https://coveralls.io/r/JuliaStats/HypothesisTests.jl?branch=master)
 
