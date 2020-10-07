@@ -6,6 +6,11 @@ using Statistics: clampcor
 export CorrelationTest
 
 """
+    CorrelationTest(x, y)
+
+Perform a t-test for the hypothesis that ``\\text{Cor}(x,y) = 0``, i.e. the correlation 
+of vectors `x` and `y` is zero.
+
     CorrelationTest(x, y, Z)
 
 Perform a t-test for the hypothesis that ``\\text{Cor}(x,y|Z=z) = 0``, i.e. the partial
