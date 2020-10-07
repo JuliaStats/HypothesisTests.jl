@@ -6,7 +6,7 @@ d = [[762,484] [327,239] [468,477]]
 m = PowerDivergenceTest(d)
 
 if VERSION < v"1.4"
-@test sprint(show, m, context=:compact => true) ==
+    @test sprint(show, m, context=:compact => true) ==
     """
     Pearson's Chi-square Test
     -------------------------
@@ -28,10 +28,10 @@ if VERSION < v"1.4"
         std. residuals:     [4.50205, -4.50205, 0.699452, -0.699452, -5.31595, 5.31595]
     """
 
-d = [ 20, 15, 25 ]
-m = PowerDivergenceTest(d)
+    d = [ 20, 15, 25 ]
+    m = PowerDivergenceTest(d)
 
-@test sprint(show, m, context=:compact => true) ==
+    @test sprint(show, m, context=:compact => true) ==
     """
     Pearson's Chi-square Test
     -------------------------
@@ -53,7 +53,7 @@ m = PowerDivergenceTest(d)
         std. residuals:     [0.0, -1.36931, 1.36931]
     """
 else
-@test sprint(show, m, context=:compact => true) ==
+    @test sprint(show, m, context=:compact => true) ==
     """
     Pearson's Chi-square Test
     -------------------------
@@ -75,10 +75,10 @@ else
         std. residuals:     [4.50205, -4.50205, 0.699452, -0.699452, -5.31595, 5.31595]
     """
 
-d = [ 20, 15, 25 ]
-m = PowerDivergenceTest(d)
+    d = [ 20, 15, 25 ]
+    m = PowerDivergenceTest(d)
 
-@test sprint(show, m, context=:compact => true) ==
+    @test sprint(show, m, context=:compact => true) ==
     """
     Pearson's Chi-square Test
     -------------------------
