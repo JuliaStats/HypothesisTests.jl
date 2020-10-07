@@ -221,15 +221,15 @@ e = [ 5.19346;
     Population details:
         parameter of interest:   T*R2
         value under h_0:         0
-        point estimate:          $(w_test.lm)
+        point estimate:          $(sprint(show, w_test.lm; context=:compact => true))
 
     Test summary:
         outcome with 95% confidence: fail to reject h_0
         one-sided p-value:           $(round(w_pval,digits=4))
 
     Details:
-        T*R^2 statistic:        $(w_test.lm)
-        degrees of freedom:     $(w_test.dof)
+        T*R^2 statistic:        $(sprint(show, w_test.lm  ; context=:compact => true))
+        degrees of freedom:     $(sprint(show, w_test.dof ; context=:compact => true))
         type:                   $(w_test.type)
     """
 
