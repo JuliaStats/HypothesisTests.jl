@@ -13,7 +13,7 @@ m = PowerDivergenceTest(d)
         parameter of interest:   Multinomial Probabilities
         value under h_0:         [0.255231, 0.19671, 0.11594, 0.0893561, 0.193574, 0.14919]
         point estimate:          [0.276387, 0.175553, 0.118607, 0.0866884, 0.16975, 0.173014]
-        95% confidence interval: Tuple{Float64,Float64}[(0.2545, 0.2994), (0.1573, 0.1955), (0.1033, 0.1358), (0.0736, 0.1019), (0.1517, 0.1894), (0.1548, 0.1928)]
+        95% confidence interval: [(0.2545, 0.2994), (0.1573, 0.1955), (0.1033, 0.1358), (0.0736, 0.1019), (0.1517, 0.1894), (0.1548, 0.1928)]
 
     Test summary:
         outcome with 95% confidence: reject h_0
@@ -38,7 +38,7 @@ m = PowerDivergenceTest(d)
         parameter of interest:   Multinomial Probabilities
         value under h_0:         [0.333333, 0.333333, 0.333333]
         point estimate:          [0.333333, 0.25, 0.416667]
-        95% confidence interval: Tuple{Float64,Float64}[(0.2167, 0.481), (0.1333, 0.3976), (0.3, 0.5643)]
+        95% confidence interval: [(0.2167, 0.481), (0.1333, 0.3976), (0.3, 0.5643)]
 
     Test summary:
         outcome with 95% confidence: fail to reject h_0

@@ -98,7 +98,8 @@ function check_level(level::Float64)
 end
 
 # Pretty-print
-function Base.show(io::IO, test::T) where T<:HypothesisTest
+function Base.show(_io::IO, test::T) where T<:HypothesisTest
+    io = IOContext(_io, :compact=>get(_io, :compact, true))
     println(io, testname(test))
     println(io, repeat("-", length(testname(test))))
 
