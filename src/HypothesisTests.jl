@@ -170,6 +170,7 @@ include("deprecated.jl")
 include("common.jl")
 
 include("binomial.jl")
+include("twobinomial.jl")
 include("circular.jl")
 include("fisher.jl")
 include("kolmogorov_smirnov.jl")
