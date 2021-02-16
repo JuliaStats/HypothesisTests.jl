@@ -21,8 +21,11 @@ that `f(x)` is equal to `f(y)`.  All possible permutations are sampled.
 function ExactPermutationTest(x::AbstractVector{R}, y::AbstractVector{S},
                               f::Function) where {R<:Real,S<:Real}
     xy, rx, ry = ptstats(x,y)
-    P = permutations(xy)
-    samples = [f(view(p,rx)) - f(view(p,ry)) for p in P]
+    rxry = [rx;ry]
+    P = combinations(rxry,rx[end])
+    # check the length of the output before allocating memory (10^9 is time consuming, but feasible)
+    @assert binomial(big(length(rxry)),rx[end])<10^9 "Performing the exact test is computionally expensive, you may use the ApproximatePermutationTest function instead."
+    samples = [f(view(xy,p)) - f(view(xy,setdiff(rxry,p))) for p in P]
     PermutationTest(f(x) - f(y), samples)
 end
 
