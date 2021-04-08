@@ -78,7 +78,7 @@ end
 end
 
 @testset "more tests" begin
-    Random.seed!(3112455)
+    Random.seed!(31412455)
     samples = Any[rand(Normal(), 50), rand(Normal(0.5), 30)]
     t = KSampleADTest(samples...)
     @test pvalue(t) < 0.05
