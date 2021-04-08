@@ -39,7 +39,7 @@ using HypothesisTests: default_tail
     d = Uniform(-pi, 2pi)
     x = rand(d, n)
     t = OneSampleADTest(x, d)
-    @test pvalue(t) ≈ 0.2046 atol=0.1^4
+    @test pvalue(t) ≈ 0.5489 atol=0.1^4
 
     x = rand(Uniform(0, 1.8), n)
     t = OneSampleADTest(x, Uniform())
@@ -47,7 +47,7 @@ using HypothesisTests: default_tail
 
     x = rand(Exponential(), n)
     t = OneSampleADTest(x, Exponential())
-    @test pvalue(t) ≈ 0.9665 atol=0.1^4
+    @test pvalue(t) ≈ 0.1153 atol=0.1^4
 end
 
 @testset "k-sample test" begin
