@@ -16,30 +16,30 @@ using HypothesisTests: default_tail
     d = DoubleExponential()
     x = rand(d, n)
     t = OneSampleADTest(x, Normal(mean(d), std(d)))
-    @test t.A² ≈ 10.9678 atol=0.1^4
+    @test t.A² ≈ 11.3969 atol=0.1^4
     @test pvalue(t) ≈ 0.0 atol=0.1^4
     t = OneSampleADTest(x, d)
-    @test t.A² ≈ 0.21942 atol=0.1^4
-    @test pvalue(t) ≈ 0.9842 atol=0.1^4
+    @test t.A² ≈ 0.6036 atol=0.1^4
+    @test pvalue(t) ≈ 0.6446 atol=0.1^4
 
     d = Cauchy()
     x = rand(Cauchy(), n)
     t = OneSampleADTest(x, Normal())
     @test pvalue(t) ≈ 0.0 atol=0.1^4
     t = OneSampleADTest(x, d)
-    @test pvalue(t) ≈ 0.4228 atol=0.1^4
+    @test pvalue(t) ≈ 0.6773 atol=0.1^4
 
     d = LogNormal()
     x = rand(d, n)
     t = OneSampleADTest(x, Normal(mean(d), std(d)))
     @test pvalue(t) ≈ 0.0 atol=0.1^4
     t = OneSampleADTest(x, d)
-    @test pvalue(t) ≈ 0.1569 atol=0.1^4
+    @test pvalue(t) ≈ 0.1055 atol=0.1^4
 
     d = Uniform(-pi, 2pi)
     x = rand(d, n)
     t = OneSampleADTest(x, d)
-    @test pvalue(t) ≈ 0.5489 atol=0.1^4
+    @test pvalue(t) ≈ 0.5614 atol=0.1^4
 
     x = rand(Uniform(0, 1.8), n)
     t = OneSampleADTest(x, Uniform())
@@ -47,7 +47,7 @@ using HypothesisTests: default_tail
 
     x = rand(Exponential(), n)
     t = OneSampleADTest(x, Exponential())
-    @test pvalue(t) ≈ 0.1153 atol=0.1^4
+    @test pvalue(t) ≈ 0.1086 atol=0.1^4
 end
 
 @testset "k-sample test" begin
