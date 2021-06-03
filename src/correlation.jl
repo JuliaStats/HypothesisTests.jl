@@ -1,6 +1,4 @@
 # Correlation
-# TODO: Implement `CorrelationTest` for two arguments
-
 using Statistics: clampcor
 
 export CorrelationTest
@@ -37,7 +35,7 @@ struct CorrelationTest{T<:Real} <: HypothesisTest
 
     # Error checking is done in `cor`
     function CorrelationTest(x::AbstractVector, y::AbstractVector)
-        r = cor(x, y)
+        r = corspearman(x, y)
         n = length(x)
         t = r * sqrt((n - 2) / (1 - r^2))
         return new{typeof(r)}(r, n, 0, t)
