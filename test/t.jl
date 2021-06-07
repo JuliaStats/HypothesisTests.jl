@@ -54,17 +54,17 @@ end
 	@test default_tail(tst) == :both
 	show(IOBuffer(), tst)
 
-    n1 = length(a1)
-    n2 = length(a2)
-    m1 = mean(a1)
-    m2 = mean(a2)
-    v1 = var(a1)
-    v2 = var(a2)
+	n1 = length(a1)
+	n2 = length(a2)
+	m1 = mean(a1)
+	m2 = mean(a2)
+	v1 = var(a1)
+	v2 = var(a2)
 
-    tst2 = EqualVarianceTTest(n1, n2, m1, m2, v1, v2)
-    @test tst.df == tst2.df
-    @test tst.t == tst2.t
-    @test pvalue(tst) == pvalue(tst2)
+	tst2 = EqualVarianceTTest(n1, n2, m1, m2, v1, v2)
+	@test tst.df == tst2.df
+	@test tst.t == tst2.t
+	@test pvalue(tst) == pvalue(tst2)
 
 	tst = UnequalVarianceTTest(a1, a2)
 	@test abs(tst.df - 7.03) <= 0.01
