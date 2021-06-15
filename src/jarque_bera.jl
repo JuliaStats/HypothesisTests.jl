@@ -63,7 +63,7 @@ function JarqueBeraTest(y::AbstractVector{T}) where T<:Real
         m4r += yi^4 / n
     end
     # compute central moments (http://mathworld.wolfram.com/CentralMoment.html)
-    m2 = -m1r^2 + m2r
+    m2 = abs(-m1r^2 + m2r)
     m3 = 2 * m1r^3 - 3 * m1r * m2r + m3r
     m4 = -3 * m1r^4 + 6 * m1r^2 * m2r - 4 * m1r * m3r + m4r
 
