@@ -16,7 +16,7 @@ of vectors `x` and `y` is zero.
 Perform a t-test for the hypothesis that ``\\text{Cor}(x,y|Z=z) = 0``, i.e. the partial
 correlation of vectors `x` and `y` given the matrix `Z` is zero.
 
-Implements `pvalue` for the t-test.
+Implements `pvalue` for the t-test, as well as `stderror`. 
 Implements `confint` using an approximate confidence interval based on Fisher's
 ``z``-transform.
 
@@ -82,6 +82,7 @@ end
 
 default_tail(::CorrelationTest) = :both
 pvalue(test::CorrelationTest; tail=:both) = pvalue(TDist(dof(test)), test.t, tail=tail)
+StatsBase.stderror(test::CorrelationTest) = sqrt(1/dof(test))
 
 function show_params(io::IO, test::CorrelationTest, indent="")
     println(io, indent, "number of observations:          ", nobs(test))

@@ -11,6 +11,7 @@ using HypothesisTests: default_tail
 	@test abs(pvalue(tst; tail=:left) - 0.9735) <= 1e-4
 	@test abs(pvalue(tst; tail=:right) - 0.0265) <= 1e-4
 	@test default_tail(tst) == :both
+	@test stderror(tst) ≈ tst.stderr ≈ 1.1902380714238083
 	show(IOBuffer(), tst)
 
 	tst = OneSampleTTest(mean(-5:10), std(-5:10), 16)
@@ -24,6 +25,7 @@ using HypothesisTests: default_tail
 	c = confint(tst; tail=:right)
 	@test abs(c[1] - 0.4135) .<= 1e-4
 	@test c[2] == Inf
+	@test stderror(tst) ≈ tst.stderr ≈ 1.1902380714238083
 	show(IOBuffer(), tst)
 
 	tst = OneSampleTTest(-10:5)
@@ -33,6 +35,7 @@ using HypothesisTests: default_tail
 	@test all(abs.([confint(tst)...] - [-5.0369, 0.0369]) .<= 1e-4)
 	@test abs.(confint(tst; tail=:left)[2] - (-0.4135)) .<= 1e-4
 	@test abs.(confint(tst; tail=:right)[1] - (-4.5865)) .<= 1e-4
+	@test stderror(tst) ≈ tst.stderr ≈ 1.1902380714238083	
 	show(IOBuffer(), tst)
 end
 
@@ -52,6 +55,7 @@ end
 	@test abs(pvalue(tst) - 0.078) <= 1e-3
 	@test all(abs.([confint(tst)...] - [-0.0131, 0.2031]) .<= 1e-4)
 	@test default_tail(tst) == :both
+	@test stderror(tst) ≈ tst.stderr ≈ 0.048493985881413015	
 	show(IOBuffer(), tst)
 
 	n1 = length(a1)
@@ -72,6 +76,7 @@ end
 	@test abs(pvalue(tst) - 0.091) <= 1e-3
 	@test all(abs.([confint(tst)...] - [-0.0196, 0.2096]) .<= 1e-4)
 	@test default_tail(tst) == :both
+	@test stderror(tst) ≈ tst.stderr ≈ 0.048493985881413015		
 	show(IOBuffer(), tst)
 
 end

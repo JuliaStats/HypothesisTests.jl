@@ -6,6 +6,7 @@ using HypothesisTests: default_tail
     @test pvalue(t) ≈ 0.004334880883507431
     @test pvalue(t, tail=:left) ≈ 0.002167440441753716
     @test pvalue(t, tail=:right) ≈ 0.9989844298129187
+    @test stderror(t) ≈ 0.05337605126836238
     @test default_tail(t) == :both
     @test_ci_approx confint(t) (0.23058523962930383, 0.4491666887959782)
     @test_ci_approx confint(t, tail=:left) (0.0, 0.4313047758370174)
@@ -32,6 +33,7 @@ using HypothesisTests: default_tail
     @test pvalue(t) ≈ 0.5078125000000002
     @test pvalue(t, tail=:left) ≈ 0.91015625
     @test pvalue(t, tail=:right) ≈ 0.2539062500000001
+    @test stderror(t) ≈ 0.15713484026367724
     @test_ci_approx confint(t) (0.2992950562085405, 0.9251453685803082)
     @test_ci_approx confint(t, tail=:left) (0.0, 0.9022531865607242)
     @test_ci_approx confint(t, tail=:right) (0.3449413659437032, 1.0)
