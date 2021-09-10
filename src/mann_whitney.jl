@@ -141,7 +141,7 @@ function pvalue(x::ExactMannWhitneyUTest; tail=:both)
             if x.U < x.nx * x.ny / 2
                 p = pwilcox(x.U, x.nx, x.ny, true)
             else
-                p =  pwilcox(x.U - 1, x.nx, x.ny, false)
+                p = pwilcox(x.U - 1, x.nx, x.ny, false)
             end
             min(2 * p, 1.0)
         elseif tail == :left
