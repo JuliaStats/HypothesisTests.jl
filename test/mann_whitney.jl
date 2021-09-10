@@ -54,7 +54,7 @@ end
 	@test abs(pvalue(ExactMannWhitneyUTest(Float32[1:10;], Float32[2:11;])) - 0.5096) <= 1e-4
 end
 
-@testset "Issue #126" begin
+@testset "Issue #126 pvalues above 1" begin
 	A = [1.34937, 1.75722,0.276514, 1.04546, 1.69085, 0.738085, 2.36313 ]
 	B = [2.62325, 1.16533, 1.1327,  0.728714]
 
