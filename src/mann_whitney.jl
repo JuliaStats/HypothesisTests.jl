@@ -143,7 +143,7 @@ function pvalue(x::ExactMannWhitneyUTest; tail=:both)
             else
                 p =  pwilcox(x.U - 1, x.nx, x.ny, false)
             end
-            min(2 * p, 1)
+            min(2 * p, 1.0)
         elseif tail == :left
             pwilcox(x.U, x.nx, x.ny, true)
         elseif tail == :right
@@ -229,7 +229,7 @@ function pvalue(x::ApproximateMannWhitneyUTest; tail=:both)
     else
         if tail == :both
             p = ccdf(Normal(), abs(x.mu - 0.5 * sign(x.mu))/x.sigma)
-            min(2 * p, 1)
+            min(2 * p, 1.0)
         elseif tail == :left
             cdf(Normal(), (x.mu + 0.5)/x.sigma)
         elseif tail == :right
