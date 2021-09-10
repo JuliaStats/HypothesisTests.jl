@@ -139,10 +139,11 @@ function pvalue(x::ExactMannWhitneyUTest; tail=:both)
         # cannot account for ties
         if tail == :both
             if x.U < x.nx * x.ny / 2
-                2 * pwilcox(x.U, x.nx, x.ny, true)
+                p = pwilcox(x.U, x.nx, x.ny, true)
             else
-                2 * pwilcox(x.U - 1, x.nx, x.ny, false)
+                p =  pwilcox(x.U - 1, x.nx, x.ny, false)
             end
+            min(2 * p, 1)
         elseif tail == :left
             pwilcox(x.U, x.nx, x.ny, true)
         elseif tail == :right
@@ -227,7 +228,8 @@ function pvalue(x::ApproximateMannWhitneyUTest; tail=:both)
         1
     else
         if tail == :both
-            2 * ccdf(Normal(), abs(x.mu - 0.5 * sign(x.mu))/x.sigma)
+            p = ccdf(Normal(), abs(x.mu - 0.5 * sign(x.mu))/x.sigma)
+            min(2 * p, 1)
         elseif tail == :left
             cdf(Normal(), (x.mu + 0.5)/x.sigma)
         elseif tail == :right
