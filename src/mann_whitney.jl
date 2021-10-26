@@ -225,7 +225,7 @@ end
 
 function pvalue(x::ApproximateMannWhitneyUTest; tail=:both)
     if x.mu == x.sigma == 0
-        1
+        1.0
     else
         if tail == :both
             p = ccdf(Normal(), abs(x.mu - 0.5 * sign(x.mu))/x.sigma)
