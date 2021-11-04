@@ -116,7 +116,7 @@ function Base.show(_io::IO, test::T) where T<:HypothesisTest
     println(io)
 
     if has_ci
-        ci = map(x -> round.(x, digits=4, base=10), StatsBase.confint(test))
+        ci = map(x -> round.(x; sigdigits=4, base=10), StatsBase.confint(test))
         print(io, "    95% confidence interval: ")
         show(io, ci)
         println(io)
