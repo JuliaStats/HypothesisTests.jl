@@ -2,7 +2,7 @@ using HypothesisTests, Test
 using HypothesisTests: default_tail
 
 @testset "Fisher" begin
-t = HypothesisTests.FisherExactTest(1, 1, 1, 1)
+t = @inferred(HypothesisTests.FisherExactTest(1, 1, 1, 1))
 @test t.ω ≈ 1.0
 @test pvalue(t; tail=:left) ≈ 0.8333333333333337
 @test pvalue(t; tail=:right) ≈ 0.8333333333333337
