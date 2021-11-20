@@ -107,7 +107,7 @@ alternative hypothesis that the distribution does not have mean `μ0`.
 Implements: [`pvalue`](@ref), [`confint`](@ref)
     
 !!! note
-    This test is also known as a dependent samples t-test, dependent means t-test or correlated pairs t-test.
+    This test is also known as a t-test for paired or dependent samples,  see [paired difference test](https://en.wikipedia.org/wiki/Paired_difference_test) on Wikipedia.
 """
 function OneSampleTTest(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0) where {T<:Real, S<:Real}
     check_same_length(x, y)
