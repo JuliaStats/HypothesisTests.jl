@@ -59,16 +59,19 @@ end
 	B = [2.62325, 1.16533, 1.1327, 0.728714]
 
 	m = ExactMannWhitneyUTest(A,B)
-	p = pvalue(m; tail = :both)
+	p = @inferred(pvalue(m; tail = :both))
 	@test p == 1
 
 	A = [12,10,7,6,3,1]
 	B = [11,9,8,5,4,2]
 
 	m = MannWhitneyUTest(A,B)
-	p = pvalue(m; tail = :both)
+	p = @inferred(pvalue(m; tail = :both))
 
 	@test p == 1
+
+	m = ApproximateMannWhitneyUTest(A, B)
+	p = @inferred(pvalue(m; tail = :both))
 end
 
 end

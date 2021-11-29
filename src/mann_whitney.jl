@@ -234,6 +234,8 @@ function pvalue(x::ApproximateMannWhitneyUTest; tail=:both)
             cdf(Normal(), (x.mu + 0.5)/x.sigma)
         elseif tail == :right
             ccdf(Normal(), (x.mu - 0.5)/x.sigma)
+        else
+            throw(ArgumentError("tail=$(tail) is invalid"))
         end
     end
 end
