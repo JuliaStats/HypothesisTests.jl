@@ -159,12 +159,11 @@ function EqualVarianceTTest(nx::Int, ny::Int, mx::Real, my::Real, vx::Real, vy::
 end
 
 """
-    EqualVarianceTTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real})
-    EqualVarianceTTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real}, μ0::Real)
+    EqualVarianceTTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real}, μ0::Real=0)
 
 Perform a two-sample t-test of the null hypothesis that `x` and `y` come from distributions
 with equal means and variances against the alternative hypothesis that the distributions
-have different means but equal variances. If μ0 is not set, it defaults to 0.
+have different means but equal variances.
 
 For testing if two datasets have equal variance, see [`VarianceFTest`](@ref).
 Implements: [`pvalue`](@ref), [`confint`](@ref)
@@ -192,7 +191,7 @@ end
 testname(::UnequalVarianceTTest) = "Two sample t-test (unequal variance)"
 
 """
-    UnequalVarianceTTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real})
+    UnequalVarianceTTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real}, μ0::Real=0)
 
 Perform an unequal variance two-sample t-test of the null hypothesis that `x` and `y` come
 from distributions with equal means against the alternative hypothesis that the
