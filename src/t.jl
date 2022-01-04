@@ -160,11 +160,13 @@ end
 
 """
     EqualVarianceTTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real})
+    EqualVarianceTTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real}, μ0::Real)
 
 Perform a two-sample t-test of the null hypothesis that `x` and `y` come from distributions
 with equal means and variances against the alternative hypothesis that the distributions
-have different means but equal variances.
+have different means but equal variances. If μ0 is not set, it defaults to 0.
 
+For testing if two datasets have equal variance, see [`VarianceFTest`](@ref).
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
 function EqualVarianceTTest(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0) where {T<:Real,S<:Real}
@@ -204,6 +206,7 @@ equation:
         \\frac{(k_i s_i^2)^2}{ν_i}}
 ```
 
+For testing if two datasets have equal variance, see [`VarianceFTest`](@ref).
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
 function UnequalVarianceTTest(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0) where {T<:Real,S<:Real}
