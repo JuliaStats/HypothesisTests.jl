@@ -137,7 +137,8 @@ Perform a two-sample z-test of the null hypothesis that `x` and `y` come from di
 with equal means and variances against the alternative hypothesis that the distributions
 have different means but equal variances.
 
-For testing if two datasets have equal variance, see [`VarianceFTest`](@ref).
+See also:  [`VarianceFTest`](@ref) to test whether two datasets have equal variance.
+
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
 function EqualVarianceZTest(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0) where {T<:Real,S<:Real}
