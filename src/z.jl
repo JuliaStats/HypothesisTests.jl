@@ -134,8 +134,8 @@ population_param_of_interest(x::TwoSampleZTest) = ("Mean difference", x.μ0, x.x
     EqualVarianceZTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real}, μ0::Real=0)
 
 Perform a two-sample z-test of the null hypothesis that `x` and `y` come from distributions
-with equal means and variances against the alternative hypothesis that the distributions
-have different means but equal variances.
+with equal variances and mean difference μ0 (defaults to 0) against the alternative hypothesis
+that the distributions have equal variances and a mean difference different from μ0.
 
 See also:  [`VarianceFTest`](@ref) to test whether two datasets have equal variance.
 
@@ -167,9 +167,9 @@ testname(::UnequalVarianceZTest) = "Two sample z-test (unequal variance)"
 """
     UnequalVarianceZTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real}, μ0::Real=0)
 
-Perform an unequal variance two-sample z-test of the null hypothesis that `x` and `y` come
-from distributions with equal means against the alternative hypothesis that the
-distributions have different means.
+Perform a two-sample z-test of the null hypothesis that `x` and `y` come from distributions
+with different variances and mean difference μ0 (defaults to 0) against the alternative hypothesis
+that the distributions have different variances and a mean difference different from μ0.
 
 For testing if two datasets have equal variance, see [`VarianceFTest`](@ref).
 Implements: [`pvalue`](@ref), [`confint`](@ref)
