@@ -166,6 +166,7 @@ with equal variances and mean difference μ0 (defaults to 0) against the alterna
 that the distributions have equal variances and a mean difference different from μ0.
 
 See also:  [`VarianceFTest`](@ref) to test whether two datasets have equal variance.
+    
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
 function EqualVarianceTTest(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0) where {T<:Real,S<:Real}
@@ -206,6 +207,7 @@ equation:
 ```
 
 See also:  [`VarianceFTest`](@ref) to test whether two datasets have equal variance.
+    
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
 function UnequalVarianceTTest(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0) where {T<:Real,S<:Real}
