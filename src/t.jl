@@ -163,7 +163,7 @@ end
 
 Perform a two-sample t-test of the null hypothesis that `x` and `y` come from distributions
 with equal variances and mean difference μ0 (defaults to 0) against the alternative hypothesis
-that the distributions have equal variances and a mean difference different fron μ0.
+that the distributions have equal variances and a mean difference different from μ0.
 
 See also:  [`VarianceFTest`](@ref) to test whether two datasets have equal variance.
 Implements: [`pvalue`](@ref), [`confint`](@ref)
@@ -195,7 +195,7 @@ testname(::UnequalVarianceTTest) = "Two sample t-test (unequal variance)"
 
 Perform a two-sample t-test of the null hypothesis that `x` and `y` come from distributions
 with different variances and mean difference μ0 (defaults to 0) against the alternative hypothesis
-that the distributions have different variances and a mean difference different fron μ0.
+that the distributions have different variances and a mean difference different from μ0.
 
 This test is sometimes known as Welch's t-test. It differs from the equal variance t-test in
 that it computes the number of degrees of freedom of the test using the Welch-Satterthwaite
