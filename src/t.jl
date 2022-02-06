@@ -162,10 +162,10 @@ end
     EqualVarianceTTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real}, μ0::Real=0)
 
 Perform a two-sample t-test of the null hypothesis that `x` and `y` come from distributions
-with equal means and variances against the alternative hypothesis that the distributions
-have different means but equal variances.
+with equal variances and mean difference μ0 (defaults to 0) against the alternative hypothesis
+that the distributions have equal variances and a mean difference different fron μ0.
 
-For testing if two datasets have equal variance, see [`VarianceFTest`](@ref).
+See also:  [`VarianceFTest`](@ref) to test whether two datasets have equal variance.
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
 function EqualVarianceTTest(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0) where {T<:Real,S<:Real}
@@ -193,9 +193,9 @@ testname(::UnequalVarianceTTest) = "Two sample t-test (unequal variance)"
 """
     UnequalVarianceTTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real}, μ0::Real=0)
 
-Perform an unequal variance two-sample t-test of the null hypothesis that `x` and `y` come
-from distributions with equal means against the alternative hypothesis that the
-distributions have different means.
+Perform a two-sample t-test of the null hypothesis that `x` and `y` come from distributions
+with different variances and mean difference μ0 (defaults to 0) against the alternative hypothesis
+that the distributions have different variances and a mean difference different fron μ0.
 
 This test is sometimes known as Welch's t-test. It differs from the equal variance t-test in
 that it computes the number of degrees of freedom of the test using the Welch-Satterthwaite
@@ -205,7 +205,7 @@ equation:
         \\frac{(k_i s_i^2)^2}{ν_i}}
 ```
 
-For testing if two datasets have equal variance, see [`VarianceFTest`](@ref).
+See also:  [`VarianceFTest`](@ref) to test whether two datasets have equal variance.
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
 function UnequalVarianceTTest(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0) where {T<:Real,S<:Real}
