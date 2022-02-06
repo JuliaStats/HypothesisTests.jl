@@ -171,7 +171,8 @@ Perform a two-sample z-test of the null hypothesis that `x` and `y` come from di
 with different variances and mean difference μ0 (defaults to 0) against the alternative hypothesis
 that the distributions have different variances and a mean difference different from μ0.
 
-For testing if two datasets have equal variance, see [`VarianceFTest`](@ref).
+See also:  [`VarianceFTest`](@ref) to test whether two datasets have equal variance.
+    
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
 function UnequalVarianceZTest(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0) where {T<:Real,S<:Real}
