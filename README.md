@@ -9,8 +9,8 @@
 
 - **Documentation**: [![][docs-stable-img]][docs-stable-url] [![][docs-latest-img]][docs-latest-url]
 
-[docs-latest-img]: https://img.shields.io/badge/docs-latest-blue.svg
-[docs-latest-url]: http://JuliaStats.github.io/HypothesisTests.jl/latest/
+[docs-latest-img]: https://img.shields.io/badge/docs-dev-blue.svg
+[docs-latest-url]: http://JuliaStats.github.io/HypothesisTests.jl/dev/
 
 [docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
 [docs-stable-url]: http://JuliaStats.github.io/HypothesisTests.jl/stable/
