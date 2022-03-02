@@ -18,11 +18,8 @@ end
 Perform a permutation test (a.k.a. randomization test) of the null hypothesis
 that `f(x)` is equal to `f(y)`.  All possible permutations are sampled.
 """
-function ExactPermutationTest(
-    x::AbstractVector{R},
-    y::AbstractVector{S},
-    f::Function
-) where {R<:Real,S<:Real}
+function ExactPermutationTest(x::AbstractVector{R}, y::AbstractVector{S},
+                              f::Function) where {R<:Real,S<:Real}
     xy, rx, ry = ptstats(x,y)
     P = permutations(xy)
     samples = [f(view(p,rx)) - f(view(p,ry)) for p in P]
@@ -37,23 +34,15 @@ that `f(x)` is equal to `f(y)`.  `n` of the `factorial(length(x)+length(y))`
 permutations are sampled at random. A random number generator can optionally
 be passed as the first argument. The default generator is `Random.default_rng()`.
 """
-function ApproximatePermutationTest(
-    rng::AbstractRNG,
-    x::AbstractVector{R},
-    y::AbstractVector{S},
-    f::Function,
-    n::Int
-) where {R<:Real,S<:Real}
+function ApproximatePermutationTest(rng::AbstractRNG, x::AbstractVector{R}, y::AbstractVector{S},
+                                    f::Function, n::Int) where {R<:Real,S<:Real}
     xy, rx, ry = ptstats(x,y)
     samples = [(shuffle!(rng, xy); f(view(xy,rx)) - f(view(xy,ry))) for i = 1:n]
     PermutationTest(f(x) - f(y), samples)
 end
-ApproximatePermutationTest(
-    x::AbstractVector{R},
-    y::AbstractVector{S},
-    f::Function,
-    n::Int
-) where {R<:Real,S<:Real} = ApproximatePermutationTest(Random.default_rng(), x, y, f, n)
+ApproximatePermutationTest(x::AbstractVector{R}, y::AbstractVector{S},
+                           f::Function, n::Int) where {R<:Real,S<:Real} =
+    ApproximatePermutationTest(Random.default_rng(), x, y, f, n)
 
 function pvalue(apt::PermutationTest; tail=:both)
     if tail == :both
