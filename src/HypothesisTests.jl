@@ -73,7 +73,7 @@ function pvalue(dist::ContinuousUnivariateDistribution, x::Number; tail=:both)
     check_tail(tail)
 
     if tail == :both
-        min(2 * min(cdf(dist, x), ccdf(dist, x)), 1)
+        2 * min(cdf(dist, x), ccdf(dist, x))
     elseif tail == :left
         cdf(dist, x)
     else # tail == :right
@@ -85,7 +85,7 @@ function pvalue(dist::DiscreteUnivariateDistribution, x::Number; tail=:both)
     check_tail(tail)
 
     if tail == :both
-        min(2 * min(ccdf(dist, x-1), cdf(dist, x)), 1)
+        2 * min(ccdf(dist, x-1), cdf(dist, x))
     elseif tail == :left
         cdf(dist, x)
     else # tail == :right
