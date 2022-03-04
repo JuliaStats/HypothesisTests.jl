@@ -133,20 +133,22 @@ function signedrankenumerate(x::ExactSignedRankTest)
 end
 
 function pvalue(x::ExactSignedRankTest; tail=:both)
+    check_tail(tail)
+
     n = length(x.ranks)
     if n == 0
-        1
+        1.0
     elseif x.tie_adjustment == 0
         # Compute exact p-value using method from Rmath, which is fast but cannot account for ties
         if tail == :both
             if x.W <= n * (n + 1)/4
-                p = 2 * psignrank(x.W, n, true)
+                2 * psignrank(x.W, n, true)
             else
-                p = 2 * psignrank(x.W - 1, n, false)
+                2 * psignrank(x.W - 1, n, false)
             end
         elseif tail == :left
             psignrank(x.W, n, true)
-        elseif tail == :right
+        else
             psignrank(x.W - 1, n, false)
         end
     else
@@ -155,7 +157,7 @@ function pvalue(x::ExactSignedRankTest; tail=:both)
             min(1, 2 * minimum(signedrankenumerate(x)))
         elseif tail == :left
             first(signedrankenumerate(x))
-        elseif tail == :right
+        else
             last(signedrankenumerate(x))
         end
     end
@@ -223,16 +225,16 @@ function show_params(io::IO, x::ApproximateSignedRankTest, ident)
 end
 
 function pvalue(x::ApproximateSignedRankTest; tail=:both)
+    check_tail(tail)
+
     if x.mu == x.sigma == 0
-        1
-    else
-        if tail == :both
-            2 * ccdf(Normal(), abs(x.mu - 0.5 * sign(x.mu))/x.sigma)
-        elseif tail == :left
-            cdf(Normal(), (x.mu + 0.5)/x.sigma)
-        elseif tail == :right
-            ccdf(Normal(), (x.mu - 0.5)/x.sigma)
-        end
+        1.0
+    elseif tail == :both
+        2 * ccdf(Normal(), abs(x.mu - 0.5 * sign(x.mu))/x.sigma)
+    elseif tail == :left
+        cdf(Normal(), (x.mu + 0.5)/x.sigma)
+    else # tail == :right
+        ccdf(Normal(), (x.mu - 0.5)/x.sigma)
     end
 end
 
@@ -241,6 +243,7 @@ StatsBase.confint(x::ApproximateSignedRankTest; level::Real=0.95, tail=:both) = 
 # implementation method inspired by these notes: http://www.stat.umn.edu/geyer/old03/5102/notes/rank.pdf
 function calculate_ci(x::AbstractVector, level::Real=0.95; tail=:both)
     check_level(level)
+    check_tail(tail)
 
     if tail == :both
         c = level
@@ -250,8 +253,7 @@ function calculate_ci(x::AbstractVector, level::Real=0.95; tail=:both)
     n = length(x)
     m = div(n * (n + 1), 2)
     k_range = 1:div(m, 2)
-    l = [1 - 2 * psignrank(i, n, true) for i in k_range]
-    k = argmin(abs.(l .- c))
+    k = argmin(abs(1 - 2 * psignrank(i, n, true) - c) for i in k_range)
     vals = Float64[]
     enumerated = enumerate(x)
     for (outer_index, outer_value) in enumerated
@@ -269,7 +271,7 @@ function calculate_ci(x::AbstractVector, level::Real=0.95; tail=:both)
         return (left, right)
     elseif tail == :left
         return (left, Inf)
-    elseif tail == :right
+    else # tail == :right
         return (-Inf, right)
     end
 end
