@@ -253,8 +253,8 @@ function calculate_ci(x::AbstractVector, level::Real=0.95; tail=:both)
     n = length(x)
     m = div(n * (n + 1), 2)
     k_range = 1:div(m, 2)
-    ks = [abs(1 - 2 * psignrank(i, n, true) - c) for i in k_range]
-    k = argmin(ks)
+    l = [1 - 2 * psignrank(i, n, true) for i in k_range]
+    k = argmin(abs.(l .- c))
     vals = Float64[]
     enumerated = enumerate(x)
     for (outer_index, outer_value) in enumerated
