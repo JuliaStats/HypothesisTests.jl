@@ -153,7 +153,7 @@ function pvalue(x::ExactMannWhitneyUTest; tail=:both)
     else
         # Compute exact p-value by enumerating possible ranks in the tied data
         if tail == :both
-            min(1, 2 * minimum(mwuenumerate(x)))
+            min(1.0, 2 * minimum(mwuenumerate(x)))
         elseif tail == :left
             mwuenumerate(x)[1]
         else # tail == :right
