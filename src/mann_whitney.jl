@@ -134,6 +134,8 @@ function mwuenumerate(x::ExactMannWhitneyUTest)
 end
 
 function pvalue(x::ExactMannWhitneyUTest; tail=:both)
+    check_tail(tail)
+
     if x.tie_adjustment == 0
         # Compute exact p-value using method from Rmath, which is fast but
         # cannot account for ties
@@ -145,21 +147,17 @@ function pvalue(x::ExactMannWhitneyUTest; tail=:both)
             end
         elseif tail == :left
             pwilcox(x.U, x.nx, x.ny, true)
-        elseif tail == :right
+        else # tail == :right
             pwilcox(x.U - 1, x.nx, x.ny, false)
-        else
-            throw(ArgumentError("tail=$(tail) is invalid"))
         end
     else
         # Compute exact p-value by enumerating possible ranks in the tied data
         if tail == :both
-            min(1, 2 * minimum(mwuenumerate(x)))
+            min(1.0, 2 * minimum(mwuenumerate(x)))
         elseif tail == :left
             mwuenumerate(x)[1]
-        elseif tail == :right
+        else # tail == :right
             mwuenumerate(x)[2]
-        else
-            throw(ArgumentError("tail=$(tail) is invalid"))
         end
     end
 end
@@ -223,15 +221,15 @@ function show_params(io::IO, x::ApproximateMannWhitneyUTest, ident)
 end
 
 function pvalue(x::ApproximateMannWhitneyUTest; tail=:both)
+    check_tail(tail)
+
     if x.mu == x.sigma == 0
-        1
-    else
-        if tail == :both
-            2 * ccdf(Normal(), abs(x.mu - 0.5 * sign(x.mu))/x.sigma)
-        elseif tail == :left
-            cdf(Normal(), (x.mu + 0.5)/x.sigma)
-        elseif tail == :right
-            ccdf(Normal(), (x.mu - 0.5)/x.sigma)
-        end
+        1.0
+    elseif tail == :both
+        2 * ccdf(Normal(), abs(x.mu - 0.5 * sign(x.mu))/x.sigma)
+    elseif tail == :left
+        cdf(Normal(), (x.mu + 0.5)/x.sigma)
+    else # tail == :right
+        ccdf(Normal(), (x.mu - 0.5)/x.sigma)
     end
 end
