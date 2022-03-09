@@ -53,4 +53,25 @@ end
 @testset "Issue #39" begin
     @test abs(@inferred(pvalue(ExactMannWhitneyUTest(Float32[1:10;], Float32[2:11;]))) - 0.5096) <= 1e-4
 end
+
+@testset "Issue #126 pvalues above 1" begin
+	A = [1.34937, 1.75722,0.276514, 1.04546, 1.69085, 0.738085, 2.36313]
+	B = [2.62325, 1.16533, 1.1327, 0.728714]
+
+	m = ExactMannWhitneyUTest(A,B)
+	p = @inferred(pvalue(m; tail = :both))
+	@test p == 1
+
+	A = [12,10,7,6,3,1]
+	B = [11,9,8,5,4,2]
+
+	m = MannWhitneyUTest(A,B)
+	p = @inferred(pvalue(m; tail = :both))
+
+	@test p == 1
+
+	m = ApproximateMannWhitneyUTest(A, B)
+	p = @inferred(pvalue(m; tail = :both))
+end
+
 end
