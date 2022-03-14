@@ -43,7 +43,9 @@ successes were encountered in `n` draws (or alternatively from which the vector 
 drawn) has success probability `p` against the alternative hypothesis that the success
 probability is not equal to `p`.
 
-Computed confidence intervals ([`confint`](@ref)) by default are Clopper-Pearson intervals.
+Computed confidence intervals by default are Clopper-Pearson intervals.
+See the [`confint(::BinomialTest)`](@ref) documentation for a list of
+supported methods to compute confidence intervals.
 
 Implements: [`pvalue`](@ref), [`confint(::BinomialTest)`](@ref)
 """

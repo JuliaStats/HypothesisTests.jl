@@ -255,6 +255,11 @@ marginals.
 
 Note that the entries of `x` (and `y` if provided) must be non-negative integers.
 
+Computed confidence intervals by default are Quesenberry-Hurst intervals
+if the minimum of the expected cell counts exceeds 100, and Sison-Glaz intervals otherwise.
+See the [`confint(::PowerDivergenceTest)`](@ref) documentation for a list of
+supported methods to compute confidence intervals.
+
 The power divergence test is given by
 ```math
     \\dfrac{2}{λ(λ+1)}\\sum_{i=1}^I \\sum_{j=1}^J n_{ij} \\left[(n_{ij}
