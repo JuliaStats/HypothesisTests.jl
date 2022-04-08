@@ -44,7 +44,7 @@ default_tail(test::PowerDivergenceTest) = :right
 pvalue(x::PowerDivergenceTest; tail=:right) = pvalue(Chisq(x.df),x.stat; tail=tail)
 
 """
-    confint(test::PowerDivergenceTest; alpha = 0.05, tail = :both, method = :auto)
+    confint(test::PowerDivergenceTest; level = 0.95, tail = :both, method = :auto)
 
 Compute a confidence interval with coverage `level` for multinomial proportions using
 one of the following methods. Possible values for `method` are:
