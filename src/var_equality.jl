@@ -60,7 +60,7 @@ end
 function anova(scores::AbstractVector{<:Real}...)
     Nᵢ = [length(g) for g in scores]
     Z̄ᵢ = mean.(scores)
-    Z̄ = mean(Z̄ᵢ)
+    Z̄ = sum(Iterators.flatten(scores))/sum(Nᵢ)
     SStᵢ = Nᵢ .* (Z̄ᵢ .- Z̄).^2
     SSeᵢ = sum.( (z .- z̄).^2 for (z, z̄) in zip(scores, Z̄ᵢ) )
     (Nᵢ, SStᵢ, SSeᵢ)
