@@ -56,7 +56,8 @@ function cihalpha(htype, alpha)
 end
 
 """
-    TwoSampleBinomialTest(x1::Real, n1::Real, x2::Real, n2::Real, δ::Real; ptype::Symbol, htype::Symbol, alpha::Real = 0.05, method::Symbol = :default)
+    TwoSampleBinomialTest(x1::Real, n1::Real, x2::Real, n2::Real, δ::Real;
+                          ptype::Symbol, htype::Symbol, alpha::Real = 0.05, method::Symbol = :default)
 
 Perform a two sample binomial hypothesis check via computing confidence intrval
 with coverage `1 - alpha` for `equality` test or `1 - 2 * alpha` for `equivalence`
