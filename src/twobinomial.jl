@@ -375,7 +375,7 @@ function ci_diff_mover(test, level)
     return est, NaN, lci, uci
 end
 ################################################################################
-@inline function mle_or(φ::Real, x1::Int, n1::Int, x2::Int, n2::Int)::Tuple{Float64,Float64}
+@inline function mle_or(φ::Float64, x1::Int, n1::Int, x2::Int, n2::Int)
     a  = n2 * (φ-1)
     b  = φ * n1 + n2 - (x1 + x2) * (φ - 1)
     c  = -(x1 + x2)
