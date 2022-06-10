@@ -146,6 +146,13 @@ function ci_jeffrey(x::BinomialTest, alpha::Float64=0.05)
     (quantile(Beta(x.x + 1/2, x.n - x.x + 1/2), alpha/2), quantile(Beta(x.x + 1/2, x.n - x.x + 1/2), 1-alpha/2))
 end
 
+# Jeffreys interval for Poisson rate uses gamma distribution
+# Li at al, 2011, Confidence Intervals for Difference Between Two Poisson Rates
+# Brown at al, 2001, Interval estimation for a binomial proportion(with discussion)
+function ci_jeffrey_gamma(x::BinomialTest, alpha::Float64=0.05)
+    (quantile(Gamma(x.x + 1/2, 1/x.n), alpha/2), quantile(Gamma(x.x + 1/2, 1/x.n), alpha/2))
+end
+
 # Agresti-Coull interval
 function ci_agresti_coull(x::BinomialTest, alpha::Float64=0.05)
     q = quantile(Normal(), 1-alpha/2)
@@ -165,6 +172,12 @@ function ci_wilson(x::BinomialTest, alpha::Float64=0.05)
     σ = sqrt(p*(1-p)/x.n + q^2/(4x.n^2))
     σ /= denominator
     (μ-q*σ, μ+q*σ)
+end
+
+# Wilson score interval with continuity correction
+function ci_wilson_cc(x::BinomialTest, alpha::Float64=0.05)
+    est, se, lci, uci = ci_prop_wilson_cc(x.x, x.n, alpha)
+    (lci, uci)
 end
 
 # Arcsine transformation interval as based on Cohen's H: https://en.wikipedia.org/wiki/Binomial_proportion_confidence_interval#Arcsine_transformation
