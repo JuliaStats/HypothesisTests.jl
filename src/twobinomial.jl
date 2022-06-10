@@ -359,7 +359,7 @@ function ci_diff_jeffreys(test, level)
     se   = sqrt(p1*(1 - p1) / test.n1 + p2 * (1 - p2) / test.n2)
     z    = quantile(Normal(), 1 - alpha / 2)
     est  = p1 - p2
-    return test.x1/test.n1-test.x2/test.n2, se, max(-1.0, est - z * se), min(1.0, est + z * se)
+    return test.x1 / test.n1 - test.x2 / test.n2, se, max(-1.0, est - z * se), min(1.0, est + z * se)
 end
 #Method of variance estimates recovery
 function ci_diff_mover(test, level)
