@@ -101,7 +101,8 @@ Possible values for `method` for `oddratio` are:
   - `:mover`
 
 """
-function TwoSampleBinomialTest(x1::Real, n1::Real, x2::Real, n2::Real, δ::Real; ptype::Symbol, htype::Symbol, alpha::Real = 0.05, method::Symbol = :default)
+function TwoSampleBinomialTest(x1::Real, n1::Real, x2::Real, n2::Real, δ::Real;
+                               ptype::Symbol, htype::Symbol, alpha::Real = 0.05, method::Symbol = :default)
     test = TwoSampleBinomialTask(x1, n1, x2, n2, δ, ptype, htype, alpha, method)
     cialpha = cihalpha(htype, alpha)
     if ptype == :difference
