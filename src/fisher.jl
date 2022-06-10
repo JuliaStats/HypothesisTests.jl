@@ -186,13 +186,15 @@ function StatsBase.confint(x::FisherExactTest; level::Float64=0.95, tail=:both, 
         if (x.a == maximum(dist(1.0)))
             (0.0, Inf)
         else
-            (0.0, fzero(obj, find_brackets(obj)...))
+            lower, upper = find_brackets(obj)
+            (0.0, lower == upper ? lower : find_zero(obj, (lower, upper)))
         end
     elseif tail == :right # lower bound
         if (x.a == minimum(dist(1.0)))
             (0.0, Inf)
         else
-            (fzero(obj, find_brackets(obj)...), Inf)
+            lower, upper = find_brackets(obj)
+            (lower == upper ? lower : find_zero(obj, (lower, upper)), Inf)
         end
     elseif tail == :both
         if method == :central
@@ -251,6 +253,7 @@ function cond_mle_odds_ratio(a::Int, b::Int, c::Int, d::Int)
         Inf
     else
         obj(ω) = mean(dist(ω))-a
-        fzero(obj, find_brackets(obj)...)
+        lower, upper = find_brackets(obj)
+        lower == upper ? lower : find_zero(obj, (lower, upper))
     end
 end

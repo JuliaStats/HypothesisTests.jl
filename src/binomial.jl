@@ -43,7 +43,9 @@ successes were encountered in `n` draws (or alternatively from which the vector 
 drawn) has success probability `p` against the alternative hypothesis that the success
 probability is not equal to `p`.
 
-Computed confidence intervals ([`confint`](@ref)) by default are Clopper-Pearson intervals.
+Computed confidence intervals by default are Clopper-Pearson intervals.
+See the [`confint(::BinomialTest)`](@ref) documentation for a list of
+supported methods to compute confidence intervals.
 
 Implements: [`pvalue`](@ref), [`confint(::BinomialTest)`](@ref)
 """
@@ -75,7 +77,7 @@ of the following methods. Possible values for `method` are:
 
   - `:clopper_pearson` (default): Clopper-Pearson interval is based on the binomial
     distribution. The empirical coverage is never less than the nominal coverage of
-    1-`alpha`; it is usually too conservative.
+    `level`; it is usually too conservative.
   - `:wald`: Wald (or normal approximation) interval relies on the standard approximation of
     the actual binomial distribution by a normal distribution. Coverage can be erratically
     poor for success probabilities close to zero or one.

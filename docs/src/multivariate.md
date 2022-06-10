@@ -17,7 +17,7 @@ This is equivalent to Box's ``M``-test for two groups.
 BartlettTest
 ```
 
-## Partial correlation test
+## Correlation and partial correlation test
 
 ```@docs
 CorrelationTest

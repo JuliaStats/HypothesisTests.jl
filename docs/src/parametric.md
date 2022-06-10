@@ -7,6 +7,7 @@ using HypothesisTests
 ## Power divergence test
 ```@docs
 PowerDivergenceTest
+confint(::PowerDivergenceTest)
 ```
 
 ## Pearson chi-squared test

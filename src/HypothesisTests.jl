@@ -39,20 +39,20 @@ check_same_length(x::AbstractVector, y::AbstractVector) = if length(x) != length
 end
 
 """
-    confint(test::HypothesisTest; alpha = 0.05, tail = :both)
+    confint(test::HypothesisTest; level = 0.95, tail = :both)
 
-Compute a confidence interval C with coverage 1-`alpha`.
+Compute a confidence interval C with coverage `level`.
 
 If `tail` is `:both` (default), then a two-sided confidence interval is returned. If `tail`
 is `:left` or `:right`, then a one-sided confidence interval is returned.
 
 !!! note
     Most of the implemented confidence intervals are *strongly consistent*, that is, the
-    confidence interval with coverage 1-`alpha` does not contain the test statistic under
+    confidence interval with coverage `level` does not contain the test statistic under
     ``h_0`` if and only if the corresponding test rejects the null hypothesis
     ``h_0: θ = θ_0``:
     ```math
-        C (x, 1 − α) = \\{θ : p_θ (x) > α\\},
+        C (x, level) = \\{θ : p_θ (x) > 1 - level\\},
     ```
     where ``p_θ`` is the [`pvalue`](@ref) of the corresponding test.
 """
@@ -69,31 +69,41 @@ If `tail` is `:both` (default), then the p-value for the two-sided test is retur
 function pvalue end
 
 # Basic function for finding a p-value given a distribution and tail
-pvalue(dist::ContinuousUnivariateDistribution, x::Number; tail=:both) =
-    if tail == :both
-        min(2 * min(cdf(dist, x), ccdf(dist, x)), 1.0)
-    elseif tail == :left
-        cdf(dist, x)
-    elseif tail == :right
-        ccdf(dist, x)
-    else
-        throw(ArgumentError("tail=$(tail) is invalid"))
-    end
+function pvalue(dist::ContinuousUnivariateDistribution, x::Number; tail=:both)
+    check_tail(tail)
 
-pvalue(dist::DiscreteUnivariateDistribution, x::Number; tail=:both) =
     if tail == :both
-        min(2 * min(ccdf(dist, x-1), cdf(dist, x)), 1.0)
+        p = 2 * min(cdf(dist, x), ccdf(dist, x))
+        min(p, oneunit(p)) # if P(X = x) > 0, then possibly p > 1
     elseif tail == :left
         cdf(dist, x)
-    elseif tail == :right
-        ccdf(dist, x-1)
-    else
-        throw(ArgumentError("tail=$(tail) is invalid"))
+    else # tail == :right
+        ccdf(dist, x)
     end
+end
+
+function pvalue(dist::DiscreteUnivariateDistribution, x::Number; tail=:both)
+    check_tail(tail)
+
+    if tail == :both
+        p = 2 * min(ccdf(dist, x-1), cdf(dist, x))
+        min(p, oneunit(p)) # if P(X = x) > 0, then possibly p > 1
+    elseif tail == :left
+        cdf(dist, x)
+    else # tail == :right
+        ccdf(dist, x-1)
+    end
+end
 
 function check_level(level::Float64)
     if level >= 1 || level <= 0.5
         throw(ArgumentError("coverage level $level not in range (0.5, 1)"))
+    end
+end
+
+function check_tail(tail::Symbol)
+    if tail !== :both && tail !== :left && tail !== :right
+        throw(ArgumentError("tail=$(tail) is invalid"))
     end
 end
 
@@ -116,7 +126,7 @@ function Base.show(_io::IO, test::T) where T<:HypothesisTest
     println(io)
 
     if has_ci
-        ci = map(x -> round.(x, digits=4, base=10), StatsBase.confint(test))
+        ci = map(x -> round.(x; sigdigits=4, base=10), StatsBase.confint(test))
         print(io, "    95% confidence interval: ")
         show(io, ci)
         println(io)
