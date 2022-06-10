@@ -461,7 +461,7 @@ end
     p1 = p2 * φ
     return p1, p2
 end
-@inline function mle_rr_z_val(φ, x1::Int, n1::Int, x2::Int, n2::Int)
+@inline function mle_rr_z_val(φ::Float64, x1::Int, n1::Int, x2::Int, n2::Int)
     p1 = x1 / n1
     p2 = x2 / n2
     pmle1, pmle2 = mle_rr(φ, x1, n1, x2, n2)
