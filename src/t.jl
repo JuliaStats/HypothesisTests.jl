@@ -105,6 +105,10 @@ values in vectors `x` and `y` come from a distribution with mean `μ0` against t
 alternative hypothesis that the distribution does not have mean `μ0`.
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)
+    
+!!! note
+    This test is also known as a t-test for paired or dependent samples, see
+    [paired difference test](https://en.wikipedia.org/wiki/Paired_difference_test) on Wikipedia.
 """
 function OneSampleTTest(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0) where {T<:Real, S<:Real}
     check_same_length(x, y)
@@ -136,6 +140,25 @@ testname(::EqualVarianceTTest) = "Two sample t-test (equal variance)"
 population_param_of_interest(x::TwoSampleTTest) = ("Mean difference", x.μ0, x.xbar) # parameter of interest: name, value under h0, point estimate
 
 """
+    EqualVarianceTTest(nx::Int, ny::Int, mx::Real, my::Real, vx::Real, vy::Real, μ0::Real=0)
+
+Perform a two-sample t-test of the null hypothesis that samples `x` and `y` described by the number
+of elements `nx` and `ny`, the mean `mx` and `my`, and variance `vx` and `vy` come from distributions
+with equals means and variances. The alternative hypothesis is that the distributions have different
+means but equal variances.
+
+Implements: [`pvalue`](@ref), [`confint`](@ref)
+"""
+function EqualVarianceTTest(nx::Int, ny::Int, mx::Real, my::Real, vx::Real, vy::Real, μ0::Real=0)
+    xbar = mx - my
+    stddev = sqrt(((nx - 1) * vx + (ny - 1) * vy) / (nx + ny - 2))
+    stderr = stddev * sqrt(1/nx + 1/ny)
+    t = (xbar - μ0) / stderr
+    df = nx + ny - 2
+    EqualVarianceTTest(nx, ny, xbar, df, stderr, t, μ0)
+end
+
+"""
     EqualVarianceTTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real})
 
 Perform a two-sample t-test of the null hypothesis that `x` and `y` come from distributions
@@ -146,12 +169,9 @@ Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
 function EqualVarianceTTest(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0) where {T<:Real,S<:Real}
     nx, ny = length(x), length(y)
-    xbar = mean(x) - mean(y)
-    stddev = sqrt(((nx - 1) * var(x) + (ny - 1) * var(y)) / (nx + ny - 2))
-    stderr = stddev * sqrt(1/nx + 1/ny)
-    t = (xbar - μ0) / stderr
-    df = nx + ny - 2
-    EqualVarianceTTest(nx, ny, xbar, df, stderr, t, μ0)
+    mx, my = mean(x), mean(y)
+    vx, vy = var(x), var(y)
+    EqualVarianceTTest(nx, ny, mx, my, vx, vy, μ0)
 end
 
 

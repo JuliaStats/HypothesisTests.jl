@@ -13,12 +13,15 @@ KSampleADTest
 
 ```@docs
 BinomialTest
+confint(::BinomialTest)
 ```
 
 ## Fisher exact test
 
 ```@docs
 FisherExactTest
+confint(::FisherExactTest)
+pvalue(::FisherExactTest)
 ```
 
 ## Kolmogorov-Smirnov test

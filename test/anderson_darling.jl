@@ -1,57 +1,57 @@
 using HypothesisTests, Distributions, Test, Random
 using HypothesisTests: default_tail
+using StableRNGs
 
 @testset "Anderson-Darling" begin
 @testset "One sample test" begin
     n = 1000
-    Random.seed!(1984948)
+    rng = StableRNG(1984948)
 
     d = Normal(1000, 100)
-    x = rand(d, n)
+    x = rand(rng, d, n)
     t = OneSampleADTest(x, d)
-    @test t.A² ≈ 0.3078 atol=0.1^4
-    @test pvalue(t) ≈ 0.9321 atol=0.1^4
+    @test t.A² ≈ 1.2960 atol=0.1^4
+    @test pvalue(t) ≈ 0.2336 atol=0.1^4
     @test default_tail(t) == :right
 
     d = DoubleExponential()
-    x = rand(d, n)
+    x = rand(rng, d, n)
     t = OneSampleADTest(x, Normal(mean(d), std(d)))
-    @test t.A² ≈ 10.9678 atol=0.1^4
+    @test t.A² ≈ 11.0704 atol=0.1^4
     @test pvalue(t) ≈ 0.0 atol=0.1^4
     t = OneSampleADTest(x, d)
-    @test t.A² ≈ 0.21942 atol=0.1^4
-    @test pvalue(t) ≈ 0.9842 atol=0.1^4
+    @test t.A² ≈ 0.8968 atol=0.1^4
+    @test pvalue(t) ≈ 0.4162 atol=0.1^4
 
     d = Cauchy()
-    x = rand(Cauchy(), n)
+    x = rand(rng, Cauchy(), n)
     t = OneSampleADTest(x, Normal())
     @test pvalue(t) ≈ 0.0 atol=0.1^4
     t = OneSampleADTest(x, d)
-    @test pvalue(t) ≈ 0.4228 atol=0.1^4
+    @test pvalue(t) ≈ 0.9640 atol=0.1^4
 
     d = LogNormal()
-    x = rand(d, n)
+    x = rand(rng, d, n)
     t = OneSampleADTest(x, Normal(mean(d), std(d)))
     @test pvalue(t) ≈ 0.0 atol=0.1^4
     t = OneSampleADTest(x, d)
-    @test pvalue(t) ≈ 0.1569 atol=0.1^4
+    @test pvalue(t) ≈ 0.9123 atol=0.1^4
 
     d = Uniform(-pi, 2pi)
-    x = rand(d, n)
+    x = rand(rng, d, n)
     t = OneSampleADTest(x, d)
-    @test pvalue(t) ≈ 0.2046 atol=0.1^4
+    @test pvalue(t) ≈ 0.2337 atol=0.1^4
 
-    x = rand(Uniform(0, 1.8), n)
+    x = rand(rng, Uniform(0, 1.8), n)
     t = OneSampleADTest(x, Uniform())
     @test pvalue(t) ≈ 0.0 atol=0.1^4
 
-    x = rand(Exponential(), n)
+    x = rand(rng, Exponential(), n)
     t = OneSampleADTest(x, Exponential())
-    @test pvalue(t) ≈ 0.9665 atol=0.1^4
+    @test pvalue(t) ≈ 0.8579 atol=0.1^4
 end
 
 @testset "k-sample test" begin
-    Random.seed!(948574875)
     samples = Any[
         [38.7, 41.5, 43.8, 44.5, 45.5, 46.0, 47.7, 58.0],
         [39.2, 39.3, 39.7, 41.4, 41.8, 42.9, 43.3, 45.8],
@@ -78,20 +78,20 @@ end
 end
 
 @testset "more tests" begin
-    Random.seed!(31412455)
-    samples = Any[rand(Normal(), 50), rand(Normal(0.5), 30)]
+    rng =  StableRNG(31412455)
+    samples = Any[rand(rng, Normal(), 50), rand(rng, Normal(0.5), 30)]
     t = KSampleADTest(samples...)
     @test pvalue(t) < 0.05
 
-    samples = Any[rand(Normal(), 50), rand(Normal(), 30), rand(Normal(), 20)]
+    samples = Any[rand(rng, Normal(), 50), rand(rng, Normal(), 30), rand(rng, Normal(), 20)]
     t = KSampleADTest(samples...)
     @test pvalue(t) > 0.05
 
-    @test pvalue(OneSampleADTest(vcat(rand(Normal(),500), rand(Beta(2,2),500)), Beta(2,2))) ≈ 0.0 atol=0.1^4
+    @test pvalue(OneSampleADTest(vcat(rand(rng, Normal(),500), rand(rng, Beta(2,2),500)), Beta(2,2))) ≈ 0.0 atol=0.1^4
 
     n = 1000
-    x = rand(Exponential(), n)
-    @test pvalue(KSampleADTest(rand(1000),randn(1000))) ≈ 0.0 atol=eps()
+    x = rand(rng, Exponential(), n)
+    @test pvalue(KSampleADTest(rand(rng, 1000), randn(rng, 1000))) ≈ 0.0 atol=eps()
     @test pvalue(KSampleADTest(x,x,x,x,x,x)) ≈ 1.0
 end
 

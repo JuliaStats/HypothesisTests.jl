@@ -44,7 +44,7 @@ default_tail(test::PowerDivergenceTest) = :right
 pvalue(x::PowerDivergenceTest; tail=:right) = pvalue(Chisq(x.df),x.stat; tail=tail)
 
 """
-    confint(test::PowerDivergenceTest; alpha = 0.05, tail = :both, method = :auto)
+    confint(test::PowerDivergenceTest; level = 0.95, tail = :both, method = :auto)
 
 Compute a confidence interval with coverage `level` for multinomial proportions using
 one of the following methods. Possible values for `method` are:
@@ -254,6 +254,11 @@ cell counts in a 2-dimensional contingency table is the product of the row and c
 marginals.
 
 Note that the entries of `x` (and `y` if provided) must be non-negative integers.
+
+Computed confidence intervals by default are Quesenberry-Hurst intervals
+if the minimum of the expected cell counts exceeds 100, and Sison-Glaz intervals otherwise.
+See the [`confint(::PowerDivergenceTest)`](@ref) documentation for a list of
+supported methods to compute confidence intervals.
 
 The power divergence test is given by
 ```math

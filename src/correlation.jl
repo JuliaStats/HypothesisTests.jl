@@ -6,6 +6,11 @@ using Statistics: clampcor
 export CorrelationTest
 
 """
+    CorrelationTest(x, y)
+
+Perform a t-test for the hypothesis that ``\\text{Cor}(x,y) = 0``, i.e. the correlation 
+of vectors `x` and `y` is zero.
+
     CorrelationTest(x, y, Z)
 
 Perform a t-test for the hypothesis that ``\\text{Cor}(x,y|Z=z) = 0``, i.e. the partial
@@ -30,6 +35,14 @@ struct CorrelationTest{T<:Real} <: HypothesisTest
     k::Int
     t::T
 
+    # Error checking is done in `cor`
+    function CorrelationTest(x::AbstractVector, y::AbstractVector)
+        r = cor(x, y)
+        n = length(x)
+        t = r * sqrt((n - 2) / (1 - r^2))
+        return new{typeof(r)}(r, n, 0, t)
+    end
+
     # Error checking is done in `partialcor`
     function CorrelationTest(x::AbstractVector, y::AbstractVector, Z::AbstractMatrix)
         r = partialcor(x, y, Z)
@@ -47,10 +60,10 @@ struct CorrelationTest{T<:Real} <: HypothesisTest
 end
 
 testname(p::CorrelationTest) =
-    string("Test for nonzero ", p.k == 0 ? "partial " : "", " correlation")
+    string("Test for nonzero ", p.k != 0 ? "partial " : "", "correlation")
 
 function population_param_of_interest(p::CorrelationTest)
-    param = p.k == 0 ? "Partial correlation" : "Correlation"
+    param = p.k != 0 ? "Partial correlation" : "Correlation"
     (param, zero(p.r), p.r)
 end
 
