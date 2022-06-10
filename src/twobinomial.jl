@@ -453,7 +453,7 @@ function ci_or_mover(test, level)
     return est, NaN, lci, uci
 end
 ################################################################################
-@inline function mle_rr(φ, x1::Int, n1::Int, x2::Int, n2::Int)
+@inline function mle_rr(φ::Float64, x1::Int, n1::Int, x2::Int, n2::Int)
     a = (n1 + n2) * φ
     b = -(φ * (x1 + n2) + x2 + n1)
     c = x1 + x2
