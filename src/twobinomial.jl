@@ -102,8 +102,8 @@ Possible values for `method` for `oddratio` are:
   - `:mover`
 
 """
-function TwoSampleBinomialTest(x1::Real, n1::Real, x2::Real, n2::Real, δ::Real;
-                               ptype::Symbol, htype::Symbol, alpha::Real = 0.05, method::Symbol = :default)
+function TwoSampleBinomialTest(x1::Int, n1::Int, x2::Int, n2::Int, δ::Float64;
+                               ptype::Symbol, htype::Symbol, alpha::Float64 = 0.05, method::Symbol = :default)
     test = TwoSampleBinomialTask(x1, n1, x2, n2, δ, ptype, htype, alpha, method)
     cialpha = cihalpha(htype, alpha)
     if ptype == :difference
@@ -126,7 +126,7 @@ function TwoSampleBinomialTest(x1::Real, n1::Real, x2::Real, n2::Real, δ::Real;
     TwoSampleBinomialTest(test, est, se, (lci, uci), result)
 end
 ################################################################################
-function ci_prop_wilson(x::Int, n::Int, alpha::Real)
+function ci_prop_wilson(x::Int, n::Int, alpha::Float64)
     z   = abs(quantile(Normal(), 1 - alpha / 2))
     p   = x / n
     d   = 1 + (z^2) / n
@@ -134,7 +134,7 @@ function ci_prop_wilson(x::Int, n::Int, alpha::Real)
     est = (p + (z^2) / (2 * n)) / d
     return est, se, est - z * se, est + z * se
 end
-function ci_prop_wilson_cc(x::Int, n::Int, alpha::Real)
+function ci_prop_wilson_cc(x::Int, n::Int, alpha::Float64)
     z = abs(quantile(Normal(), 1 - alpha / 2))
     p = x / n
     l = (2*n*p+z*z-1-z*sqrt(z*z-2-1/n+4*p*(n*(1-p)+1)))/2/(n+z*z)
@@ -192,7 +192,7 @@ function ci_or(test; level, method)
     end
 end
 ################################################################################
-#Not implementsd yet
+# Not implementsd yet
 function pvalue(tr::TwoSampleBinomialTest)
     if tr.test.method ∈ [:wald, :waldcc, :ac, :ha]
         #return ccdf(Normal(), z)*2.
@@ -208,8 +208,8 @@ function confint(tr::TwoSampleBinomialTest)
     throw(ArgumentError("not implemented"))
 end
 ################################################################################
-#Method of Mee 1984 with Miettinen and Nurminen modification n / (n - 1) Newcombe 1998
-#Score intervals for the difference of two binomial proportions
+# Method of Mee 1984 with Miettinen and Nurminen modification n / (n - 1) Newcombe 1998
+# Score intervals for the difference of two binomial proportions
 @inline function mle_diff(p1::Float64, n1::Int, p2::Float64, n2::Int, δ::Float64)
     if p1 - p2 - δ == 0 return 0.0 end
     θ = n2 / n1
@@ -224,7 +224,7 @@ end
     p2n = p1n - δ
     return p1n, p2n
 end
-@inline function mn_diff_z_val(p1::Real, n1::Int, p2::Real, n2::Int, est::Real, δ::Real)
+@inline function mn_diff_z_val(p1::Float64, n1::Int, p2::Float64, n2::Int, est::Float64, δ::Float64)
     p1n, p2n = mle_diff(p1, n1, p2, n2, δ)
     return (est - δ)^2 / ((n1 + n2) / (n1 + n2 - 1) * (p1n * (1 - p1n) / n1 + p2n * (1 - p2n) / n2))
 end
@@ -254,7 +254,7 @@ function ci_diff_mn(test, level; atol::Float64 = 1E-8)
     uci = find_zero(fmnd, (ul, uu), atol = atol)
     return est, NaN, lci, uci
 end
-#Wald
+# Wald
 function ci_diff_wald(test, level)
     alpha    = 1 - level
     p1       = test.x1 / test.n1
@@ -264,7 +264,7 @@ function ci_diff_wald(test, level)
     se       = sqrt(p1 * (1 - p1) / test.n1 + p2 * (1 - p2) / test.n2)
     return est, se, est - z * se, est + z * se
 end
-#Wald continuity correction
+# Wald continuity correction
 function ci_diff_wald_cc(test, level)
     alpha    = 1 - level
     p1       = test.x1 / test.n1
@@ -275,8 +275,8 @@ function ci_diff_wald_cc(test, level)
     cc       = 0.5*(1 / test.n1 + 1 / test.n2)
     return est, se, est - z * se - cc, est + z * se + cc
 end
-#Newcombes Hybrid (wilson) Score interval for the difference of proportions
-#Newcombe 1998
+# Newcombes Hybrid (wilson) Score interval for the difference of proportions
+# Newcombe 1998
 function ci_diff_nhs(test, level)
     alpha    = 1 - level
     p1       = test.x1 / test.n1
@@ -287,7 +287,7 @@ function ci_diff_nhs(test, level)
     est2, se2, lci2, uci2 = ci_prop_wilson(test.x2, test.n2, alpha)
     return est, NaN, est - z * sqrt(lci1 * (1 - lci1)/test.n1 + uci2 * (1 - uci2) / test.n2), est + z * sqrt(uci1 * (1 - uci1) / test.n1 + lci2 * (1 - lci2) / test.n2)
 end
-#Newcombes Hybrid Score continuity correction
+# Newcombes Hybrid Score continuity correction
 function ci_diff_nhs_cc(test, level)
     alpha    = 1 - level
     p1       = test.x1 / test.n1
@@ -298,8 +298,8 @@ function ci_diff_nhs_cc(test, level)
     est2, se2, lci2, uci2 = ci_prop_wilson_cc(test.x2, test.n2, alpha)
     return est, NaN, est - sqrt((p1 - lci1)^2 + (uci2 - p2)^2), est + sqrt((uci1 - p1)^2 + (p2 - lci2)^2)
 end
-#Agresti-Caffo interval for the difference of proportions
-#Agresti A, Caffo B., “Simple and effective confidence intervals for proportions and differences of proportions result from adding two successes and two failures”, American Statistician 54: 280–288 (2000)
+# Agresti-Caffo interval for the difference of proportions
+# Agresti A, Caffo B., “Simple and effective confidence intervals for proportions and differences of proportions result from adding two successes and two failures”, American Statistician 54: 280–288 (2000)
 function ci_diff_ac(test, level)
     alpha    = 1 - level
     z        = quantile(Normal(), 1 - alpha / 2)
@@ -321,12 +321,12 @@ function ci_diff_ha(test, level)
     cc       = 1 / min(test.n1, test.n2)
     return est, se, est - z * se - cc, est + z * se + cc
 end
-@inline function mnmee_z_val(p1::Real, n1::Int, p2::Real, n2::Int, est::Real, δ::Real)
+@inline function mnmee_z_val(p1::Float64, n1::Int, p2::Float64, n2::Int, est::Float64, δ::Float64)
     p1n, p2n = mle_diff(p1, n1, p2, n2, δ)
     return (est - δ)^2 / (p1n * (1 - p1n) / n1 + p2n * (1 - p2n) / n2)
 end
-#Mee RW (1984) Confidence bounds for the difference between two probabilities,Biometrics40:1175-1176
-#MN - no correction
+# Mee RW (1984) Confidence bounds for the difference between two probabilities,Biometrics40:1175-1176
+# MN - no correction
 function ci_diff_mnmee(test, level; atol::Float64 = 1E-8)
     ests, ses, lcis, ucis = ci_diff_nhs_cc(test, level)
     alpha    = 1 - level
@@ -353,7 +353,7 @@ function ci_diff_mnmee(test, level; atol::Float64 = 1E-8)
     uci = find_zero(fmnd, (ul, uu), atol = atol)
     return est, NaN, lci, uci
 end
-#Brown, Li's Jeffreys
+# Brown, Li's Jeffreys
 function ci_diff_jeffreys(test, level)
     p1   = (test.x1 + 0.5) / (test.n1 + 1)
     p2   = (test.x2 + 0.5) / (test.n2+1)
@@ -362,7 +362,7 @@ function ci_diff_jeffreys(test, level)
     est  = p1 - p2
     return test.x1 / test.n1 - test.x2 / test.n2, se, max(-1.0, est - z * se), min(1.0, est + z * se)
 end
-#Method of variance estimates recovery
+# Method of variance estimates recovery
 function ci_diff_mover(test, level)
     alpha    = 1 - level
     p1       = test.x1 / test.n1
@@ -390,24 +390,24 @@ end
     return (n1 * (p1 - pmle1))^2 * (1 / (n1 * pmle1 * (1 - pmle1)) + 1/(n2 * pmle2 * (1 - pmle2))) / ((n1 + n2)/(n1 + n2 - 1))
 end
 ################################################################################
-#Miettinen O. S., Nurminen M. (1985) Comparative analysis of two rates.Statistics in Medicine4,213–226
-#MN Score
+# Miettinen O. S., Nurminen M. (1985) Comparative analysis of two rates.Statistics in Medicine4,213–226
+# MN Score
 function ci_or_mn(test, level; atol::Float64 = 1E-8)
     z        = quantile(Chisq(1), level)
     fmnor(x) = mle_or_z_val(x, test.x1, test.n1, test.x2, test.n2) - z
     if (test.x1==0 && test.x2==0) || (test.x1==test.n1 && test.x2==test.n2)
         return NaN, NaN, 0.0, Inf
     elseif test.x1==0 || test.x2==test.n2
-        return 0.0, NaN, 0.0, find_zero(fmnor, 1e-6, atol = atol)
+        return 0.0, NaN, 0.0, find_zero(fmnor, atol, atol = atol)
     elseif test.x1==test.n1 || test.x2 == 0
-        return Inf, NaN, find_zero(fmnor, 1e-6, atol = atol), Inf
+        return Inf, NaN, find_zero(fmnor, atol, atol = atol), Inf
     else
         est  = (test.x1 / (test.n1 - test.x1)) / (test.x2 / (test.n2 - test.x2))
-        return est, NaN, find_zero(fmnor, 1e-6, atol = atol), find_zero(fmnor, est+1e-6, atol = atol)
+        return est, NaN, find_zero(fmnor, atol, atol = atol), find_zero(fmnor, est+atol, atol = atol)
     end
 end
-#Woolf logit
-#Woolf, B. (1955). On estimating the relation between blood group and disease. Annals of human genetics, 19(4):251-253.
+# Woolf logit
+# Woolf, B. (1955). On estimating the relation between blood group and disease. Annals of human genetics, 19(4):251-253.
 function ci_or_woolf(test, level)
     alpha     = 1 - level
     xa        = test.x1
@@ -416,12 +416,12 @@ function ci_or_woolf(test, level)
     xd        = test.n2 - test.x2
     est       = xa*xd/xc/xb
     estI      = log(est)
-    se        = sqrt(1/xa + 1/xb + 1/xc + 1/xd)
+    se        = sqrt(1 / xa + 1 / xb + 1 / xc + 1 / xd)
     z         = quantile(Normal(), 1 - alpha / 2)
     return est, se, exp(estI - z * se), exp(estI + z * se)
 end
-#Adjusted Woolf interval (Gart adjusted logit) Lawson, R (2005):Smallsample confidence intervals for the odds ratio.  Communication in Statistics Simulation andComputation, 33, 1095-1113.
-#Gart, J. J. (1966). Alternative analyses of contingency tables. Journal of the Royal Statistical Society. Series B (Methodological), 28:164-179.
+# Adjusted Woolf interval (Gart adjusted logit) Lawson, R (2005):Smallsample confidence intervals for the odds ratio.  Communication in Statistics Simulation andComputation, 33, 1095-1113.
+# Gart, J. J. (1966). Alternative analyses of contingency tables. Journal of the Royal Statistical Society. Series B (Methodological), 28:164-179.
 function ci_or_awoolf(test, level)
     alpha     = 1 - level
     xa        = test.x1 + 0.5
@@ -430,12 +430,12 @@ function ci_or_awoolf(test, level)
     xd        = test.n2 - test.x2 + 0.5
     est       = xa*xd/xc/xb
     estI      = log(est)
-    se        = sqrt(1/xa + 1/xb + 1/xc + 1/xd)
-    z         = quantile(Normal(), 1 - alpha/2)
+    se        = sqrt(1 / xa + 1 / xb + 1 / xc + 1 / xd)
+    z         = quantile(Normal(), 1 - alpha / 2)
     return est, se, exp(estI - z * se), exp(estI + z * se)
 end
-#Method of variance estimates recovery
-#Donner, A. and Zou, G. (2012). Closed-form confidence intervals for functions of the normal mean and standard deviation. Statistical Methods in Medical Research, 21(4):347-359.
+# Method of variance estimates recovery
+# Donner, A. and Zou, G. (2012). Closed-form confidence intervals for functions of the normal mean and standard deviation. Statistical Methods in Medical Research, 21(4):347-359.
 function ci_or_mover(test, level)
     alpha    = 1 - level
     p1       = (test.x1/(test.n1-test.x1))
@@ -448,8 +448,8 @@ function ci_or_mover(test, level)
     vu1      = uci1/(1 - uci1)
     vl2      = lci2/(1 - lci2)
     vu2      = uci2/(1 - uci2)
-    lci      = (p1*p2-sqrt((p1*p2)^2 - vl1*vu2*(2*p1-vl1)*(2*p2-vu2)))/(vu2*(2*p2 - vu2))
-    uci      = (p1*p2+sqrt((p1*p2)^2 - vu1*vl2*(2*p1-vu1)*(2*p2-vl2)))/(vl2*(2*p2 - vl2))
+    lci      = (p1 * p2 - sqrt((p1 * p2)^2 - vl1 * vu2 * (2 * p1 - vl1) * (2 * p2 - vu2))) / (vu2 * (2 * p2 - vu2))
+    uci      = (p1*p2+sqrt((p1 * p2)^2 - vu1 * vl2 * (2 * p1 - vu1)*(2 * p2 - vl2)))/(vl2 * (2 * p2 - vl2))
     return est, NaN, lci, uci
 end
 ################################################################################
@@ -468,12 +468,12 @@ end
     return (p1 - φ * p2)^2 / ((pmle1 * (1 - pmle1) / n1 + φ * φ * pmle2 * (1 - pmle2) / n2) * ((n1 + n2 - 1) / (n1 + n2)))
 end
 ################################################################################
-#Miettinen-Nurminen Score interval
-#Miettinen, O. and Nurminen, M. (1985), Comparative analysis of two rates. Statist. Med., 4: 213-226. doi:10.1002/sim.4780040211
+# Miettinen-Nurminen Score interval
+# Miettinen, O. and Nurminen, M. (1985), Comparative analysis of two rates. Statist. Med., 4: 213-226. doi:10.1002/sim.4780040211
 function ci_rr_mn(test, level; atol::Float64 = 1E-8)
     z        = quantile(Chisq(1), level)
     fmnrr(x) = mle_rr_z_val(x, test.x1, test.n1, test.x2, test.n2) - z
-    if (test.x1==0 && test.x2==0) || (test.x1==test.n1 && test.x2==test.n2)
+    if (test.x1 == 0 && test.x2 == 0) || (test.x1 == test.n1 && test.x2 == test.n2)
         return NaN, NaN, 0.0, Inf
     elseif test.x1==0 || test.x2==test.n2
         return 0.0, NaN, 0.0, find_zero(fmnrr, 1e-8, atol=atol)
@@ -484,8 +484,8 @@ function ci_rr_mn(test, level; atol::Float64 = 1E-8)
         return est, NaN, find_zero(fmnrr, 1e-8, atol=atol), find_zero(fmnrr, est+1e-6, atol=atol)
     end
 end
-#Crude log interval
-#Gart, JJand Nam, J (1988): Approximate interval estimation of the ratio of binomial parameters: Areview and corrections for skewness. Biometrics 44, 323-338.
+# Crude log interval
+# Gart, JJand Nam, J (1988): Approximate interval estimation of the ratio of binomial parameters: Areview and corrections for skewness. Biometrics 44, 323-338.
 function ci_rr_cli(test, level)
     alpha     = 1 - level
     x1I       = test.x1 + 0.5
@@ -498,7 +498,7 @@ function ci_rr_cli(test, level)
     z         =  quantile(Normal(), 1 - alpha / 2)
     return est, se, exp(estI - z * se), exp(estI + z * se)
 end
-#Katz D, Baptista J, Azen SP and Pike MC. Obtaining confidence intervals for the risk ratio in cohort studies. Biometrics 1978; 34: 469–474
+# Katz D, Baptista J, Azen SP and Pike MC. Obtaining confidence intervals for the risk ratio in cohort studies. Biometrics 1978; 34: 469–474
 function ci_rr_li(test, level)
     alpha     = 1 - level
     est       = (test.x1 / test.n1) / ( test.x2 / test.n2)
@@ -507,7 +507,7 @@ function ci_rr_li(test, level)
     z         = quantile(Normal(), 1 - alpha / 2)
     return est, se, exp(estI - z * se), exp(estI + z * se)
 end
-#Method of variance estimates recovery (Donner, Zou, 2012)
+# Method of variance estimates recovery (Donner, Zou, 2012)
 function ci_rr_mover(test, level)
     alpha    = 1 - level
     p1       = test.x1 / test.n1
