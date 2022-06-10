@@ -383,7 +383,7 @@ end
     p1 = p2 * φ/(1 + p2 * (φ - 1))
     return p1, p2
 end
-@inline function mle_or_z_val(φ::Real, x1::Int, n1::Int, x2::Int, n2::Int)::Float64
+@inline function mle_or_z_val(φ::Float64, x1::Int, n1::Int, x2::Int, n2::Int)
     p1 = x1 / n1
     pmle1, pmle2 = mle_or(φ, x1, n1, x2, n2)
     return (n1 * (p1 - pmle1))^2 * (1 / (n1 * pmle1 * (1 - pmle1)) + 1/(n2 * pmle2 * (1 - pmle2))) / ((n1 + n2)/(n1 + n2 - 1))
