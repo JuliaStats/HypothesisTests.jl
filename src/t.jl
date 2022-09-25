@@ -162,8 +162,11 @@ end
     EqualVarianceTTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real}, μ0::Real=0)
 
 Perform a two-sample t-test of the null hypothesis that `x` and `y` come from distributions
-with equal variances and mean difference μ0 (defaults to 0) against the alternative hypothesis
-that the distributions have equal variances and a mean difference different from μ0.
+with equal variances and a difference between their means equal to `μ0`
+(i.e. `mean(X) - mean(Y) == μ0`) against the alternative hypothesis that
+the distributions have equal variances and a difference between their means
+different from `μ0`. By default  `μ0 = 0`, that is the null hypothesis
+is that means are equal.
 
 See also:  [`VarianceFTest`](@ref) to test whether two datasets have equal variance.
     
