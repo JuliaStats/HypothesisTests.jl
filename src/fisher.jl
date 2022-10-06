@@ -137,7 +137,9 @@ end
 
 function pvalue_both_minlike(x::FisherExactTest, ω::Float64=1.0)
     a, b, c, d = reorder(x.a, x.b, x.c, x.d)
-
+    if a == c == 0 || b == d == 0
+        return 1
+    end
     dist = FisherNoncentralHypergeometric(a+b, c+d, a+c, ω)
 
     p = pdf(dist, a)
@@ -179,6 +181,9 @@ Fisher's non-central hypergeometric distribution. For `tail = :both`, the only
 """
 function StatsBase.confint(x::FisherExactTest; level::Float64=0.95, tail=:both, method=:central)
     check_level(level)
+    if x.a == x.c == 0 || x.b == x.d == 0
+        return (0.0, Inf)
+    end
     dist(ω) = FisherNoncentralHypergeometric(x.a+x.b, x.c+x.d, x.a+x.c, ω)
     obj(ω) = pvalue(dist(ω), x.a, tail=tail) - (1-level)
 
@@ -245,6 +250,9 @@ end
 # since the mode and mean of Fisher's Noncentral Hypergeometric distribution
 # coincide, this is equivalent to find ω, s.t., mean(dist(ω)) = a
 function cond_mle_odds_ratio(a::Int, b::Int, c::Int, d::Int)
+    if a == c == 0 || b == d == 0
+        return 0.0
+    end
     dist(ω) = FisherNoncentralHypergeometric(a+b, c+d, a+c, ω)
 
     if (a == minimum(dist(1.0)))

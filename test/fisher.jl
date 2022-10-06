@@ -104,6 +104,16 @@ t = HypothesisTests.FisherExactTest(4, 1, 20, 1)
 #@test_approx_eq [confint(t; method=:minlike)...] [0.005, 9.5943]
 show(IOBuffer(), t)
 
+# Corner case gh #276
+t = HypothesisTests.FisherExactTest(5, 0, 5, 0)
+@test pvalue(t; tail=:left) ≈ 1
+@test pvalue(t; tail=:right) ≈ 1
+@test pvalue(t; method=:central) ≈ 1
+@test pvalue(t; method=:minlike) ≈ 1
+@test_ci_approx confint(t; tail=:left) (0.0, Inf)
+@test_ci_approx confint(t; tail=:right) (0.0, Inf)
+@test_ci_approx confint(t; method=:central) (0.0, Inf)
+
 t = HypothesisTests.FisherExactTest(1, 1, 1, 1)
 @test HypothesisTests.pvalue(t, tail=:both) <= 1
 show(IOBuffer(), t)
