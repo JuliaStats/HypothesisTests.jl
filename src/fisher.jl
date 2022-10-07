@@ -138,7 +138,7 @@ end
 function pvalue_both_minlike(x::FisherExactTest, ω::Float64=1.0)
     a, b, c, d = reorder(x.a, x.b, x.c, x.d)
     if a == c == 0 || b == d == 0
-        return 1
+        return 1.0
     end
     dist = FisherNoncentralHypergeometric(a+b, c+d, a+c, ω)
 
