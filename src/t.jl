@@ -165,10 +165,10 @@ Perform a two-sample t-test of the null hypothesis that `x` and `y` come from di
 with equal variances and a difference between their means equal to `μ0`
 (i.e. `mean(X) - mean(Y) == μ0`) against the alternative hypothesis that
 the distributions have equal variances and a difference between their means
-different from `μ0`. By default  `μ0 = 0`, that is the null hypothesis
+different from `μ0`. By default `μ0 = 0`, that is the null hypothesis
 is that means are equal.
 
-See also:  [`VarianceFTest`](@ref) to test whether two datasets have equal variance.
+See also: [`VarianceFTest`](@ref) to test whether two datasets have equal variance.
     
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
@@ -198,8 +198,11 @@ testname(::UnequalVarianceTTest) = "Two sample t-test (unequal variance)"
     UnequalVarianceTTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real}, μ0::Real=0)
 
 Perform a two-sample t-test of the null hypothesis that `x` and `y` come from distributions
-with different variances and mean difference μ0 (defaults to 0) against the alternative hypothesis
-that the distributions have different variances and a mean difference different from μ0.
+with different variances and a difference between their means equal to `μ0`
+(i.e. `mean(X) - mean(Y) == μ0`) against the alternative hypothesis that
+the distributions have different variances and a difference between their means
+different from `μ0`. By default `μ0 = 0`, that is the null hypothesis
+is that means are equal.
 
 This test is sometimes known as Welch's t-test. It differs from the equal variance t-test in
 that it computes the number of degrees of freedom of the test using the Welch-Satterthwaite
@@ -209,7 +212,7 @@ equation:
         \\frac{(k_i s_i^2)^2}{ν_i}}
 ```
 
-See also:  [`VarianceFTest`](@ref) to test whether two datasets have equal variance.
+See also: [`VarianceFTest`](@ref) to test whether two datasets have equal variance.
     
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
