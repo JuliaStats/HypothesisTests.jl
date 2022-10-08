@@ -113,6 +113,7 @@ t = HypothesisTests.FisherExactTest(5, 0, 5, 0)
 @test_ci_approx confint(t; tail=:left) (0.0, Inf)
 @test_ci_approx confint(t; tail=:right) (0.0, Inf)
 @test_ci_approx confint(t; method=:central) (0.0, Inf)
+
 t = HypothesisTests.FisherExactTest(0, 5, 0, 5)
 @test pvalue(t; tail=:left) ≈ 1
 @test pvalue(t; tail=:right) ≈ 1
