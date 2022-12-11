@@ -10,24 +10,18 @@ DOI: [10.1007/BF01891203](https://doi.org/10.1007/BF01891203)
 
 # TODO: Rerun simulation and polynomial fitting
 
-const ROYSTON_COEFFS = Dict{String,Vector{Float64}}("C1" => [0.0E0, 0.221157E0, -0.147981E0,
-                                                             -0.207119E1, 0.4434685E1,
-                                                             -0.2706056E1],
-                                                    "C2" => [0.0E0, 0.42981E-1, -0.293762E0,
-                                                             -0.1752461E1, 0.5682633E1,
-                                                             -0.3582633E1],
-                                                    "C3" => [0.5440E0, -0.39978E0,
-                                                             0.25054E-1, -0.6714E-3],
-                                                    "C4" => [0.13822E1, -0.77857E0,
-                                                             0.62767E-1, -0.20322E-2],
-                                                    "C5" => [-0.15861E1, -0.31082E0,
-                                                             -0.83751E-1, 0.38915E-2],
-                                                    "C6" => [-0.4803E0, -0.82676E-1,
-                                                             0.30302E-2],
-                                                    "C7" => [0.164E0, 0.533E0],
-                                                    "C8" => [0.1736E0, 0.315E0],
-                                                    "C9" => [0.256E0, -0.635E-2],
-                                                    "G" => [-0.2273E1, 0.459E0])
+const ROYSTON_COEFFS = Dict{String,Vector{Float64}}(
+    "C1" => [0.0E0, 0.221157E0, -0.147981E0, -0.207119E1, 0.4434685E1, -0.2706056E1],
+    "C2" => [0.0E0, 0.42981E-1, -0.293762E0, -0.1752461E1, 0.5682633E1, -0.3582633E1],
+    "C3" => [0.5440E0, -0.39978E0, 0.25054E-1, -0.6714E-3],
+    "C4" => [0.13822E1, -0.77857E0, 0.62767E-1, -0.20322E-2],
+    "C5" => [-0.15861E1, -0.31082E0, -0.83751E-1, 0.38915E-2],
+    "C6" => [-0.4803E0, -0.82676E-1, 0.30302E-2],
+    "C7" => [0.164E0, 0.533E0],
+    "C8" => [0.1736E0, 0.315E0],
+    "C9" => [0.256E0, -0.635E-2],
+    "G" => [-0.2273E1, 0.459E0]
+)
 
 for (s, c) in ROYSTON_COEFFS
     @eval $(Symbol("_" * s))(x) = Base.Math.@horner(x, $(c...))
@@ -73,13 +67,10 @@ function SWCoeffs(N::Int)
     else
         # Weisberg&Bingham 1975 statistic; store only positive half of m:
         # it is (anti-)symmetric; hence '2' factor below
-        m = [-norminvcdf((i - 3 / 8) / (N + 1 / 4)) for i in 1:div(N, 2)]
+        m = [-quantile(Normal(), (i - 3 / 8) / (N + 1 / 4)) for i in 1:div(N, 2)]
         mᵀm = 2sum(abs2, m)
-
         x = 1 / sqrt(N)
-
         a₁ = m[1] / sqrt(mᵀm) + _C1(x) # aₙ = cₙ + (...)
-
         if N ≤ 5
             ϕ = (mᵀm - 2m[1]^2) / (1 - 2a₁^2)
             m = m / sqrt(ϕ) # A, but reusing m to save allocs
@@ -95,15 +86,12 @@ function SWCoeffs(N::Int)
     end
 end
 
-function swstat(X::AbstractArray{T}, A::SWCoeffs) where T<:Real
-
-    if X[end] - X[1] < lastindex(X)*eps(eltype(X))
-        throw("Data seems to be constant!")
+function swstat(X::AbstractArray{T}, A::SWCoeffs) where {T<:Real}
+    if X[end] - X[1] < lastindex(X) * eps()
+        throw("data seems to be constant!")
     end
-
-    AX = dot(A,X)
-    S² = sum(abs2, X.-mean(X))
-
+    AX = dot(A, X)
+    S² = sum(abs2, X .- mean(X))
     return AX^2 / S²
 end
 
@@ -123,12 +111,10 @@ function pvalue(W::T, A::SWCoeffs, N1=A.N) where {T<:Real}
         μ = _C5(log(A.N))
         σ = exp(_C6(log(A.N)))
     end
-
     if (A.N - N1) > 0
-        throw("Not implemented yet!")
+        throw("not implemented yet!")
     end
-
-    return normccdf((w - μ) / σ)
+    return ccdf(Normal(μ, σ), w)
 end
 
 struct ShapiroWilkTest <: HypothesisTest
@@ -138,38 +124,72 @@ struct ShapiroWilkTest <: HypothesisTest
 end
 
 testname(::ShapiroWilkTest) = "Shapiro-Wilk normality test"
-function population_param_of_interest(t::ShapiroWilkTest)
-    return ("Squared correlation of data and SWCoeffes (W)", 1.0, t.W)
-end
-
+population_param_of_interest(t::ShapiroWilkTest) = ("Squared correlation of data and SWCoeffes (W)", 1.0, t.W)
 default_tail(::ShapiroWilkTest) = :left
 
 function show_params(io::IO, t::ShapiroWilkTest, ident)
     println(io, ident, "number of observations:         ", t.SWc.N)
     println(io, ident, "censored ratio:                 ", (t.SWc.N - t.N1) / t.SWc.N)
-    return println(io, ident, "W-statistic:                    ", t.W)
+    println(io, ident, "W-statistic:                    ", t.W)
 end
 
+"""
+    pvalue(t::ShapiroWilkTest)
+
+Compute the p-value for a given Shapiro-Wilk test of normality.
+
+"""
 pvalue(t::ShapiroWilkTest) = pvalue(t.W, t.SWc, t.N1)
 
-function ShapiroWilkTest(X::AbstractArray{T}, SWc::SWCoeffs=SWCoeffs(length(X)),
-                         N1=length(X)) where {T<:Real}
+"""
+    ShapiroWilkTest(X::AbstractArray{T}; [SWc::SWCoeffs=SWCoeffs(length(X)), N1 = length(X)) where {T<:Real}])
+
+Perform a Shapiro-Wilk test of normality on `X`.
+
+This julia implementation is based the method of Royston (1992). Calculation of the p-value is exact for N = 3, and the
+coefficients of Royston (1992) for the separate intervals, 4 ≤ N ≤ 11 and N ≥ 12, are used to calculate the approximate
+p-value.
+
+Implements: [`pvalue`](@ref)
+
+# Notes
+While the W-statistic will be accurate for N > 5000, p-values may not be accurate.
+
+The current implementation does not yet handle censored data.
+
+# References
+Shapiro, S. S., & Wilk, M. B. (1965). An Analysis of Variance Test for Normality (Complete Samples). *Biometrika*, 52,
+591–611. [doi:10.1093/BIOMET/52.3-4.591](https://doi.org/10.1093/BIOMET/52.3-4.591).
+
+Royston, P. (1992). Approximating the Shapiro-Wilk W-test for non-normality. *Statistics and Computing*, 2(3), 117–119.
+[doi:10.1007/BF01891203](https://doi.org/10.1007/BF01891203)
+
+Royston, P. (1993). A Toolkit for Testing for Non-Normality in Complete and Censored Samples. Journal of the Royal
+Statistical Society Series D (The Statistician), 42(1), 37–43. (doi:10.2307/2348109)[https://doi.org/10.2307/2348109]
+
+Royston, P. (1995). Remark AS R94: A Remark on Algorithm AS 181: The W-test for Normality. *Journal of the Royal
+Statistical Society Series C (Applied Statistics)*, 44(4), 547–551.
+(doi:10.2307/2986146)[https://doi.org/10.2307/2986146].
+ """
+function ShapiroWilkTest(
+    X::AbstractArray{T}; SWc::SWCoeffs=SWCoeffs(length(X)), N1=length(X)) where {T<:Real}
+
     N = length(X)
     #fatal errors
     if N < 3
-        throw("Need at least 3 samples.")
+        throw("need at least 3 samples.")
     elseif N1 > N
         throw("N1 must be less than or equal to length(X)")
     elseif length(SWc) ≠ length(X)
-        throw("Length of the sample differs from Shapiro-Wilk coefficients!")
+        throw("length of the sample differs from Shapiro-Wilk coefficients!")
     end
 
     #non-fatal errors
     if N > 5000
         @warn("p-value may be unreliable for samples larger than 5000 points")
     elseif (N1 < N) && (N < 20)
-        @warn("Number of samples is < 20. Censoring may produce unreliable p-value.")
-    elseif (N - N1)/N > 0.8
+        @warn("number of samples is < 20. Censoring may produce unreliable p-value.")
+    elseif (N - N1) / N > 0.8
         @warn("(N - N1)/N > 0.8. Censoring too much data may produce unreliable p-value.")
     end
 
