@@ -70,12 +70,12 @@ function SWCoeffs(N::Int)
         a₁ = m[1] / sqrt(mᵀm) + __RS92_C1(x) # aₙ = cₙ + (...)
         if N ≤ 5
             ϕ = (mᵀm - 2m[1]^2) / (1 - 2a₁^2)
-            m = m / sqrt(ϕ) # A, but reusing m to save allocs
+            m .= m ./ sqrt(ϕ) # A, but reusing m to save allocs
             m[1] = a₁
         else
             a₂ = m[2] / sqrt(mᵀm) + __RS92_C2(x) # aₙ₋₁ = cₙ₋₁ + (...)
             ϕ = (mᵀm - 2m[1]^2 - 2m[2]^2) / (1 - 2a₁^2 - 2a₂^2)
-            m = m / sqrt(ϕ) # A, but reusing m to save allocs
+            m .= m ./ sqrt(ϕ) # A, but reusing m to save allocs
             m[1], m[2] = a₁, a₂
         end
 
@@ -83,12 +83,13 @@ function SWCoeffs(N::Int)
     end
 end
 
-function swstat(X::AbstractArray{T}, A::SWCoeffs) where {T<:Real}
-    if X[end] - X[1] < lastindex(X) * eps()
+function swstat(X::AbstractArray{<:Real}, A::SWCoeffs)
+    if last(X) - first(X) < length(X) * eps()
         throw("data seems to be constant!")
     end
     AX = dot(A, X)
-    S² = sum(abs2, X .- mean(X))
+    m = mean(X)
+    S² = sum(x -> abs2(x - m), X)
     return AX^2 / S²
 end
 
@@ -169,7 +170,11 @@ Statistical Society Series C (Applied Statistics)*, 44(4), 547–551.
 (doi:10.2307/2986146)[https://doi.org/10.2307/2986146].
  """
 function ShapiroWilkTest(
-    X::AbstractArray{T}; SWc::SWCoeffs=SWCoeffs(length(X)), N1=length(X)) where {T<:Real}
+    X::AbstractArray{T};
+    SWc::SWCoeffs=SWCoeffs(length(X)),
+    N1=length(X),
+    is_sorted=issorted(view(X, 1:N1))
+) where {T<:Real}
 
     N = length(X)
     #fatal errors
@@ -190,11 +195,11 @@ function ShapiroWilkTest(
         @warn("(N - N1)/N > 0.8. Censoring too much data may produce unreliable p-value.")
     end
 
-    if !issorted(view(X, 1:N1))
+    W = if !is_sorted
         @warn("Shapiro-Wilk requires sorted data")
-        W = swstat(sort(X[1:N1]), SWc)
+        swstat(sort!(X[1:N1]), SWc)
     else
-        W = swstat(view(X, 1:N1), SWc)
+        swstat(view(X, 1:N1), SWc)
     end
 
     return ShapiroWilkTest(SWc, W, N1)
