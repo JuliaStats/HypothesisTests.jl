@@ -93,7 +93,8 @@ function swstat(X::AbstractArray{<:Real}, A::SWCoeffs)
     return AX^2 / S²
 end
 
-function pvalue(W::T, A::SWCoeffs, N1=A.N) where {T<:Real}
+function pvalue(W::Real, A::SWCoeffs, N1=A.N)
+    A.N != N1 && throw("not implemented yet!")
     if A.N == 3 # exact by Shapiro&Wilk 1965
         return π / 6 * (asin(sqrt(W)) - asin(sqrt(0.75)))
     elseif A.N ≤ 11
@@ -109,9 +110,6 @@ function pvalue(W::T, A::SWCoeffs, N1=A.N) where {T<:Real}
         μ = __RS92_C5(log(A.N))
         σ = exp(__RS92_C6(log(A.N)))
     end
-    if A.N != N1
-        throw("not implemented yet!")
-    end
     return ccdf(Normal(μ, σ), w)
 end
 
@@ -122,53 +120,61 @@ struct ShapiroWilkTest <: HypothesisTest
 end
 
 testname(::ShapiroWilkTest) = "Shapiro-Wilk normality test"
-population_param_of_interest(t::ShapiroWilkTest) = ("Squared correlation of data and SWCoeffes (W)", 1.0, t.W)
+population_param_of_interest(t::ShapiroWilkTest) =
+    ("Squared correlation of data and SWCoeffs (W)", 1.0, t.W)
 default_tail(::ShapiroWilkTest) = :left
 
-function show_params(io::IO, t::ShapiroWilkTest, ident)
-    println(io, ident, "number of observations:         ", t.SWc.N)
-    println(io, ident, "censored ratio:                 ", (t.SWc.N - t.N1) / t.SWc.N)
-    println(io, ident, "W-statistic:                    ", t.W)
+function show_params(io::IO, t::ShapiroWilkTest, indent)
+    l = 24
+    println(io, indent, rpad("number of observations:", l), t.SWc.N)
+    println(io, indent, rpad("censored ratio:", l), (t.SWc.N - t.N1) / t.SWc.N)
+    println(io, indent, rpad("W-statistic:", l), t.W)
 end
 
-"""
-    pvalue(t::ShapiroWilkTest)
-
-Compute the p-value for a given Shapiro-Wilk test of normality.
-
-"""
 pvalue(t::ShapiroWilkTest) = pvalue(t.W, t.SWc, t.N1)
 
 """
-    ShapiroWilkTest(X::AbstractArray{T}; [SWc::SWCoeffs=SWCoeffs(length(X)), N1 = length(X)) where {T<:Real}])
+    ShapiroWilkTest(
+        X::AbstractArray{<:Real};
+        SWc::SWCoeffs=SWCoeffs(length(X)),
+        N1=length(X),
+        is_sorted=issorted(view(X, 1:N1))
+    )
 
 Perform a Shapiro-Wilk test of normality on `X`.
 
-This julia implementation is based the method of Royston (1992). Calculation of the p-value is exact for N = 3, and the
-coefficients of Royston (1992) for the separate intervals, 4 ≤ N ≤ 11 and N ≥ 12, are used to calculate the approximate
-p-value.
+This julia implementation is based the method of Royston (1992). The calculation
+of the p-value is exact for N = 3, and for ranges 4 ≤ N ≤ 11 and N ≥ 12
+separate approximations of Royston (1992) for p-values are used.
 
 Implements: [`pvalue`](@ref)
 
 # Notes
-While the W-statistic will be accurate for N > 5000, p-values may not be accurate.
-
-The current implementation does not yet handle censored data.
+* If multiple Shapiro-Wilk tests are to be performed it is beneficial to pass
+  Shapiro-Wilk coefficients for re-use.
+* While the (approximated) W-statistic will be accurate for large N, p-values
+  may not be reliable.
+* The current implementation does not yet handle censored data.
 
 # References
-Shapiro, S. S., & Wilk, M. B. (1965). An Analysis of Variance Test for Normality (Complete Samples). *Biometrika*, 52,
-591–611. [doi:10.1093/BIOMET/52.3-4.591](https://doi.org/10.1093/BIOMET/52.3-4.591).
+Shapiro, S. S., & Wilk, M. B. (1965). An Analysis of Variance Test for Normality
+(Complete Samples). *Biometrika*, 52, 591–611.
+[doi:10.1093/BIOMET/52.3-4.591](https://doi.org/10.1093/BIOMET/52.3-4.591).
 
-Royston, P. (1992). Approximating the Shapiro-Wilk W-test for non-normality. *Statistics and Computing*, 2(3), 117–119.
+Royston, P. (1992). Approximating the Shapiro-Wilk W-test for non-normality.
+*Statistics and Computing*, 2(3), 117–119.
 [doi:10.1007/BF01891203](https://doi.org/10.1007/BF01891203)
 
-Royston, P. (1993). A Toolkit for Testing for Non-Normality in Complete and Censored Samples. Journal of the Royal
-Statistical Society Series D (The Statistician), 42(1), 37–43. (doi:10.2307/2348109)[https://doi.org/10.2307/2348109]
+Royston, P. (1993). A Toolkit for Testing for Non-Normality in Complete and
+Censored Samples. Journal of the Royal Statistical Society Series D
+(The Statistician), 42(1), 37–43.
+[doi:10.2307/2348109](https://doi.org/10.2307/2348109)
 
-Royston, P. (1995). Remark AS R94: A Remark on Algorithm AS 181: The W-test for Normality. *Journal of the Royal
-Statistical Society Series C (Applied Statistics)*, 44(4), 547–551.
-(doi:10.2307/2986146)[https://doi.org/10.2307/2986146].
- """
+Royston, P. (1995). Remark AS R94: A Remark on Algorithm AS 181: The W-test for
+Normality. *Journal of the Royal Statistical Society Series C
+(Applied Statistics)*, 44(4), 547–551.
+[doi:10.2307/2986146](https://doi.org/10.2307/2986146).
+"""
 function ShapiroWilkTest(
     X::AbstractArray{T};
     SWc::SWCoeffs=SWCoeffs(length(X)),
