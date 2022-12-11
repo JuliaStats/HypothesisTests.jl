@@ -10,21 +10,22 @@ DOI: [10.1007/BF01891203](https://doi.org/10.1007/BF01891203)
 
 # TODO: Rerun simulation and polynomial fitting
 
-const ROYSTON_COEFFS = Dict{String,Vector{Float64}}(
-    "C1" => [0.0E0, 0.221157E0, -0.147981E0, -0.207119E1, 0.4434685E1, -0.2706056E1],
-    "C2" => [0.0E0, 0.42981E-1, -0.293762E0, -0.1752461E1, 0.5682633E1, -0.3582633E1],
-    "C3" => [0.5440E0, -0.39978E0, 0.25054E-1, -0.6714E-3],
-    "C4" => [0.13822E1, -0.77857E0, 0.62767E-1, -0.20322E-2],
-    "C5" => [-0.15861E1, -0.31082E0, -0.83751E-1, 0.38915E-2],
-    "C6" => [-0.4803E0, -0.82676E-1, 0.30302E-2],
-    "C7" => [0.164E0, 0.533E0],
-    "C8" => [0.1736E0, 0.315E0],
-    "C9" => [0.256E0, -0.635E-2],
-    "G" => [-0.2273E1, 0.459E0]
-)
+let ROYSTON_COEFFS = Dict{String,Vector{Float64}}(
+        "C1" => [0.0E0, 0.221157E0, -0.147981E0, -0.207119E1, 0.4434685E1, -0.2706056E1],
+        "C2" => [0.0E0, 0.42981E-1, -0.293762E0, -0.1752461E1, 0.5682633E1, -0.3582633E1],
+        "C3" => [0.5440E0, -0.39978E0, 0.25054E-1, -0.6714E-3],
+        "C4" => [0.13822E1, -0.77857E0, 0.62767E-1, -0.20322E-2],
+        "C5" => [-0.15861E1, -0.31082E0, -0.83751E-1, 0.38915E-2],
+        "C6" => [-0.4803E0, -0.82676E-1, 0.30302E-2],
+        "C7" => [0.164E0, 0.533E0],
+        "C8" => [0.1736E0, 0.315E0],
+        "C9" => [0.256E0, -0.635E-2],
+        "G" => [-0.2273E1, 0.459E0]
+    )
 
-for (s, c) in ROYSTON_COEFFS
-    @eval $(Symbol("_" * s))(x) = Base.Math.@horner(x, $(c...))
+    for (s, c) in ROYSTON_COEFFS
+        @eval $(Symbol("__RS92_" * s))(x) = Base.Math.@horner(x, $(c...))
+    end
 end
 
 #=
@@ -70,13 +71,13 @@ function SWCoeffs(N::Int)
         m = [-quantile(Normal(), (i - 3 / 8) / (N + 1 / 4)) for i in 1:div(N, 2)]
         mᵀm = 2sum(abs2, m)
         x = 1 / sqrt(N)
-        a₁ = m[1] / sqrt(mᵀm) + _C1(x) # aₙ = cₙ + (...)
+        a₁ = m[1] / sqrt(mᵀm) + __RS92_C1(x) # aₙ = cₙ + (...)
         if N ≤ 5
             ϕ = (mᵀm - 2m[1]^2) / (1 - 2a₁^2)
             m = m / sqrt(ϕ) # A, but reusing m to save allocs
             m[1] = a₁
         else
-            a₂ = m[2] / sqrt(mᵀm) + _C2(x) # aₙ₋₁ = cₙ₋₁ + (...)
+            a₂ = m[2] / sqrt(mᵀm) + __RS92_C2(x) # aₙ₋₁ = cₙ₋₁ + (...)
             ϕ = (mᵀm - 2m[1]^2 - 2m[2]^2) / (1 - 2a₁^2 - 2a₂^2)
             m = m / sqrt(ϕ) # A, but reusing m to save allocs
             m[1], m[2] = a₁, a₂
@@ -99,26 +100,26 @@ function pvalue(W::T, A::SWCoeffs, N1=A.N) where {T<:Real}
     if A.N == 3 # exact by Shapiro&Wilk 1965
         return π / 6 * (asin(sqrt(W)) - asin(sqrt(0.75)))
     elseif A.N ≤ 11
-        γ = _G(A.N)
+        γ = __RS92_G(A.N)
         if γ ≤ log(1 - W)
             return zero(W)
         end
         w = -log(γ - log(1 - W))
-        μ = _C3(A.N)
-        σ = exp(_C4(A.N))
+        μ = __RS92_C3(A.N)
+        σ = exp(__RS92_C4(A.N))
     else
         w = log(1 - W)
-        μ = _C5(log(A.N))
-        σ = exp(_C6(log(A.N)))
+        μ = __RS92_C5(log(A.N))
+        σ = exp(__RS92_C6(log(A.N)))
     end
-    if (A.N - N1) > 0
+    if A.N != N1
         throw("not implemented yet!")
     end
     return ccdf(Normal(μ, σ), w)
 end
 
 struct ShapiroWilkTest <: HypothesisTest
-    SWc::SWCoeffs            # Expectation of order statistics for Shapiro-Wilk test
+    SWc::SWCoeffs         # Expectation of order statistics for Shapiro-Wilk test
     W::Float64            # test statistic
     N1::Int               #
 end
