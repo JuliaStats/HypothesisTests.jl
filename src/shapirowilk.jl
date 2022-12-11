@@ -205,7 +205,7 @@ end
 
 #=
 # To compare with the standard ALGORITHM AS R94 fortran subroutine
-#  * grab scipys (swilk.f)[https://github.com/scipy/scipy/blob/master/scipy/stats/statlib/swilk.f];
+#  * grab scipys (swilk.f)[https://raw.githubusercontent.com/scipy/scipy/main/scipy/stats/statlib/swilk.f];
 #  * compile
 #  ```
 #  gfortran -shared -fPIC -o swilk.so swilk.f
@@ -222,7 +222,7 @@ for (lib, I, F) in (("./swilk64.so", Int64, Float64),
             ifault = Ref{$I}(0)
 
             ccall((:swilk_, $lib),
-                Void,
+                Cvoid,
                 (
                 Ref{Bool},  # INIT if false compute SWCoeffs in A, else use A
                 Ref{$F},    # X    sample
