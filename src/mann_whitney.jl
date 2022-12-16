@@ -165,11 +165,11 @@ end
 
 struct ApproximateMannWhitneyUTest{T<:Real} <: HypothesisTest
     U::Float64              # test statistic: Mann-Whitney-U statistic
-    ranks::Vector{T}        # ranks
+    ranks::Vector{Float64}  # ranks
     tie_adjustment::Float64 # adjustment for ties
     nx::Int                 # number of observations
     ny::Int
-    median::Float64         # sample median
+    median::T               # sample median
     mu::Float64             # normal approximation: mean
     sigma::Float64          # normal approximation: std
 end
@@ -199,8 +199,8 @@ where ``\\mathcal{T}`` is the set of the counts of tied values at each tied posi
 
 Implements: [`pvalue`](@ref)
 """
-function ApproximateMannWhitneyUTest(U::Real, ranks::AbstractVector{T},
-    tie_adjustment::Real, nx::Int, ny::Int, median::Float64) where T<:Real
+function ApproximateMannWhitneyUTest(U::Float64, ranks::AbstractVector{Float64},
+    tie_adjustment::Float64, nx::Int, ny::Int, median::T) where T<:Real
     mu = U - nx * ny / 2
     sigma = sqrt((nx * ny * (nx + ny + 1 - tie_adjustment /
         ((nx + ny) * (nx + ny - 1)))) / 12)
