@@ -193,11 +193,9 @@ function ksstats(x::AbstractVector{T}, y::AbstractVector{S}) where {T<:Real, S<:
     n_x, n_y = length(x), length(y)
     all_values = [x; y]
     sort_idx = sortperm(all_values)
-    δ_y = 1. / n_y
-    δ_x = 1. / n_x
-    δ = 0.
-    δp = 0.
-    δn = 0.
+    δ_y = 1 / n_y
+    δ_x = 1 / n_x
+    δ = δp = δn = zero(δ_y)
 
     for i in 1:(n_x + n_y)
         if sort_idx[i] > n_x
