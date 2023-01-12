@@ -205,7 +205,7 @@ function ksstats(x::AbstractVector{T}, y::AbstractVector{S}) where {T<:Real, S<:
         end
 
         # only update δp/δn if the value is about to change or at the last step.
-        if ( i == n_x + n_y ) || ( all_values[sort_idx[i]] != all_values[sort_idx[i+1]] )
+        if i == n_x + n_y || all_values[sort_idx[i]] != all_values[sort_idx[i + 1]]
             if δ > δp
                 δp = δ
             elseif δ < δn
