@@ -163,9 +163,6 @@ Implements: [`pvalue`](@ref)
 """
 function ApproximateTwoSampleKSTest(x::AbstractVector{T}, y::AbstractVector{S}) where {T<:Real, S<:Real}
     n_x, n_y = length(x), length(y)
-    if n_x+n_y > length(unique([x; y]))
-        @warn("This test is inaccurate with ties")
-    end
 
     ApproximateTwoSampleKSTest(ksstats(x, y)...)
 end
@@ -194,11 +191,28 @@ end
 # compute supremum of differences between empirical cdfs.
 function ksstats(x::AbstractVector{T}, y::AbstractVector{S}) where {T<:Real, S<:Real}
     n_x, n_y = length(x), length(y)
-    sort_idx = sortperm([x; y])
-    pdf_diffs = [ones(n_x)/n_x; -ones(n_y)/n_y][sort_idx]
-    cdf_diffs = cumsum(pdf_diffs)
-    δp = maximum(cdf_diffs)
-    δn = -minimum(cdf_diffs)
-    δ = max(δp, δn)
-    (n_x, n_y, δ, δp, δn)
-end
+    all_values = [x; y]
+    sort_idx = sortperm(all_values)
+    δ_y = 1 / n_y
+    δ_x = 1 / n_x
+    δ = δp = δn = zero(δ_y)
+
+    for i in 1:(n_x + n_y)
+        if sort_idx[i] > n_x
+            δ -= δ_y
+        else
+            δ += δ_x
+        end
+
+        # only update δp/δn if the value is about to change or at the last step.
+        if i == n_x + n_y || all_values[sort_idx[i]] != all_values[sort_idx[i + 1]]
+            if δ > δp
+                δp = δ
+            elseif δ < δn
+                δn = δ
+            end
+        end
+    end
+
+    (n_x, n_y, max(δp, -δn), δp, -δn)
+end   

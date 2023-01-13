@@ -81,4 +81,11 @@ t = ExactOneSampleKSTest(x, Uniform())
 @test pvalue(t) ≈ 0.4351284228580825
 @test pvalue(t; tail=:left) ≈ 0.3013310572470338
 @test pvalue(t; tail=:right) ≈ 0.2193143479950862
+
+# Check two samples with ties
+
+t = ApproximateTwoSampleKSTest(ones(10), ones(10))
+@test isapprox(t.δ, 0., atol=1e-16)
+@test isapprox(t.δp, 0., atol=1e-16)
+@test isapprox(t.δn, 0., atol=1e-16)
 end
