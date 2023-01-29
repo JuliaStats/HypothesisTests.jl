@@ -33,6 +33,7 @@ null = Normal(0.0, 1.0)
 	@test confint(tst; tail=:left)[2] ≈ m + cquantile(null, 0.05) * se
 	@test confint(tst; tail=:right)[1] ≈ m + quantile(null, 0.05) * se
 	@test confint(tst; tail=:right)[2] ≈ Inf
+	@test_throws ArgumentError confint(tst; tail=2)
 	show(IOBuffer(), tst)
 
 	x = -10:5
