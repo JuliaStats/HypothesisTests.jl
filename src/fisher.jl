@@ -27,8 +27,8 @@ export FisherExactTest
 """
     FisherExactTest(a::Integer, b::Integer, c::Integer, d::Integer)
 
-Perform Fisher's exact test of the null hypothesis that the success probabilities ``a/c``
-and ``b/d`` are equal, that is the odds ratio ``(a/c) / (b/d)`` is one, against the
+Perform Fisher's exact test to test the null hypothesis that the success probabilities ``a/(c+a)``
+and ``b/(d+d)`` are equal, meaning that the odds ratio ``(a/c) / (b/d)`` is one, against the
 alternative hypothesis that they are not equal.
 
 See [`pvalue(::FisherExactTest)`](@ref) and [`confint(::FisherExactTest)`](@ref) for details
