@@ -319,6 +319,13 @@ function PowerDivergenceTest(x::AbstractMatrix{T}; lambda::U=1.0, theta0::Vector
             stat += x[i] * (log(x[i]) - log(xhat[i]))
         end
         stat *= 2
+    #yates correction
+    elseif lambda==1 && df==1
+        for i in 1:length(x)
+            num = abs(x[i] - xhat[i]) - 0.5
+            den = sqrt(xhat[i])
+            stat += (num / den)^2
+        end
     elseif lambda == -1
         for i in 1:length(x)
             stat += xhat[i] * (log(xhat[i]) - log(x[i]))
