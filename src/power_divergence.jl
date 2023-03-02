@@ -237,14 +237,17 @@ end
 # Under regularity conditions, their asymptotic distributions are all the same (Drost 1989)
 # Chi-squared null approximation works best for lambda near 2/3
 """
-    PowerDivergenceTest(x[, y]; lambda = 1.0, theta0 = ones(length(x))/length(x))
+    PowerDivergenceTest(x[, y]; lambda = 1.0, theta0 = ones(length(x))/length(x), ddof = 0)
 
 Perform a Power Divergence test.
 
 If `y` is not given and `x` is a matrix with one row or column, or `x` is a vector, then
 a goodness-of-fit test is performed (`x` is treated as a one-dimensional contingency
 table). In this case, the hypothesis tested is whether the population probabilities equal
-those in `theta0`, or are all equal if `theta0` is not given.
+those in `theta0`, or are all equal if `theta0` is not given. The `ddof` parameter is the 
+"delta degrees of freedom" adjustment to the number of degrees of freedom used for 
+calculation of p-values. The number of degrees of freedom is decreased by `ddof`.
+
 
 If `x` is a matrix with at least two rows and columns, it is taken as a two-dimensional
 contingency table. Otherwise, `x` and `y` must be vectors of the same length. The contingency
@@ -360,7 +363,9 @@ with ``λ = 1``).
 If `y` is not given and `x` is a matrix with one row or column, or `x` is a vector, then
 a goodness-of-fit test is performed (`x` is treated as a one-dimensional contingency
 table). In this case, the hypothesis tested is whether the population probabilities equal
-those in `theta0`, or are all equal if `theta0` is not given.
+those in `theta0`, or are all equal if `theta0` is not given. The `ddof` parameter is the 
+"delta degrees of freedom" adjustment to the number of degrees of freedom used for 
+calculation of p-values. The number of degrees of freedom is decreased by `ddof`.
 
 If `x` is a matrix with at least two rows and columns, it is taken as a two-dimensional
 contingency table. Otherwise, `x` and `y` must be vectors of the same length. The contingency
