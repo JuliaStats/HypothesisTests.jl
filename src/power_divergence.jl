@@ -284,7 +284,7 @@ Implements: [`pvalue`](@ref), [`confint(::PowerDivergenceTest)`](@ref)
 
   * Agresti, Alan. Categorical Data Analysis, 3rd Edition. Wiley, 2013.
 """
-function PowerDivergenceTest(x::AbstractMatrix{T}; lambda::U=1.0, theta0::Vector{U} = ones(length(x))/length(x)) where {T<:Integer,U<:AbstractFloat}
+function PowerDivergenceTest(x::AbstractMatrix{T}; lambda::U=1.0, theta0::Vector{U} = ones(length(x))/length(x), ddof::Int64=0) where {T<:Integer,U<:AbstractFloat}
 
     nrows, ncols = size(x)
     n = sum(x)
@@ -297,13 +297,13 @@ function PowerDivergenceTest(x::AbstractMatrix{T}; lambda::U=1.0, theta0::Vector
     if nrows > 1 && ncols > 1
         rowsums = sum(x, dims=2)
         colsums = sum(x, dims=1)
-        df = (nrows - 1) * (ncols - 1)
+        df = (nrows - 1) * (ncols - 1) - ddof
         thetahat = x ./ n
         xhat = rowsums * colsums / n
         theta0 = xhat / n
         V = Float64[(colsums[j]/n) * (rowsums[i]/n) * (1 - rowsums[i]/n) * (n - colsums[j]) for i in 1:nrows, j in 1:ncols]
     elseif nrows == 1 || ncols == 1
-        df = length(x) - 1
+        df = length(x) - 1 - ddof
         xhat = reshape(n * theta0, size(x))
         thetahat = x / n
         V = reshape(n .* theta0 .* (1 .- theta0), size(x))
@@ -337,18 +337,18 @@ end
 #convenience functions
 
 #PDT
-function PowerDivergenceTest(x::AbstractVector{T}, y::AbstractVector{T}, levels::Levels{T}; lambda::U=1.0) where {T<:Integer,U<:AbstractFloat}
+function PowerDivergenceTest(x::AbstractVector{T}, y::AbstractVector{T}, levels::Levels{T}; lambda::U=1.0, ddof::Int64=0) where {T<:Integer,U<:AbstractFloat}
     d = counts(x, y, levels)
-    PowerDivergenceTest(d, lambda=lambda)
+    PowerDivergenceTest(d, lambda=lambda, ddof=ddof)
 end
 
-function PowerDivergenceTest(x::AbstractVector{T}, y::AbstractVector{T}, k::T; lambda::U=1.0) where {T<:Integer,U<:AbstractFloat}
+function PowerDivergenceTest(x::AbstractVector{T}, y::AbstractVector{T}, k::T; lambda::U=1.0, ddof::Int64=0) where {T<:Integer,U<:AbstractFloat}
     d = counts(x, y, k)
-    PowerDivergenceTest(d, lambda=lambda)
+    PowerDivergenceTest(d, lambda=lambda, ddof=ddof)
 end
 
-PowerDivergenceTest(x::AbstractVector{T}; lambda::U=1.0, theta0::Vector{U} = ones(length(x))/length(x)) where {T<:Integer,U<:AbstractFloat} =
-    PowerDivergenceTest(reshape(x, length(x), 1), lambda=lambda, theta0=theta0)
+PowerDivergenceTest(x::AbstractVector{T}; lambda::U=1.0, theta0::Vector{U} = ones(length(x))/length(x), ddof::Int64=0) where {T<:Integer,U<:AbstractFloat} =
+    PowerDivergenceTest(reshape(x, length(x), 1), lambda=lambda, theta0=theta0, ddof=ddof)
 
 #ChisqTest
 """
@@ -373,22 +373,22 @@ Note that the entries of `x` (and `y` if provided) must be non-negative integers
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
-function ChisqTest(x::AbstractMatrix{T}) where T<:Integer
-    PowerDivergenceTest(x, lambda=1.0)
+function ChisqTest(x::AbstractMatrix{T}; ddof::Int64=0) where T<:Integer
+    PowerDivergenceTest(x, lambda=1.0, ddof=ddof)
 end
 
-function ChisqTest(x::AbstractVector{T}, y::AbstractVector{T}, levels::Levels{T}) where T<:Integer
+function ChisqTest(x::AbstractVector{T}, y::AbstractVector{T}, levels::Levels{T}; ddof::Int64=0) where T<:Integer
     d = counts(x, y, levels)
-    PowerDivergenceTest(d, lambda=1.0)
+    PowerDivergenceTest(d, lambda=1.0, ddof=ddof)
 end
 
-function ChisqTest(x::AbstractVector{T}, y::AbstractVector{T}, k::T) where T<:Integer
+function ChisqTest(x::AbstractVector{T}, y::AbstractVector{T}, k::T; ddof::Int64=0) where T<:Integer
     d = counts(x, y, k)
-    PowerDivergenceTest(d, lambda=1.0)
+    PowerDivergenceTest(d, lambda=1.0, ddof=ddof)
 end
 
-ChisqTest(x::AbstractVector{T}, theta0::Vector{U} = ones(length(x))/length(x)) where {T<:Integer,U<:AbstractFloat} =
-    PowerDivergenceTest(reshape(x, length(x), 1), lambda=1.0, theta0=theta0)
+ChisqTest(x::AbstractVector{T}, theta0::Vector{U} = ones(length(x))/length(x); ddof::Int64=0) where {T<:Integer,U<:AbstractFloat} =
+    PowerDivergenceTest(reshape(x, length(x), 1), lambda=1.0, theta0=theta0, ddof=ddof)
 
 #MultinomialLRTest
 """
