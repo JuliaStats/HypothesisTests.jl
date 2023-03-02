@@ -198,4 +198,10 @@ MultinomialLRTest(x,y,(1:3,1:3))
 d = [113997 1031298
      334453 37471]
 PowerDivergenceTest(d)
+
+# Test ddof for the ChisqTest
+x = [8,10,16,6]
+probs = [0.15865525393145702, 0.341344746068543, 0.34134474606854304, 0.15865525393145702]
+m = ChisqTest(x, probs, ddof=2)
+@test pvalue(m) ≈ 0.17603510054227095
 end
