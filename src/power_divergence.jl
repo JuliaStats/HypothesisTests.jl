@@ -306,7 +306,7 @@ Implements: [`pvalue`](@ref), [`confint(::PowerDivergenceTest)`](@ref)
   * Agresti, Alan. Categorical Data Analysis, 3rd Edition. Wiley, 2013.
 """
 function PowerDivergenceTest(x::AbstractMatrix{T}; lambda::U=1.0, theta0::Vector{U} =
-	ones(length(x))/length(x), ddof::Int64=0) where {T<:Integer,U<:AbstractFloat}
+	ones(length(x))/length(x), ddof::Integer=0) where {T<:Integer,U<:AbstractFloat}
 
     nrows, ncols = size(x)
     n = sum(x)
@@ -365,19 +365,19 @@ end
 
 #PDT
 function PowerDivergenceTest(x::AbstractVector{T}, y::AbstractVector{T},
-	levels::Levels{T}; lambda::U=1.0, ddof::Int64=0) where {T<:Integer,U<:AbstractFloat}
+	levels::Levels{T}; lambda::U=1.0, ddof::Integer=0) where {T<:Integer,U<:AbstractFloat}
     d = counts(x, y, levels)
     PowerDivergenceTest(d, lambda=lambda, ddof=ddof)
 end
 
 function PowerDivergenceTest(x::AbstractVector{T}, y::AbstractVector{T}, k::T;
-	lambda::U=1.0, ddof::Int64=0) where {T<:Integer,U<:AbstractFloat}
+	lambda::U=1.0, ddof::Integer=0) where {T<:Integer,U<:AbstractFloat}
     d = counts(x, y, k)
     PowerDivergenceTest(d, lambda=lambda, ddof=ddof)
 end
 
 PowerDivergenceTest(x::AbstractVector{T}; lambda::U=1.0, theta0::Vector{U} =
-	ones(length(x))/length(x), ddof::Int64=0) where {T<:Integer,U<:AbstractFloat} =
+	ones(length(x))/length(x), ddof::Integer=0) where {T<:Integer,U<:AbstractFloat} =
 	PowerDivergenceTest(reshape(x, length(x), 1), lambda=lambda, theta0=theta0,
 	ddof=ddof)
 
@@ -406,24 +406,24 @@ Note that the entries of `x` (and `y` if provided) must be non-negative integers
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
-function ChisqTest(x::AbstractMatrix{T}; ddof::Int64=0) where T<:Integer
+function ChisqTest(x::AbstractMatrix{T}; ddof::Integer=0) where T<:Integer
     PowerDivergenceTest(x, lambda=1.0, ddof=ddof)
 end
 
 function ChisqTest(x::AbstractVector{T}, y::AbstractVector{T}, levels::Levels{T};
-	ddof::Int64=0) where T<:Integer
+	ddof::Integer=0) where T<:Integer
     d = counts(x, y, levels)
     PowerDivergenceTest(d, lambda=1.0, ddof=ddof)
 end
 
-function ChisqTest(x::AbstractVector{T}, y::AbstractVector{T}, k::T; ddof::Int64=0) where
+function ChisqTest(x::AbstractVector{T}, y::AbstractVector{T}, k::T; ddof::Integer=0) where
 	T<:Integer
     d = counts(x, y, k)
     PowerDivergenceTest(d, lambda=1.0, ddof=ddof)
 end
 
 ChisqTest(x::AbstractVector{T}, theta0::Vector{U} = ones(length(x))/length(x);
-	ddof::Int64=0) where {T<:Integer,U<:AbstractFloat} =
+	ddof::Integer=0) where {T<:Integer,U<:AbstractFloat} =
     PowerDivergenceTest(reshape(x, length(x), 1), lambda=1.0, theta0=theta0, ddof=ddof)
 
 #MultinomialLRTest
