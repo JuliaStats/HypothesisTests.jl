@@ -465,8 +465,8 @@ function MultinomialLRTest(x::AbstractVector{T}, y::AbstractVector{T}, k::T) whe
     PowerDivergenceTest(d, lambda=0.0)
 end
 
-MultinomialLRTest(x::AbstractVector{T}, theta0::Vector{U} = ones(length(x))/length(x))
-	where {T<:Integer,U<:AbstractFloat} =
+MultinomialLRTest(x::AbstractVector{T}, 
+    theta0::Vector{U} = ones(length(x))/length(x)) where {T<:Integer,U<:AbstractFloat} =
     PowerDivergenceTest(reshape(x, length(x), 1), lambda=0.0, theta0=theta0)
 
 function show_params(io::IO, x::PowerDivergenceTest, ident="")
