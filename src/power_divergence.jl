@@ -260,9 +260,7 @@ Perform a Power Divergence test.
 If `y` is not given and `x` is a matrix with one row or column, or `x` is a vector, then
 a goodness-of-fit test is performed (`x` is treated as a one-dimensional contingency
 table). In this case, the hypothesis tested is whether the population probabilities equal
-those in `theta0`, or are all equal if `theta0` is not given. The `ddof` parameter is the 
-"delta degrees of freedom" adjustment to the number of degrees of freedom used for 
-calculation of p-values. The number of degrees of freedom is decreased by `ddof`.
+those in `theta0`, or are all equal if `theta0` is not given. 
 
 
 If `x` is a matrix with at least two rows and columns, it is taken as a two-dimensional
@@ -273,6 +271,10 @@ distribution of the cell counts in a 2-dimensional contingency table is the prod
 row and column marginals.
 
 Note that the entries of `x` (and `y` if provided) must be non-negative integers.
+
+The `ddof` parameter is the "delta degrees of freedom" adjustment to the number of degrees
+of freedom used for calculation of p-values. The number of degrees of freedom is decreased
+by `ddof`.
 
 Computed confidence intervals by default are Quesenberry-Hurst intervals if the minimum of
 the expected cell counts exceeds 100, and Sison-Glaz intervals otherwise. See the
