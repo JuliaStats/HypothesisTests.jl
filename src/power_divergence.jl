@@ -416,8 +416,8 @@ function ChisqTest(x::AbstractVector{T}, y::AbstractVector{T}, levels::Levels{T}
     PowerDivergenceTest(d, lambda=1.0, ddof=ddof)
 end
 
-function ChisqTest(x::AbstractVector{T}, y::AbstractVector{T}, k::T; ddof::Integer=0)
-	where T<:Integer
+function ChisqTest(x::AbstractVector{T}, y::AbstractVector{T}, k::T; 
+    ddof::Integer=0) where T<:Integer
     d = counts(x, y, k)
     PowerDivergenceTest(d, lambda=1.0, ddof=ddof)
 end
