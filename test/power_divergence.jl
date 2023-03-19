@@ -198,4 +198,28 @@ MultinomialLRTest(x,y,(1:3,1:3))
 d = [113997 1031298
      334453 37471]
 PowerDivergenceTest(d)
+
+# Pearson's Chi-Squared Test
+# As in https://en.wikipedia.org/wiki/Pearson's_chi-squared_test#Fairness_of_dice
+O = [5,8,9,8,10,20]
+E = fill(10,6)
+m = ChisqTest(O,E)
+
+@test pvalue(m) ≈ 0.01990522033477436
+@test m.stat ≈ 13.4
+@test m.df == 5
+@test m.n == 60
+@test m.residuals ≈ reshape([-1.5811388300841895,-0.6324555320336759,-0.31622776601683794,-0.6324555320336759, 0.0, 3.162277660168379],size(O))
+
+# As in https://en.wikipedia.org/wiki/Pearson's_chi-squared_test#Goodness_of_fit
+O = [44,56]
+E = fill(50,2)
+m = ChisqTest(O,E)
+
+@test pvalue(m) ≈ 0.23013934044341544
+@test m.stat ≈ 1.44
+@test m.df == 1
+@test m.n == 100
+@test m.residuals ≈ reshape([-0.848528137423857,0.848528137423857],size(O))
+
 end

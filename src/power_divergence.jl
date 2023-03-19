@@ -387,6 +387,11 @@ function ChisqTest(x::AbstractVector{T}, y::AbstractVector{T}, k::T) where T<:In
     PowerDivergenceTest(d, lambda=1.0)
 end
 
+function ChisqTest(x::AbstractVector{T}, y::AbstractVector{T}) where {T<:Integer}
+    theta0 = y ./ sum(y)
+    PowerDivergenceTest(reshape(x, length(x), 1), lambda=1.0, theta0=theta0)
+end
+
 ChisqTest(x::AbstractVector{T}, theta0::Vector{U} = ones(length(x))/length(x)) where {T<:Integer,U<:AbstractFloat} =
     PowerDivergenceTest(reshape(x, length(x), 1), lambda=1.0, theta0=theta0)
 
