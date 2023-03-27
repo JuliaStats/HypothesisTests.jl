@@ -362,6 +362,11 @@ a goodness-of-fit test is performed (`x` is treated as a one-dimensional conting
 table). In this case, the hypothesis tested is whether the population probabilities equal
 those in `theta0`, or are all equal if `theta0` is not given.
 
+If only `y` and `x` are given and both are vectors of integer type, then once again a
+goodness-of-fit test is performed. In this case, `theta0` is calculated by the proportion
+of each individual values in `y`. Here, the hypothesis tested is whether the two samples
+`x` and `y` come from the same population or not.
+
 If `x` is a matrix with at least two rows and columns, it is taken as a two-dimensional
 contingency table. Otherwise, `x` and `y` must be vectors of the same length. The contingency
 table is calculated using `counts` function from the `StatsBase` package. Then the power
