@@ -362,6 +362,11 @@ a goodness-of-fit test is performed (`x` is treated as a one-dimensional conting
 table). In this case, the hypothesis tested is whether the population probabilities equal
 those in `theta0`, or are all equal if `theta0` is not given.
 
+If only `y` and `x` are given and both are vectors of integer type, then once again a
+goodness-of-fit test is performed. In this case, `theta0` is calculated by the proportion
+of each individual values in `y`. Here, the hypothesis tested is whether the two samples
+`x` and `y` come from the same population or not.
+
 If `x` is a matrix with at least two rows and columns, it is taken as a two-dimensional
 contingency table. Otherwise, `x` and `y` must be vectors of the same length. The contingency
 table is calculated using `counts` function from the `StatsBase` package. Then the power
@@ -385,6 +390,11 @@ end
 function ChisqTest(x::AbstractVector{T}, y::AbstractVector{T}, k::T) where T<:Integer
     d = counts(x, y, k)
     PowerDivergenceTest(d, lambda=1.0)
+end
+
+function ChisqTest(x::AbstractVector{T}, y::AbstractVector{T}) where {T<:Integer}
+    theta0 = y ./ sum(y)
+    PowerDivergenceTest(reshape(x, length(x), 1), lambda=1.0, theta0=theta0)
 end
 
 ChisqTest(x::AbstractVector{T}, theta0::Vector{U} = ones(length(x))/length(x)) where {T<:Integer,U<:AbstractFloat} =
