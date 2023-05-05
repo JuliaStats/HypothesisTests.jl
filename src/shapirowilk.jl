@@ -137,27 +137,29 @@ function pvalue(t::ShapiroWilkTest)
 end
 
 """
-    ShapiroWilkTest(
-        X::AbstractArray{<:Real};
-        SWc::SWCoeffs=SWCoeffs(length(X)),
-        N1=length(X),
-        is_sorted=issorted(view(X, 1:N1))
-    )
-
+    ShapiroWilkTest(X::AbstractArray{<:Real}, SWc::SWCoeffs=SWCoeffs(length(X)); kwargs...)
 Perform a Shapiro-Wilk test of normality on `X`.
 
-This julia implementation is based the method of Royston (1992). The calculation
-of the p-value is exact for N = 3, and for ranges 4 ≤ N ≤ 11 and N ≥ 12
-separate approximations of Royston (1992) for p-values are used.
+This julia implementation is based the method of Royston (1992).
+The calculation of the p-value is exact for `N = 3`, and for ranges
+`4 ≤ N ≤ 11` and `12 ≤ N ≤ 5000` (Royston 1992) two separate approximations
+for p-values are used.
 
 Implements: [`pvalue`](@ref)
 
-# Notes
-* If multiple Shapiro-Wilk tests are to be performed it is beneficial to pass
-  Shapiro-Wilk coefficients for re-use.
-* While the (approximated) W-statistic will be accurate for large N, p-values
-  may not be reliable.
-* The current implementation does not yet handle censored data.
+# Notes (Royston 1993)
+* While the (approximated) W-statistic will be accurate for large sample size
+  (`N > 2000`), returned p-values may not be reliable.
+* Censoring too much data (`(N - N1) / N > 0.8`, where `N1` is (upper)
+  uncensored data length), or when the sample size is small (`N < 20`) may
+  produce unreliable p-values.
+
+# Implementation notes
+* The current implementation DOES NOT implement p-values for censored data.
+* If multiple Shapiro-Wilk tests are to be performed on samples of same
+  cardinality it is beneficial to pass `SWc` for re-use.
+* For maximal performance sorted `X` should be passed and indicated with
+  `sample_sorted=true` keyword argument.
 
 # References
 Shapiro, S. S., & Wilk, M. B. (1965). An Analysis of Variance Test for Normality
@@ -195,20 +197,10 @@ function ShapiroWilkTest(
         throw("length of the sample differs from Shapiro-Wilk coefficients!")
     end
 
-    #non-fatal errors
-    if N > 5000
-        @warn("p-value may be unreliable for samples larger than 5000 points")
-    elseif (N1 < N) && (N < 20)
-        @warn("number of samples is < 20. Censoring may produce unreliable p-value.")
-    elseif (N - N1) / N > 0.8
-        @warn("(N - N1)/N > 0.8. Censoring too much data may produce unreliable p-value.")
-    end
-
-    W = if !is_sorted
-        @warn("Shapiro-Wilk requires sorted data")
-        swstat(sort!(X[1:N1]), SWc)
+    W = if !sample_sorted
+        swstat(sort!(sample[1:N1]), SWc)
     else
-        swstat(view(X, 1:N1), SWc)
+        swstat(view(sample, 1:N1), SWc)
     end
 
     return ShapiroWilkTest(SWc, W, N1)
