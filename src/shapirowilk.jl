@@ -1,4 +1,4 @@
-export ShapiroWilkTest, SWCoeffs
+export ShapiroWilkTest
 
 #=
 From:
