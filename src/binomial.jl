@@ -105,7 +105,7 @@ of the following methods. Possible values for `method` are:
 function StatsBase.confint(x::BinomialTest; level::Float64=0.95, tail=:both, method=:clopper_pearson)
     check_level(level)
 
-    if tail == :left
+    lower, upper = if tail == :left
         (0.0, StatsBase.confint(x, level=1-(1-level)*2, method=method)[2])
     elseif tail == :right
         (StatsBase.confint(x, level=1-(1-level)*2, method=method)[1], 1.0)
@@ -128,6 +128,11 @@ function StatsBase.confint(x::BinomialTest; level::Float64=0.95, tail=:both, met
     else
         throw(ArgumentError("tail=$(tail) is invalid"))
     end
+
+    # make sure we stay in [0, 1]
+    lower = max(lower, zero(lower))
+    upper = min(upper, one(upper))
+    return (lower, upper)
 end
 
 # Clopper-Pearson interval (confidence interval by inversion)
