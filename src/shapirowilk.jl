@@ -220,8 +220,7 @@ for (lib, I, F) in (("./swilk64.so", Int64, Float64),
                     ("./swilk.so"  , Int32, Float32))
     @eval begin
         function swilkfort!(X::AbstractVector{$F}, A::AbstractVector{$F}, computeA=true)
-
-            N = length(X)
+            X = issorted(X) ? X : sort(X)
             w, pval = Ref{$F}(0.0), Ref{$F}(0.0)
             ifault = Ref{$I}(0)
 
