@@ -42,10 +42,11 @@ end
 Base.size(SWc::SWCoeffs) = (SWc.N,)
 Base.IndexStyle(::Type{SWCoeffs}) = IndexLinear()
 
-function Base.getindex(SWc::SWCoeffs, i::Int)
-    if firstindex(SWc.A) ≤ i ≤ lastindex(SWc.A)
-        return @inbounds SWc.A[i]
-    elseif isodd(SWc.N) && i == lastindex(SWc.A) + 1
+Base.@propagate_inbounds function Base.getindex(SWc::SWCoeffs, i::Integer)
+    @boundscheck checkbounds(SWc, i)
+    @inbounds if checkbounds(Bool, SWc.A, i)
+        return SWc.A[i]
+    elseif isodd(length(SWc)) && i == lastindex(SWc.A) + 1
         return zero(eltype(SWc))
     else
         return -SWc.A[SWc.N+1-i]
