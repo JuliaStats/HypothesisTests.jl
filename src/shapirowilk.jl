@@ -86,7 +86,8 @@ function swstat(X::AbstractArray{<:Real}, A::SWCoeffs)
     AX = dot(view(A, 1:length(X)), X)
     m = mean(X)
     S² = sum(x -> abs2(x - m), X)
-    return AX^2 / S²
+    W = AX^2 / S²
+    return min(W, one(W)) # to guard against numeric errors
 end
 
 struct ShapiroWilkTest <: HypothesisTest
@@ -184,7 +185,7 @@ function ShapiroWilkTest(
     sample::AbstractArray{<:Real},
     SWc::SWCoeffs=SWCoeffs(length(sample));
     N1=length(sample),
-    sample_sorted=issorted(view(sample, 1:N1))
+    sample_sorted=issorted(sample)
 )
 
     N = length(sample)
@@ -194,8 +195,8 @@ function ShapiroWilkTest(
         throw(ArgumentError("censoring length N1 must be less than or equal to " *
                             "total length, got N1 = $N1 > $N = N"))
     elseif length(SWc) ≠ length(sample)
-        throw(DimensionMismatch("length of the sample differs from Shapiro-Wilk " *
-                                "coefficients, got $N and $(length(SWc))"))
+        throw(DimensionMismatch("length of sample and Shapiro-Wilk coeffs " *
+                                "differ, got $N and $(length(SWc))"))
     end
 
     W = if !sample_sorted
