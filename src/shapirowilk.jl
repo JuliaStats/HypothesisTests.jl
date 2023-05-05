@@ -89,45 +89,52 @@ function swstat(X::AbstractArray{<:Real}, A::SWCoeffs)
     return AX^2 / S²
 end
 
-function pvalue(W::Real, A::SWCoeffs, N1=A.N)
-    A.N != N1 && throw("not implemented yet!")
-    if A.N == 3 # exact by Shapiro&Wilk 1965
-        return π / 6 * (asin(sqrt(W)) - asin(sqrt(0.75)))
-    elseif A.N ≤ 11
-        γ = __RS92_G(A.N)
-        if γ ≤ log(1 - W)
-            return zero(W)
-        end
-        w = -log(γ - log(1 - W))
-        μ = __RS92_C3(A.N)
-        σ = exp(__RS92_C4(A.N))
-    else
-        w = log(1 - W)
-        μ = __RS92_C5(log(A.N))
-        σ = exp(__RS92_C6(log(A.N)))
-    end
-    return ccdf(Normal(μ, σ), w)
-end
-
 struct ShapiroWilkTest <: HypothesisTest
     SWc::SWCoeffs         # Expectation of order statistics for Shapiro-Wilk test
     W::Float64            # test statistic
-    N1::Int               #
+    N1::Int               # (upper) uncensored data length
 end
 
 testname(::ShapiroWilkTest) = "Shapiro-Wilk normality test"
 population_param_of_interest(t::ShapiroWilkTest) =
     ("Squared correlation of data and SWCoeffs (W)", 1.0, t.W)
 default_tail(::ShapiroWilkTest) = :left
+censored_ratio(t::ShapiroWilkTest) = (length(t.SWc) - t.N1) / length(t.SWc)
 
 function show_params(io::IO, t::ShapiroWilkTest, indent)
     l = 24
-    println(io, indent, rpad("number of observations:", l), t.SWc.N)
-    println(io, indent, rpad("censored ratio:", l), (t.SWc.N - t.N1) / t.SWc.N)
+    println(io, indent, rpad("number of observations:", l), length(t.SWc))
+    println(io, indent, rpad("censored ratio:", l), censored_ratio(t))
     println(io, indent, rpad("W-statistic:", l), t.W)
 end
 
-pvalue(t::ShapiroWilkTest) = pvalue(t.W, t.SWc, t.N1)
+function pvalue(t::ShapiroWilkTest)
+    n = length(t.SWc)
+    W = t.W
+
+    if iszero(censored_ratio(t))
+        if n == 3 # exact by Shapiro&Wilk 1965
+            # equivalent to 6/π * (asin(sqrt(W)) - asin(sqrt(3/4)))
+            return 1 - 6acos(sqrt(W)) / π
+        elseif n ≤ 11 # Royston 1992
+            γ = __RS92_G(n)
+            if γ ≤ log1p(-W)
+                return zero(W)
+            end
+            w = -log(γ - log1p(-W))
+            μ = __RS92_C3(n)
+            σ = exp(__RS92_C4(n))
+        elseif 12 ≤ n # Royston 1992
+            w = log1p(-W)
+            μ = __RS92_C5(log(n))
+            σ = exp(__RS92_C6(log(n)))
+        end
+        return ccdf(Normal(μ, σ), w)
+    else
+        throw("censored samples not implemented yet")
+        # to implement censored samples follow Royston 1993 Section 3.3
+    end
+end
 
 """
     ShapiroWilkTest(
