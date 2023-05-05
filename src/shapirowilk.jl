@@ -181,20 +181,21 @@ Normality. *Journal of the Royal Statistical Society Series C
 [doi:10.2307/2986146](https://doi.org/10.2307/2986146).
 """
 function ShapiroWilkTest(
-    X::AbstractArray{T};
-    SWc::SWCoeffs=SWCoeffs(length(X)),
-    N1=length(X),
-    is_sorted=issorted(view(X, 1:N1))
-) where {T<:Real}
+    sample::AbstractArray{<:Real},
+    SWc::SWCoeffs=SWCoeffs(length(sample));
+    N1=length(sample),
+    sample_sorted=issorted(view(sample, 1:N1))
+)
 
-    N = length(X)
-    #fatal errors
+    N = length(sample)
     if N < 3
-        throw("need at least 3 samples.")
+        throw(ArgumentError("at least 3 samples are required, got $N"))
     elseif N1 > N
-        throw("N1 must be less than or equal to length(X)")
-    elseif length(SWc) ≠ length(X)
-        throw("length of the sample differs from Shapiro-Wilk coefficients!")
+        throw(ArgumentError("censoring length N1 must be less than or equal to " *
+                            "total length, got N1 = $N1 > $N = N"))
+    elseif length(SWc) ≠ length(sample)
+        throw(DimensionMismatch("length of the sample differs from Shapiro-Wilk " *
+                                "coefficients, got $N and $(length(SWc))"))
     end
 
     W = if !sample_sorted
