@@ -61,7 +61,12 @@ using HypothesisTests: default_tail
     show(IOBuffer(), t)
 
     # from issue #295
+    # without clamping: (-0.05457239484968546, 0.4890548596328611)
     @test_ci_approx confint(BinomialTest(0, 5), method=:agresti_coull) (0.0, 0.4890548596328611)
+    # without clamping: (-0.15060901623063327, 0.5506090162306333)
+    @test_ci_approx confint(BinomialTest(1, 5), method=:wald) (0.0, 0.5506090162306333)
+    # without clamping: (-2.7755575615628914e-17, 0.2775327998628899)
+    @test_ci_approx confint(BinomialTest(0, 10), method=:wilson) (0.0, 0.2775327998628899)
 end
 
 @testset "SignTest" begin

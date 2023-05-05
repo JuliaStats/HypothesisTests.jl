@@ -105,7 +105,7 @@ of the following methods. Possible values for `method` are:
 function StatsBase.confint(x::BinomialTest; level::Float64=0.95, tail=:both, method=:clopper_pearson)
     check_level(level)
 
-    lower, upper = if tail == :left
+    if tail == :left
         (0.0, StatsBase.confint(x, level=1-(1-level)*2, method=method)[2])
     elseif tail == :right
         (StatsBase.confint(x, level=1-(1-level)*2, method=method)[1], 1.0)
@@ -128,11 +128,6 @@ function StatsBase.confint(x::BinomialTest; level::Float64=0.95, tail=:both, met
     else
         throw(ArgumentError("tail=$(tail) is invalid"))
     end
-
-    # make sure we stay in [0, 1]
-    lower = max(lower, zero(lower))
-    upper = min(upper, one(upper))
-    return (lower, upper)
 end
 
 # Clopper-Pearson interval (confidence interval by inversion)
@@ -145,7 +140,11 @@ end
 function ci_wald(x::BinomialTest, alpha::Float64=0.05)
     μ = x.x / x.n
     σ = sqrt(μ*(1-μ)/x.n)
-    (quantile(Normal(μ, σ), alpha/2), quantile(Normal(μ, σ), 1-alpha/2))
+    lower, upper = (quantile(Normal(μ, σ), alpha/2), quantile(Normal(μ, σ), 1-alpha/2))
+    # make sure we stay in [0, 1]
+    lower = max(lower, zero(lower))
+    upper = min(upper, one(upper))
+    return (lower, upper)
 end
 
 # Jeffreys interval
@@ -159,7 +158,11 @@ function ci_agresti_coull(x::BinomialTest, alpha::Float64=0.05)
     n = x.n + q^2
     μ = (x.x + q^2/2)/n
     σ = sqrt(μ*(1-μ)/n)
-    (μ-q*σ, μ+q*σ)
+    lower, upper = (μ-q*σ, μ+q*σ)
+    # make sure we stay in [0, 1]
+    lower = max(lower, zero(lower))
+    upper = min(upper, one(upper))
+    return (lower, upper)
 end
 
 # Wilson score interval
@@ -171,7 +174,11 @@ function ci_wilson(x::BinomialTest, alpha::Float64=0.05)
     μ /= denominator
     σ = sqrt(p*(1-p)/x.n + q^2/(4x.n^2))
     σ /= denominator
-    (μ-q*σ, μ+q*σ)
+    lower, upper = (μ-q*σ, μ+q*σ)
+    # make sure we stay in [0, 1]
+    lower = max(lower, zero(lower))
+    upper = min(upper, one(upper))
+    return (lower, upper)
 end
 
 # Arcsine transformation interval as based on Cohen's H: https://en.wikipedia.org/wiki/Binomial_proportion_confidence_interval#Arcsine_transformation
