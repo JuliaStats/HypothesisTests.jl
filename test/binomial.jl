@@ -59,6 +59,9 @@ using HypothesisTests: default_tail
     t = BinomialTest(100, 100, 0.99)
     @test pvalue(t) ≈ 0.7320646825464584
     show(IOBuffer(), t)
+
+    # from issue #295
+    @test_ci_approx confint(BinomialTest(0, 5), method=:agresti_coull) (0.0, 0.4890548596328611)
 end
 
 @testset "SignTest" begin
