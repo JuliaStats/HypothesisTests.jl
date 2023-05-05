@@ -81,9 +81,9 @@ end
 
 function swstat(X::AbstractArray{<:Real}, A::SWCoeffs)
     if last(X) - first(X) < length(X) * eps()
-        throw("data seems to be constant!")
+        throw(ArgumentError("sample seems to be constant!"))
     end
-    AX = dot(A, X)
+    AX = dot(view(A, 1:length(X)), X)
     m = mean(X)
     S² = sum(x -> abs2(x - m), X)
     return AX^2 / S²
