@@ -140,7 +140,9 @@ end
 function ci_wald(x::BinomialTest, alpha::Float64=0.05)
     μ = x.x / x.n
     σ = sqrt(μ*(1-μ)/x.n)
-    (quantile(Normal(μ, σ), alpha/2), quantile(Normal(μ, σ), 1-alpha/2))
+    lower, upper = (quantile(Normal(μ, σ), alpha/2), quantile(Normal(μ, σ), 1-alpha/2))
+    # make sure we stay in [0, 1]
+    (max(lower, 0), min(upper, 1))
 end
 
 # Jeffreys interval
@@ -154,7 +156,8 @@ function ci_agresti_coull(x::BinomialTest, alpha::Float64=0.05)
     n = x.n + q^2
     μ = (x.x + q^2/2)/n
     σ = sqrt(μ*(1-μ)/n)
-    (μ-q*σ, μ+q*σ)
+    # make sure we stay in [0, 1]
+    (max(μ-q*σ, 0), min(μ+q*σ, 1))
 end
 
 # Wilson score interval
@@ -166,7 +169,8 @@ function ci_wilson(x::BinomialTest, alpha::Float64=0.05)
     μ /= denominator
     σ = sqrt(p*(1-p)/x.n + q^2/(4x.n^2))
     σ /= denominator
-    (μ-q*σ, μ+q*σ)
+    # make sure we stay in [0, 1]
+    (max(μ-q*σ, 0), min(μ+q*σ, 1))
 end
 
 # Arcsine transformation interval as based on Cohen's H: https://en.wikipedia.org/wiki/Binomial_proportion_confidence_interval#Arcsine_transformation
