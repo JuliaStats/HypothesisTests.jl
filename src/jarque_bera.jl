@@ -32,14 +32,20 @@ struct JarqueBeraTest <: HypothesisTest
 end
 
 """
-    JarqueBeraTest(y::AbstractVector)
+    JarqueBeraTest(y::AbstractVector; adjusted::Bool=false)
 
-Compute the Jarque-Bera statistic to test the null hypothesis that a real-valued vector `y`
-is normally distributed.
+When `adjusted` is `false`, compute the Jarque-Bera statistic to test the null hypothesis
+that a real-valued vector `y` is normally distributed.
 
 Note that the approximation by the Chi-squared distribution does not work well and the
 speed of convergence is slow. In small samples, the test tends to be over-sized for
 nominal levels up to about 3% and under-sized for larger nominal levels (Mantalos, 2010).
+
+When `adjusted` is `true`, compute the Adjusted Lagrangian Multiplier statistic to test the
+null hypothesis that a real-valued vector `y` is normally distributed.
+
+Note that the use of Adjusted Lagrangian Multiplier is preferred over Jarque-Bera for small
+and medium sample sizes and it is a modification to the Jarque-Bera test (Urzua, 1996).
 
 # References
 
@@ -48,11 +54,15 @@ nominal levels up to about 3% and under-sized for larger nominal levels (Mantalo
     of Computational Economics and Econometrics, Vol. 2, No. 1,
     [link](http://dx.doi.org/10.1504/IJCEE.2011.040576).
 
+  * Carlos M. Urzúa, "On the correct use of omnibus tests for normality", Economics Letters,
+    Volume 53, Issue 3,
+    [link](https://doi.org/10.1016/S0165-1765(96)00923-8).
+
 # External links
 
   * [Jarque-Bera test on Wikipedia](https://en.wikipedia.org/wiki/Jarque–Bera_test)
 """
-function JarqueBeraTest(y::AbstractVector{T}) where T<:Real
+function JarqueBeraTest(y::AbstractVector{T}; adjusted::Bool=false) where T<:Real
     n = length(y)
     M = Base.promote_op(/, T, typeof(n))
     m1r = m2r = m3r = m4r = zero(M)
@@ -70,7 +80,16 @@ function JarqueBeraTest(y::AbstractVector{T}) where T<:Real
     skew = m3 / m2^(3/2)
     kurt = m4 / m2^2
 
-    stat = n * skew^2 / 6 + n * (kurt - 3)^2 / 24
+    if adjusted == false
+        stat = n * skew^2 / 6 + n * (kurt - 3)^2 / 24
+    else
+        meankurt = 3 * (n-1) / (n+1)
+        varskew = 6 * (n-2) / ((n+1) * (n+3))
+        varkurt = 24 * n * (n-2) * (n-3) / ((n+1)^2 * (n+3) * (n+5))
+
+        stat = skew^2 / varskew + (kurt - meankurt)^2 / varkurt
+    end
+
     JarqueBeraTest(n, stat, skew, kurt)
 end
 

@@ -65,6 +65,20 @@ using HypothesisTests: default_tail
     t = BinomialTest(100, 100, 0.99)
     @test pvalue(t) ≈ 0.7320646825464584
     show(IOBuffer(), t)
+
+    # from issue #295
+    # without clamping: (-0.05457239484968546, 0.4890548596328611)
+    @test_ci_approx confint(BinomialTest(0, 5), method=:agresti_coull) (0.0, 0.4890548596328611)
+    # without clamping: (0.5109451403671388, 1.0545723948496855)
+    @test_ci_approx confint(BinomialTest(5, 5), method=:agresti_coull) (0.5109451403671388, 1.0)
+    # without clamping: (-0.15060901623063327, 0.5506090162306333)
+    @test_ci_approx confint(BinomialTest(1, 5), method=:wald) (0.0, 0.5506090162306333)
+    # without clamping: (0.44939098376936687, 1.1506090162306333)
+    @test_ci_approx confint(BinomialTest(4, 5), method=:wald) (0.44939098376936687, 1.0)
+    # without clamping: (-2.7755575615628914e-17, 0.2775327998628899)
+    @test_ci_approx confint(BinomialTest(0, 10), method=:wilson) (0.0, 0.2775327998628899)
+    # without clamping: (0.7575059933447587, 1.0000000000000002)
+    @test_ci_approx confint(BinomialTest(12, 12), method=:wilson) (0.7575059933447587, 1.0)
 end
 
 @testset "SignTest" begin
