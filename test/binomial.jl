@@ -41,7 +41,7 @@ using HypothesisTests: default_tail
     @test_ci_approx confint(t, method=:wald) (0.35868803903340479, 0.97464529429992841)
     @test_ci_approx confint(t, tail=:left, method=:wald) (0.0,0.92513047859481645)
     @test_ci_approx confint(t, tail=:right, method=:wald) (0.40820285473851681,1.0)
-    @test_ci_approx confint(t, method=:waldcc) (0.3031324834778487, 1.0302008498554844)
+    @test_ci_approx confint(t, method=:waldcc) (0.3031324834778487, 1.0)
     @test_ci_approx confint(t, tail=:left, method=:waldcc) (0.0, 0.9806860341503718)
     @test_ci_approx confint(t, tail=:right, method=:waldcc) (0.35264729918296145, 1.0)
     @test_ci_approx confint(t, method=:wilson) (0.35420213558039609,0.87941618161308899)
