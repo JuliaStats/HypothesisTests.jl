@@ -155,7 +155,7 @@ end
 function ci_waldcc(x::BinomialTest, alpha::Float64=0.05)
     lower, upper = ci_wald(x, alpha)
     correction = 1 // (2 * x.n)
-    (max(lower - correction, 0), min(lower + correction, 1))
+    (max(lower - correction, 0), min(upper + correction, 1))
 end
 
 # Jeffreys interval
