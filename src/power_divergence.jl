@@ -68,8 +68,8 @@ one of the following methods. Possible values for `method` are:
     Mathematical Statistics, 30:56-74, 1963.
 """
 function StatsAPI.confint(x::PowerDivergenceTest; level::Float64=0.95,
-                 tail::Symbol=:both, method::Symbol=:auto, correct::Bool=true,
-                 bootstrap_iters::Int64=10000, GC::Bool=true)
+                          tail::Symbol=:both, method::Symbol=:auto, correct::Bool=true,
+                          bootstrap_iters::Int64=10000, GC::Bool=true)
     check_level(level)
 
     m  = length(x.thetahat)
