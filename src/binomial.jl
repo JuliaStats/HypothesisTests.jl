@@ -81,7 +81,8 @@ of the following methods. Possible values for `method` are:
   - `:wald`: Wald (or normal approximation) interval relies on the standard approximation of
     the actual binomial distribution by a normal distribution. Coverage can be erratically
     poor for success probabilities close to zero or one.
-  - `:waldcc`: Wald interval with continuity correction (add 0.5/n to interval).
+  - `:waldcc`: Wald interval with a continuity correction that extends the interval
+    by `1/2n` on both ends.
   - `:wilson`: Wilson score interval relies on a normal approximation. In contrast to `:wald`,
     the standard deviation is not approximated by an empirical estimate, resulting in good
     empirical coverages even for small numbers of draws and extreme success probabilities.
@@ -150,9 +151,9 @@ end
 
 # Wald interval with continuity correction
 function ci_waldcc(x::BinomialTest, alpha::Float64=0.05)
-    μ = x.x / x.n
-    σ = sqrt(μ*(1-μ)/x.n)
-    (quantile(Normal(μ, σ), alpha/2) - 0.5/x.n, quantile(Normal(μ, σ), 1-alpha/2) + 0.5/x.n)
+    lower, upper = ci_wald(x, alpha)
+    correction = 1 // (2 * x.n)
+    (max(lower - correction, 0), min(lower + correction, 1))
 end
 
 # Jeffreys interval
