@@ -63,7 +63,7 @@ function show_params(io::IO, x::VarianceFTest, ident)
     println(io, ident, "degrees of freedom:     [$(x.df_x), $(x.df_y)]")
 end
 
-function pvalue(x::VarianceFTest; tail=:both)
+function StatsAPI.pvalue(x::VarianceFTest; tail=:both)
     dist = FDist(x.df_x, x.df_y)
     if tail == :both
         return 1 - 2*abs(cdf(dist, x.F) - 0.5)

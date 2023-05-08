@@ -66,7 +66,7 @@ function show_params(io::IO, x::BinomialTest, ident="")
     println(io, ident, "number of successes:    $(x.x)")
 end
 
-pvalue(x::BinomialTest; tail=:both) = pvalue(Binomial(x.n, x.p), x.x; tail=tail)
+StatsAPI.pvalue(x::BinomialTest; tail=:both) = pvalue(Binomial(x.n, x.p), x.x; tail=tail)
 
 # Confidence interval
 """
@@ -102,13 +102,13 @@ of the following methods. Possible values for `method` are:
   * [Binomial confidence interval on Wikipedia](https://en.wikipedia.org/wiki/
     Binomial_proportion_confidence_interval)
 """
-function StatsBase.confint(x::BinomialTest; level::Float64=0.95, tail=:both, method=:clopper_pearson)
+function StatsAPI.confint(x::BinomialTest; level::Float64=0.95, tail=:both, method=:clopper_pearson)
     check_level(level)
 
     if tail == :left
-        (0.0, StatsBase.confint(x, level=1-(1-level)*2, method=method)[2])
+        (0.0, confint(x, level=1-(1-level)*2, method=method)[2])
     elseif tail == :right
-        (StatsBase.confint(x, level=1-(1-level)*2, method=method)[1], 1.0)
+        (confint(x, level=1-(1-level)*2, method=method)[1], 1.0)
     elseif tail == :both
         if method == :clopper_pearson
             ci_clopper_pearson(x, 1-level)
@@ -218,9 +218,9 @@ function show_params(io::IO, x::SignTest, ident="")
     println(io, ident, text2, x.x)
 end
 
-pvalue(x::SignTest; tail=:both) = pvalue(Binomial(x.n, 0.5), x.x; tail=tail)
+StatsAPI.pvalue(x::SignTest; tail=:both) = pvalue(Binomial(x.n, 0.5), x.x; tail=tail)
 
-function StatsBase.confint(x::SignTest; level::Float64=0.95, tail=:both)
+function StatsAPI.confint(x::SignTest; level::Float64=0.95, tail=:both)
     check_level(level)
 
     if tail == :left

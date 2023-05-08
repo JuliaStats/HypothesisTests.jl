@@ -92,7 +92,7 @@ function show_params(io::IO, x::KruskalWallisTest, ident)
     println(io, ident, "adjustment for ties:                 ", x.tie_adjustment)
 end
 
-pvalue(x::KruskalWallisTest) = pvalue(Chisq(x.df), x.H; tail=:right)
+StatsAPI.pvalue(x::KruskalWallisTest) = pvalue(Chisq(x.df), x.H; tail=:right)
 
 
 ## helper

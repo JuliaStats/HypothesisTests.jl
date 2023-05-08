@@ -1,8 +1,9 @@
 using HypothesisTests
 using Test
-using StatsBase
 using Statistics
 using DelimitedFiles
+
+using StatsAPI: dof, nobs
 
 @testset "Equality of Variances" begin
 

@@ -1,7 +1,8 @@
 using HypothesisTests
 using Test
-using StatsBase
 using DelimitedFiles
+
+using StatsAPI: dof, nobs
 
 @testset "Bartlett's test" begin
     # Columns are type, length, left, right, bottom, top, diag

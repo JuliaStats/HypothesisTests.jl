@@ -103,4 +103,4 @@ function show_params(io::IO, x::JarqueBeraTest, ident)
     println(io, ident, "JB statistic:                   ", x.JB)
 end
 
-pvalue(x::JarqueBeraTest) = pvalue(Chisq(2), x.JB; tail=:right)
+StatsAPI.pvalue(x::JarqueBeraTest) = pvalue(Chisq(2), x.JB; tail=:right)

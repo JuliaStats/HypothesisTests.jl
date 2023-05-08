@@ -132,7 +132,7 @@ function signedrankenumerate(x::ExactSignedRankTest)
     (le/tot, gr/tot)
 end
 
-function pvalue(x::ExactSignedRankTest; tail=:both)
+function StatsAPI.pvalue(x::ExactSignedRankTest; tail=:both)
     check_tail(tail)
 
     n = length(x.ranks)
@@ -163,7 +163,7 @@ function pvalue(x::ExactSignedRankTest; tail=:both)
     end
 end
 
-StatsBase.confint(x::ExactSignedRankTest; level::Real=0.95, tail=:both) = calculate_ci(x.vals, level, tail=tail)
+StatsAPI.confint(x::ExactSignedRankTest; level::Real=0.95, tail=:both) = calculate_ci(x.vals, level, tail=tail)
 
 
 ## APPROXIMATE SIGNED RANK TEST
@@ -224,7 +224,7 @@ function show_params(io::IO, x::ApproximateSignedRankTest, ident)
     println(io, ident, "normal approximation (μ, σ): ", (x.mu, x.sigma))
 end
 
-function pvalue(x::ApproximateSignedRankTest; tail=:both)
+function StatsAPI.pvalue(x::ApproximateSignedRankTest; tail=:both)
     check_tail(tail)
 
     if x.mu == x.sigma == 0
@@ -238,7 +238,7 @@ function pvalue(x::ApproximateSignedRankTest; tail=:both)
     end
 end
 
-StatsBase.confint(x::ApproximateSignedRankTest; level::Real=0.95, tail=:both) = calculate_ci(x.vals, level, tail=tail)
+StatsAPI.confint(x::ApproximateSignedRankTest; level::Real=0.95, tail=:both) = calculate_ci(x.vals, level, tail=tail)
 
 # implementation method inspired by these notes: http://www.stat.umn.edu/geyer/old03/5102/notes/rank.pdf
 function calculate_ci(x::AbstractVector, level::Real=0.95; tail=:both)

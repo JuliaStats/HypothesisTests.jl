@@ -60,7 +60,7 @@ function show_params(io::IO, x::RayleighTest, ident="")
     println(io, ident, "test statistic:         $(x.Rbar^2 * x.n)")
 end
 
-function pvalue(x::RayleighTest)
+function StatsAPI.pvalue(x::RayleighTest)
     Z = x.Rbar^2 * x.n
     x.n > 1e6 ? exp(-Z) :
         exp(-Z)*(1+(2*Z-Z^2)/(4*x.n)-(24*Z - 132*Z^2 + 76*Z^3 - 9*Z^4)/(288*x.n^2))
@@ -135,7 +135,7 @@ function tlinear_Z(x::FisherTLinearAssociation)
 end
 
 # p-values
-function pvalue(x::FisherTLinearAssociation; tail=:both)
+function StatsAPI.pvalue(x::FisherTLinearAssociation; tail=:both)
     n = length(x.theta)
     if n == 0
         return NaN
@@ -218,7 +218,7 @@ function show_params(io::IO, x::JammalamadakaCircularCorrelation, ident="")
     println(io, ident, "test statistic: $(x.Z)")
 end
 
-pvalue(x::JammalamadakaCircularCorrelation; tail=:both) = pvalue(Normal(), x.Z; tail=tail)
+StatsAPI.pvalue(x::JammalamadakaCircularCorrelation; tail=:both) = pvalue(Normal(), x.Z; tail=tail)
 
 ## GENERAL
 

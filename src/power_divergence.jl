@@ -41,7 +41,7 @@ end
 population_param_of_interest(x::PowerDivergenceTest) = ("Multinomial Probabilities", x.theta0, x.thetahat)
 default_tail(test::PowerDivergenceTest) = :right
 
-pvalue(x::PowerDivergenceTest; tail=:right) = pvalue(Chisq(x.df),x.stat; tail=tail)
+StatsAPI.pvalue(x::PowerDivergenceTest; tail=:right) = pvalue(Chisq(x.df),x.stat; tail=tail)
 
 """
     confint(test::PowerDivergenceTest; level = 0.95, tail = :both, method = :auto)
@@ -67,18 +67,18 @@ one of the following methods. Possible values for `method` are:
   * Gold, R. Z. Tests Auxiliary to ``χ^2`` Tests in a Markov Chain. Annals of
     Mathematical Statistics, 30:56-74, 1963.
 """
-function StatsBase.confint(x::PowerDivergenceTest; level::Float64=0.95,
-                           tail::Symbol=:both, method::Symbol=:auto, correct::Bool=true,
-                           bootstrap_iters::Int64=10000, GC::Bool=true)
+function StatsAPI.confint(x::PowerDivergenceTest; level::Float64=0.95,
+                 tail::Symbol=:both, method::Symbol=:auto, correct::Bool=true,
+                 bootstrap_iters::Int64=10000, GC::Bool=true)
     check_level(level)
 
     m  = length(x.thetahat)
 
     if tail == :left
-        i = StatsBase.confint(x, level=1-(1-level)*2, method=method, GC=GC)
+        i = confint(x, level=1-(1-level)*2, method=method, GC=GC)
         Tuple{Float64,Float64}[(0.0, i[j][2]) for j in 1:m]
     elseif tail == :right
-        i = StatsBase.confint(x, level=1-(1-level)*2, method=method, GC=GC)
+        i = confint(x, level=1-(1-level)*2, method=method, GC=GC)
         Tuple{Float64,Float64}[(i[j][1], 1.0) for j in 1:m]
     elseif tail == :both
         if method == :auto

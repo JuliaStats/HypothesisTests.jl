@@ -177,7 +177,7 @@ function pan_algorithm(a::AbstractArray, x::Float64, m::Int, n::Int)
 
 end
 
-function pvalue(x::DurbinWatsonTest; tail=:both)
+function StatsAPI.pvalue(x::DurbinWatsonTest; tail=:both)
 
     exact_problem_flag = 0
     if (x.p_compute == :ndep && x.n <= 100) || x.p_compute == :exact

@@ -67,10 +67,10 @@ function population_param_of_interest(p::CorrelationTest)
     (param, zero(p.r), p.r)
 end
 
-StatsBase.nobs(p::CorrelationTest) = p.n
-StatsBase.dof(p::CorrelationTest) = p.n - 2 - p.k
+StatsAPI.nobs(p::CorrelationTest) = p.n
+StatsAPI.dof(p::CorrelationTest) = p.n - 2 - p.k
 
-function StatsBase.confint(test::CorrelationTest{T}, level::Float64=0.95) where T
+function StatsAPI.confint(test::CorrelationTest{T}, level::Float64=0.95) where T
     dof(test) > 1 || return (-one(T), one(T))  # Otherwise we can get NaNs
     q = quantile(Normal(), 1 - (1-level) / 2)
     fisher = atanh(test.r)
@@ -81,7 +81,7 @@ function StatsBase.confint(test::CorrelationTest{T}, level::Float64=0.95) where 
 end
 
 default_tail(::CorrelationTest) = :both
-pvalue(test::CorrelationTest; tail=:both) = pvalue(TDist(dof(test)), test.t, tail=tail)
+StatsAPI.pvalue(test::CorrelationTest; tail=:both) = pvalue(TDist(dof(test)), test.t, tail=tail)
 
 function show_params(io::IO, test::CorrelationTest, indent="")
     println(io, indent, "number of observations:          ", nobs(test))

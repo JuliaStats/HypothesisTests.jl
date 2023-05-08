@@ -1,7 +1,8 @@
 using HypothesisTests
 using Test
 using DelimitedFiles
-using StatsBase
+
+using StatsAPI: dof, nobs
 
 @testset "Correlation" begin
     # Columns are line number, calcium, iron

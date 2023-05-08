@@ -77,7 +77,7 @@ function show_params(io::IO, x::ExactOneSampleKSTest, ident="")
     println(io, ident, "number of observations:   $(x.n)")
 end
 
-function pvalue(x::ExactKSTest; tail=:both)
+function StatsAPI.pvalue(x::ExactKSTest; tail=:both)
     if tail == :left
         pvalue(KSOneSided(x.n), x.δn; tail=:right)
     elseif tail == :right
@@ -123,7 +123,7 @@ function show_params(io::IO, x::ApproximateOneSampleKSTest, ident="")
 end
 
 # one-sided: http://www.encyclopediaofmath.org/index.php/Kolmogorov-Smirnov_test
-function pvalue(x::ApproximateOneSampleKSTest; tail=:both)
+function StatsAPI.pvalue(x::ApproximateOneSampleKSTest; tail=:both)
     if tail == :left
         exp(-2*x.n*x.δn^2)
     elseif tail == :right
@@ -175,7 +175,7 @@ function show_params(io::IO, x::ApproximateTwoSampleKSTest, ident="")
     println(io, ident, "KS-statistic:              $(sqrt(n)*x.δ)")
 end
 
-function pvalue(x::ApproximateTwoSampleKSTest; tail=:both)
+function StatsAPI.pvalue(x::ApproximateTwoSampleKSTest; tail=:both)
     n = x.n_x*x.n_y/(x.n_x+x.n_y)
     if tail == :left
         exp(-2*n*x.δn^2)

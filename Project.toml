@@ -1,22 +1,25 @@
 name = "HypothesisTests"
 uuid = "09f84164-cd44-5f33-b23f-e6b0d136a0d5"
-version = "0.10.13"
+version = "0.11.0"
 
 [deps]
 Combinatorics = "861a8166-3701-5b0c-9a16-15d98fcdc6aa"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 Rmath = "79098fc4-a85e-5d69-aa6a-4863f24498fa"
 Roots = "f2b01f46-fcfa-551c-844a-d8ac1e96c665"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
+StatsAPI = "82ae8749-77ed-4fe6-ae5f-f523153014b0"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 
 [compat]
 Combinatorics = "1"
-Distributions = "0.19, 0.20, 0.21, 0.22, 0.23, 0.24, 0.25"
+Distributions = "0.25.90"
 Rmath = "0.5, 0.6, 0.7"
 Roots = "0.7, 0.8, 1.0, 2"
+StatsAPI = "1.6"
 StatsBase = "0.27, 0.28, 0.29, 0.30, 0.31, 0.32, 0.33, 0.34"
 julia = "1.3"
 

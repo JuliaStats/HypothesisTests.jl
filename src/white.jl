@@ -116,5 +116,5 @@ function show_params(io::IO, t::WhiteTest, ident = "")
     println(io, ident, "type:                   ", t.type)
 end
 
-StatsBase.dof(t::WhiteTest) = t.dof
-pvalue(t::WhiteTest) = pvalue(Chisq(t.dof), t.lm, tail=:right)
+StatsAPI.dof(t::WhiteTest) = t.dof
+StatsAPI.pvalue(t::WhiteTest) = pvalue(Chisq(t.dof), t.lm, tail=:right)

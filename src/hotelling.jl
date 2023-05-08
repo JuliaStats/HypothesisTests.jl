@@ -5,7 +5,7 @@ export OneSampleHotellingT2Test, EqualCovHotellingT2Test, UnequalCovHotellingT2T
 abstract type HotellingT2TestTest <: HypothesisTest end
 
 default_tail(::HotellingT2TestTest) = :right
-pvalue(T::HotellingT2TestTest; tail=:right) = pvalue(FDist(dof(T)...), T.F, tail=tail)
+StatsAPI.pvalue(T::HotellingT2TestTest; tail=:right) = pvalue(FDist(dof(T)...), T.F, tail=tail)
 
 function show_params(io::IO, T::HotellingT2TestTest, indent="")
     println(io, indent, "number of observations: ", nobs(T))
@@ -42,8 +42,8 @@ struct OneSampleHotellingT2Test <: HotellingT2TestTest
     S::Matrix
 end
 
-StatsBase.nobs(T::OneSampleHotellingT2Test) = T.n
-StatsBase.dof(T::OneSampleHotellingT2Test) = (T.p, T.n - T.p)
+StatsAPI.nobs(T::OneSampleHotellingT2Test) = T.n
+StatsAPI.dof(T::OneSampleHotellingT2Test) = (T.p, T.n - T.p)
 
 """
     OneSampleHotellingT2Test(X::AbstractMatrix, μ₀=<zero vector>)
@@ -112,8 +112,8 @@ function EqualCovHotellingT2Test(X::AbstractMatrix, Y::AbstractMatrix)
     return EqualCovHotellingT2Test(T², F, nx, ny, p, Δ, S)
 end
 
-StatsBase.nobs(T::EqualCovHotellingT2Test) = (T.nx, T.ny)
-StatsBase.dof(T::EqualCovHotellingT2Test) = (T.p, T.nx + T.ny - T.p - 1)
+StatsAPI.nobs(T::EqualCovHotellingT2Test) = (T.nx, T.ny)
+StatsAPI.dof(T::EqualCovHotellingT2Test) = (T.p, T.nx + T.ny - T.p - 1)
 
 testname(::EqualCovHotellingT2Test) =
     "Two sample Hotelling's T² test (equal covariance matrices)"
@@ -156,8 +156,8 @@ function UnequalCovHotellingT2Test(X::AbstractMatrix, Y::AbstractMatrix)
     return UnequalCovHotellingT2Test(T², F, nx, ny, p, ν, Δ, ST)
 end
 
-StatsBase.nobs(T::UnequalCovHotellingT2Test) = (T.nx, T.ny)
-StatsBase.dof(T::UnequalCovHotellingT2Test) = (T.p, T.ν)
+StatsAPI.nobs(T::UnequalCovHotellingT2Test) = (T.nx, T.ny)
+StatsAPI.dof(T::UnequalCovHotellingT2Test) = (T.p, T.ν)
 
 testname(::UnequalCovHotellingT2Test) =
     "Two sample Hotelling's T² test (unequal covariance matrices)"

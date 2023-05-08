@@ -120,7 +120,7 @@ For `tail = :both`, possible values for `method` are:
     Blaker’s exact tests". Biostatistics, Volume 11, Issue 2, 1 April 2010, Pages 373–374,
     [link](https://doi.org/10.1093/biostatistics/kxp050)
 """
-function pvalue(x::FisherExactTest; tail=:both, method=:central)
+function StatsAPI.pvalue(x::FisherExactTest; tail=:both, method=:central)
     if tail == :both && method != :central
         if method == :minlike
             p = pvalue_both_minlike(x)
@@ -179,7 +179,7 @@ Fisher's non-central hypergeometric distribution. For `tail = :both`, the only
     Blaker’s exact tests". Biostatistics, Volume 11, Issue 2, 1 April 2010, Pages 373–374,
     [link](https://doi.org/10.1093/biostatistics/kxp050)
 """
-function StatsBase.confint(x::FisherExactTest; level::Float64=0.95, tail=:both, method=:central)
+function StatsAPI.confint(x::FisherExactTest; level::Float64=0.95, tail=:both, method=:central)
     check_level(level)
     if x.a == x.c == 0 || x.b == x.d == 0
         return (0.0, Inf)
@@ -203,8 +203,8 @@ function StatsBase.confint(x::FisherExactTest; level::Float64=0.95, tail=:both, 
         end
     elseif tail == :both
         if method == :central
-            (StatsBase.confint(x, level=1-(1-level)/2, tail=:right)[1],
-             StatsBase.confint(x, level=1-(1-level)/2, tail=:left)[2])
+            (confint(x, level=1-(1-level)/2, tail=:right)[1],
+             confint(x, level=1-(1-level)/2, tail=:left)[2])
         else
             throw(ArgumentError("method=$(method) is not implemented yet"))
         end
