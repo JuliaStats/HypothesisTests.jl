@@ -36,7 +36,7 @@ using StatsBase: autocor, autocov, counts, mean_and_std, partialcor
 
 using Printf: @printf
 
-export testname, pvalue, confint
+export testname, pvalue, confint, dof, nobs
 
 check_same_length(x::AbstractVector, y::AbstractVector) = if length(x) != length(y)
     throw(DimensionMismatch("Vectors must be the same length"))

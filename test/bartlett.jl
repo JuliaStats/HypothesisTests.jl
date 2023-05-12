@@ -2,8 +2,6 @@ using HypothesisTests
 using Test
 using DelimitedFiles
 
-using StatsAPI: dof, nobs
-
 @testset "Bartlett's test" begin
     # Columns are type, length, left, right, bottom, top, diag
     swiss = readdlm(joinpath(@__DIR__, "data", "swiss3.txt"))

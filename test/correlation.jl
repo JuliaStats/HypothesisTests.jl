@@ -2,8 +2,6 @@ using HypothesisTests
 using Test
 using DelimitedFiles
 
-using StatsAPI: dof, nobs
-
 @testset "Correlation" begin
     # Columns are line number, calcium, iron
     nutrient = readdlm(joinpath(@__DIR__, "data", "nutrient.txt"))[:, 1:3]

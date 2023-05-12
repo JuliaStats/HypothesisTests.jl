@@ -3,8 +3,6 @@ using Test
 using Statistics
 using DelimitedFiles
 
-using StatsAPI: dof, nobs
-
 @testset "Equality of Variances" begin
 
     # https://en.wikipedia.org/wiki/One-way_analysis_of_variance#Example
