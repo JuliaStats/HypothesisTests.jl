@@ -25,16 +25,13 @@
 module HypothesisTests
 
 using Statistics, Random, LinearAlgebra
-using Distributions, Roots
+using Distributions, Roots, StatsBase
 using Combinatorics: combinations, permutations
 using Rmath: pwilcox, psignrank
+using Printf: @printf
 
 import StatsAPI
-using StatsAPI: HypothesisTest, confint, dof, nobs, pvalue
-import StatsBase
-using StatsBase: autocor, autocov, counts, mean_and_std, partialcor
-
-using Printf: @printf
+using StatsAPI: HypothesisTest, confint, pvalue
 
 export testname, pvalue, confint, dof, nobs
 
