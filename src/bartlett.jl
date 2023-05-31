@@ -45,12 +45,12 @@ function BartlettTest(X::AbstractMatrix, Y::AbstractMatrix)
     return BartlettTest(L′, p, nx, ny)
 end
 
-StatsBase.nobs(B::BartlettTest) = (B.nx, B.ny)
-StatsBase.dof(B::BartlettTest) = div(B.p * (B.p + 1), 2)
+StatsAPI.nobs(B::BartlettTest) = (B.nx, B.ny)
+StatsAPI.dof(B::BartlettTest) = div(B.p * (B.p + 1), 2)
 
 testname(::BartlettTest) = "Bartlett's Test for Equality of Covariance Matrices"
 default_tail(::BartlettTest) = :right
-pvalue(B::BartlettTest; tail=:right) = pvalue(Chisq(dof(B)), B.L′, tail=tail)
+StatsAPI.pvalue(B::BartlettTest; tail=:right) = pvalue(Chisq(dof(B)), B.L′, tail=tail)
 
 function show_params(io::IO, B::BartlettTest, indent="")
     println(io, indent, "number of observations: ", nobs(B))

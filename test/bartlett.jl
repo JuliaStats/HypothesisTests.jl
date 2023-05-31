@@ -1,6 +1,5 @@
 using HypothesisTests
 using Test
-using StatsBase
 using DelimitedFiles
 
 @testset "Bartlett's test" begin

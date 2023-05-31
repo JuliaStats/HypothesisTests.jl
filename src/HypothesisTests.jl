@@ -28,71 +28,15 @@ using Statistics, Random, LinearAlgebra
 using Distributions, Roots, StatsBase
 using Combinatorics: combinations, permutations
 using Rmath: pwilcox, psignrank
+using Printf: @printf
 
-import StatsBase.confint
+import StatsAPI
+using StatsAPI: HypothesisTest, confint, pvalue
 
-export testname, pvalue, confint
-abstract type HypothesisTest end
+export testname, pvalue, confint, dof, nobs
 
 check_same_length(x::AbstractVector, y::AbstractVector) = if length(x) != length(y)
     throw(DimensionMismatch("Vectors must be the same length"))
-end
-
-"""
-    confint(test::HypothesisTest; level = 0.95, tail = :both)
-
-Compute a confidence interval C with coverage `level`.
-
-If `tail` is `:both` (default), then a two-sided confidence interval is returned. If `tail`
-is `:left` or `:right`, then a one-sided confidence interval is returned.
-
-!!! note
-    Most of the implemented confidence intervals are *strongly consistent*, that is, the
-    confidence interval with coverage `level` does not contain the test statistic under
-    ``h_0`` if and only if the corresponding test rejects the null hypothesis
-    ``h_0: θ = θ_0``:
-    ```math
-        C (x, level) = \\{θ : p_θ (x) > 1 - level\\},
-    ```
-    where ``p_θ`` is the [`pvalue`](@ref) of the corresponding test.
-"""
-function confint end
-
-"""
-    pvalue(test::HypothesisTest; tail = :both)
-
-Compute the p-value for a given significance test.
-
-If `tail` is `:both` (default), then the p-value for the two-sided test is returned. If
-`tail` is `:left` or `:right`, then a one-sided test is performed.
-"""
-function pvalue end
-
-# Basic function for finding a p-value given a distribution and tail
-function pvalue(dist::ContinuousUnivariateDistribution, x::Number; tail=:both)
-    check_tail(tail)
-
-    if tail == :both
-        p = 2 * min(cdf(dist, x), ccdf(dist, x))
-        min(p, oneunit(p)) # if P(X = x) > 0, then possibly p > 1
-    elseif tail == :left
-        cdf(dist, x)
-    else # tail == :right
-        ccdf(dist, x)
-    end
-end
-
-function pvalue(dist::DiscreteUnivariateDistribution, x::Number; tail=:both)
-    check_tail(tail)
-
-    if tail == :both
-        p = 2 * min(ccdf(dist, x-1), cdf(dist, x))
-        min(p, oneunit(p)) # if P(X = x) > 0, then possibly p > 1
-    elseif tail == :left
-        cdf(dist, x)
-    else # tail == :right
-        ccdf(dist, x-1)
-    end
 end
 
 function check_level(level::Float64)
@@ -114,7 +58,7 @@ function Base.show(_io::IO, test::T) where T<:HypothesisTest
     println(io, repeat("-", length(testname(test))))
 
     # population details
-    has_ci = applicable(StatsBase.confint, test)
+    has_ci = applicable(confint, test)
     (param_name, param_under_h0, param_estimate) = population_param_of_interest(test)
     println(io, "Population details:")
     println(io, "    parameter of interest:   $param_name")
@@ -126,7 +70,7 @@ function Base.show(_io::IO, test::T) where T<:HypothesisTest
     println(io)
 
     if has_ci
-        ci = map(x -> round.(x; sigdigits=4, base=10), StatsBase.confint(test))
+        ci = map(x -> round.(x; sigdigits=4, base=10), confint(test))
         print(io, "    95% confidence interval: ")
         show(io, ci)
         println(io)
@@ -176,7 +120,6 @@ function show_params(io::IO, test::T, ident="") where T<:HypothesisTest
     end
 end
 
-include("deprecated.jl")
 include("common.jl")
 
 include("binomial.jl")

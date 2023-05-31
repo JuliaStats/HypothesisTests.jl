@@ -133,7 +133,7 @@ function mwuenumerate(x::ExactMannWhitneyUTest)
     (le/tot, gr/tot)
 end
 
-function pvalue(x::ExactMannWhitneyUTest; tail=:both)
+function StatsAPI.pvalue(x::ExactMannWhitneyUTest; tail=:both)
     check_tail(tail)
 
     if x.tie_adjustment == 0
@@ -221,7 +221,7 @@ function show_params(io::IO, x::ApproximateMannWhitneyUTest, ident)
     println(io, ident, "normal approximation (μ, σ):          ", (x.mu, x.sigma))
 end
 
-function pvalue(x::ApproximateMannWhitneyUTest; tail=:both)
+function StatsAPI.pvalue(x::ApproximateMannWhitneyUTest; tail=:both)
     check_tail(tail)
 
     if x.mu == x.sigma == 0

@@ -28,18 +28,18 @@ export OneSampleTTest, TwoSampleTTest, EqualVarianceTTest,
 abstract type TTest <: HypothesisTest end
 abstract type TwoSampleTTest <: TTest end
 
-pvalue(x::TTest; tail=:both) = pvalue(TDist(x.df), x.t; tail=tail)
+StatsAPI.pvalue(x::TTest; tail=:both) = pvalue(TDist(x.df), x.t; tail=tail)
 
 default_tail(test::TTest) = :both
 
 # confidence interval by inversion
-function StatsBase.confint(x::TTest; level::Float64=0.95, tail=:both)
+function StatsAPI.confint(x::TTest; level::Float64=0.95, tail=:both)
     check_level(level)
 
     if tail == :left
-        (-Inf, StatsBase.confint(x, level=1-(1-level)*2)[2])
+        (-Inf, confint(x, level=1-(1-level)*2)[2])
     elseif tail == :right
-        (StatsBase.confint(x, level=1-(1-level)*2)[1], Inf)
+        (confint(x, level=1-(1-level)*2)[1], Inf)
     elseif tail == :both
         q = quantile(TDist(x.df), 1-(1-level)/2)
         (x.xbar-q*x.stderr, x.xbar+q*x.stderr)

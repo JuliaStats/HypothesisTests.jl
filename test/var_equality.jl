@@ -1,6 +1,5 @@
 using HypothesisTests
 using Test
-using StatsBase
 using Statistics
 using DelimitedFiles
 

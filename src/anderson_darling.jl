@@ -52,7 +52,7 @@ function show_params(io::IO, x::OneSampleADTest, ident = "")
 end
 
 ### G. and J. Marsaglia, "Evaluating the Anderson-Darling Distribution", Journal of Statistical Software, 2004
-function pvalue(t::OneSampleADTest)
+function StatsAPI.pvalue(t::OneSampleADTest)
     g1(x) = sqrt(x)*(1.0-x)*(49.0x-102.0)
     g2(x) = -0.00022633 + (6.54034 - (14.6538 - (14.458 - (8.259 - 1.91864x)x)x)x)x
     g3(x) = -130.2137 + (745.2337 - (1705.091 - (1950.646 - (1116.360 - 255.7844x)x)x)x)x
@@ -238,7 +238,7 @@ function pvalueasym(x::KSampleADTest)
     return exp(lp0)/(1 + exp(lp0))
 end
 
-pvalue(x::KSampleADTest) = x.nsim == 0 ? pvalueasym(x) : pvaluesim(x)
+StatsAPI.pvalue(x::KSampleADTest) = x.nsim == 0 ? pvalueasym(x) : pvaluesim(x)
 
 function adkvals(Z⁺, N, samples)
     k = length(samples)

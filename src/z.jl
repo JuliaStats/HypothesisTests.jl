@@ -28,18 +28,18 @@ export OneSampleZTest, TwoSampleZTest, EqualVarianceZTest,
 abstract type ZTest <: HypothesisTest end
 abstract type TwoSampleZTest <: ZTest end
 
-pvalue(x::ZTest; tail=:both) = pvalue(Normal(0.0, 1.0), x.z; tail=tail)
+StatsAPI.pvalue(x::ZTest; tail=:both) = pvalue(Normal(0.0, 1.0), x.z; tail=tail)
 
 default_tail(test::ZTest) = :both
 
 # confidence interval by inversion
-function StatsBase.confint(x::ZTest; level::Float64=0.95, tail=:both)
+function StatsAPI.confint(x::ZTest; level::Float64=0.95, tail=:both)
     check_level(level)
 
     if tail == :left
-        (-Inf, StatsBase.confint(x, level=1-(1-level)*2)[2])
+        (-Inf, confint(x, level=1-(1-level)*2)[2])
     elseif tail == :right
-        (StatsBase.confint(x, level=1-(1-level)*2)[1], Inf)
+        (confint(x, level=1-(1-level)*2)[1], Inf)
     elseif tail == :both
         q = cquantile(Normal(0.0, 1.0), (1-level)/2)
         (x.xbar-q*x.stderr, x.xbar+q*x.stderr)

@@ -44,7 +44,7 @@ ApproximatePermutationTest(x::AbstractVector{R}, y::AbstractVector{S},
                            f::Function, n::Int) where {R<:Real,S<:Real} =
     ApproximatePermutationTest(Random.default_rng(), x, y, f, n)
 
-function pvalue(apt::PermutationTest; tail=:both)
+function StatsAPI.pvalue(apt::PermutationTest; tail=:both)
     if tail == :both
         count = sum(abs(apt.observation) <= abs(x) for x in apt.samples)
     elseif tail == :left

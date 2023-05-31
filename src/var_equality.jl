@@ -18,16 +18,16 @@ testname(t::VarianceEqualityTest) = t.description[1]
 teststatisticname(t::VarianceEqualityTest{TD}) where {TD <: ContinuousDistribution} =
     length(t.description[3]) != 0 ? t.description[3] : (TD <: FDist ? "F" : "χ²")
 
-StatsBase.nobs(t::VarianceEqualityTest) = t.Nᵢ
-StatsBase.dof(t::VarianceEqualityTest{Chisq}) = t.DFt
-StatsBase.dof(t::VarianceEqualityTest{FDist}) = (t.DFt, t.DFe)
+StatsAPI.nobs(t::VarianceEqualityTest) = t.Nᵢ
+StatsAPI.dof(t::VarianceEqualityTest{Chisq}) = t.DFt
+StatsAPI.dof(t::VarianceEqualityTest{FDist}) = (t.DFt, t.DFe)
 
 teststatistic(t::VarianceEqualityTest{FDist}) = (t.DFe/t.DFt)*sum(t.SStᵢ)/sum(t.SSeᵢ)
 function teststatistic(t::VarianceEqualityTest{Chisq})
     y = sum(t.SStᵢ)/sum(t.SSeᵢ)
     y*(t.DFe+t.DFt)/(1 + y) # sum(t.SStᵢ)/t.s²
 end
-pvalue(t::VarianceEqualityTest{TD}; tail=:right) where {TD <: ContinuousDistribution} =
+StatsAPI.pvalue(t::VarianceEqualityTest{TD}; tail=:right) where {TD <: ContinuousDistribution} =
     pvalue(TD(dof(t)...), teststatistic(t), tail=tail)
 
 function show_params(io::IO, t::VarianceEqualityTest{TD},
@@ -49,11 +49,11 @@ function Base.show(io::IOContext, t::VarianceEqualityTest)
         MSe = SSe/t.DFe
         println(io, "Source            SS    DF        MS         F  P-value")
         println(io, repeat("-", 55))
-        StatsBase.@printf(io, "Treatments  %8.3f  %4d  %8.3f  %8.3f  %7.5f\n",
-                              SSt, t.DFt, MSt, MSt/MSe, pvalue(t))
-        StatsBase.@printf(io, "Error       %8.3f  %4d  %8.3f\n", SSe, t.DFe, MSe)
+        @printf(io, "Treatments  %8.3f  %4d  %8.3f  %8.3f  %7.5f\n",
+                SSt, t.DFt, MSt, MSt/MSe, pvalue(t))
+        @printf(io, "Error       %8.3f  %4d  %8.3f\n", SSe, t.DFe, MSe)
         println(io, repeat("-", 55))
-        StatsBase.@printf(io, "Total       %8.3f  %4d\n", SSt+SSe, t.DFt+t.DFe)
+        @printf(io, "Total       %8.3f  %4d\n", SSt+SSe, t.DFt+t.DFe)
     end
 end
 

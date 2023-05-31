@@ -217,4 +217,4 @@ function show_params(io::IO, x::ADFTest, ident)
     println(io)
 end
 
-pvalue(x::ADFTest) = HypothesisTests.pvalue(Normal(0, 1), adf_pv_aux(x.stat, x.deterministic); tail=:left)
+StatsAPI.pvalue(x::ADFTest) = pvalue(Normal(0, 1), adf_pv_aux(x.stat, x.deterministic); tail=:left)

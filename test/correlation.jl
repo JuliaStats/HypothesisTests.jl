@@ -1,7 +1,6 @@
 using HypothesisTests
 using Test
 using DelimitedFiles
-using StatsBase
 
 @testset "Correlation" begin
     # Columns are line number, calcium, iron
