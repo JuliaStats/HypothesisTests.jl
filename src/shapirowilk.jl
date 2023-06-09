@@ -87,7 +87,7 @@ end
 
 testname(::ShapiroWilkTest) = "Shapiro-Wilk normality test"
 population_param_of_interest(t::ShapiroWilkTest) =
-    ("Squared correlation of data and SWCoeffs (W)", 1.0, t.W)
+    ("Squared correlation of sorted data and the uncorrelated expected order statistics of the normal distribution (W)", 1.0, t.W)
 default_tail(::ShapiroWilkTest) = :left
 censored_ratio(t::ShapiroWilkTest) = (length(t.SWc) - t.N1) / length(t.SWc)
 
