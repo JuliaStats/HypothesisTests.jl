@@ -22,15 +22,15 @@ for (s, c) in [(:C1, [0.0, 0.221157, -0.147981, -2.07119, 4.434685, -2.706056]),
     @eval $(Symbol(:__RS92_, s))(x) = Base.Math.@horner(x, $(c...))
 end
 
-struct SWCoeffs <: AbstractVector{Float64}
+struct ShapiroWilkCoefs <: AbstractVector{Float64}
     N::Int
     A::Vector{Float64}
 end
 
-Base.size(SWc::SWCoeffs) = (SWc.N,)
-Base.IndexStyle(::Type{SWCoeffs}) = IndexLinear()
+Base.size(SWc::ShapiroWilkCoefs) = (SWc.N,)
+Base.IndexStyle(::Type{ShapiroWilkCoefs}) = IndexLinear()
 
-Base.@propagate_inbounds function Base.getindex(SWc::SWCoeffs, i::Integer)
+Base.@propagate_inbounds function Base.getindex(SWc::ShapiroWilkCoefs, i::Integer)
     @boundscheck checkbounds(SWc, i)
     @inbounds if checkbounds(Bool, SWc.A, i)
         return SWc.A[i]
@@ -41,11 +41,11 @@ Base.@propagate_inbounds function Base.getindex(SWc::SWCoeffs, i::Integer)
     end
 end
 
-function SWCoeffs(N::Int)
+function ShapiroWilkCoefs(N::Integer)
     if N < 3
         throw(ArgumentError("N must be greater than or equal to 3, got $N"))
     elseif N == 3 # exact
-        return SWCoeffs(N, [sqrt(2.0) / 2.0])
+        return ShapiroWilkCoefs(N, [sqrt(2.0) / 2.0])
     else
         # Weisberg&Bingham 1975 statistic; store only positive half of m:
         # it is (anti-)symmetric; hence '2' factor below
@@ -63,12 +63,11 @@ function SWCoeffs(N::Int)
             m .= m ./ sqrt(ϕ) # A, but reusing m to save allocs
             m[1], m[2] = a₁, a₂
         end
-
-        return SWCoeffs(N, m)
+        return ShapiroWilkCoefs(N, m)
     end
 end
 
-function swstat(X::AbstractVector{<:Real}, A::SWCoeffs)
+function swstat(X::AbstractVector{<:Real}, A::ShapiroWilkCoefs)
     if last(X) - first(X) < length(X) * eps()
         throw(ArgumentError("sample is constant (up to numerical accuracy)"))
     end
@@ -80,26 +79,26 @@ function swstat(X::AbstractVector{<:Real}, A::SWCoeffs)
 end
 
 struct ShapiroWilkTest <: HypothesisTest
-    SWc::SWCoeffs         # Expectation of order statistics for Shapiro-Wilk test
-    W::Float64            # test statistic
-    lower_uncensored::Int # only the smallest N₁ samples were used
+    coefs::ShapiroWilkCoefs # Expectation of order statistics for Shapiro-Wilk test
+    W::Float64              # test statistic
+    lower_uncensored::Int   # only the smallest N₁ samples were used
 end
 
 testname(::ShapiroWilkTest) = "Shapiro-Wilk normality test"
 population_param_of_interest(t::ShapiroWilkTest) =
     ("Squared correlation of sorted data and the uncorrelated expected order statistics of the normal distribution (W)", 1.0, t.W)
 default_tail(::ShapiroWilkTest) = :left
-censored_ratio(t::ShapiroWilkTest) = (length(t.SWc) - t.lower_uncensored) / length(t.SWc)
+censored_ratio(t::ShapiroWilkTest) = (length(t.coefs) - t.lower_uncensored) / length(t.coefs)
 
 function show_params(io::IO, t::ShapiroWilkTest, indent)
     l = 24
-    println(io, indent, rpad("number of observations:", l), length(t.SWc))
+    println(io, indent, rpad("number of observations:", l), length(t.coefs))
     println(io, indent, rpad("censored ratio:", l), censored_ratio(t))
     println(io, indent, rpad("W-statistic:", l), t.W)
 end
 
 function pvalue(t::ShapiroWilkTest)
-    n = length(t.SWc)
+    n = length(t.coefs)
     W = t.W
 
     if iszero(censored_ratio(t))
@@ -180,7 +179,7 @@ Normality. *Journal of the Royal Statistical Society Series C
 """
 function ShapiroWilkTest(
     sample::AbstractVector{<:Real},
-    SWc::SWCoeffs=SWCoeffs(length(sample));
+    swcoefs::ShapiroWilkCoefs=ShapiroWilkCoefs(length(sample));
     lower_uncensored=length(sample),
     sorted=issorted(sample)
 )
@@ -191,18 +190,18 @@ function ShapiroWilkTest(
     elseif lower_uncensored > N
         throw(ArgumentError("uncensored length N₁ must be less than or equal to " *
                             "total length, got N₁ = $lower_uncensored > $N = N"))
-    elseif length(SWc) ≠ length(sample)
+    elseif length(swcoefs) ≠ length(sample)
         throw(DimensionMismatch("length of sample and Shapiro-Wilk coeffs " *
-                                "differ, got $N and $(length(SWc))"))
+                                "differ, got $N and $(length(swcoefs))"))
     end
 
     W = if !sorted
-        swstat(sort!(sample[1:lower_uncensored]), SWc)
+        swstat(sort!(sample[1:lower_uncensored]), swcoefs)
     else
-        swstat(view(sample, 1:lower_uncensored), SWc)
+        swstat(view(sample, 1:lower_uncensored), swcoefs)
     end
 
-    return ShapiroWilkTest(SWc, W, lower_uncensored)
+    return ShapiroWilkTest(swcoefs, W, lower_uncensored)
 end
 
 #=
