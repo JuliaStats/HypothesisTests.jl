@@ -60,7 +60,7 @@ using StableRNGs
         for N in (3, 11, 1000)
             rng = StableRNG(0x5bca7c69b794f8ce)
             X = sort(randn(rng, N))
-            t = ShapiroWilkTest(X, sample_sorted=true)
+            t = ShapiroWilkTest(X, sorted=true)
 
             # analytic properties from Shapiro-Wilk 1965:
             # Lemma 1: Scale and origin invariance:

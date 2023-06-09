@@ -8,31 +8,19 @@ Approximating the Shapiro-Wilk W-test for non-normality
 DOI: [10.1007/BF01891203](https://doi.org/10.1007/BF01891203)
 =#
 
-# TODO: Rerun simulation and polynomial fitting
-
 # Coefficients from Royston (1992)
 for (s, c) in [(:C1, [0.0, 0.221157, -0.147981, -2.07119, 4.434685, -2.706056]),
-               (:C2, [0.0, 0.042981, -0.293762, -1.752461, 5.682633, -3.582633]),
-               (:C3, [0.5440, -0.39978, 0.025054, -0.0006714]),
-               (:C4, [1.3822, -0.77857, 0.062767, -0.0020322]),
-               (:C5, [-1.5861, -0.31082, -0.083751, 0.0038915]),
-               (:C6, [-0.4803, -0.082676, 0.0030302]),
-               (:C7, [0.164, 0.533]),
-               (:C8, [0.1736, 0.315]),
-               (:C9, [0.256, -0.00635]),
-               (:G, [-2.273, 0.459])]
+    (:C2, [0.0, 0.042981, -0.293762, -1.752461, 5.682633, -3.582633]),
+    (:C3, [0.5440, -0.39978, 0.025054, -0.0006714]),
+    (:C4, [1.3822, -0.77857, 0.062767, -0.0020322]),
+    (:C5, [-1.5861, -0.31082, -0.083751, 0.0038915]),
+    (:C6, [-0.4803, -0.082676, 0.0030302]),
+    (:C7, [0.164, 0.533]),
+    (:C8, [0.1736, 0.315]),
+    (:C9, [0.256, -0.00635]),
+    (:G, [-2.273, 0.459])]
     @eval $(Symbol(:__RS92_, s))(x) = Base.Math.@horner(x, $(c...))
 end
-
-#=
-The following hardcoded constants has been replaced by more precise values:
-
-SQRTH = sqrt(2.0)/2.0 # 0.70711E0
-TH = 3/8 # 0.375E0
-SMALL = eps(1.0) # 1E-19
-PI6 = π/6 # 0.1909859E1
-STQR = asin(sqrt(0.75)) # 0.1047198E1
-=#
 
 struct SWCoeffs <: AbstractVector{Float64}
     N::Int
@@ -55,7 +43,7 @@ end
 
 function SWCoeffs(N::Int)
     if N < 3
-        throw(ArgumentError("N must be greater than or equal to 3: $N"))
+        throw(ArgumentError("N must be greater than or equal to 3, got $N"))
     elseif N == 3 # exact
         return SWCoeffs(N, [sqrt(2.0) / 2.0])
     else
@@ -80,9 +68,9 @@ function SWCoeffs(N::Int)
     end
 end
 
-function swstat(X::AbstractArray{<:Real}, A::SWCoeffs)
+function swstat(X::AbstractVector{<:Real}, A::SWCoeffs)
     if last(X) - first(X) < length(X) * eps()
-        throw(ArgumentError("sample seems to be constant!"))
+        throw(ArgumentError("sample is constant (up to numerical accuracy)"))
     end
     AX = dot(view(A, 1:length(X)), X)
     m = mean(X)
@@ -140,21 +128,22 @@ end
 
 """
     ShapiroWilkTest(X::AbstractArray{<:Real}, SWc::SWCoeffs=SWCoeffs(length(X)); kwargs...)
-Perform a Shapiro-Wilk test of normality on `X`.
+Perform a Shapiro-Wilk test of the null hypothesis that the data in array `X`
+come from a normal distribution.
 
-This julia implementation is based the method of Royston (1992).
+This implementation is based the method by Royston (1992).
 The calculation of the p-value is exact for `N = 3`, and for ranges
 `4 ≤ N ≤ 11` and `12 ≤ N ≤ 5000` (Royston 1992) two separate approximations
 for p-values are used.
 
 Implements: [`pvalue`](@ref)
 
-# Notes (Royston 1993)
-* While the (approximated) W-statistic will be accurate for large sample size
-  (`N > 2000`), returned p-values may not be reliable.
-* Censoring too much data (`(N - N1) / N > 0.8`, where `N1` is (upper)
-  uncensored data length), or when the sample size is small (`N < 20`) may
-  produce unreliable p-values.
+# Warning
+As noted by Royston (1993), (approximated) W-statistic will be accurate
+but returned p-values may not be reliable if either of these apply:
+* Sample size is large  (`N > 2000`) or small (`N < 20`)
+* Too much data is censored (`(N - N1) / N > 0.8`, where `N1` is (upper)
+  uncensored data length)
 
 # Implementation notes
 * The current implementation DOES NOT implement p-values for censored data.
