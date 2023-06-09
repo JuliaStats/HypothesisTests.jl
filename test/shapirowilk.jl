@@ -1,5 +1,6 @@
 using HypothesisTests, LinearAlgebra, Test, Random
 using StableRNGs
+
 @testset "ShapiroWilk" begin
     @testset "ShapiroWilkCoefs" begin
         @test HypothesisTests.ShapiroWilkCoefs(3).A == [sqrt(2.0) / 2.0]
@@ -54,7 +55,13 @@ using StableRNGs
         t = ShapiroWilkTest([1, 2, 3])
         @test t.W == 1.0
         @test pvalue(t) == 1.0
-        @test sprint(show, t) isa String
+
+        str = sprint(show, t)
+        @test occursin("parameter of interest:   Squared correlation of sorted data and the uncorrelated expected order statistics of the normal distribution (W)", str)
+        @test occursin("fail to reject h_0", str)
+        @test occursin("number of observations: 3", str)
+        @test occursin("censored ratio:         0.0", str)
+        @test occursin("W-statistic:            1.0", str)
 
         # testing different cases of N
         for N in (3, 5, 11, 12)
