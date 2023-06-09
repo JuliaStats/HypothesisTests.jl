@@ -48,16 +48,16 @@ using StableRNGs
     @testset "ShapiroWilk" begin
         # syntactic tests
         @test_throws ArgumentError ShapiroWilkTest([1, 2])
-        @test_throws ArgumentError ShapiroWilkTest([1, 2, 3], N1=4)
+        @test_throws ArgumentError ShapiroWilkTest([1, 2, 3], lower_uncensored=4)
         @test_throws DimensionMismatch ShapiroWilkTest([1, 2, 3], HypothesisTests.SWCoeffs(4))
 
         t = ShapiroWilkTest([1, 2, 3])
-        @test t.W == 1.0 # W is at most one but numerics makes it nextfloat(1.0)
+        @test t.W == 1.0
         @test pvalue(t) == 1.0
         @test sprint(show, t) isa String
 
         # testing different cases of N
-        for N in (3, 11, 1000)
+        for N in (3, 5, 11, 12)
             rng = StableRNG(0x5bca7c69b794f8ce)
             X = sort(randn(rng, N))
             t = ShapiroWilkTest(X, sorted=true)
@@ -87,7 +87,7 @@ using StableRNGs
             @test t.W == W
             @test pvalue(t) ≈ 0.018 atol = 4.7e-5
 
-            @test t.N1 == length(X)
+            @test iszero(HypothesisTests.censored_ratio(t))
             @test length(t.SWc) == length(X)
         end
     end

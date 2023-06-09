@@ -82,14 +82,14 @@ end
 struct ShapiroWilkTest <: HypothesisTest
     SWc::SWCoeffs         # Expectation of order statistics for Shapiro-Wilk test
     W::Float64            # test statistic
-    N1::Int               # (upper) uncensored data length
+    lower_uncensored::Int # only the smallest N₁ samples were used
 end
 
 testname(::ShapiroWilkTest) = "Shapiro-Wilk normality test"
 population_param_of_interest(t::ShapiroWilkTest) =
     ("Squared correlation of sorted data and the uncorrelated expected order statistics of the normal distribution (W)", 1.0, t.W)
 default_tail(::ShapiroWilkTest) = :left
-censored_ratio(t::ShapiroWilkTest) = (length(t.SWc) - t.N1) / length(t.SWc)
+censored_ratio(t::ShapiroWilkTest) = (length(t.SWc) - t.lower_uncensored) / length(t.SWc)
 
 function show_params(io::IO, t::ShapiroWilkTest, indent)
     l = 24
@@ -136,6 +136,13 @@ The calculation of the p-value is exact for `N = 3`, and for ranges
 `4 ≤ N ≤ 11` and `12 ≤ N ≤ 5000` (Royston 1992) two separate approximations
 for p-values are used.
 
+# Keyword arguments
+The following keyword arguments may be passed.
+ * `sorted=true`: to indicate that data `X` is already sorted.
+ * `lower_uncensored=N₁`: to use only the smallest `N₁` samples from `X`
+   (so called upper-tail censoring)
+   Note: currently `pvalue` is not implemented for censored samples.
+
 Implements: [`pvalue`](@ref)
 
 # Warning
@@ -150,7 +157,7 @@ but returned p-values may not be reliable if either of these apply:
 * If multiple Shapiro-Wilk tests are to be performed on samples of same
   cardinality it is beneficial to pass `SWc` for re-use.
 * For maximal performance sorted `X` should be passed and indicated with
-  `sample_sorted=true` keyword argument.
+  `sorted=true` keyword argument.
 
 # References
 Shapiro, S. S., & Wilk, M. B. (1965). An Analysis of Variance Test for Normality
@@ -172,30 +179,30 @@ Normality. *Journal of the Royal Statistical Society Series C
 [doi:10.2307/2986146](https://doi.org/10.2307/2986146).
 """
 function ShapiroWilkTest(
-    sample::AbstractArray{<:Real},
+    sample::AbstractVector{<:Real},
     SWc::SWCoeffs=SWCoeffs(length(sample));
-    N1=length(sample),
-    sample_sorted=issorted(sample)
+    lower_uncensored=length(sample),
+    sorted=issorted(sample)
 )
 
     N = length(sample)
     if N < 3
         throw(ArgumentError("at least 3 samples are required, got $N"))
-    elseif N1 > N
-        throw(ArgumentError("censoring length N1 must be less than or equal to " *
-                            "total length, got N1 = $N1 > $N = N"))
+    elseif lower_uncensored > N
+        throw(ArgumentError("uncensored length N₁ must be less than or equal to " *
+                            "total length, got N₁ = $lower_uncensored > $N = N"))
     elseif length(SWc) ≠ length(sample)
         throw(DimensionMismatch("length of sample and Shapiro-Wilk coeffs " *
                                 "differ, got $N and $(length(SWc))"))
     end
 
-    W = if !sample_sorted
-        swstat(sort!(sample[1:N1]), SWc)
+    W = if !sorted
+        swstat(sort!(sample[1:lower_uncensored]), SWc)
     else
-        swstat(view(sample, 1:N1), SWc)
+        swstat(view(sample, 1:lower_uncensored), SWc)
     end
 
-    return ShapiroWilkTest(SWc, W, N1)
+    return ShapiroWilkTest(SWc, W, lower_uncensored)
 end
 
 #=
