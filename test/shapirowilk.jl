@@ -54,7 +54,7 @@ using StableRNGs
 
         t = ShapiroWilkTest([1, 2, 3])
         @test t.W == 1.0
-        @test pvalue(t) == 1.0
+        @test HypothesisTests.pvalue(t) == 1.0
 
         str = sprint(show, t)
         @test occursin("parameter of interest:   Squared correlation of sorted data and the uncorrelated expected order statistics of the normal distribution (W)", str)
@@ -92,7 +92,7 @@ using StableRNGs
 
             t = ShapiroWilkTest(X)
             @test t.W == W
-            @test pvalue(t) ≈ 0.018 atol = 4.7e-5
+            @test HypothesisTests.pvalue(t) ≈ 0.018 atol = 4.7e-5
 
             @test iszero(HypothesisTests.censored_ratio(t))
             @test length(t.coefs) == length(X)
