@@ -81,14 +81,14 @@ end
 struct ShapiroWilkTest <: HypothesisTest
     coefs::ShapiroWilkCoefs # Expectation of order statistics for Shapiro-Wilk test
     W::Float64              # test statistic
-    lower_uncensored::Int   # only the smallest N₁ samples were used
+    censored::Int   # only the smallest N₁ samples were used
 end
 
 testname(::ShapiroWilkTest) = "Shapiro-Wilk normality test"
 population_param_of_interest(t::ShapiroWilkTest) =
     ("Squared correlation of sorted data and the uncorrelated expected order statistics of the normal distribution (W)", 1.0, t.W)
 default_tail(::ShapiroWilkTest) = :left
-censored_ratio(t::ShapiroWilkTest) = (length(t.coefs) - t.lower_uncensored) / length(t.coefs)
+censored_ratio(t::ShapiroWilkTest) = t.censored / length(t.coefs)
 
 function show_params(io::IO, t::ShapiroWilkTest, indent)
     l = 24
@@ -126,7 +126,11 @@ function pvalue(t::ShapiroWilkTest)
 end
 
 """
-    ShapiroWilkTest(X::AbstractArray{<:Real}, SWc::SWCoeffs=SWCoeffs(length(X)); kwargs...)
+    ShapiroWilkTest(X::AbstractArray{<:Real},
+                    swc::ShapiroWilkCoefs=ShapiroWilkCoefs(length(X));
+                    sorted::Bool=issorted(X),
+                    censored::Integer=0)
+
 Perform a Shapiro-Wilk test of the null hypothesis that the data in array `X`
 come from a normal distribution.
 
@@ -137,9 +141,8 @@ for p-values are used.
 
 # Keyword arguments
 The following keyword arguments may be passed.
- * `sorted=true`: to indicate that data `X` is already sorted.
- * `lower_uncensored=N₁`: to use only the smallest `N₁` samples from `X`
-   (so called upper-tail censoring)
+ * `sorted::Bool=issorted(X)`: to indicate that data `X` is already sorted.
+ * `censored::Integer=0`: to censor the largest samples from `X` (so called upper-tail censoring)
    Note: currently `pvalue` is not implemented for censored samples.
 
 Implements: [`pvalue`](@ref)
@@ -148,13 +151,12 @@ Implements: [`pvalue`](@ref)
 As noted by Royston (1993), (approximated) W-statistic will be accurate
 but returned p-values may not be reliable if either of these apply:
 * Sample size is large  (`N > 2000`) or small (`N < 20`)
-* Too much data is censored (`(N - N1) / N > 0.8`, where `N1` is (upper)
-  uncensored data length)
+* Too much data is censored (`censored / N > 0.8`)
 
 # Implementation notes
 * The current implementation DOES NOT implement p-values for censored data.
 * If multiple Shapiro-Wilk tests are to be performed on samples of same
-  cardinality it is beneficial to pass `SWc` for re-use.
+  cardinality it is beneficial to pass `swc` for re-use.
 * For maximal performance sorted `X` should be passed and indicated with
   `sorted=true` keyword argument.
 
@@ -177,31 +179,28 @@ Normality. *Journal of the Royal Statistical Society Series C
 (Applied Statistics)*, 44(4), 547–551.
 [doi:10.2307/2986146](https://doi.org/10.2307/2986146).
 """
-function ShapiroWilkTest(
-    sample::AbstractVector{<:Real},
-    swcoefs::ShapiroWilkCoefs=ShapiroWilkCoefs(length(sample));
-    lower_uncensored=length(sample),
-    sorted=issorted(sample)
-)
-
+function ShapiroWilkTest(sample::AbstractVector{<:Real},
+                         swcoefs::ShapiroWilkCoefs=ShapiroWilkCoefs(length(sample));
+                         sorted::Bool=issorted(sample),
+                         censored::Integer=0)
     N = length(sample)
     if N < 3
         throw(ArgumentError("at least 3 samples are required, got $N"))
-    elseif lower_uncensored > N
-        throw(ArgumentError("uncensored length N₁ must be less than or equal to " *
-                            "total length, got N₁ = $lower_uncensored > $N = N"))
+    elseif censored ≥ N
+        throw(ArgumentError("censored length `N₁`` must be less than " *
+                            "the total length `N`, got `N₁ = $censored > $N = N`"))
     elseif length(swcoefs) ≠ length(sample)
-        throw(DimensionMismatch("length of sample and Shapiro-Wilk coeffs " *
+        throw(DimensionMismatch("length of sample and Shapiro-Wilk coefficients " *
                                 "differ, got $N and $(length(swcoefs))"))
     end
 
     W = if !sorted
-        swstat(sort!(sample[1:lower_uncensored]), swcoefs)
+        swstat(sort!(sample[1:(end - censored)]), swcoefs)
     else
-        swstat(view(sample, 1:lower_uncensored), swcoefs)
+        swstat(@view(sample[1:(end - censored)]), swcoefs)
     end
 
-    return ShapiroWilkTest(swcoefs, W, lower_uncensored)
+    return ShapiroWilkTest(swcoefs, W, censored)
 end
 
 #=

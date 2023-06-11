@@ -49,7 +49,7 @@ using StableRNGs
     @testset "ShapiroWilk" begin
         # syntactic tests
         @test_throws ArgumentError ShapiroWilkTest([1, 2])
-        @test_throws ArgumentError ShapiroWilkTest([1, 2, 3], lower_uncensored=4)
+        @test_throws ArgumentError ShapiroWilkTest([1, 2, 3], censored=4)
         @test_throws DimensionMismatch ShapiroWilkTest([1, 2, 3], HypothesisTests.ShapiroWilkCoefs(4))
 
         t = ShapiroWilkTest([1, 2, 3])
