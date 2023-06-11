@@ -85,8 +85,10 @@ struct ShapiroWilkTest <: HypothesisTest
 end
 
 testname(::ShapiroWilkTest) = "Shapiro-Wilk normality test"
-population_param_of_interest(t::ShapiroWilkTest) =
-    ("Squared correlation of sorted data and the uncorrelated expected order statistics of the normal distribution (W)", 1.0, t.W)
+function population_param_of_interest(t::ShapiroWilkTest)
+    return ("Squared correlation of data and the expected order statistics of N(0,1) (W)",
+            1.0, t.W)
+end
 default_tail(::ShapiroWilkTest) = :left
 censored_ratio(t::ShapiroWilkTest) = t.censored / length(t.coefs)
 

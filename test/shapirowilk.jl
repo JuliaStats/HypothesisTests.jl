@@ -60,11 +60,23 @@ using StableRNGs
         @test HypothesisTests.pvalue(t) == 1.0
 
         str = sprint(show, t)
-        @test occursin("parameter of interest:   Squared correlation of sorted data and the uncorrelated expected order statistics of the normal distribution (W)", str)
-        @test occursin("fail to reject h_0", str)
-        @test occursin("number of observations: 3", str)
-        @test occursin("censored ratio:         0.0", str)
-        @test occursin("W-statistic:            1.0", str)
+        @test str ==
+              """Shapiro-Wilk normality test
+              ---------------------------
+              Population details:
+                  parameter of interest:   Squared correlation of data and the expected order statistics of N(0,1) (W)
+                  value under h_0:         1.0
+                  point estimate:          1.0
+
+              Test summary:
+                  outcome with 95% confidence: fail to reject h_0
+                  one-sided p-value:           1.0000
+
+              Details:
+                  number of observations: 3
+                  censored ratio:         0.0
+                  W-statistic:            1.0
+              """
 
         # testing different cases of N
         for N in (3, 5, 11, 12)
