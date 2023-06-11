@@ -97,7 +97,7 @@ function show_params(io::IO, t::ShapiroWilkTest, indent)
     return println(io, indent, rpad("W-statistic:", l), t.W)
 end
 
-function pvalue(t::ShapiroWilkTest)
+function StatsAPI.pvalue(t::ShapiroWilkTest)
     n = length(t.coefs)
     W = t.W
 
