@@ -10,15 +10,15 @@ DOI: [10.1007/BF01891203](https://doi.org/10.1007/BF01891203)
 
 # Coefficients from Royston (1992)
 for (s, c) in [(:C1, [0.0, 0.221157, -0.147981, -2.07119, 4.434685, -2.706056]),
-    (:C2, [0.0, 0.042981, -0.293762, -1.752461, 5.682633, -3.582633]),
-    (:C3, [0.5440, -0.39978, 0.025054, -0.0006714]),
-    (:C4, [1.3822, -0.77857, 0.062767, -0.0020322]),
-    (:C5, [-1.5861, -0.31082, -0.083751, 0.0038915]),
-    (:C6, [-0.4803, -0.082676, 0.0030302]),
-    (:C7, [0.164, 0.533]),
-    (:C8, [0.1736, 0.315]),
-    (:C9, [0.256, -0.00635]),
-    (:G, [-2.273, 0.459])]
+               (:C2, [0.0, 0.042981, -0.293762, -1.752461, 5.682633, -3.582633]),
+               (:C3, [0.5440, -0.39978, 0.025054, -0.0006714]),
+               (:C4, [1.3822, -0.77857, 0.062767, -0.0020322]),
+               (:C5, [-1.5861, -0.31082, -0.083751, 0.0038915]),
+               (:C6, [-0.4803, -0.082676, 0.0030302]),
+               (:C7, [0.164, 0.533]),
+               (:C8, [0.1736, 0.315]),
+               (:C9, [0.256, -0.00635]),
+               (:G, [-2.273, 0.459])]
     @eval $(Symbol(:__RS92_, s))(x) = Base.Math.@horner(x, $(c...))
 end
 
@@ -37,7 +37,7 @@ Base.@propagate_inbounds function Base.getindex(SWc::ShapiroWilkCoefs, i::Intege
     elseif isodd(length(SWc)) && i == lastindex(SWc.A) + 1
         return zero(eltype(SWc))
     else
-        return -SWc.A[SWc.N+1-i]
+        return -SWc.A[SWc.N + 1 - i]
     end
 end
 
@@ -94,7 +94,7 @@ function show_params(io::IO, t::ShapiroWilkTest, indent)
     l = 24
     println(io, indent, rpad("number of observations:", l), length(t.coefs))
     println(io, indent, rpad("censored ratio:", l), censored_ratio(t))
-    println(io, indent, rpad("W-statistic:", l), t.W)
+    return println(io, indent, rpad("W-statistic:", l), t.W)
 end
 
 function pvalue(t::ShapiroWilkTest)

@@ -26,7 +26,7 @@ using StableRNGs
 
         #anti-symmetry
         swc = HypothesisTests.ShapiroWilkCoefs(20)
-        @test all([swc[i] == -swc[end-i+1] for i in eachindex(swc)])
+        @test all([swc[i] == -swc[end - i + 1] for i in eachindex(swc)])
 
         # Values obtained by calling `_swilkfort` fortran subroutine directly.
 
@@ -35,7 +35,9 @@ using StableRNGs
         @test norm(res, 1) ≈ 0.0 atol = length(swc10) * eps(Float32)
 
         swc20 = HypothesisTests.ShapiroWilkCoefs(20)
-        res = swc20.A .- [0.473371, 0.32174, 0.255663, 0.208297, 0.16864, 0.133584, 0.101474, 0.0712893, 0.0423232, 0.0140351]
+        res = swc20.A .-
+              [0.473371, 0.32174, 0.255663, 0.208297, 0.16864, 0.133584, 0.101474,
+               0.0712893, 0.0423232, 0.0140351]
         @test norm(res, 1) ≈ 0.0 atol = length(swc20) * eps(Float32)
 
         rng = StableRNG(0x5bca7c69b794f8ce)
@@ -50,7 +52,8 @@ using StableRNGs
         # syntactic tests
         @test_throws ArgumentError ShapiroWilkTest([1, 2])
         @test_throws ArgumentError ShapiroWilkTest([1, 2, 3], censored=4)
-        @test_throws DimensionMismatch ShapiroWilkTest([1, 2, 3], HypothesisTests.ShapiroWilkCoefs(4))
+        @test_throws DimensionMismatch ShapiroWilkTest([1, 2, 3],
+                                                       HypothesisTests.ShapiroWilkCoefs(4))
 
         t = ShapiroWilkTest([1, 2, 3])
         @test t.W == 1.0
@@ -67,7 +70,7 @@ using StableRNGs
         for N in (3, 5, 11, 12)
             rng = StableRNG(0x5bca7c69b794f8ce)
             X = sort(randn(rng, N))
-            t = ShapiroWilkTest(X, sorted=true)
+            t = ShapiroWilkTest(X; sorted=true)
 
             # analytic properties from Shapiro-Wilk 1965:
             # Lemma 1: Scale and origin invariance:
@@ -99,4 +102,3 @@ using StableRNGs
         end
     end
 end
-
