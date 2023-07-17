@@ -26,6 +26,30 @@ using DelimitedFiles
     @test pvalue(x) ≈ 0.2948405 atol=1e-6
 end
 
+@testset "SpearmanCorrelation" begin
+    # Columns are line number, calcium, iron
+    nutrient = readdlm(joinpath(@__DIR__, "data", "nutrient.txt"))[:, 1:3]
+    w = SpearmanCorrelationTest(nutrient[:,2], nutrient[:,3])
+    let out = sprint(show, w)
+        @test occursin("reject h_0", out) && !occursin("fail to", out)
+    end
+    # let ci = confint(w)
+    #     @test first(ci) ≈ 0.3327138 atol=1e-6
+    #     @test last(ci) ≈ 0.4546639 atol=1e-6
+    # end
+    @test nobs(w) == 737
+    @test dof(w) == 735
+    @test pvalue(w) < 1e-25
+
+    x = SpearmanCorrelationTest(nutrient[:,1], nutrient[:,2])
+    @test occursin("fail to reject", sprint(show, x))
+    # let ci = confint(x)
+    #     @test first(ci) ≈ -0.1105478 atol=1e-6
+    #     @test last(ci) ≈ 0.0336730 atol=1e-6
+    # end
+    @test pvalue(x) ≈ 0.09275 atol=1e-2 # value from R's cor.test(..., method="spearman") which does not use a t test algorithm AS 89 
+end
+
 @testset "Partial correlation" begin
     # Columns are information, similarities, arithmetic, picture completion
     wechsler = readdlm(joinpath(@__DIR__, "data", "wechsler.txt"))[:,2:end]
