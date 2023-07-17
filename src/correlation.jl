@@ -133,7 +133,7 @@ end
 testname(p::SpearmanCorrelationTest) =  "Spearman correlation"
 
 function population_param_of_interest(p::SpearmanCorrelationTest)
-    param = "Spearman Correlation"
+    param = "Spearman correlation"
     (param, zero(p.r), p.r)
 end
 
