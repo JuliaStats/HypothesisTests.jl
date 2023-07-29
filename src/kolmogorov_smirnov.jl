@@ -63,8 +63,8 @@ sample is not drawn from `d`.
 
 Implements: [`pvalue`](@ref)
 """
-function ExactOneSampleKSTest(x::AbstractVector{T}, d::UnivariateDistribution) where T<:Real
-    if length(x) > length(unique(x))
+function ExactOneSampleKSTest(x::AbstractVector{<:Real}, d::UnivariateDistribution)
+    if !allunique(x)
         @warn("This test is inaccurate with ties")
     end
 
@@ -107,8 +107,8 @@ that the sample is not drawn from `d`.
 
 Implements: [`pvalue`](@ref)
 """
-function ApproximateOneSampleKSTest(x::AbstractVector{T}, d::UnivariateDistribution) where T<:Real
-    if length(x) > length(unique(x))
+function ApproximateOneSampleKSTest(x::AbstractVector{<:Real}, d::UnivariateDistribution)
+    if !allunique(x)
         @warn("This test is inaccurate with ties")
     end
 
