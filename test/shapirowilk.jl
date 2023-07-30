@@ -55,6 +55,8 @@ using StableRNGs
         @test_throws DimensionMismatch ShapiroWilkTest([1, 2, 3],
                                                        HypothesisTests.ShapiroWilkCoefs(4))
 
+        @test_throws ArgumentError ShapiroWilkTest([1,1,1])
+
         t = ShapiroWilkTest([1, 2, 3])
         @test t.W == 1.0
         @test HypothesisTests.pvalue(t) == 1.0
@@ -92,6 +94,9 @@ using StableRNGs
             @test t.W ≈ ShapiroWilkTest(scale .* X .+ shift).W
             # Lemma 2, 3: upper and lower bounds
             @test N * t.coefs[1]^2 / (N - 1) ≤ t.W ≤ 1.0
+
+            # test the computation of pvalue in those cases
+            @test pvalue(t) ≥ 0.05
         end
 
         @testset "Worked Example" begin
@@ -107,10 +112,21 @@ using StableRNGs
 
             t = ShapiroWilkTest(X)
             @test t.W == W
-            @test HypothesisTests.pvalue(t) ≈ 0.018 atol = 4.7e-5
-
+            @test pvalue(t) ≈ 0.018 atol = 4.7e-5
+            @test pvalue(t) ≈ pvalue(ShapiroWilkTest(X, sorted=true))
             @test iszero(HypothesisTests.censored_ratio(t))
             @test length(t.coefs) == length(X)
+
+            # test for un-sorted sample
+            X2 = X[[9,8,2,3,4,5,7,10,1,6]]
+            t2 = ShapiroWilkTest(X2)
+            @test_throws ArgumentError ShapiroWilkTest(X2, sorted=true)
+            @test t2.W ≈ t.W
+            X3 = X[[2,8,9,3,4,5,7,10,1,6]]
+            t3 = ShapiroWilkTest(X3)
+            @test t3.W ≈ t.W
+            @test pvalue(t3) ≈ pvalue(t)
+            @test pvalue(t3) ≠ pvalue(ShapiroWilkTest(X3, sorted=true))
         end
     end
 end
