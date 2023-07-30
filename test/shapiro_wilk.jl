@@ -50,16 +50,22 @@ using StableRNGs
 
     @testset "Shapiro-Wilk" begin
         # syntactic tests
+
         @test_throws ArgumentError ShapiroWilkTest([1, 2])
+        @test_throws ArgumentError("at least 3 samples are required, got 2") ShapiroWilkTest([1, 2],
+                                                   HypothesisTests.ShapiroWilkCoefs(3))
         @test_throws ArgumentError ShapiroWilkTest([1, 2, 3], censored=4)
         @test_throws DimensionMismatch ShapiroWilkTest([1, 2, 3],
                                                        HypothesisTests.ShapiroWilkCoefs(4))
 
-        @test_throws ArgumentError ShapiroWilkTest([1,1,1])
+        @test_throws ArgumentError("sample doesn't seem to be sorted or is constant (up to numerical accuracy)") ShapiroWilkTest([1,1,1])
+        @test_throws ArgumentError("sample is constant (up to numerical accuracy)") ShapiroWilkTest([1,1,1], sorted=false)
 
         t = ShapiroWilkTest([1, 2, 3])
         @test t.W == 1.0
-        @test HypothesisTests.pvalue(t) == 1.0
+        @test pvalue(t) == 1.0
+
+        @test_throws "censored samples not implemented yet" pvalue(ShapiroWilkTest(1:4, censored=1))
 
         str = sprint(show, t)
         @test str ==
