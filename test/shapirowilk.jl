@@ -64,7 +64,7 @@ using StableRNGs
               """Shapiro-Wilk normality test
               ---------------------------
               Population details:
-                  parameter of interest:   Squared correlation of data and the expected order statistics of N(0,1) (W)
+                  parameter of interest:   Squared correlation of data and expected order statistics of N(0,1) (W)
                   value under h_0:         1.0
                   point estimate:          1.0
 

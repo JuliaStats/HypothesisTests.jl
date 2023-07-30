@@ -79,14 +79,14 @@ function swstat(X::AbstractVector{<:Real}, A::ShapiroWilkCoefs)
 end
 
 struct ShapiroWilkTest <: HypothesisTest
-    coefs::ShapiroWilkCoefs # Expectation of order statistics for Shapiro-Wilk test
+    coefs::ShapiroWilkCoefs # expectation of order statistics for Shapiro-Wilk test
     W::Float64              # test statistic
-    censored::Int   # only the smallest N₁ samples were used
+    censored::Int           # only the smallest N₁ samples were used
 end
 
 testname(::ShapiroWilkTest) = "Shapiro-Wilk normality test"
 function population_param_of_interest(t::ShapiroWilkTest)
-    return ("Squared correlation of data and the expected order statistics of N(0,1) (W)",
+    return ("Squared correlation of data and expected order statistics of N(0,1) (W)",
             1.0, t.W)
 end
 default_tail(::ShapiroWilkTest) = :left
@@ -128,24 +128,24 @@ function StatsAPI.pvalue(t::ShapiroWilkTest)
 end
 
 """
-    ShapiroWilkTest(X::AbstractArray{<:Real},
+    ShapiroWilkTest(X::AbstractVector{<:Real},
                     swc::ShapiroWilkCoefs=ShapiroWilkCoefs(length(X));
                     sorted::Bool=issorted(X),
                     censored::Integer=0)
 
-Perform a Shapiro-Wilk test of the null hypothesis that the data in array `X`
-come from a normal distribution.
+Perform a Shapiro-Wilk test of the null hypothesis that sample `X` come from a
+normal distribution.
 
-This implementation is based the method by Royston (1992).
-The calculation of the p-value is exact for `N = 3`, and for ranges
+This implementation is based on the method by Royston (1992).
+The calculation of the p-value is exact for sample size `N = 3`, and for ranges
 `4 ≤ N ≤ 11` and `12 ≤ N ≤ 5000` (Royston 1992) two separate approximations
 for p-values are used.
 
 # Keyword arguments
 The following keyword arguments may be passed.
- * `sorted::Bool=issorted(X)`: to indicate that data `X` is already sorted.
- * `censored::Integer=0`: to censor the largest samples from `X` (so called upper-tail censoring)
-   Note: currently `pvalue` is not implemented for censored samples.
+* `sorted::Bool=issorted(X)`: to indicate that sample `X` is already sorted.
+* `censored::Integer=0`: to censor the largest samples from `X`
+  (so called upper-tail censoring)
 
 Implements: [`pvalue`](@ref)
 
@@ -189,8 +189,8 @@ function ShapiroWilkTest(sample::AbstractVector{<:Real},
     if N < 3
         throw(ArgumentError("at least 3 samples are required, got $N"))
     elseif censored ≥ N
-        throw(ArgumentError("censored length `N₁`` must be less than " *
-                            "the total length `N`, got `N₁ = $censored > $N = N`"))
+        throw(ArgumentError("`censored` must be less than `length(sample)`, " *
+                            "got `censored = $censored > $N = length(sample)`"))
     elseif length(swcoefs) ≠ length(sample)
         throw(DimensionMismatch("length of sample and Shapiro-Wilk coefficients " *
                                 "differ, got $N and $(length(swcoefs))"))
