@@ -22,6 +22,15 @@ for (s, c) in [(:C1, [0.0, 0.221157, -0.147981, -2.07119, 4.434685, -2.706056]),
     @eval $(Symbol(:__RS92_, s))(x) = Base.Math.@horner(x, $(c...))
 end
 
+"""
+    ShapiroWilkCoefs(N::Integer)
+
+Construct a vector of de-correlated expected order statistics for Shapiro-Wilk
+test.
+
+If multiple tests on samples of size `N` are performed, it is beneficial to
+construct and pass a signle vector of coefficients to `ShapiroWilkTest`(@ref).
+"""
 struct ShapiroWilkCoefs <: AbstractVector{Float64}
     N::Int
     A::Vector{Float64}
@@ -158,7 +167,8 @@ but returned p-values may not be reliable if either of these apply:
 # Implementation notes
 * The current implementation DOES NOT implement p-values for censored data.
 * If multiple Shapiro-Wilk tests are to be performed on samples of same
-  cardinality it is beneficial to pass `swc` for re-use.
+  size, it is beneficial to construct `swc = ShapiroWilkCoefs(lenght(X))` once
+  and pass it to the test via `ShapiroWilkTest(X, swc)` for re-use.
 * For maximal performance sorted `X` should be passed and indicated with
   `sorted=true` keyword argument.
 
