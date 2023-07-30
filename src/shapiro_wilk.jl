@@ -155,11 +155,11 @@ The following keyword arguments may be passed.
 
 Implements: [`pvalue`](@ref)
 
-# Warning
-As noted by Royston (1993), (approximated) W-statistic will be accurate
-but returned p-values may not be reliable if either of these apply:
-* Sample size is large  (`N > 2000`) or small (`N < 20`)
-* Too much data is censored (`censored / N > 0.8`)
+!!! warning
+    As noted by Royston (1993), (approximated) W-statistic will be accurate
+    but returned p-values may not be reliable if either of these apply:
+    * Sample size is large  (`N > 2000`) or small (`N < 20`)
+    * Too much data is censored (`censored / N > 0.8`)
 
 # Implementation notes
 * The current implementation DOES NOT implement p-values for censored data.
