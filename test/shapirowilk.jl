@@ -45,7 +45,7 @@ using StableRNGs
         # W, pval, _ = swilkfort(X)
         W = 0.9088434774710951
         # pval = 0.2731410626084226
-        @test HypothesisTests.swstat(X, swc10) ≈ W atol = eps(Float32)
+        @test HypothesisTests.unsafe_swstat(X, swc10) ≈ W atol = eps(Float32)
     end
 
     @testset "ShapiroWilk" begin
@@ -102,7 +102,7 @@ using StableRNGs
             X = [48.4, 49.0, 59.5, 59.6, 60.7, 88.8, 98.2, 109.4, 169.1, 227.1]
             swc = HypothesisTests.ShapiroWilkCoefs(length(X))
             @test norm(swc.A .- [0.5737, 0.3290, 0.2143, 0.1228, 0.0401], Inf) < 5.0e-5
-            W = HypothesisTests.swstat(X, swc)
+            W = HypothesisTests.unsafe_swstat(X, swc)
             @test W ≈ 0.8078 atol = 2.9e-5
 
             t = ShapiroWilkTest(X)

@@ -76,10 +76,7 @@ function ShapiroWilkCoefs(N::Integer)
     end
 end
 
-function swstat(X::AbstractVector{<:Real}, A::ShapiroWilkCoefs)
-    if last(X) - first(X) < length(X) * eps()
-        throw(ArgumentError("sample is constant (up to numerical accuracy)"))
-    end
+function unsafe_swstat(X::AbstractVector{<:Real}, A::ShapiroWilkCoefs)
     AX = dot(view(A, 1:length(X)), X)
     m = mean(X)
     S² = sum(x -> abs2(x - m), X)
@@ -207,9 +204,18 @@ function ShapiroWilkTest(sample::AbstractVector{<:Real},
     end
 
     W = if !sorted
-        swstat(sort!(sample[1:(end - censored)]), swcoefs)
+        X = sort!(sample[1:(end - censored)])
+        if abs(last(X) - first(X)) < length(X) * eps()
+            throw(ArgumentError("sample is constant (up to numerical accuracy)"))
+        end
+        unsafe_swstat(X, swcoefs)
     else
-        swstat(@view(sample[1:(end - censored)]), swcoefs)
+        X = @view sample[1:(end - censored)]
+        if last(X) - first(X) < length(X) * eps()
+            throw(ArgumentError("sample doesn't seem to be sorted or " *
+                                "is constant (up to numerical accuracy)"))
+        end
+        unsafe_swstat(X, swcoefs)
     end
 
     return ShapiroWilkTest(swcoefs, W, censored)
