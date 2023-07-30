@@ -148,5 +148,5 @@ include("diebold_mariano.jl")
 include("clark_west.jl")
 include("white.jl")
 include("var_equality.jl")
-include("shapirowilk.jl")
+include("shapiro_wilk.jl")
 end

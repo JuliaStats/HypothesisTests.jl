@@ -1,7 +1,7 @@
 using HypothesisTests, LinearAlgebra, Test, Random
 using StableRNGs
 
-@testset "ShapiroWilk" begin
+@testset "Shapiro-Wilk" begin
     @testset "ShapiroWilkCoefs" begin
         @test HypothesisTests.ShapiroWilkCoefs(3).A == [sqrt(2.0) / 2.0]
         @test length(HypothesisTests.ShapiroWilkCoefs(3)) == 3
@@ -48,7 +48,7 @@ using StableRNGs
         @test HypothesisTests.unsafe_swstat(X, swc10) ≈ W atol = eps(Float32)
     end
 
-    @testset "ShapiroWilk" begin
+    @testset "Shapiro-Wilk" begin
         # syntactic tests
         @test_throws ArgumentError ShapiroWilkTest([1, 2])
         @test_throws ArgumentError ShapiroWilkTest([1, 2, 3], censored=4)
