@@ -11,8 +11,8 @@ abstract type AbstractCorrelationTest <: HypothesisTest end
 """
     CorrelationTest(x, y)
 
-Perform a t-test for the hypothesis that ``\\text{Cor}(x,y) = 0``, i.e. the correlation 
-of vectors `x` and `y` is zero.
+Perform a t-test for the hypothesis that ``\\text{Cor}(x,y) = 0``, i.e. the Pearson 
+correlation of vectors `x` and `y` is zero.
 
     CorrelationTest(x, y, Z)
 
@@ -97,23 +97,34 @@ end
 """
     SpearmanCorrelationTest(x, y)
 
-Perform a t-test for the hypothesis that ``\\text{Cor}(x,y) = 0``, i.e. the rank-based Spearman correlation 
-of vectors `x` and `y` is zero.
+Perform a t-test for the hypothesis that ``\\text{Cor}(x,y) = 0``, i.e. the Spearman rank
+correlation ρₛ of vectors `x` and `y` is zero.
 
 Implements `pvalue` for the t-test.
 
-Implements `confint` using an approximate confidence interval adjusting for the non-normality of the ranks based on [1]. This is still an approximation and which performs insufficient in the case of:
+Implements `confint` using an approximate confidence interval adjusting for the
+non-normality of the ranks based on [1]. This is still an approximation, which performs
+insufficiently in the case of:
 
-* small sample sizes n < 25
-* a high true population Spearman correlation
+* sample sizes below 25
+* a true population Spearman correlation |ρₛ| above 0.95
+* ordinal data
 
-In these cases a bootstrap confidence interval can perform better [2].
+In these cases a bootstrap confidence interval can perform better [2,3].
 
 # External resources
-[1] D. G. Bonett and T. A. Wright, “Sample size requirements for estimating pearson, kendall and spearman correlations,” Psychometrika, vol. 65, no. 1, pp. 23–28, Mar. 2000, doi: 10.1007/BF02294183.
+[1] D. G. Bonett and T. A. Wright, “Sample size requirements for estimating Pearson, 
+Kendall and Spearman correlations,” Psychometrika, vol. 65, no. 1, pp. 23–28, Mar. 2000,
+doi: 10.1007/BF02294183.
 
-[2] A. J. Bishara and J. B. Hittner, “Confidence intervals for correlations when data are not normal,” Behav Res, vol. 49, no. 1, pp. 294–309, Feb. 2017, doi: 10.3758/s13428-016-0702-8.
+[2] A. J. Bishara and J. B. Hittner, “Confidence intervals for correlations when data are
+not normal,” Behav Res, vol. 49, no. 1, pp. 294–309, Feb. 2017,
+doi: 10.3758/s13428-016-0702-8.
 
+[3] J. Ruscio, “Constructing Confidence Intervals for Spearman’s Rank Correlation with 
+Ordinal Data: A Simulation Study Comparing Analytic and Bootstrap Methods,” 
+J. Mod. App. Stat. Meth., vol. 7, no. 2, pp. 416–434, Nov. 2008,
+doi: 10.22237/jmasm/1225512360
 """
 struct SpearmanCorrelationTest{T<:Real} <: AbstractCorrelationTest
     r::T
@@ -130,7 +141,7 @@ struct SpearmanCorrelationTest{T<:Real} <: AbstractCorrelationTest
     end
 end
 
-testname(p::SpearmanCorrelationTest) =  "Spearman correlation"
+testname(p::SpearmanCorrelationTest) = "Spearman correlation"
 
 function population_param_of_interest(p::SpearmanCorrelationTest)
     param = "Spearman correlation"

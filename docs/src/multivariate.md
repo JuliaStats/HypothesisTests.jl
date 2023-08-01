@@ -21,4 +21,5 @@ BartlettTest
 
 ```@docs
 CorrelationTest
+SpearmanCorrelationTest
 ```
