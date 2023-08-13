@@ -139,7 +139,7 @@ end
                     sorted::Bool=issorted(X),
                     censored::Integer=0)
 
-Perform a Shapiro-Wilk test of the null hypothesis that sample `X` come from a
+Perform a Shapiro-Wilk test of the null hypothesis that the data in vector `X` come from a
 normal distribution.
 
 This implementation is based on the method by Royston (1992).
