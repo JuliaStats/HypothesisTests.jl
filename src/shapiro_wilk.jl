@@ -23,7 +23,7 @@ for (s, c) in [(:C1, [0.0, 0.221157, -0.147981, -2.07119, 4.434685, -2.706056]),
 end
 
 """
-    ShapiroWilkCoefs(N::Integer)
+    HypothesisTests.ShapiroWilkCoefs(N::Integer)
 
 Construct a vector of de-correlated expected order statistics for Shapiro-Wilk
 test.
