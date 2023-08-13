@@ -52,8 +52,7 @@ using StableRNGs
         # syntactic tests
 
         @test_throws ArgumentError ShapiroWilkTest([1, 2])
-        @test_throws ArgumentError("at least 3 samples are required, got 2") ShapiroWilkTest([1, 2],
-                                                   HypothesisTests.ShapiroWilkCoefs(3))
+        @test_throws ArgumentError("at least 3 samples are required, got 2") ShapiroWilkTest([1, 2], HypothesisTests.ShapiroWilkCoefs(3))
         @test_throws ArgumentError ShapiroWilkTest([1, 2, 3], censored=4)
         @test_throws DimensionMismatch ShapiroWilkTest([1, 2, 3],
                                                        HypothesisTests.ShapiroWilkCoefs(4))
