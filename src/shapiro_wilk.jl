@@ -164,7 +164,7 @@ Implements: [`pvalue`](@ref)
 # Implementation notes
 * The current implementation DOES NOT implement p-values for censored data.
 * If multiple Shapiro-Wilk tests are to be performed on samples of same
-  size, it is beneficial to construct `swc = ShapiroWilkCoefs(lenght(X))` once
+  size, it is faster to construct `swc = ShapiroWilkCoefs(length(X))` once
   and pass it to the test via `ShapiroWilkTest(X, swc)` for re-use.
 * For maximal performance sorted `X` should be passed and indicated with
   `sorted=true` keyword argument.
