@@ -127,6 +127,7 @@ using StableRNGs
             t2 = ShapiroWilkTest(X2)
             @test_throws ArgumentError ShapiroWilkTest(X2, sorted=true)
             @test t2.W ≈ t.W
+            @test pvalue(t2) ≈ pvalue(t)
             X3 = X[[2,8,9,3,4,5,7,10,1,6]]
             t3 = ShapiroWilkTest(X3)
             @test t3.W ≈ t.W
