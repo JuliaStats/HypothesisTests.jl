@@ -26,7 +26,7 @@ end
     HypothesisTests.ShapiroWilkCoefs(N::Integer)
 
 Construct a vector of de-correlated expected order statistics for Shapiro-Wilk
-test.
+test for a sample of size `N`.
 
 If multiple tests on samples of size `N` are performed, it is beneficial to
 construct and pass a single vector of coefficients to `ShapiroWilkTest`(@ref).
