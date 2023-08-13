@@ -29,7 +29,7 @@ Construct a vector of de-correlated expected order statistics for Shapiro-Wilk
 test.
 
 If multiple tests on samples of size `N` are performed, it is beneficial to
-construct and pass a signle vector of coefficients to `ShapiroWilkTest`(@ref).
+construct and pass a single vector of coefficients to `ShapiroWilkTest`(@ref).
 """
 struct ShapiroWilkCoefs <: AbstractVector{Float64}
     N::Int
