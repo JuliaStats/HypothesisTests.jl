@@ -220,7 +220,7 @@ function pvalueasym(x::KSampleADTest)
     n = length(PV)
     Tm = zeros(n)
     for i in 1:n
-        A = [ sqm[i]^p for i = 1:length(sqm), p = 0:3 ] # fit in cubic
+        A = [ sqm[i]^p for i in eachindex(sqm), p = 0:3 ] # fit in cubic
         C = A \ T[:,i]
         x = 1/sqrt(m)
         Tm[i] = C[1] + C[2]*x + C[3]*x^2 + C[4]*x^3

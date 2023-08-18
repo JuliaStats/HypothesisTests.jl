@@ -59,7 +59,7 @@ function signedrankstats(x::AbstractVector{S}) where S<:Real
    nonzero_x = x[x .!= 0]
    (ranks, tieadj) = tiedrank_adj(abs.(nonzero_x))
    W = 0.0
-   for i = 1:length(nonzero_x)
+   for i in eachindex(nonzero_x)
        if nonzero_x[i] > 0
            W += ranks[i]
        end
