@@ -110,7 +110,7 @@ function show_params(io::IO, test::T, ident="") where T<:HypothesisTest
         lengths = [length(string(T.names[i])) for i in fieldidx]
         maxlen = maximum(lengths)
 
-        for i in eachindex(fieldidx)
+        for (fieldidx_i, maxlen-lengths_i) in zip(fieldidx, maxlen-lengths)
             name = T.names[fieldidx[i]]
             print(io, ident, repeat(" ", maxlen-lengths[i]),
                       replace(string(name), "_", " ", " = "))
