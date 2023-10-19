@@ -115,9 +115,6 @@ function StatsAPI.pvalue(t::ShapiroWilkTest)
             return 1 - 6acos(sqrt(W)) / π
         elseif n ≤ 11 # Royston 1992
             γ = __RS92_G(n)
-            if γ ≤ log1p(-W)
-                return zero(W)
-            end
             w = -log(γ - log1p(-W))
             μ = __RS92_C3(n)
             σ = exp(__RS92_C4(n))
