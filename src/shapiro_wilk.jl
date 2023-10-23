@@ -38,12 +38,12 @@ function shapiro_wilk_coefs(N::Integer)
         w = sqrt(2.0) / 2.0
         return [w,zero(w),-w]
     else
-        # Weisberg&Bingham 1975 statistic; store only positive half of m:
-        # it is (anti-)symmetric; hence '2' factor below
         n = div(N, 2)
-        m = Vector{Float64}(undef, N)
-        resize!(m, n)
-        for i in 1:n
+        swc = Vector{Float64}(undef, N)
+        m = @view swc[1:n] # store only positive half of swc:
+        # it is (anti-)symmetric; hence '2' factor below
+        for i in eachindex(m)
+            # Weisberg&Bingham 1975 statistic
             m[i] = -quantile(Normal(), (i - 3 / 8) / (N + 1 / 4))
         end
         mᵀm = 2sum(abs2, m)
@@ -59,14 +59,14 @@ function shapiro_wilk_coefs(N::Integer)
             m .= m ./ sqrt(ϕ) # A, but reusing m to save allocs
             m[1], m[2] = a₁, a₂
         end
-        resize!(m, N)
+
         for i in 1:n
-            m[N-i+1] = -m[i]
+            swc[N-i+1] = -swc[i]
         end
         if isodd(N)
-            m[n+1] = zero(eltype(m))
+            swc[n+1] = zero(eltype(swc))
         end
-        return m
+        return swc
     end
 end
 
