@@ -23,7 +23,7 @@ for (s, c) in [(:C1, [0.0, 0.221157, -0.147981, -2.07119, 4.434685, -2.706056]),
 end
 
 """
-    HypothesisTests.ShapiroWilkCoefs(N::Integer)
+    HypothesisTests.shapiro_wilk_coefs(N::Integer)
 
 Construct a vector of de-correlated expected order statistics for Shapiro-Wilk
 test for a sample of size `N`.
@@ -31,34 +31,21 @@ test for a sample of size `N`.
 If multiple tests on samples of size `N` are performed, it is beneficial to
 construct and pass a single vector of coefficients to `ShapiroWilkTest`(@ref).
 """
-struct ShapiroWilkCoefs <: AbstractVector{Float64}
-    N::Int
-    A::Vector{Float64}
-end
-
-Base.size(SWc::ShapiroWilkCoefs) = (SWc.N,)
-Base.IndexStyle(::Type{ShapiroWilkCoefs}) = IndexLinear()
-
-Base.@propagate_inbounds function Base.getindex(SWc::ShapiroWilkCoefs, i::Integer)
-    @boundscheck checkbounds(SWc, i)
-    @inbounds if checkbounds(Bool, SWc.A, i)
-        return SWc.A[i]
-    elseif isodd(length(SWc)) && i == lastindex(SWc.A) + 1
-        return zero(eltype(SWc))
-    else
-        return -SWc.A[SWc.N + 1 - i]
-    end
-end
-
-function ShapiroWilkCoefs(N::Integer)
+function shapiro_wilk_coefs(N::Integer)
     if N < 3
         throw(ArgumentError("N must be greater than or equal to 3, got $N"))
     elseif N == 3 # exact
-        return ShapiroWilkCoefs(N, [sqrt(2.0) / 2.0])
+        w = sqrt(2.0) / 2.0
+        return [w,zero(w),-w]
     else
         # Weisberg&Bingham 1975 statistic; store only positive half of m:
         # it is (anti-)symmetric; hence '2' factor below
-        m = [-quantile(Normal(), (i - 3 / 8) / (N + 1 / 4)) for i in 1:div(N, 2)]
+        n = div(N, 2)
+        m = Vector{Float64}(undef, N)
+        resize!(m, n)
+        for i in 1:n
+            m[i] = -quantile(Normal(), (i - 3 / 8) / (N + 1 / 4))
+        end
         mᵀm = 2sum(abs2, m)
         x = 1 / sqrt(N)
         a₁ = m[1] / sqrt(mᵀm) + __RS92_C1(x) # aₙ = cₙ + (...)
@@ -72,12 +59,19 @@ function ShapiroWilkCoefs(N::Integer)
             m .= m ./ sqrt(ϕ) # A, but reusing m to save allocs
             m[1], m[2] = a₁, a₂
         end
-        return ShapiroWilkCoefs(N, m)
+        resize!(m, N)
+        for i in 1:n
+            m[N-i+1] = -m[i]
+        end
+        if isodd(N)
+            m[n+1] = zero(eltype(m))
+        end
+        return m
     end
 end
 
-function unsafe_swstat(X::AbstractVector{<:Real}, A::ShapiroWilkCoefs)
-    AX = dot(view(A, 1:length(X)), X)
+function unsafe_swstat(X::AbstractVector{<:Real}, A::AbstractVector{<:Real})
+    AX = @inbounds dot(view(A, 1:length(X)), X)
     m = mean(X)
     S² = sum(x -> abs2(x - m), X)
     W = AX^2 / S²
@@ -85,7 +79,7 @@ function unsafe_swstat(X::AbstractVector{<:Real}, A::ShapiroWilkCoefs)
 end
 
 struct ShapiroWilkTest <: HypothesisTest
-    coefs::ShapiroWilkCoefs # expectation of order statistics for Shapiro-Wilk test
+    coefs::Vector{Float64}  # expectation of order statistics for Shapiro-Wilk test
     W::Float64              # test statistic
     censored::Int           # only the smallest N₁ samples were used
 end
@@ -132,7 +126,7 @@ end
 
 """
     ShapiroWilkTest(X::AbstractVector{<:Real},
-                    swc::ShapiroWilkCoefs=ShapiroWilkCoefs(length(X));
+                    swc::AbstractVector{<:Real}=shapiro_wilk_coefs(length(X));
                     sorted::Bool=issorted(X),
                     censored::Integer=0)
 
@@ -161,7 +155,7 @@ Implements: [`pvalue`](@ref)
 # Implementation notes
 * The current implementation DOES NOT implement p-values for censored data.
 * If multiple Shapiro-Wilk tests are to be performed on samples of same
-  size, it is faster to construct `swc = ShapiroWilkCoefs(length(X))` once
+  size, it is faster to construct `swc = shapiro_wilk_coefs(length(X))` once
   and pass it to the test via `ShapiroWilkTest(X, swc)` for re-use.
 * For maximal performance sorted `X` should be passed and indicated with
   `sorted=true` keyword argument.
@@ -186,7 +180,7 @@ Normality. *Journal of the Royal Statistical Society Series C
 [doi:10.2307/2986146](https://doi.org/10.2307/2986146).
 """
 function ShapiroWilkTest(sample::AbstractVector{<:Real},
-                         swcoefs::ShapiroWilkCoefs=ShapiroWilkCoefs(length(sample));
+                         swcoefs::AbstractVector{<:Real}=shapiro_wilk_coefs(length(sample));
                          sorted::Bool=issorted(sample),
                          censored::Integer=0)
     N = length(sample)

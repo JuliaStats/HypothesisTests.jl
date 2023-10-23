@@ -2,40 +2,32 @@ using HypothesisTests, LinearAlgebra, Test, Random
 using StableRNGs
 
 @testset "Shapiro-Wilk" begin
-    @testset "ShapiroWilkCoefs" begin
-        @test HypothesisTests.ShapiroWilkCoefs(3).A == [sqrt(2.0) / 2.0]
-        @test length(HypothesisTests.ShapiroWilkCoefs(3)) == 3
+    @testset "shapiro_wilk_coefs" begin
+        @test HypothesisTests.shapiro_wilk_coefs(3) == [sqrt(2.0) / 2.0, 0.0, -sqrt(2.0) / 2.0]
 
-        swc = HypothesisTests.ShapiroWilkCoefs(10)
-        @test length(swc) == 10
-        @test lastindex(swc) == 10
-        @test length(swc.A) == 5
+        swc = HypothesisTests.shapiro_wilk_coefs(10)
+        @test swc[4] == -swc[7]
+        @test swc[2] == -swc[9]
 
-        @test swc.A[4] == swc[4] == -swc[7]
-        @test swc.A[2] == swc[2] == -swc[9]
-
-        swc = HypothesisTests.ShapiroWilkCoefs(11)
-        @test length(swc) == 11
-        @test lastindex(swc) == 11
-        @test length(swc.A) == 5
+        swc = HypothesisTests.shapiro_wilk_coefs(11)
 
         @test swc[6] == 0.0
-        @test swc.A[5] == swc[5] == -swc[7]
-        @test swc.A[3] == swc[3] == -swc[9]
-        @test swc.A[1] == swc[1] == -swc[11]
+        @test swc[5] == -swc[7]
+        @test swc[3] == -swc[9]
+        @test swc[1] == -swc[11]
 
         #anti-symmetry
-        swc = HypothesisTests.ShapiroWilkCoefs(20)
+        swc = HypothesisTests.shapiro_wilk_coefs(20)
         @test all([swc[i] == -swc[end - i + 1] for i in eachindex(swc)])
 
         # Values obtained by calling `_swilkfort` fortran subroutine directly.
 
-        swc10 = HypothesisTests.ShapiroWilkCoefs(10)
-        res = swc10.A .- [0.573715, 0.32897, 0.214349, 0.122791, 0.0400887]
+        swc10 = HypothesisTests.shapiro_wilk_coefs(10)
+        res = swc10[1:5] .- [0.573715, 0.32897, 0.214349, 0.122791, 0.0400887]
         @test norm(res, 1) ≈ 0.0 atol = length(swc10) * eps(Float32)
 
-        swc20 = HypothesisTests.ShapiroWilkCoefs(20)
-        res = swc20.A .-
+        swc20 = HypothesisTests.shapiro_wilk_coefs(20)
+        res = swc20[1:10] .-
               [0.473371, 0.32174, 0.255663, 0.208297, 0.16864, 0.133584, 0.101474,
                0.0712893, 0.0423232, 0.0140351]
         @test norm(res, 1) ≈ 0.0 atol = length(swc20) * eps(Float32)
@@ -52,10 +44,10 @@ using StableRNGs
         # syntactic tests
 
         @test_throws ArgumentError ShapiroWilkTest([1, 2])
-        @test_throws ArgumentError("at least 3 samples are required, got 2") ShapiroWilkTest([1, 2], HypothesisTests.ShapiroWilkCoefs(3))
+        @test_throws ArgumentError("at least 3 samples are required, got 2") ShapiroWilkTest([1, 2], HypothesisTests.shapiro_wilk_coefs(3))
         @test_throws ArgumentError ShapiroWilkTest([1, 2, 3], censored=4)
         @test_throws DimensionMismatch ShapiroWilkTest([1, 2, 3],
-                                                       HypothesisTests.ShapiroWilkCoefs(4))
+                                                       HypothesisTests.shapiro_wilk_coefs(4))
 
         @test_throws ArgumentError("sample doesn't seem to be sorted or is constant (up to numerical accuracy)") ShapiroWilkTest([1,1,1])
         @test_throws ArgumentError("sample is constant (up to numerical accuracy)") ShapiroWilkTest([1,1,1], sorted=false)
@@ -110,8 +102,8 @@ using StableRNGs
             # *Statistics and Computing* (1992) **2**, 117-119
 
             X = [48.4, 49.0, 59.5, 59.6, 60.7, 88.8, 98.2, 109.4, 169.1, 227.1]
-            swc = HypothesisTests.ShapiroWilkCoefs(length(X))
-            @test norm(swc.A .- [0.5737, 0.3290, 0.2143, 0.1228, 0.0401], Inf) < 5.0e-5
+            swc = HypothesisTests.shapiro_wilk_coefs(length(X))
+            @test norm(swc[1:5] .- [0.5737, 0.3290, 0.2143, 0.1228, 0.0401], Inf) < 5.0e-5
             W = HypothesisTests.unsafe_swstat(X, swc)
             @test W ≈ 0.8078 atol = 2.9e-5
 
