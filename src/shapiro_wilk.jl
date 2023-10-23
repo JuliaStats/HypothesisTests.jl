@@ -72,8 +72,7 @@ end
 
 function unsafe_swstat(X::AbstractVector{<:Real}, A::AbstractVector{<:Real})
     AX = @inbounds dot(view(A, 1:length(X)), X)
-    m = mean(X)
-    S² = sum(x -> abs2(x - m), X)
+    S² = moment(X, 2)
     W = AX^2 / S²
     return min(W, one(W)) # to guard against numeric errors
 end
