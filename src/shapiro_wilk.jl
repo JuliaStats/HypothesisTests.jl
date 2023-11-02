@@ -71,7 +71,8 @@ function shapiro_wilk_coefs(N::Integer)
 end
 
 function unsafe_swstat(X::AbstractVector{<:Real}, A::AbstractVector{<:Real})
-    AX = @inbounds dot(@view(A[begin:(begin + length(X) - 1)]), X)
+    _begin = firstindex(A)
+    AX = @inbounds dot(view(A, _begin:(_begin + length(X) - 1)), X)
     m = mean(X)
     S² = sum(x -> abs2(x - m), X)
     W = AX^2 / S²
