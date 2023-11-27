@@ -28,8 +28,8 @@ struct FriedmanTest <: HypothesisTest
     n::Int                    # number of observations
     k::Int                    # number of treatments
     df::Int                   # degrees of freedom
-    rank_sums::Vector{<:Real} # ranks sums vector
-    chi_sq::Real              # chi-squared statistic
+    rank_sums::Vector{<:Real} # rank sums vector
+    Q::Real                   # Q statistic
 end
 
 """
@@ -39,9 +39,9 @@ Perform the Friedman two-way ANOVA by ranks, a rank sum test to test the differe
 treatments across ``N`` repeated tests. This is a non-parametric test similar to the
 Kruskall-Wallis one-way ANOVA by ranks. It is a special case of the Durbin test.
 
-The p-value is computed using a ``χ^2`` statistic, as follows:
+The p-value is computed using a ``Q`` statistic, as follows:
 ```math
-    χ^2 & = \\frac{12}{Nk(N+1)} \\sum_{j = 1}^{k}R_j^2 - 3N(k+1)
+    Q = \\frac{12N}{k(k+1)} \\sum_{j = 1}^{k}(\\frac{R_j}{n} - \\frac{k+1}{2})^2
 ```
 where ``N`` is the number of tests, ``k`` is the number of treatments, and ``R`` is the rank
 sum vector.
@@ -59,47 +59,59 @@ Implements: [`pvalue`](@ref)
     ](https://en.wikipedia.org/wiki/Friedman_test)
 """
 function FriedmanTest(groups::AbstractVector{T}...) where {T<:Real}
-    x = mapreduce(permutedims, vcat, groups)
-    n = size(x, 2)
-    k = size(x, 1)
+    x = mapreduce(permutedims, vcat, groups) |> permutedims
+    n = size(x, 1)
+    k = size(x, 2)
     df = k - 1
     rank_sums = sum.(convert_rank(x) |> eachcol)
-    squared_rank_sums_sum = sum(rank_sum^2 for rank_sum in rank_sums)
-    chi_sq = (12 / (n*k*(k+1))) * squared_rank_sums_sum - 3*n*(k+1)
-    FriedmanTest(n, k, df, rank_sums, chi_sq)
+    tie_correction = get_tie_correction(x, n, k)
+    Q = ((12 / (k*n*(k+1))) * sum(rank_sum^2 for rank_sum in rank_sums) - 3*n*(k+1)) / tie_correction
+    FriedmanTest(n, k, df, rank_sums, Q)
 end
 
-testname(::FriedmanTest) = "Friedman two-way ANOVA by ranks"
+HypothesisTests.testname(::FriedmanTest) = "Friedman two-way ANOVA by ranks"
 population_param_of_interest(x::FriedmanTest) = ("location parameter", "all equal", NaN) # parameter of interest: name, value under h0, point estimate
-default_tail(test::FriedmanTest) = :both
+HypothesisTests.default_tail(x::FriedmanTest) = :right
 
 function show_params(io::IO, x::FriedmanTest, ident)
     println(io, ident, "number of observations: ", x.n)
     println(io, ident, "number of treatments:   ", x.k)
     println(io, ident, "degrees of freedom:     ", x.df)
     println(io, ident, "rank sums vector:       ", x.rank_sums)
-    println(io, ident, "χ² statistic:           ", x.chi_sq)
+    println(io, ident, "Q statistic:            ", x.Q)
 end
 
+StatsAPI.pvalue(x::FriedmanTest; tail=:right) = pvalue(Chisq(x.df), x.Q, tail=tail)
 
-StatsAPI.pvalue(x::FriedmanTest; tail=:both) = pvalue(Chisq(x.df), x.chi_sq, tail=tail)
+# helper functions
 
-#helper functions
-
-#find the average index of an item in a vector
+# find the average index of an item in a vector
 function avg_index(item::T, x::AbstractVector{T}) where {T<:Real}
     equal = item .== x
     sum([i for (i, value) in enumerate(equal) if value]) / sum(equal) # get average rank (for ties)
 end
 
-#find the ranks for a single test/row
+# find the ranks for a single test/row
 function row_rank(row::AbstractVector{T}) where {T<:Real}
     sorted_row = sort(row)
     map(x -> avg_index(x, sorted_row), row)
 end
 
-#convert an input matrix into ranks
+# convert an input matrix into ranks
 function convert_rank(x::AbstractMatrix{T}) where {T<:Real}
     x = map(row_rank, eachrow(x))
     mapreduce(permutedims, vcat, x)
+end
+
+# get the row count vector for a single row to be used for the tie correction
+function row_tie_count(x::AbstractVector{T}) where {T<:Real}
+    counts = map(item -> sum(x.==item), unique(x))
+    counts = map(item -> item^3, counts) - counts
+    sum(counts)
+end
+
+# get the tie correction
+function get_tie_correction(x::AbstractMatrix{T}, n::Int64, k::Int64) where {T<:Real}
+    row_ties = map(row_tie_count, eachrow(x)) |> sum
+    1 - row_ties / (k * (k^2 - 1)*n)
 end
