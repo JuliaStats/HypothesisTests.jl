@@ -41,7 +41,7 @@ Kruskall-Wallis one-way ANOVA by ranks. It is a special case of the Durbin test.
 
 The p-value is computed using a ``Q`` statistic, as follows:
 ```math
-    Q = \\frac{12N}{k(k+1)} \\sum_{j = 1}^{k}(\\frac{R_j}{n} - \\frac{k+1}{2})^2
+    Q = \\frac{12}{kN(k+1)} \\sum_{j = 1}^{k}(R_j^2) - 3n(k+1)
 ```
 where ``N`` is the number of tests, ``k`` is the number of treatments, and ``R`` is the rank
 sum vector.
