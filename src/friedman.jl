@@ -69,9 +69,9 @@ function FriedmanTest(groups::AbstractVector{T}...) where {T<:Real}
     FriedmanTest(n, k, df, rank_sums, Q)
 end
 
-HypothesisTests.testname(::FriedmanTest) = "Friedman two-way ANOVA by ranks"
+testname(::FriedmanTest) = "Friedman two-way ANOVA by ranks"
 population_param_of_interest(x::FriedmanTest) = ("location parameter", "all equal", NaN) # parameter of interest: name, value under h0, point estimate
-HypothesisTests.default_tail(x::FriedmanTest) = :right
+default_tail(x::FriedmanTest) = :right
 
 function show_params(io::IO, x::FriedmanTest, ident)
     println(io, ident, "number of observations: ", x.n)
