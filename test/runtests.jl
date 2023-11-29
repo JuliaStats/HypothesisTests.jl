@@ -12,9 +12,6 @@ macro test_ci_approx(x::Expr, y::Expr)
     end
 end
 
-include("../src/friedman.jl")
-
-include("friedman.jl")
 include("anderson_darling.jl")
 include("augmented_dickey_fuller.jl")
 include("bartlett.jl")
@@ -43,3 +40,4 @@ include("diebold_mariano.jl")
 include("clark_west.jl")
 include("white.jl")
 include("var_equality.jl")
+include("friedman.jl")
