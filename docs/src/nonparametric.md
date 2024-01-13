@@ -81,3 +81,9 @@ ApproximatePermutationTest
 ```@docs
 FlignerKilleenTest
 ```
+
+## Friedman two-way ANOVA by ranks
+
+```@docs
+FriedmanTest
+```
