@@ -315,17 +315,17 @@ function PowerDivergenceTest(x::AbstractMatrix{T}; lambda::U=1.0, theta0::Vector
 
     stat = 0
     if lambda == 0
-        for i in 1:length(x)
+        for i in eachindex(x)
             stat += x[i] * (log(x[i]) - log(xhat[i]))
         end
         stat *= 2
     elseif lambda == -1
-        for i in 1:length(x)
+        for i in eachindex(x)
             stat += xhat[i] * (log(xhat[i]) - log(x[i]))
         end
         stat *= 2
     else
-        for i in 1:length(x)
+        for i in eachindex(x)
             stat += x[i] * ((x[i] / xhat[i])^lambda - 1)
         end
         stat *= 2 / (lambda * (lambda + 1))

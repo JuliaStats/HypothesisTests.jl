@@ -65,7 +65,7 @@ using DelimitedFiles
     # Columns are gear diameter and batch number
     gear = readdlm(joinpath(@__DIR__, "data", "gear.txt"))
     samples = reshape(gear[:,1],:,10)
-    groups2 = tuple((samples[:,i] for i in 1:size(samples,1))...)
+    groups2 = tuple((samples[:,i] for i in axes(samples,1))...)
 
     # Brown-Forsythe Test
     l = BrownForsytheTest(groups2...)

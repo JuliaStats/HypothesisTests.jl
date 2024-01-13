@@ -139,7 +139,7 @@ function StatsAPI.pvalue(x::FisherTLinearAssociation; tail=:both)
     n = length(x.theta)
     if n == 0
         return NaN
-    elseif n < 25 || x.uniformly_distributed == nothing
+    elseif n < 25 || x.uniformly_distributed === nothing
         # If the number of samples is small, or if we don't know whether the
         # distribution is uniform, use a permutation test.
 
