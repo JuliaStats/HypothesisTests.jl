@@ -33,6 +33,7 @@ using HypothesisTests: default_tail
 	@test all(abs.([confint(tst)...] - [-5.0369, 0.0369]) .<= 1e-4)
 	@test abs.(confint(tst; tail=:left)[2] - (-0.4135)) .<= 1e-4
 	@test abs.(confint(tst; tail=:right)[1] - (-4.5865)) .<= 1e-4
+	@test_throws ArgumentError confint(tst; tail=2)
 	show(IOBuffer(), tst)
 end
 
