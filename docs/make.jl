@@ -10,7 +10,8 @@ makedocs(
         "nonparametric.md",
         "time_series.md",
         "multivariate.md",
-    ]
+    ],
+    checkdocs = :exports
 )
 
 deploydocs(
