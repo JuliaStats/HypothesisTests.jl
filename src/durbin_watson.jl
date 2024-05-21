@@ -91,24 +91,27 @@ function show_params(io::IO, x::DurbinWatsonTest, ident)
     println(io, ident, "DW statistic:               ", x.DW)
 end
 
-#     pan_algorithm(a::AbstractArray, x::Float64, m::Int, n::Int)
-#
-# Compute exact p-values for the Durbin-Watson statistic using Pan's algorithm (Farebrother,
-# 1980).
-# 
-# `a` is the vector of non-zero Eigenvalues of ``(I-(X(X'X)^{-1}X'))A`` (see Durbin and
-# Watson, 1971, p. 2), `x` is the value of the Durbin-Watson statistic, `m` the number of
-# elements in `a`, and `n` the number of approximation terms (see Farebrother, 1980, eq. 5).
-# 
-# # References
-# 
-#   * J. Durbin and G. S. Watson, 1971, "Testing for Serial Correlation in Least Squares
-#   Regression: III", Biometrika, Vol. 58, No. 1, pp. 1-19,
-#   [http://www.jstor.org/stable/2334313](http://www.jstor.org/stable/2334313).
-#   * R. W. Farebrother, 1980, "Algorithm AS 153: Pan's Procedure for the Tail Probabilities
-#   of the Durbin-Watson Statistic", Journal of the Royal Statistical Society, Series C
-#   (Applied Statistics), Vol. 29, No. 2, pp. 224-227,
-#   [http://www.jstor.org/stable/2986316](http://www.jstor.org/stable/2986316).
+"""
+    pan_algorithm(a::AbstractArray, x::Float64, m::Int, n::Int)
+
+Compute exact p-values for the Durbin-Watson statistic using Pan's algorithm (Farebrother,
+1980).
+
+`a` is the vector of non-zero Eigenvalues of ``(I-(X(X'X)^{-1}X'))A`` (see Durbin and
+Watson, 1971, p. 2), `x` is the value of the Durbin-Watson statistic, `m` the number of
+elements in `a`, and `n` the number of approximation terms (see Farebrother, 1980, eq. 5).
+
+# References
+
+  * J. Durbin and G. S. Watson, 1971, "Testing for Serial Correlation in Least Squares
+  Regression: III", Biometrika, Vol. 58, No. 1, pp. 1-19,
+  [http://www.jstor.org/stable/2334313](http://www.jstor.org/stable/2334313).
+  * R. W. Farebrother, 1980, "Algorithm AS 153: Pan's Procedure for the Tail Probabilities
+  of the Durbin-Watson Statistic", Journal of the Royal Statistical Society, Series C
+  (Applied Statistics), Vol. 29, No. 2, pp. 224-227,
+  [http://www.jstor.org/stable/2986316](http://www.jstor.org/stable/2986316).
+
+"""
 function pan_algorithm(a::AbstractArray, x::Float64, m::Int, n::Int)
 
     ν = findfirst(ai -> ai >= x, a)
