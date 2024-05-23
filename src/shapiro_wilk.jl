@@ -120,7 +120,7 @@ function StatsAPI.pvalue(t::ShapiroWilkTest)
         end
         return ccdf(Normal(μ, σ), w)
     else
-        throw("censored samples not implemented yet")
+        throw(ArgumentError("censored samples not implemented yet"))
         # to implement censored samples follow Royston 1993 Section 3.3
     end
 end
