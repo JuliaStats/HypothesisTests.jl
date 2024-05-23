@@ -76,7 +76,7 @@ function unsafe_swstat(X::AbstractVector{<:Real}, A::AbstractVector{<:Real})
     m = mean(X)
     S² = sum(x -> abs2(x - m), X)
     W = AX^2 / S²
-    return min(W, one(W)) # to guard against numeric errors
+    return clamp(W, 0, 1) # to guard against numeric errors
 end
 
 struct ShapiroWilkTest <: HypothesisTest
