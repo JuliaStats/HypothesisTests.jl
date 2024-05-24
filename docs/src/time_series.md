@@ -39,3 +39,8 @@ DieboldMarianoTest
 WhiteTest
 BreuschPaganTest
 ```
+
+## KPSS test
+```@docs
+KPSSTest
+```

@@ -56,11 +56,8 @@ or `:legacy` for the the KPSS data-independent method.
 """
 
 function autolag(resids::AbstractVector{d}, T::Int) where d <: Real
-    """
-    Computes the optimal number of lags using the Bartlett kernel as described in Hobijn et al. (2004).
-    
-    Reference: Table 3 p.489 of Hobijn et al. (2004)
-    """
+    # Computes the optimal number of lags using the Bartlett kernel as described in Hobijn et al. (2004).
+    # Reference: Table 3 p.489 of Hobijn et al. (2004)
 
     n = trunc(Int, T^(2.0 / 9.0))
     
@@ -80,11 +77,9 @@ function autolag(resids::AbstractVector{d}, T::Int) where d <: Real
 end
 
 function s²_l(ϵ::AbstractVector{d}, T::Int, l::Int) where d <: Real
-    """
-    calculate weighted s² using Bartlett kernel weighting as in Kwiatkowski et al. (1992) and Hobijn et al. (2004)
-    
-    Reference: Equation (10), p. 164 (Kwiatkowski et al., 1992).
-    """
+    # calculate weighted s² using Bartlett kernel weighting as in Kwiatkowski et al. (1992) and Hobijn et al. (2004)
+    # Reference: Equation (10), p. 164 (Kwiatkowski et al., 1992).
+
     SSE = sum(ϵ.^2)
 
     weighted_sum = 0
