@@ -30,8 +30,47 @@ struct KPSSTest <: HypothesisTest
     lag::Int   # number of lags  
 end
 
+function autolag(resids::AbstractVector{<:Real}, T::Int)
+    # Computes the optimal number of lags using the Bartlett kernel as described in Hobijn et al. (2004).
+    # Reference: Table 3 p.489 of Hobijn et al. (2004)
+
+    n = trunc(Int, T^(2.0 / 9.0))
+    
+    ŝ_0 = sum(resids .^ 2) / T
+    ŝ_j = 0.0
+    for i in 1:n
+        resids_prod = dot(resids[i+1:end], resids[1:T-i])
+        resids_prod /= T / 2.0
+        ŝ_0 += resids_prod
+        ŝ_j += i * resids_prod
+    end
+
+    γ̂ = 1.1447 * ((ŝ_j / ŝ_0)^2)^(1.0 / 3.0)
+    m̂ₜ = min(T, trunc(Int,γ̂ * T^(1.0 / 3.0)))
+    return m̂ₜ
+
+end
+
+function s²_l(ϵ::AbstractVector{<:Real}, T::Int, l::Int)
+    # calculate weighted s² using Bartlett kernel weighting as in Kwiatkowski et al. (1992) and Hobijn et al. (2004)
+    # Reference: Equation (10), p. 164 (Kwiatkowski et al., 1992).
+
+    SSE = sum(ϵ.^2)
+
+    weighted_sum = 0
+    for s in 1:l
+        weight = 1.0 - (s / (l + 1.0)) 
+        resids_prod = dot(ϵ[s+1:end], ϵ[1:T-s])
+        weighted_sum += 2 * weight * resids_prod
+    end
+    
+    ŝ² = (SSE + weighted_sum) / T
+    
+    return ŝ²
+end
+
 """
-    KPSSTest(y::AbstractVector{d}, regression::Symbol, lag::Union{Symbol, Int}) where d<:Real
+    KPSSTest(y::AbstractVector{<:Real}, regression::Symbol, lag::Union{Symbol, Int})
 
 Compute the Kwiatkowski-Phillips-Schmidt-Shin unit root test.
 
@@ -54,48 +93,7 @@ or `:legacy` for the the KPSS data-independent method.
 
   * [KPSS test on Wikipedia](https://en.wikipedia.org/wiki/KPSS_test)
 """
-
-function autolag(resids::AbstractVector{d}, T::Int) where d <: Real
-    # Computes the optimal number of lags using the Bartlett kernel as described in Hobijn et al. (2004).
-    # Reference: Table 3 p.489 of Hobijn et al. (2004)
-
-    n = trunc(Int, T^(2.0 / 9.0))
-    
-    ŝ_0 = sum(resids .^ 2) / T
-    ŝ_j = 0.0
-    for i in 1:n
-        resids_prod = dot(resids[i+1:end], resids[1:T-i])
-        resids_prod /= T / 2.0
-        ŝ_0 += resids_prod
-        ŝ_j += i * resids_prod
-    end
-
-    γ̂ = 1.1447 * ((ŝ_j / ŝ_0)^2)^(1.0 / 3.0)
-    m̂ₜ = min(T, trunc(Int,γ̂ * T^(1.0 / 3.0)))
-    return m̂ₜ
-
-end
-
-function s²_l(ϵ::AbstractVector{d}, T::Int, l::Int) where d <: Real
-    # calculate weighted s² using Bartlett kernel weighting as in Kwiatkowski et al. (1992) and Hobijn et al. (2004)
-    # Reference: Equation (10), p. 164 (Kwiatkowski et al., 1992).
-
-    SSE = sum(ϵ.^2)
-
-    weighted_sum = 0
-    for s in 1:l
-        weight = 1.0 - (s / (l + 1.0)) 
-        resids_prod = dot(ϵ[s+1:end], ϵ[1:T-s])
-        weighted_sum += 2 * weight * resids_prod
-    end
-    
-    ŝ² = (SSE + weighted_sum) / T
-    
-    return ŝ²
-end
-
-
-function KPSSTest(y::AbstractVector{d}, regression::Symbol= :constant, lag::Union{Symbol, Int}= :auto) where d <: Real
+function KPSSTest(y::AbstractVector{<:Real}, regression::Symbol= :constant, lag::Union{Symbol, Int}= :auto)
     
     # Number of observations
     T = length(y)
