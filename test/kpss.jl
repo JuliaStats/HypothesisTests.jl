@@ -33,40 +33,40 @@ using Random
     
 
     @testset "Constant Regression" begin
-        t = KPSSTest(sim_data_h0, :c, :legacy)
+        t = KPSSTest(sim_data_h0, :constant, :legacy)
     
         @test t.stat ≈ 0.13987897604307584
-        @test t.regression == :c
+        @test t.regression == :constant
         @test t.lag == 13
         @test pvalue(t) ≈ 0.1
         show(IOBuffer(), t)
     end
 
     @testset "Trend Regression" begin
-        t = KPSSTest(sim_data_h0, :ct, :legacy)
+        t = KPSSTest(sim_data_h0, :trend, :legacy)
     
         @test t.stat ≈ 0.09890587815850194
-        @test t.regression == :ct
+        @test t.regression == :trend
         @test t.lag == 13
         @test pvalue(t) ≈  0.1
         show(IOBuffer(), t)
     end
 
     @testset "Specified Lags" begin
-        t = KPSSTest(sim_data_h0, :c, 7)
+        t = KPSSTest(sim_data_h0, :constant, 7)
     
         @test t.stat ≈ 0.1658918837769353
-        @test t.regression == :c
+        @test t.regression == :constant
         @test t.lag == 7
         @test pvalue(t) ≈  0.1
         show(IOBuffer(), t)
     end
 
     @testset "Automatic Lags" begin
-        t = KPSSTest(sim_data_h0, :c, :auto)
+        t = KPSSTest(sim_data_h0, :constant, :auto)
     
         @test t.stat ≈ 0.17245866753792385
-        @test t.regression == :c
+        @test t.regression == :constant
         @test t.lag == 4
         @test pvalue(t) ≈  0.1
         show(IOBuffer(), t)
@@ -102,40 +102,40 @@ using Random
     ]
 
     @testset "Constant Regression 2" begin
-        t = KPSSTest(sim_data_h1, :c, 4)
+        t = KPSSTest(sim_data_h1, :constant, 4)
     
         @test t.stat ≈ 1.4173729681925817
-        @test t.regression == :c
+        @test t.regression == :constant
         @test t.lag == 4
         @test pvalue(t) ≈  0.01
         show(IOBuffer(), t)
     end
 
     @testset "Trend Regression 2" begin
-        t = KPSSTest(sim_data_h1, :ct, :legacy)
+        t = KPSSTest(sim_data_h1, :trend, :legacy)
     
         @test t.stat ≈ 0.10863791731446652
-        @test t.regression == :ct
+        @test t.regression == :trend
         @test t.lag == 13
         @test pvalue(t) ≈  0.1
         show(IOBuffer(), t)
     end
 
     @testset "Specified Lags 2" begin
-        t = KPSSTest(sim_data_h1, :c, 7)
+        t = KPSSTest(sim_data_h1, :constant, 7)
     
         @test t.stat ≈ 0.9223695420686719
-        @test t.regression == :c
+        @test t.regression == :constant
         @test t.lag == 7
         @test pvalue(t) ≈  0.01
         show(IOBuffer(), t)
     end
 
     @testset "Automatic Lags 2" begin
-        t = KPSSTest(sim_data_h1, :c, :auto)
+        t = KPSSTest(sim_data_h1, :constant, :auto)
     
         @test t.stat ≈ 1.1975763349807966
-        @test t.regression == :c
+        @test t.regression == :constant
         @test t.lag == 5
         @test pvalue(t) ≈  0.01
         show(IOBuffer(), t)
