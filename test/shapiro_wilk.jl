@@ -56,7 +56,7 @@ using StableRNGs
         @test t.W == 1.0
         @test pvalue(t) == 1.0
 
-        @test_throws "censored samples not implemented yet" pvalue(ShapiroWilkTest(1:4, censored=1))
+        @test_throws ArgumentError("censored samples not implemented yet") pvalue(ShapiroWilkTest(1:4, censored=1))
 
         str = sprint(show, t)
         @test str ==
