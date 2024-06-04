@@ -2,12 +2,12 @@
 
 export OneSampleHotellingT2Test, EqualCovHotellingT2Test, UnequalCovHotellingT2Test
 
-abstract type HotellingT2TestTest <: HypothesisTest end
+abstract type HotellingT2Test <: HypothesisTest end
 
-default_tail(::HotellingT2TestTest) = :right
-StatsAPI.pvalue(T::HotellingT2TestTest; tail=:right) = pvalue(FDist(dof(T)...), T.F, tail=tail)
+default_tail(::HotellingT2Test) = :right
+StatsAPI.pvalue(T::HotellingT2Test; tail=:right) = pvalue(FDist(dof(T)...), T.F, tail=tail)
 
-function show_params(io::IO, T::HotellingT2TestTest, indent="")
+function show_params(io::IO, T::HotellingT2Test, indent="")
     println(io, indent, "number of observations: ", nobs(T))
     println(io, indent, "number of variables:    ", T.p)
     println(io, indent, "T² statistic:           ", T.T²)
@@ -32,7 +32,7 @@ At_Binv_A(A::AbstractArray, B::AbstractArray) = A'*(B \ A)
 
 ## One sample
 
-struct OneSampleHotellingT2Test <: HotellingT2TestTest
+struct OneSampleHotellingT2Test <: HotellingT2Test
     T²::Real
     F::Real
     n::Int
@@ -86,7 +86,7 @@ population_param_of_interest(T::OneSampleHotellingT2Test) = ("Mean vector", T.μ
 
 ## Two sample: equal covariance
 
-struct EqualCovHotellingT2Test <: HotellingT2TestTest
+struct EqualCovHotellingT2Test <: HotellingT2Test
     T²::Real
     F::Real
     nx::Int
@@ -124,7 +124,7 @@ population_param_of_interest(T::EqualCovHotellingT2Test) =
 
 # Store the denominator degrees of freedom in the type, since the computation
 # is expensive and we don't want to redo it every time the user calls dof
-struct UnequalCovHotellingT2Test <: HotellingT2TestTest
+struct UnequalCovHotellingT2Test <: HotellingT2Test
     T²::Real
     F::Real
     nx::Int
