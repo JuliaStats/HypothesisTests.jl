@@ -81,3 +81,8 @@ ApproximatePermutationTest
 ```@docs
 FlignerKilleenTest
 ```
+
+## Shapiro-Wilk test
+```@docs
+ShapiroWilkTest
+```
