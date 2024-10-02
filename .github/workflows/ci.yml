@@ -22,6 +22,10 @@ jobs:
           - windows-latest
         arch:
           - x64
+    # needed to allow julia-actions/cache to delete old caches that it has created
+    permissions:
+      actions: write
+      contents: read
     steps:
       - uses: actions/checkout@v2
       - uses: julia-actions/setup-julia@v1
