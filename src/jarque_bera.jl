@@ -67,13 +67,14 @@ function JarqueBeraTest(y::AbstractVector{T}; adjusted::Bool=false) where T<:Rea
     M = Base.promote_op(/, T, typeof(n))
     m1r = m2r = m3r = m4r = zero(M)
     @inbounds for yi in y # compute raw moments
-        m1r += yi / n
-        m2r += yi^2 / n
-        m3r += yi^3 / n
-        m4r += yi^4 / n
+        m1r += y1 = yi / n
+        m2r += y2 = y1 * y1 * n
+        m3r += y3 = y1 * y2 * n
+        m4r += y4 = y1 * y3 * n
     end
     # compute central moments (http://mathworld.wolfram.com/CentralMoment.html)
     m2 = -m1r^2 + m2r
+    (m2 <= 0 || m2^(3/2) <= 0 || m2^2 <= 0) && return JarqueBeraTest(n, n * 9 / 24, 0, 0)
     m3 = 2 * m1r^3 - 3 * m1r * m2r + m3r
     m4 = -3 * m1r^4 + 6 * m1r^2 * m2r - 4 * m1r * m3r + m4r
 
