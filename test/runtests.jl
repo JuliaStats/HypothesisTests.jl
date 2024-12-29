@@ -12,6 +12,7 @@ macro test_ci_approx(x::Expr, y::Expr)
     end
 end
 
+include("agostino_test.jl")
 include("anderson_darling.jl")
 include("augmented_dickey_fuller.jl")
 include("bartlett.jl")
