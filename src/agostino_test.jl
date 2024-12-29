@@ -10,14 +10,13 @@ end
 
 
 function agostino_stat(x::AbstractVector{<:Real})
-    
-    #x = sort(x)
+
     n = length(x)
 
     if n < 8 || n > 46340
         throw(ArgumentError("Sample size must be ≥ 8 and ≤ 46340"))
     end
-    
+
     g₁ = skewness(x)
     Y = g₁ * sqrt((n + 1) * (n + 3) / (6 * (n - 2)))
     β₂ = 3 * (n^2 + 27 * n - 70) * (n + 1) * (n + 3) / ((n - 2) * (n + 5) * (n + 7) * (n + 9))
@@ -26,7 +25,7 @@ function agostino_stat(x::AbstractVector{<:Real})
     α = sqrt(2 / (W² - 1))
     Z = δ * log(Y / α + sqrt((Y / α)^2 + 1))
 
-    return (n, g₁, Z)    
+    return (n, g₁, Z)
 end
 
 
@@ -41,7 +40,7 @@ D'Agostino, R.B. (1970). Transformation to Normality of the Null Distribution of
 Implements: [`pvalue`](@ref)
 """
 function AgostinoTest(x::AbstractVector{<:Real})
-    AgostinoTest(agostino_stat(x)...)    
+    return AgostinoTest(agostino_stat(x)...)
 end
 
 
@@ -60,18 +59,17 @@ StatsAPI.nobs(x::AgostinoTest) = x.nobs
 function StatsAPI.pvalue(x::AgostinoTest; tail = :both)
 
     check_tail(tail)
-    
+
     left_tail = cdf(Normal(), x.z_statistic)
     right_tail = ccdf(Normal(), x.z_statistic)
-    
+
     if tail == :both
         p = minimum(2 * [left_tail, right_tail])
     elseif tail == :left
         p = left_tail
-    else tail == :right
+    else
         p = right_tail
     end
 
     return p
 end
-
