@@ -1,4 +1,5 @@
 using HypothesisTests, Test
+using StatsBase
 using HypothesisTests: default_tail
 
 @testset "Fisher" begin
@@ -126,4 +127,14 @@ t = HypothesisTests.FisherExactTest(0, 5, 0, 5)
 t = HypothesisTests.FisherExactTest(1, 1, 1, 1)
 @test HypothesisTests.pvalue(t, tail=:both) <= 1
 show(IOBuffer(), t)
+
+# constructor test for matrix and vectors
+x=[1,1,1,0,0,0,0,0,1,1]
+y=[1,1,0,0,1,0,1,1,1,1]
+
+d = counts(x,y)
+
+FisherExactTest(d)
+FisherExactTest(x,y)
+
 end
