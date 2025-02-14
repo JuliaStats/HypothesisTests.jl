@@ -85,8 +85,8 @@ Perform a Wilcoxon exact signed rank U test of the null hypothesis that the dist
 `x` (or the difference `x - y` if `y` is provided) has zero median against the alternative
 hypothesis that the median is non-zero.
 
-When there are no tied ranks, the exact p-value is computed using the `psignrank` function
-from the `Rmath` package. In the presence of tied ranks, a p-value is computed by exhaustive
+When there are no tied ranks, the exact p-value is computed using dynamic programming.
+In the presence of tied ranks, a p-value is computed by exhaustive
 enumeration of permutations, which can be very slow for even moderately sized data sets.
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)
@@ -144,12 +144,12 @@ function StatsAPI.pvalue(x::ExactSignedRankTest; tail=:both)
             if x.W <= n * (n + 1)/4
                 2 * psignrank(x.W, n, true)
             else
-                2 * psignrank(x.W - 1, n, false)
+                2 * psignrank(x.W, n, false)
             end
         elseif tail == :left
             psignrank(x.W, n, true)
         else
-            psignrank(x.W - 1, n, false)
+            psignrank(x.W, n, false)
         end
     else
         # Compute exact p-value by enumerating all possible ranks in the tied data
@@ -161,6 +161,27 @@ function StatsAPI.pvalue(x::ExactSignedRankTest; tail=:both)
             last(signedrankenumerate(x))
         end
     end
+end
+
+function psignrank(W::Union{Float64, Int}, n::Int, lower_tail::Bool)
+    W = round(Int, W)
+    max_W =  (n * (n + 1)) >> 1
+    if !lower_tail
+        return psignrank(max_W - W, n, true)
+    end
+    if W == max_W
+        return 1.0
+    elseif W > max_W >> 1
+        return 1 - psignrank(max_W - W - 1, n, true)
+    end
+    DP = zeros(Int, W + 1)
+    DP[W+1] = 1
+    for j in 1:n
+        for i in 1:(W+1-j)
+            DP[i] += DP[i + j]
+        end
+    end
+    return sum(ldexp.(float.(DP), -n))
 end
 
 StatsAPI.confint(x::ExactSignedRankTest; level::Real=0.95, tail=:both) = calculate_ci(x.vals, level, tail=tail)

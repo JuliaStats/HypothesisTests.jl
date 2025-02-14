@@ -1,5 +1,6 @@
 using HypothesisTests, Test
 using HypothesisTests: default_tail
+using Rmath
 
 @testset "Wilcoxon" begin
 @testset "Basic exact test" begin
@@ -72,5 +73,29 @@ end
     @test isapprox(@inferred(confint(ApproximateSignedRankTest(x)))[2], 15.5, atol=1e-4)
     @test isapprox(@inferred(confint(SignedRankTest(x); tail=:left))[1], 4.45, atol=1e-4)
     @test isapprox(@inferred(confint(SignedRankTest(x); tail=:right))[2], 14.45, atol=1e-4)
+end
+
+@testset "Comparison psignrank with Rmath" begin
+    n = 4
+    for W in 0.0:sum(0:n)
+        @test isapprox(@inferred(HypothesisTests.psignrank(W, n, true)),
+                                 Rmath.psignrank.(W, n, true),
+                                 atol=1e-10)
+    end
+    for W in 0.0:sum(0:n)
+        @test isapprox(@inferred(HypothesisTests.psignrank(W, n, false)),
+                                 Rmath.psignrank(W-1, n, false),
+                                 atol=1e-10)
+    end
+    for W in 0:sum(0:n)
+        @test isapprox(@inferred(HypothesisTests.psignrank(W, n, true)),
+                                 Rmath.psignrank.(W, n, true),
+                                 atol=1e-10)
+    end
+    for W in 0:sum(0:n)
+        @test isapprox(@inferred(HypothesisTests.psignrank(W, n, false)),
+                                 Rmath.psignrank(W-1, n, false),
+                                 atol=1e-10)
+    end
 end
 end
