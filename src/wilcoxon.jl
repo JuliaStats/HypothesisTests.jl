@@ -181,7 +181,7 @@ function psignrank(W::Union{Float64, Int}, n::Int, lower_tail::Bool)
             DP[i] += DP[i + j]
         end
     end
-    return sum(ldexp.(float.(DP), -n))
+    return sum(Base.Fix2(ldexp, -n) ∘ float, DP)
 end
 
 StatsAPI.confint(x::ExactSignedRankTest; level::Real=0.95, tail=:both) = calculate_ci(x.vals, level, tail=tail)
