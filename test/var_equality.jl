@@ -1,6 +1,6 @@
 using HypothesisTests
 using Test
-using Statistics
+using StatsBase
 using DelimitedFiles
 
 @testset "Equality of Variances" begin
