@@ -25,6 +25,22 @@ using DelimitedFiles
         @test HypothesisTests.teststatistic(t2) == HypothesisTests.teststatistic(t)
         @test sprint(show, t2) == sprint(show, t)
 
+        # test tuple version
+        t3 = OneWayANOVATest((groups...))
+        @test nobs(t3) == nobs(t)
+        @test dof(t3) == dof(t)
+        @test pvalue(t3) == pvalue(t)
+        @test HypothesisTests.teststatistic(t3) == HypothesisTests.teststatistic(t)
+        @test sprint(show, t3) == sprint(show, t)
+
+        # test generator version
+        t4 = OneWayANOVATest(g for g in groups)
+        @test nobs(t4) == nobs(t)
+        @test dof(t4) == dof(t)
+        @test pvalue(t4) == pvalue(t)
+        @test HypothesisTests.teststatistic(t4) == HypothesisTests.teststatistic(t)
+        @test sprint(show, t4) == sprint(show, t)
+
         show(IOContext(IOBuffer(), :table => true), t)
         show(IOBuffer(), t)
 
