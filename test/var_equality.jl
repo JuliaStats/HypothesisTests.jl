@@ -11,11 +11,19 @@ using DelimitedFiles
             [8, 12, 9, 11, 6, 8],
             [13, 9, 11, 8, 7, 12]
         ]
-        t = OneWayANOVATest(groups...)
+        t = OneWayANOVATest(groups)
         @test nobs(t) == fill(6, 3)
         @test dof(t) == (2,15)
         @test pvalue(t) ≈ 0.002 atol=1e-3
         @test occursin("reject h_0", sprint(show, t))
+
+        # test splatting version
+        t2 = OneWayANOVATest(groups...)
+        @test nobs(t2) == nobs(t)
+        @test dof(t2) == dof(t)
+        @test pvalue(t2) == pvalue(t)
+        @test HypothesisTests.teststatistic(t2) == HypothesisTests.teststatistic(t)
+        @test sprint(show, t2) == sprint(show, t)
 
         show(IOContext(IOBuffer(), :table => true), t)
         show(IOBuffer(), t)
@@ -27,7 +35,7 @@ using DelimitedFiles
             [79, 84, 74, 98, 63, 83, 85, 58],
             [85, 80, 65, 71, 67, 51],
         ]
-        t = OneWayANOVATest(groups...)
+        t = OneWayANOVATest(groups)
         @test nobs(t) == [7, 8, 8, 6]
         @test dof(t) == (3, 25)
         @test pvalue(t) ≈ 0.07276 atol=1e-6
@@ -44,26 +52,41 @@ using DelimitedFiles
     ]
     @testset "Levene" begin
         # with means
-        l = LeveneTest(groups...; statistic=mean)
+        l = LeveneTest(groups; statistic=mean)
         @test nobs(l) == fill(8, 4)
         @test dof(l) == (3,28)
         @test pvalue(l) ≈ 0.90357 atol=1e-4
 
+        l2 = LeveneTest(groups...; statistic=mean)
+        @test nobs(l2) == nobs(l)
+        @test dof(l2) == dof(l)
+        @test pvalue(l2) == pvalue(l)
+        @test HypothesisTests.teststatistic(l2) == HypothesisTests.teststatistic(l)
+        @test sprint(show, l2) == sprint(show, l)
+
         # with medians
-        l = LeveneTest(groups...; statistic=median)
+        l = LeveneTest(groups; statistic=median)
         @test pvalue(l) ≈ 0.97971 atol=1e-4
         # with 10% trimmed means
-        l = LeveneTest(groups...; statistic=v -> mean(trim(v, prop=0.1)))
+        l = LeveneTest(groups; statistic=v -> mean(trim(v, prop=0.1)))
         @test pvalue(l) ≈ 0.90357 atol=1e-4
     end
 
     @testset "Fligner-Killeen" begin
-        t = FlignerKilleenTest(groups...)
+        t = FlignerKilleenTest(groups)
         @test nobs(t) == fill(8, 4)
         @test dof(t) == 3
         @test pvalue(t) ≈ 0.9878 atol=1e-4
         @test HypothesisTests.teststatistic(t) ≈ 0.1311 atol=1e-5
         @test occursin("reject h_0", sprint(show, t))
+
+        # test splatting version
+        t2 = FlignerKilleenTest(groups...)
+        @test nobs(t2) == nobs(t)
+        @test dof(t2) == dof(t)
+        @test pvalue(t2) == pvalue(t)
+        @test HypothesisTests.teststatistic(t2) == HypothesisTests.teststatistic(t)
+        @test sprint(show, t2) == sprint(show, t)
     end
 
     @testset "Brown-Forsythe" begin
@@ -78,5 +101,12 @@ using DelimitedFiles
         @test HypothesisTests.teststatistic(l) ≈ 1.705910 atol=1e-5
         @test pvalue(l) ≈ 0.0991 atol=1e-4
         @test occursin("reject h_0", sprint(show, l))
+
+        l2 = BrownForsytheTest(eachcol(samples)...)
+        @test nobs(l2) == nobs(l)
+        @test dof(l2) == dof(l)
+        @test HypothesisTests.teststatistic(l2) == HypothesisTests.teststatistic(l)
+        @test pvalue(l2) == pvalue(l)
+        @test sprint(show, l2) == sprint(show, l)
     end
 end
