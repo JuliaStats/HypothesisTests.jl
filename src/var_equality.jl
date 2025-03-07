@@ -60,9 +60,9 @@ end
 function anova(scores::AbstractVector{<:Real}...)
     Nᵢ = [length(g) for g in scores]
     Z̄ᵢ = mean.(scores)
-    Z̄ = mean(Z̄ᵢ)
-    SStᵢ = Nᵢ .* (Z̄ᵢ .- Z̄).^2
-    SSeᵢ = sum.( (z .- z̄).^2 for (z, z̄) in zip(scores, Z̄ᵢ) )
+    Z̄ = dot(Z̄ᵢ, Nᵢ) / sum(Nᵢ)
+    SStᵢ = Nᵢ .* abs2.(Z̄ᵢ .- Z̄)
+    SSeᵢ = [sum(z -> abs2(z - z̄ᵢ), scoresᵢ) for (scoresᵢ, z̄ᵢ) in zip(scores, Z̄ᵢ)]
     (Nᵢ, SStᵢ, SSeᵢ)
 end
 

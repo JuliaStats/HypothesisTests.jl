@@ -30,7 +30,8 @@ using DelimitedFiles
     t = OneWayANOVATest(groups...)
     @test nobs(t) == [7, 8, 8, 6]
     @test dof(t) == (3, 25)
-    @test pvalue(t) ≈ 0.072 atol=1e-3
+    @test pvalue(t) ≈ 0.07276 atol=1e-6
+    @test HypothesisTests.teststatistic(t) ≈ 2.62311 atol=1e-6
     @test occursin("reject h_0", sprint(show, t))
 
     # http://www.real-statistics.com/one-way-analysis-of-variance-anova/homogeneity-variances/levenes-test/
