@@ -198,10 +198,15 @@ function FlignerKilleenTest(groups::AbstractVector{<:Real}...)
     # calculate scores
     Zᵢⱼ = [abs.(g .- median(g)) for g in groups]
     # rank scores
-    (ranks, tieadj) = tiedrank_adj(vcat(Zᵢⱼ...))
+    (ranks, tieadj) = tiedrank_adj(reduce(vcat, Zᵢⱼ))
     qᵢⱼ = quantile.(Normal(), 0.5 .+ ranks ./ 2(length(ranks) + 1))
-    Nᵢ = pushfirst!(cumsum([length(g) for g in groups]), 0)
-    Qᵢⱼ = [qᵢⱼ[(Nᵢ[i]+1):(Nᵢ[i+1])] for i in 1:length(Nᵢ)-1]
+    lastᵢ = 0
+    Qᵢⱼ = map(groups) do gᵢ
+        n = length(gᵢ)
+        qᵢ = view(qᵢⱼ, (lastᵢ + 1):(lastᵢ + n))
+        lastᵢ += n
+        return qᵢ
+    end
     # anova
     Nᵢ, SStᵢ, SSeᵢ = anova(Qᵢⱼ...)
     k = length(Nᵢ)
