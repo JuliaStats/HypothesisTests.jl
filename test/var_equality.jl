@@ -29,7 +29,7 @@ using DelimitedFiles
     ]
     t = OneWayANOVATest(groups...)
     @test nobs(t) == [7, 8, 8, 6]
-    @test dof(t) == (3,25)
+    @test dof(t) == (3, 25)
     @test pvalue(t) ≈ 0.072 atol=1e-3
     @test occursin("reject h_0", sprint(show, t))
 
@@ -49,7 +49,7 @@ using DelimitedFiles
     l = LeveneTest(groups...; statistic=median)
     @test pvalue(l) ≈ 0.97971 atol=1e-4
     # with 10% trimmed means
-    l = LeveneTest(groups...; statistic=v->mean(trim(v, prop=0.1)))
+    l = LeveneTest(groups...; statistic=v -> mean(trim(v, prop=0.1)))
     @test pvalue(l) ≈ 0.90357 atol=1e-4
 
     # Fligner-Killeen Test
@@ -64,13 +64,13 @@ using DelimitedFiles
 
     # Columns are gear diameter and batch number
     gear = readdlm(joinpath(@__DIR__, "data", "gear.txt"))
-    samples = reshape(gear[:,1],:,10)
-    groups2 = tuple((samples[:,i] for i in 1:size(samples,1))...)
+    samples = reshape(gear[:, 1], :, 10)
+    groups2 = tuple((samples[:, i] for i in 1:size(samples, 1))...)
 
     # Brown-Forsythe Test
     l = BrownForsytheTest(groups2...)
     @test nobs(l) == fill(10, 10)
-    @test dof(l) == (9,90)
+    @test dof(l) == (9, 90)
     @test HypothesisTests.teststatistic(l) ≈ 1.705910 atol=1e-5
     @test pvalue(l) ≈ 0.0991 atol=1e-4
     @test occursin("reject h_0", sprint(show, l))

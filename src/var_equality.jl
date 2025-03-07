@@ -90,7 +90,7 @@ function OneWayANOVATest(groups::AbstractVector{<:Real}...)
     Nᵢ, SStᵢ, SSeᵢ = anova(groups...)
     k = length(Nᵢ)
     VarianceEqualityTest{FDist}(Nᵢ, SStᵢ, SSeᵢ, k-1, sum(Nᵢ)-k,
-        ("One-way analysis of variance (ANOVA) test","Means","F"))
+        ("One-way analysis of variance (ANOVA) test", "Means", "F"))
 end
 
 """
@@ -141,7 +141,7 @@ function LeveneTest(groups::AbstractVector{<:Real}...; scorediff=abs, statistic=
     Nᵢ, SStᵢ, SSeᵢ = anova(Zᵢⱼ...)
     k = length(Nᵢ)
     VarianceEqualityTest{FDist}(Nᵢ, SStᵢ, SSeᵢ, k-1, sum(Nᵢ)-k,
-        ("Levene's test","Variances","W"))
+        ("Levene's test", "Variances", "W"))
 end
 
 """
@@ -199,12 +199,12 @@ function FlignerKilleenTest(groups::AbstractVector{<:Real}...)
     Zᵢⱼ = [abs.(g .- median(g)) for g in groups]
     # rank scores
     (ranks, tieadj) = tiedrank_adj(vcat(Zᵢⱼ...))
-    qᵢⱼ = quantile.(Normal(),0.5 .+ ranks./2(length(ranks)+1))
-    Nᵢ = pushfirst!(cumsum([length(g) for g in groups]),0)
+    qᵢⱼ = quantile.(Normal(), 0.5 .+ ranks ./ 2(length(ranks) + 1))
+    Nᵢ = pushfirst!(cumsum([length(g) for g in groups]), 0)
     Qᵢⱼ = [qᵢⱼ[(Nᵢ[i]+1):(Nᵢ[i+1])] for i in 1:length(Nᵢ)-1]
     # anova
     Nᵢ, SStᵢ, SSeᵢ = anova(Qᵢⱼ...)
     k = length(Nᵢ)
-    t3 = VarianceEqualityTest{Chisq}(Nᵢ, SStᵢ, SSeᵢ, k-1, sum(Nᵢ)-k,
-            ("Fligner-Killeen test","Variances","FK"))
+    VarianceEqualityTest{Chisq}(Nᵢ, SStᵢ, SSeᵢ, k-1, sum(Nᵢ)-k,
+        ("Fligner-Killeen test", "Variances", "FK"))
 end
