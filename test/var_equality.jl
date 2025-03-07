@@ -71,9 +71,8 @@ using DelimitedFiles
         # Columns are gear diameter and batch number
         gear = readdlm(joinpath(@__DIR__, "data", "gear.txt"))
         samples = reshape(gear[:, 1], :, 10)
-        groups2 = tuple((samples[:, i] for i in 1:size(samples, 1))...)
 
-        l = BrownForsytheTest(groups2...)
+        l = BrownForsytheTest(collect(eachcol(samples)))
         @test nobs(l) == fill(10, 10)
         @test dof(l) == (9, 90)
         @test HypothesisTests.teststatistic(l) ≈ 1.705910 atol=1e-5
