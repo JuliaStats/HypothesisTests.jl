@@ -5,6 +5,12 @@ using DelimitedFiles
 
 @testset "Equality of Variances" begin
     @testset "One-way ANOVA" begin
+        # input checks
+        @test_throws ArgumentError OneWayANOVATest([])
+        @test_throws ArgumentError OneWayANOVATest(["A", "B"])
+        @test_throws ArgumentError OneWayANOVATest([["A", "B"], ["C", "D"]])
+        @test_throws MethodError OneWayANOVATest(["A", "B"], ["C", "D"])
+
         # https://en.wikipedia.org/wiki/One-way_analysis_of_variance#Example
         groups = [
             [6, 8, 4, 5, 3, 4],
