@@ -29,7 +29,7 @@ using DelimitedFiles
         @test dof(t2) == dof(t)
         @test pvalue(t2) == pvalue(t)
         @test HypothesisTests.teststatistic(t2) == HypothesisTests.teststatistic(t)
-        @test sprint(show, t2) == sprint(show, t)
+        @test repr(t2) == repr(t)
 
         # test tuple version
         t3 = OneWayANOVATest((groups...))
@@ -37,7 +37,7 @@ using DelimitedFiles
         @test dof(t3) == dof(t)
         @test pvalue(t3) == pvalue(t)
         @test HypothesisTests.teststatistic(t3) == HypothesisTests.teststatistic(t)
-        @test sprint(show, t3) == sprint(show, t)
+        @test repr(t3) == repr(t)
 
         # test generator version
         t4 = OneWayANOVATest(g for g in groups)
@@ -45,7 +45,7 @@ using DelimitedFiles
         @test dof(t4) == dof(t)
         @test pvalue(t4) == pvalue(t)
         @test HypothesisTests.teststatistic(t4) == HypothesisTests.teststatistic(t)
-        @test sprint(show, t4) == sprint(show, t)
+        @test repr(t4) == repr(t)
 
         show(IOContext(IOBuffer(), :table => true), t)
         show(IOBuffer(), t)
@@ -84,7 +84,7 @@ using DelimitedFiles
         @test dof(l2) == dof(l)
         @test pvalue(l2) == pvalue(l)
         @test HypothesisTests.teststatistic(l2) == HypothesisTests.teststatistic(l)
-        @test sprint(show, l2) == sprint(show, l)
+        @test repr(l2) == repr(l)
 
         # with medians
         l = LeveneTest(groups; statistic=median)
@@ -108,7 +108,7 @@ using DelimitedFiles
         @test dof(t2) == dof(t)
         @test pvalue(t2) == pvalue(t)
         @test HypothesisTests.teststatistic(t2) == HypothesisTests.teststatistic(t)
-        @test sprint(show, t2) == sprint(show, t)
+        @test repr(t2) == repr(t)
     end
 
     @testset "Brown-Forsythe" begin
@@ -129,6 +129,6 @@ using DelimitedFiles
         @test dof(l2) == dof(l)
         @test HypothesisTests.teststatistic(l2) == HypothesisTests.teststatistic(l)
         @test pvalue(l2) == pvalue(l)
-        @test sprint(show, l2) == sprint(show, l)
+        @test repr(l2) == repr(l)
     end
 end
