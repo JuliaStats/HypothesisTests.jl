@@ -91,8 +91,8 @@ from the same population as `y` is greater than an observation drawn from the sa
 population as `x` against the alternative hypothesis that these probabilities are not
 equal.
 
-When there are no tied ranks, the exact p-value is computed using the `pwilcox` function
-from the `Rmath` package. In the presence of tied ranks, a p-value is computed by exhaustive
+When there are no tied ranks, the exact p-value is computed using the `wilcoxcdf` and `wilcoxccdf`
+functions from the `StatsFuns` package. In the presence of tied ranks, a p-value is computed by exhaustive
 enumeration of permutations, which can be very slow for even moderately sized data sets.
 
 Implements: [`pvalue`](@ref)
@@ -137,19 +137,19 @@ function StatsAPI.pvalue(x::ExactMannWhitneyUTest; tail=:both)
     check_tail(tail)
 
     if x.tie_adjustment == 0
-        # Compute exact p-value using method from Rmath, which is fast but
+        # Compute exact p-value using method from StatsFuns, which is fast but
         # cannot account for ties
         if tail == :both
             if x.U < x.nx * x.ny / 2
-                p = pwilcox(x.U, x.nx, x.ny, true)
+                p = wilcoxcdf(x.nx, x.ny, x.U)
             else
-                p = pwilcox(x.U - 1, x.nx, x.ny, false)
+                p = wilcoxccdf(x.nx, x.ny, x.U - 1)
             end
             min(2 * p, 1.0)
         elseif tail == :left
-            pwilcox(x.U, x.nx, x.ny, true)
+            wilcoxcdf(x.nx, x.ny, x.U)
         else # tail == :right
-            pwilcox(x.U - 1, x.nx, x.ny, false)
+            wilcoxccdf(x.nx, x.ny, x.U - 1)
         end
     else
         # Compute exact p-value by enumerating possible ranks in the tied data
