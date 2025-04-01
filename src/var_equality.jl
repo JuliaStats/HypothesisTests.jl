@@ -58,8 +58,9 @@ function Base.show(io::IOContext, t::VarianceEqualityTest)
 end
 
 function anova(scores)
-    !isempty(scores) && all(Base.Fix2(isa, AbstractVector{<:Real}), scores) ||
+    if isempty(scores) || !all(x -> x isa AbstractVector{<:Real}, scores)
         throw(ArgumentError("`anova` requires a non-empty collection of vectors of `Real` numbers"))
+    end
 
     Nᵢ = [length(s) for s in scores]
     Z̄ᵢ = map(mean, scores)
