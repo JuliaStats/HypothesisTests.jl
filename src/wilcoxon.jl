@@ -85,8 +85,8 @@ Perform a Wilcoxon exact signed rank U test of the null hypothesis that the dist
 `x` (or the difference `x - y` if `y` is provided) has zero median against the alternative
 hypothesis that the median is non-zero.
 
-When there are no tied ranks, the exact p-value is computed using the `psignrank` function
-from the `Rmath` package. In the presence of tied ranks, a p-value is computed by exhaustive
+When there are no tied ranks, the exact p-value is computed using the `signrankcdf` and `signrankccdf`
+functions from the `StatsFuns` package. In the presence of tied ranks, a p-value is computed by exhaustive
 enumeration of permutations, which can be very slow for even moderately sized data sets.
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)
@@ -139,17 +139,17 @@ function StatsAPI.pvalue(x::ExactSignedRankTest; tail=:both)
     if n == 0
         1.0
     elseif x.tie_adjustment == 0
-        # Compute exact p-value using method from Rmath, which is fast but cannot account for ties
+        # Compute exact p-value using method from StatsFuns, which is fast but cannot account for ties
         if tail == :both
             if x.W <= n * (n + 1)/4
-                2 * psignrank(x.W, n, true)
+                2 * signrankcdf(n, x.W)
             else
-                2 * psignrank(x.W - 1, n, false)
+                2 * signrankccdf(n, x.W - 1)
             end
         elseif tail == :left
-            psignrank(x.W, n, true)
+            signrankcdf(n, x.W)
         else
-            psignrank(x.W - 1, n, false)
+            signrankccdf(n, x.W - 1)
         end
     else
         # Compute exact p-value by enumerating all possible ranks in the tied data
@@ -253,7 +253,7 @@ function calculate_ci(x::AbstractVector, level::Real=0.95; tail=:both)
     n = length(x)
     m = div(n * (n + 1), 2)
     k_range = 1:div(m, 2)
-    l = [1 - 2 * psignrank(i, n, true) for i in k_range]
+    l = [1 - 2 * signrankcdf(n, i) for i in k_range]
     k = argmin(abs.(l .- c))
     vals = Float64[]
     enumerated = enumerate(x)
