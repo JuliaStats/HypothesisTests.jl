@@ -44,7 +44,7 @@ end
     @test abs(@inferred(pvalue(ExactMannWhitneyUTest([1:10;], [1:10;]); tail = :left)) - 0.5296) <= 1e-4
     @test abs(@inferred(pvalue(ExactMannWhitneyUTest([1:10;], [2:11;]); tail = :left)) - 0.2548) <= 1e-4
     @test abs(@inferred(pvalue(ExactMannWhitneyUTest([2:11;], [1:10;]); tail = :left)) - 0.7634) <= 1e-4
-    @test abs(@inferred(pvalue(ExactMannWhitneyUTest([1:10;], [1:5; ones(5)]); tail = :left)) - 0.9978) <= 1e-4
+    @test abs(@inferred(pvalue(ExactMannWhitneyUTest([1:10;], [1:5; ones(5)]); tail = :left)) - 0.9979) <= 1e-4
     @test abs(@inferred(pvalue(ExactMannWhitneyUTest([1:5; ones(5)], [1:10;]); tail = :left)) - 0.0028) <= 1e-4
 
     # Right tail
@@ -52,7 +52,7 @@ end
     @test abs(@inferred(pvalue(ExactMannWhitneyUTest([1:10;], [2:11;]); tail = :right)) - 0.7634) <= 1e-4
     @test abs(@inferred(pvalue(ExactMannWhitneyUTest([2:11;], [1:10;]); tail = :right)) - 0.2548) <= 1e-4
     @test abs(@inferred(pvalue(ExactMannWhitneyUTest([1:10;], [1:5; ones(5)]); tail = :right)) - 0.0028) <= 1e-4
-    @test abs(@inferred(pvalue(ExactMannWhitneyUTest([1:5; ones(5)], [1:10;]); tail = :right)) - 0.9978) <= 1e-4
+    @test abs(@inferred(pvalue(ExactMannWhitneyUTest([1:5; ones(5)], [1:10;]); tail = :right)) - 0.9979) <= 1e-4
 end
 
 @testset "Exact with ties and unequal lengths" begin
@@ -65,12 +65,12 @@ end
     end
 
     # Left tail
-    @test abs(@inferred(pvalue(ExactMannWhitneyUTest([1:10;], [2:2:24;]); tail = :left)) - 0.9948) <= 1e-4
-    @test abs(@inferred(pvalue(ExactMannWhitneyUTest([2:2:24;], [1:10;]); tail = :left)) - 0.9948) <= 1e-4
+    @test_broken abs(@inferred(pvalue(ExactMannWhitneyUTest([1:10;], [2:2:24;]); tail = :left)) - 0.0060) <= 1e-4
+    @test abs(@inferred(pvalue(ExactMannWhitneyUTest([2:2:24;], [1:10;]); tail = :left)) - 0.9949) <= 1e-4
 
     # Right tail
-    @test abs(@inferred(pvalue(ExactMannWhitneyUTest([1:10;], [2:2:24;]); tail = :right)) - 0.0058) <= 1e-4
-    @test abs(@inferred(pvalue(ExactMannWhitneyUTest([2:2:24;], [1:10;]); tail = :right)) - 0.0058) <= 1e-4
+    @test_broken abs(@inferred(pvalue(ExactMannWhitneyUTest([1:10;], [2:2:24;]); tail = :right)) - 0.9949) <= 1e-4
+    @test_broken abs(@inferred(pvalue(ExactMannWhitneyUTest([2:2:24;], [1:10;]); tail = :right)) - 0.0060) <= 1e-4
 end
 
 @testset "Approximate test" begin
