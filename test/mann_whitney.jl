@@ -3,8 +3,33 @@ using HypothesisTests: default_tail
 
 @testset "Mann-Whitney" begin
 @testset "Basic exact test" begin
-	@test default_tail(ExactMannWhitneyUTest([1:10;], [2.1:2:21;])) == :both
-	show(IOBuffer(), ExactMannWhitneyUTest([1:10;], [2.1:2:21;]))
+    test = ExactMannWhitneyUTest([1:10;], [2.1:2:21;])
+    @test test.nx == 10
+    @test test.ny == 10
+    @test test.ranks == [1, 2, 4, 5, 7, 8, 10, 11, 13, 14, 3, 6, 9, 12, 15, 16, 17, 18, 19, 20]
+    @test iszero(test.tie_adjustment)
+    @test test.U == 20
+    @test test.median == -5.6
+
+    @test default_tail(test) == :both
+    @test repr(test) == """
+    Exact Mann-Whitney U test
+    -------------------------
+    Population details:
+        parameter of interest:   Location parameter (pseudomedian)
+        value under h_0:         0
+        point estimate:          -5.6
+    
+    Test summary:
+        outcome with 95% confidence: reject h_0
+        two-sided p-value:           0.0232
+    
+    Details:
+        number of observations in each group: [10, 10]
+        Mann-Whitney-U statistic:             20.0
+        rank sums:                            [75.0, 135.0]
+        adjustment for ties:                  0.0
+    """
 
     # Two-sided
     for kwargs in ((), (; tail = :both))
@@ -56,21 +81,66 @@ end
 end
 
 @testset "Exact with ties and unequal lengths" begin
-    show(IOBuffer(), ExactMannWhitneyUTest([1:10;], [2:2:24;]))
+    test1 = ExactMannWhitneyUTest([1:10;], [2:2:24;])
+    test2 = ExactMannWhitneyUTest([2:2:24;], [1:10;])
+    @test test1.nx == test2.ny == 10
+    @test test2.nx == test1.ny == 12
+    @test test1.ranks == test2.ranks[[13:22; 1:12]]
+    @test test1.tie_adjustment == test2.tie_adjustment
+    @test test1.U == 22.5
+    @test test1.U + test2.U == 120
+    @test test1.median == -test2.median
+
+    @test repr(test1) == """
+    Exact Mann-Whitney U test
+    -------------------------
+    Population details:
+        parameter of interest:   Location parameter (pseudomedian)
+        value under h_0:         0
+        point estimate:          -7.5
+
+    Test summary:
+        outcome with 95% confidence: reject h_0
+        two-sided p-value:           0.0120
+
+    Details:
+        number of observations in each group: [10, 12]
+        Mann-Whitney-U statistic:             22.5
+        rank sums:                            [77.5, 175.5]
+        adjustment for ties:                  30.0
+    """
+    @test repr(test2) == """
+    Exact Mann-Whitney U test
+    -------------------------
+    Population details:
+        parameter of interest:   Location parameter (pseudomedian)
+        value under h_0:         0
+        point estimate:          7.5
+
+    Test summary:
+        outcome with 95% confidence: reject h_0
+        two-sided p-value:           0.0120
+
+    Details:
+        number of observations in each group: [12, 10]
+        Mann-Whitney-U statistic:             97.5
+        rank sums:                            [175.5, 77.5]
+        adjustment for ties:                  30.0
+    """
 
     # Two-sided
     for kwargs in ((), (; tail = :both))
-        @test abs(@inferred(pvalue(ExactMannWhitneyUTest([1:10;], [2:2:24;]); kwargs...)) - 0.0118) <= 1e-4
-        @test abs(@inferred(pvalue(ExactMannWhitneyUTest([2:2:24;], [1:10;]); kwargs...)) - 0.0118) <= 1e-4
+        @test abs(@inferred(pvalue(ExactMannWhitneyUTest([1:10;], [2:2:24;]); kwargs...)) - 0.0120) <= 1e-4
+        @test abs(@inferred(pvalue(ExactMannWhitneyUTest([2:2:24;], [1:10;]); kwargs...)) - 0.0120) <= 1e-4
     end
 
     # Left tail
-    @test_broken abs(@inferred(pvalue(ExactMannWhitneyUTest([1:10;], [2:2:24;]); tail = :left)) - 0.0060) <= 1e-4
+    @test abs(@inferred(pvalue(ExactMannWhitneyUTest([1:10;], [2:2:24;]); tail = :left)) - 0.0060) <= 1e-4
     @test abs(@inferred(pvalue(ExactMannWhitneyUTest([2:2:24;], [1:10;]); tail = :left)) - 0.9949) <= 1e-4
 
     # Right tail
-    @test_broken abs(@inferred(pvalue(ExactMannWhitneyUTest([1:10;], [2:2:24;]); tail = :right)) - 0.9949) <= 1e-4
-    @test_broken abs(@inferred(pvalue(ExactMannWhitneyUTest([2:2:24;], [1:10;]); tail = :right)) - 0.0060) <= 1e-4
+    @test abs(@inferred(pvalue(ExactMannWhitneyUTest([1:10;], [2:2:24;]); tail = :right)) - 0.9949) <= 1e-4
+    @test abs(@inferred(pvalue(ExactMannWhitneyUTest([2:2:24;], [1:10;]); tail = :right)) - 0.0060) <= 1e-4
 end
 
 @testset "Approximate test" begin
