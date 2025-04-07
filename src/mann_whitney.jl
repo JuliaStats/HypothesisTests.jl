@@ -57,17 +57,19 @@ function MannWhitneyUTest(x::AbstractVector{S}, y::AbstractVector{T}) where {S<:
 end
 
 # Get U, ranks, and tie adjustment for Mann-Whitney U test
-function mwustats(x::AbstractVector{S}, y::AbstractVector{T}) where {S<:Real,T<:Real}
+# U is the sum of adjusted ranks in the first sample minus the minimal sum of ranks (ie sum(1:length(x))
+function mwustats(x::AbstractVector{<:Real}, y::AbstractVector{<:Real})
+    ranks, tieadj = tiedrank_adj([x; y])
     nx = length(x)
     ny = length(y)
     if nx <= ny
-        (ranks, tieadj) = tiedrank_adj([x; y])
-        U = sum(@view ranks[1:nx]) - nx*(nx+1)/2
+        U = sum(@view(ranks[begin:(begin + (nx-1))])) - nx*(nx+1)/2
     else
-        (ranks, tieadj) = tiedrank_adj([y; x])
-        U = nx*ny - sum(@view ranks[1:ny]) + ny*(ny+1)/2
+        # Sum of adjusted ranks of first and second sample sums to (nx + ny)*(nx + ny + 1)/2, hence
+        # U = (nx + ny)*(nx + ny + 1)/2 - sum(ranks_y) - nx*(nx + 1)/2
+        U = ny*(2 * nx + ny + 1)/2 - sum(@view(ranks[(begin + nx):end]))
     end
-    (U, ranks, tieadj, nx, ny, median(x)-median(y))
+    return (U, ranks, tieadj, nx, ny, median(x)-median(y))
 end
 
 
@@ -110,7 +112,7 @@ function show_params(io::IO, x::ExactMannWhitneyUTest, ident)
     println(io)
     println(io, ident, "Mann-Whitney-U statistic:             ", x.U)
     print(io, ident, "rank sums:                            ")
-    show(io, [sum(@view x.ranks[1:x.nx]), sum(@view x.ranks[x.nx+1:end])])
+    show(io, [sum(@view(x.ranks[begin:(begin + (x.nx - 1))])), sum(@view(x.ranks[(begin + x.nx):end]))])
     println(io)
     println(io, ident, "adjustment for ties:                  ", x.tie_adjustment)
 end
@@ -118,18 +120,31 @@ end
 # Enumerate all possible Mann-Whitney U results for a given vector,
 # determining left-and right-tailed p values
 function mwuenumerate(x::ExactMannWhitneyUTest)
-    # Get the other U if inverted by mwu_stats
-    n = min(x.nx, x.ny)
-    U = (x.nx >= x.ny ? x.U : x.nx * x.ny - x.U) + n*(n + 1)/2
-    le = 0
-    gr = 0
-    tot = 0
-    for comb in combinations(x.ranks, n)
-        Up = sum(comb)
-        tot += 1
-        le += Up <= U
-        gr += Up >= U
+    # Compute sum of ranks of the smaller group
+    nx = x.nx
+    ny = x.ny
+    if nx <= ny
+        n = nx
+        R = x.U + n*(n + 1)/2
+    else
+        n = ny
+        R = ny*(2 * nx + ny + 1)/2 - x.U
     end
+
+    # Compare with sum of ranks of all possible groups of the same size
+    le = gr = tot = 0
+    for comb in combinations(x.ranks, n)
+        Rp = sum(comb)
+        tot += 1
+        le += Rp <= R
+        gr += Rp >= R
+    end
+
+    # Adjust "less"/"greater" in case the first group was not the smaller one
+    if nx > n
+        le, gr = gr, le
+    end
+
     (le/tot, gr/tot)
 end
 
@@ -140,11 +155,7 @@ function StatsAPI.pvalue(x::ExactMannWhitneyUTest; tail=:both)
         # Compute exact p-value using method from StatsFuns, which is fast but
         # cannot account for ties
         if tail == :both
-            if x.U < x.nx * x.ny / 2
-                p = wilcoxcdf(x.nx, x.ny, x.U)
-            else
-                p = wilcoxccdf(x.nx, x.ny, x.U - 1)
-            end
+            p = wilcoxcdf(min(x.U, x.nx * x.ny - x.U), x.nx, x.ny)
             min(2 * p, 1.0)
         elseif tail == :left
             wilcoxcdf(x.nx, x.ny, x.U)
@@ -201,9 +212,10 @@ Implements: [`pvalue`](@ref)
 """
 function ApproximateMannWhitneyUTest(U::Real, ranks::AbstractVector{T},
     tie_adjustment::Real, nx::Int, ny::Int, median::Real) where T<:Real
-    mu = U - nx * ny / 2
-    sigma = sqrt((nx * ny * (nx + ny + 1 - tie_adjustment /
-        ((nx + ny) * (nx + ny - 1)))) / 12)
+    n = nx + ny
+    nxny = nx * ny
+    mu = U - nxny / 2
+    sigma = sqrt(nxny / 12 * (n + 1 - tie_adjustment / (n * (n - 1))))
     ApproximateMannWhitneyUTest(U, ranks, tie_adjustment, nx, ny, median, mu, sigma)
 end
 ApproximateMannWhitneyUTest(x::AbstractVector{S}, y::AbstractVector{T}) where {S<:Real,T<:Real} =
@@ -216,7 +228,7 @@ default_tail(test::ApproximateMannWhitneyUTest) = :both
 function show_params(io::IO, x::ApproximateMannWhitneyUTest, ident)
     println(io, ident, "number of observations in each group: ", [x.nx, x.ny])
     println(io, ident, "Mann-Whitney-U statistic:             ", x.U)
-    println(io, ident, "rank sums:                            ", [sum(x.ranks[1:x.nx]), sum(x.ranks[x.nx+1:end])])
+    println(io, ident, "rank sums:                            ", [sum(@view(x.ranks[begin:(begin + (x.nx - 1))])), sum(@view(x.ranks[(begin + x.nx):end]))])
     println(io, ident, "adjustment for ties:                  ", x.tie_adjustment)
     println(io, ident, "normal approximation (μ, σ):          ", (x.mu, x.sigma))
 end

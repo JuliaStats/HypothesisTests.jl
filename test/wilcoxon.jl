@@ -3,21 +3,55 @@ using HypothesisTests: default_tail
 
 @testset "Wilcoxon" begin
 @testset "Basic exact test" begin
-    @test abs(@inferred(pvalue(ExactSignedRankTest([1:10;], [2:2:20;]))) - 0.0020) <= 1e-4
-    @test abs(@inferred(pvalue(ExactSignedRankTest([2:2:20;], [1:10;]))) - 0.0020) <= 1e-4
-    @test abs(@inferred(pvalue(ExactSignedRankTest([1:10;], [2:2:16; -1; 1]))) - 0.4316) <= 1e-4
-    @test abs(@inferred(pvalue(ExactSignedRankTest([2:2:16; -1; 1], [1:10;]))) - 0.4316) <= 1e-4
-	@test default_tail(ExactSignedRankTest([1:10;], [2:2:20;])) == :both
+    @test default_tail(ExactSignedRankTest([1:10;], [2:2:20;])) == :both
 	show(IOBuffer(), ExactSignedRankTest([1:10;], [2:2:20;]))
+
+    # Two-sided
+    for kwargs in ((), (; tail = :both))
+        @test abs(@inferred(pvalue(ExactSignedRankTest([1:10;], [2:2:20;]); kwargs...)) - 0.0020) <= 1e-4
+        @test abs(@inferred(pvalue(ExactSignedRankTest([2:2:20;], [1:10;]); kwargs...)) - 0.0020) <= 1e-4
+        @test abs(@inferred(pvalue(ExactSignedRankTest([1:10;], [2:2:16; -1; 1]); kwargs...)) - 0.4316) <= 1e-4
+        @test abs(@inferred(pvalue(ExactSignedRankTest([2:2:16; -1; 1], [1:10;]); kwargs...)) - 0.4316) <= 1e-4
+    end
+
+    # Left tail
+    @test abs(@inferred(pvalue(ExactSignedRankTest([1:10;], [2:2:20;]); tail = :left)) - 0.0009) <= 1e-4
+    @test abs(@inferred(pvalue(ExactSignedRankTest([2:2:20;], [1:10;]); tail = :left)) - 1) <= 1e-4
+    @test abs(@inferred(pvalue(ExactSignedRankTest([1:10;], [2:2:16; -1; 1]); tail = :left)) - 0.2158) <= 1e-4
+    @test abs(@inferred(pvalue(ExactSignedRankTest([2:2:16; -1; 1], [1:10;]); tail = :left)) - 0.8125) <= 1e-4
+
+    # Right tail
+    @test abs(@inferred(pvalue(ExactSignedRankTest([1:10;], [2:2:20;]); tail = :right)) - 1) <= 1e-4
+    @test abs(@inferred(pvalue(ExactSignedRankTest([2:2:20;], [1:10;]); tail = :right)) - 0.0009) <= 1e-4
+    @test abs(@inferred(pvalue(ExactSignedRankTest([1:10;], [2:2:16; -1; 1]); tail = :right)) - 0.8125) <= 1e-4
+    @test abs(@inferred(pvalue(ExactSignedRankTest([2:2:16; -1; 1], [1:10;]); tail = :right)) - 0.2158) <= 1e-4
 end
 
 @testset "Exact with ties" begin
-    @test abs(@inferred(pvalue(ExactSignedRankTest([1:10;], [1:10;]))) - 1) <= 1e-4
-    @test abs(@inferred(pvalue(ExactSignedRankTest([1:10;], [2:11;]))) - 0.0020) <= 1e-4
-    @test abs(@inferred(pvalue(ExactSignedRankTest([2:11;], [1:10;]))) - 0.0020) <= 1e-4
-    @test abs(@inferred(pvalue(ExactSignedRankTest(1:10, [1:5; ones(5)]))) - 0.0625) <= 1e-4
-    @test abs(@inferred(pvalue(ExactSignedRankTest([1:5; ones(5)], [1:10;]))) - 0.0625) <= 1e-4
-	show(IOBuffer(), ExactSignedRankTest([1:10;], [1:10;]))
+    show(IOBuffer(), ExactSignedRankTest([1:10;], [1:10;]))
+
+    # Two-sided
+    for kwargs in ((), (; tail = :both))
+        @test abs(@inferred(pvalue(ExactSignedRankTest([1:10;], [1:10;]); kwargs...)) - 1) <= 1e-4
+        @test abs(@inferred(pvalue(ExactSignedRankTest([1:10;], [2:11;]); kwargs...)) - 0.0020) <= 1e-4
+        @test abs(@inferred(pvalue(ExactSignedRankTest([2:11;], [1:10;]); kwargs...)) - 0.0020) <= 1e-4
+        @test abs(@inferred(pvalue(ExactSignedRankTest(1:10, [1:5; ones(5)]); kwargs...)) - 0.0625) <= 1e-4
+        @test abs(@inferred(pvalue(ExactSignedRankTest([1:5; ones(5)], [1:10;]); kwargs...)) - 0.0625) <= 1e-4
+    end
+
+    # Left tail
+    @test abs(@inferred(pvalue(ExactSignedRankTest([1:10;], [1:10;]); tail = :left)) - 1) <= 1e-4
+    @test abs(@inferred(pvalue(ExactSignedRankTest([1:10;], [2:11;]); tail = :left)) - 0.0009) <= 1e-4
+    @test abs(@inferred(pvalue(ExactSignedRankTest([2:11;], [1:10;]); tail = :left)) - 1) <= 1e-4
+    @test abs(@inferred(pvalue(ExactSignedRankTest(1:10, [1:5; ones(5)]); tail = :left)) - 1) <= 1e-4
+    @test abs(@inferred(pvalue(ExactSignedRankTest([1:5; ones(5)], [1:10;]); tail = :left)) - 0.0312) <= 1e-4
+
+    # Right tail
+    @test abs(@inferred(pvalue(ExactSignedRankTest([1:10;], [1:10;]); tail = :right)) - 1) <= 1e-4
+    @test abs(@inferred(pvalue(ExactSignedRankTest([1:10;], [2:11;]); tail = :right)) - 1) <= 1e-4
+    @test abs(@inferred(pvalue(ExactSignedRankTest([2:11;], [1:10;]); tail = :right)) - 0.0009) <= 1e-4
+    @test abs(@inferred(pvalue(ExactSignedRankTest(1:10, [1:5; ones(5)]); tail = :right)) - 0.0312) <= 1e-4
+    @test abs(@inferred(pvalue(ExactSignedRankTest([1:5; ones(5)], [1:10;]); tail = :right)) - 1) <= 1e-4
 end
 
 @testset "Approximate test" begin

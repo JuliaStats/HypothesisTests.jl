@@ -57,16 +57,23 @@ function Base.show(io::IOContext, t::VarianceEqualityTest)
     end
 end
 
-function anova(scores::AbstractVector{<:Real}...)
-    Nᵢ = [length(g) for g in scores]
-    Z̄ᵢ = mean.(scores)
-    Z̄ = mean(Z̄ᵢ)
-    SStᵢ = Nᵢ .* (Z̄ᵢ .- Z̄).^2
-    SSeᵢ = sum.( (z .- z̄).^2 for (z, z̄) in zip(scores, Z̄ᵢ) )
+function anova(scores)
+    if isempty(scores) || !all(x -> x isa AbstractVector{<:Real}, scores)
+        throw(ArgumentError("`anova` requires a non-empty collection of vectors of `Real` numbers"))
+    end
+
+    Nᵢ = [length(s) for s in scores]
+    Z̄ᵢ = map(mean, scores)
+    Z̄ = dot(Z̄ᵢ, Nᵢ) / sum(Nᵢ)
+    SStᵢ = Nᵢ .* abs2.(Z̄ᵢ .- Z̄)
+    SSeᵢ = [sum(z -> abs2(z - z̄ᵢ), scoresᵢ) for (scoresᵢ, z̄ᵢ) in zip(scores, Z̄ᵢ)]
     (Nᵢ, SStᵢ, SSeᵢ)
 end
 
+anova(scores::AbstractVector{<:Real}...) = anova(scores)
+
 """
+    OneWayANOVATest(groups)
     OneWayANOVATest(groups::AbstractVector{<:Real}...)
 
 Perform one-way analysis of variance test of the hypothesis that that the `groups`
@@ -86,14 +93,17 @@ Implements: [`pvalue`](@ref)
   * [One-way analysis of variance on Wikipedia
     ](https://en.wikipedia.org/wiki/One-way_analysis_of_variance)
 """
-function OneWayANOVATest(groups::AbstractVector{<:Real}...)
-    Nᵢ, SStᵢ, SSeᵢ = anova(groups...)
+function OneWayANOVATest(groups)
+    Nᵢ, SStᵢ, SSeᵢ = anova(groups)
     k = length(Nᵢ)
     VarianceEqualityTest{FDist}(Nᵢ, SStᵢ, SSeᵢ, k-1, sum(Nᵢ)-k,
-        ("One-way analysis of variance (ANOVA) test","Means","F"))
+        ("One-way analysis of variance (ANOVA) test", "Means", "F"))
 end
 
+OneWayANOVATest(groups::AbstractVector{<:Real}...) = OneWayANOVATest(groups)
+
 """
+    LeveneTest(groups; scorediff=abs, statistic=mean)
     LeveneTest(groups::AbstractVector{<:Real}...; scorediff=abs, statistic=mean)
 
 Perform Levene's test of the hypothesis that that the `groups` variances are equal.
@@ -134,17 +144,21 @@ Implements: [`pvalue`](@ref)
   * [Levene's test on Wikipedia
     ](https://en.wikipedia.org/wiki/Levene%27s_test)
 """
-function LeveneTest(groups::AbstractVector{<:Real}...; scorediff=abs, statistic=mean)
+function LeveneTest(groups; scorediff=abs, statistic=mean)
     # calculate scores
-    Zᵢⱼ = [scorediff.(g .- statistic(g)) for g in groups]
+    Zᵢⱼ = map(g -> scorediff.(g .- statistic(g)), groups)
     # anova
-    Nᵢ, SStᵢ, SSeᵢ = anova(Zᵢⱼ...)
+    Nᵢ, SStᵢ, SSeᵢ = anova(Zᵢⱼ)
     k = length(Nᵢ)
     VarianceEqualityTest{FDist}(Nᵢ, SStᵢ, SSeᵢ, k-1, sum(Nᵢ)-k,
-        ("Levene's test","Variances","W"))
+        ("Levene's test", "Variances", "W"))
 end
 
+LeveneTest(groups::AbstractVector{<:Real}...; kwargs...) =
+    LeveneTest(groups; kwargs...)
+
 """
+    BrownForsytheTest(groups)
     BrownForsytheTest(groups::AbstractVector{<:Real}...)
 
 The Brown–Forsythe test is a statistical test for the equality of `groups` variances.
@@ -165,9 +179,11 @@ Implements: [`pvalue`](@ref)
   * [Brown–Forsythe test on Wikipedia
     ](https://en.wikipedia.org/wiki/Brown%E2%80%93Forsythe_test)
 """
-BrownForsytheTest(groups::AbstractVector{<:Real}...) = LeveneTest(groups...; statistic=median)
+BrownForsytheTest(groups) = LeveneTest(groups; statistic=median)
+BrownForsytheTest(groups::AbstractVector{<:Real}...) = BrownForsytheTest(groups)
 
 """
+    FlignerKilleenTest(groups)
     FlignerKilleenTest(groups::AbstractVector{<:Real}...)
 
 Perform Fligner-Killeen median test of the null hypothesis that the `groups`
@@ -194,17 +210,25 @@ Implements: [`pvalue`](@ref)
   * [Fligner-Killeen test on Statistical Analysis Handbook
     ](https://www.statsref.com/HTML/index.html?fligner-killeen_test.html)
 """
-function FlignerKilleenTest(groups::AbstractVector{<:Real}...)
+function FlignerKilleenTest(groups)
     # calculate scores
-    Zᵢⱼ = [abs.(g .- median(g)) for g in groups]
+    Zᵢⱼ = map(g -> abs.(g .- median(g)), groups)
     # rank scores
-    (ranks, tieadj) = tiedrank_adj(vcat(Zᵢⱼ...))
-    qᵢⱼ = quantile.(Normal(),0.5 .+ ranks./2(length(ranks)+1))
-    Nᵢ = pushfirst!(cumsum([length(g) for g in groups]),0)
-    Qᵢⱼ = [qᵢⱼ[(Nᵢ[i]+1):(Nᵢ[i+1])] for i in 1:length(Nᵢ)-1]
+    (ranks, tieadj) = tiedrank_adj(reduce(vcat, Zᵢⱼ))
+    qᵢⱼ = quantile.(Normal(), 0.5 .+ ranks ./ 2(length(ranks) + 1))
+    lastᵢ = 0
+    Qᵢⱼ = map(groups) do gᵢ
+        n = length(gᵢ)
+        qᵢ = view(qᵢⱼ, (lastᵢ + 1):(lastᵢ + n))
+        lastᵢ += n
+        return qᵢ
+    end
     # anova
-    Nᵢ, SStᵢ, SSeᵢ = anova(Qᵢⱼ...)
+    Nᵢ, SStᵢ, SSeᵢ = anova(Qᵢⱼ)
     k = length(Nᵢ)
-    t3 = VarianceEqualityTest{Chisq}(Nᵢ, SStᵢ, SSeᵢ, k-1, sum(Nᵢ)-k,
-            ("Fligner-Killeen test","Variances","FK"))
+    VarianceEqualityTest{Chisq}(Nᵢ, SStᵢ, SSeᵢ, k-1, sum(Nᵢ)-k,
+        ("Fligner-Killeen test", "Variances", "FK"))
 end
+
+FlignerKilleenTest(groups::AbstractVector{<:Real}...) =
+    FlignerKilleenTest(groups)
