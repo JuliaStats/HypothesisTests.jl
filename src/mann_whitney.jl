@@ -155,7 +155,7 @@ function StatsAPI.pvalue(x::ExactMannWhitneyUTest; tail=:both)
         # Compute exact p-value using method from StatsFuns, which is fast but
         # cannot account for ties
         if tail == :both
-            p = wilcoxcdf(min(x.U, x.nx * x.ny - x.U), x.nx, x.ny)
+            p = wilcoxcdf(x.nx, x.ny, min(x.U, x.nx * x.ny - x.U))
             min(2 * p, 1.0)
         elseif tail == :left
             wilcoxcdf(x.nx, x.ny, x.U)
