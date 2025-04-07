@@ -6,6 +6,19 @@ on:
   pull_request:
   workflow_dispatch:
 jobs:
+  finalize:
+    timeout-minutes: 10
+    needs: [test, docs]
+    if: always()
+    runs-on: ubuntu-latest # GitHub-hosted runners
+    steps:
+      - run: |
+          echo test: ${{ needs.test.result }}
+          echo doctest: ${{ needs.docs.result }}
+      - run: exit 1
+        if: |
+          (needs.test.result != 'success') ||
+          (needs.docs.result != 'success')
   test:
     name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
     runs-on: ${{ matrix.os }}
