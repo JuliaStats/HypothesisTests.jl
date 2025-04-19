@@ -3,7 +3,8 @@ using StableRNGs
 
 @testset "Shapiro-Wilk" begin
     @testset "shapiro_wilk_coefs" begin
-        @test HypothesisTests.shapiro_wilk_coefs(3) == [sqrt(2.0) / 2.0, 0.0, -sqrt(2.0) / 2.0]
+        @test HypothesisTests.shapiro_wilk_coefs(3) ==
+              [sqrt(2.0) / 2.0, 0.0, -sqrt(2.0) / 2.0]
 
         swc = HypothesisTests.shapiro_wilk_coefs(10)
         @test swc[4] == -swc[7]
@@ -44,19 +45,27 @@ using StableRNGs
         # syntactic tests
 
         @test_throws ArgumentError ShapiroWilkTest([1, 2])
-        @test_throws ArgumentError("at least 3 samples are required, got 2") ShapiroWilkTest([1, 2], HypothesisTests.shapiro_wilk_coefs(3))
+        @test_throws ArgumentError("at least 3 samples are required, got 2") ShapiroWilkTest([1,
+                                                                                              2],
+                                                                                             HypothesisTests.shapiro_wilk_coefs(3))
         @test_throws ArgumentError ShapiroWilkTest([1, 2, 3], censored=4)
         @test_throws DimensionMismatch ShapiroWilkTest([1, 2, 3],
                                                        HypothesisTests.shapiro_wilk_coefs(4))
 
-        @test_throws ArgumentError("sample doesn't seem to be sorted or is constant (up to numerical accuracy)") ShapiroWilkTest([1,1,1])
-        @test_throws ArgumentError("sample is constant (up to numerical accuracy)") ShapiroWilkTest([1,1,1], sorted=false)
+        @test_throws ArgumentError("sample doesn't seem to be sorted or is constant (up to numerical accuracy)") ShapiroWilkTest([1,
+                                                                                                                                  1,
+                                                                                                                                  1])
+        @test_throws ArgumentError("sample is constant (up to numerical accuracy)") ShapiroWilkTest([1,
+                                                                                                     1,
+                                                                                                     1],
+                                                                                                    sorted=false)
 
         t = ShapiroWilkTest([1, 2, 3])
         @test t.W == 1.0
         @test pvalue(t) == 1.0
 
-        @test_throws ArgumentError("censored samples not implemented yet") pvalue(ShapiroWilkTest(1:4, censored=1))
+        @test_throws ArgumentError("censored samples not implemented yet") pvalue(ShapiroWilkTest(1:4,
+                                                                                                  censored=1))
 
         str = sprint(show, t)
         @test str ==
@@ -115,12 +124,12 @@ using StableRNGs
             @test length(t.coefs) == length(X)
 
             # test for un-sorted sample
-            X2 = X[[9,8,2,3,4,5,7,10,1,6]]
+            X2 = X[[9, 8, 2, 3, 4, 5, 7, 10, 1, 6]]
             t2 = ShapiroWilkTest(X2)
             @test_throws ArgumentError ShapiroWilkTest(X2, sorted=true)
             @test t2.W ≈ t.W
             @test pvalue(t2) ≈ pvalue(t)
-            X3 = X[[2,8,9,3,4,5,7,10,1,6]]
+            X3 = X[[2, 8, 9, 3, 4, 5, 7, 10, 1, 6]]
             t3 = ShapiroWilkTest(X3)
             @test t3.W ≈ t.W
             @test pvalue(t3) ≈ pvalue(t)

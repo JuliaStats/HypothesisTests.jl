@@ -22,12 +22,14 @@ using HypothesisTests: default_tail
     @test_ci_approx confint(t, method=:jeffrey) (0.23626570247518358, 0.44251318323879296)
     @test_ci_approx confint(t, tail=:left, method=:jeffrey) (0.0, 0.42466492683653623)
     @test_ci_approx confint(t, tail=:right, method=:jeffrey) (0.25098836986261724, 1.0)
-    @test_ci_approx confint(t, method=:agresti_coull) (0.2384423809121706, 0.44387022232522744)
+    @test_ci_approx confint(t, method=:agresti_coull) (0.2384423809121706,
+                                                       0.44387022232522744)
     @test_ci_approx confint(t, tail=:left, method=:agresti_coull) (0.0, 0.42558712894362222)
-    @test_ci_approx confint(t, tail=:right, method=:agresti_coull) (0.25225408385003706, 1.0)
-    @test_ci_approx confint(t, method=:arcsine) (0.23366209634204066,0.44117918327686334)
-    @test_ci_approx confint(t, tail=:left, method=:arcsine) (0.0,0.4235046425920888)
-    @test_ci_approx confint(t, tail=:right, method=:arcsine) (0.2489264087216164,1.0)
+    @test_ci_approx confint(t, tail=:right, method=:agresti_coull) (0.25225408385003706,
+                                                                    1.0)
+    @test_ci_approx confint(t, method=:arcsine) (0.23366209634204066, 0.44117918327686334)
+    @test_ci_approx confint(t, tail=:left, method=:arcsine) (0.0, 0.4235046425920888)
+    @test_ci_approx confint(t, tail=:right, method=:arcsine) (0.2489264087216164, 1.0)
 
     show(IOBuffer(), t)
 
@@ -39,23 +41,25 @@ using HypothesisTests: default_tail
     @test_ci_approx confint(t, tail=:left) (0.0, 0.9022531865607242)
     @test_ci_approx confint(t, tail=:right) (0.3449413659437032, 1.0)
     @test_ci_approx confint(t, method=:wald) (0.35868803903340479, 0.97464529429992841)
-    @test_ci_approx confint(t, tail=:left, method=:wald) (0.0,0.92513047859481645)
-    @test_ci_approx confint(t, tail=:right, method=:wald) (0.40820285473851681,1.0)
+    @test_ci_approx confint(t, tail=:left, method=:wald) (0.0, 0.92513047859481645)
+    @test_ci_approx confint(t, tail=:right, method=:wald) (0.40820285473851681, 1.0)
     @test_ci_approx confint(t, method=:waldcc) (0.3031324834778487, 1.0)
     @test_ci_approx confint(t, tail=:left, method=:waldcc) (0.0, 0.9806860341503718)
     @test_ci_approx confint(t, tail=:right, method=:waldcc) (0.35264729918296145, 1.0)
-    @test_ci_approx confint(t, method=:wilson) (0.35420213558039609,0.87941618161308899)
-    @test_ci_approx confint(t, tail=:left, method=:wilson) (0.0,0.85802909820500495)
-    @test_ci_approx confint(t, tail=:right, method=:wilson) (0.39825972868840931,1.0)
-    @test_ci_approx confint(t, method=:jeffrey) (0.34779179347226591,0.89578677833922582)
-    @test_ci_approx confint(t, tail=:left, method=:jeffrey) (0.0,0.86830830610561005)
-    @test_ci_approx confint(t, tail=:right, method=:jeffrey) (0.39604343455469687,1.0)
-    @test_ci_approx confint(t, method=:agresti_coull) (0.350905767251112,0.88271254994237336)
-    @test_ci_approx confint(t, tail=:left, method=:agresti_coull) (0.0,0.86049746046629294)
-    @test_ci_approx confint(t, tail=:right, method=:agresti_coull) (0.39579136642712159,1.0)
-    @test_ci_approx confint(t, method=:arcsine) (0.345812446615087,0.9188773496172281)
-    @test_ci_approx confint(t, tail=:left, method=:arcsine) (0.0,0.8879439981269358)
-    @test_ci_approx confint(t, tail=:right, method=:arcsine) (0.3965293068864491,1.0)
+    @test_ci_approx confint(t, method=:wilson) (0.35420213558039609, 0.87941618161308899)
+    @test_ci_approx confint(t, tail=:left, method=:wilson) (0.0, 0.85802909820500495)
+    @test_ci_approx confint(t, tail=:right, method=:wilson) (0.39825972868840931, 1.0)
+    @test_ci_approx confint(t, method=:jeffrey) (0.34779179347226591, 0.89578677833922582)
+    @test_ci_approx confint(t, tail=:left, method=:jeffrey) (0.0, 0.86830830610561005)
+    @test_ci_approx confint(t, tail=:right, method=:jeffrey) (0.39604343455469687, 1.0)
+    @test_ci_approx confint(t, method=:agresti_coull) (0.350905767251112,
+                                                       0.88271254994237336)
+    @test_ci_approx confint(t, tail=:left, method=:agresti_coull) (0.0, 0.86049746046629294)
+    @test_ci_approx confint(t, tail=:right, method=:agresti_coull) (0.39579136642712159,
+                                                                    1.0)
+    @test_ci_approx confint(t, method=:arcsine) (0.345812446615087, 0.9188773496172281)
+    @test_ci_approx confint(t, tail=:left, method=:arcsine) (0.0, 0.8879439981269358)
+    @test_ci_approx confint(t, tail=:right, method=:arcsine) (0.3965293068864491, 1.0)
     show(IOBuffer(), t)
 
     t = BinomialTest(0, 100, 0.01)
@@ -68,9 +72,11 @@ using HypothesisTests: default_tail
 
     # from issue #295
     # without clamping: (-0.05457239484968546, 0.4890548596328611)
-    @test_ci_approx confint(BinomialTest(0, 5), method=:agresti_coull) (0.0, 0.4890548596328611)
+    @test_ci_approx confint(BinomialTest(0, 5), method=:agresti_coull) (0.0,
+                                                                        0.4890548596328611)
     # without clamping: (0.5109451403671388, 1.0545723948496855)
-    @test_ci_approx confint(BinomialTest(5, 5), method=:agresti_coull) (0.5109451403671388, 1.0)
+    @test_ci_approx confint(BinomialTest(5, 5), method=:agresti_coull) (0.5109451403671388,
+                                                                        1.0)
     # without clamping: (-0.15060901623063327, 0.5506090162306333)
     @test_ci_approx confint(BinomialTest(1, 5), method=:wald) (0.0, 0.5506090162306333)
     # without clamping: (0.44939098376936687, 1.1506090162306333)
@@ -101,7 +107,8 @@ end
     show(IOBuffer(), SignTest(x, y))
 
     # www.stat.umn.edu/geyer/old03/5102/notes/rank.pdf
-    x = [-4.7, 3.7, 22.4, 13.6, 8.7, 9.1, -7.8, 10.8, 15.6, 23.5, 14.4, 20.2, 6.5, 10.1, -6.9]
+    x = [-4.7, 3.7, 22.4, 13.6, 8.7, 9.1, -7.8, 10.8, 15.6, 23.5, 14.4, 20.2, 6.5, 10.1,
+         -6.9]
     @test pvalue(SignTest(x)) ≈ 0.03515625
     @test pvalue(SignTest(x), tail=:left) ≈ 0.996307373046875
     @test pvalue(SignTest(x), tail=:right) ≈ 0.017578125000000007

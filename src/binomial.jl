@@ -49,8 +49,7 @@ supported methods to compute confidence intervals.
 
 Implements: [`pvalue`](@ref), [`confint(::BinomialTest)`](@ref)
 """
-BinomialTest(x::AbstractVector{Bool}, p=0.5) =
-    BinomialTest(sum(x), length(x), p)
+BinomialTest(x::AbstractVector{Bool}, p=0.5) = BinomialTest(sum(x), length(x), p)
 
 """
     testname(::HypothesisTest)
@@ -63,7 +62,7 @@ default_tail(test::BinomialTest) = :both
 
 function show_params(io::IO, x::BinomialTest, ident="")
     println(io, ident, "number of observations: $(x.n)")
-    println(io, ident, "number of successes:    $(x.x)")
+    return println(io, ident, "number of successes:    $(x.x)")
 end
 
 StatsAPI.pvalue(x::BinomialTest; tail=:both) = pvalue(Binomial(x.n, x.p), x.x; tail=tail)
@@ -106,13 +105,14 @@ of the following methods. Possible values for `method` are:
   * [Binomial confidence interval on Wikipedia](https://en.wikipedia.org/wiki/
     Binomial_proportion_confidence_interval)
 """
-function StatsAPI.confint(x::BinomialTest; level::Float64=0.95, tail=:both, method=:clopper_pearson)
+function StatsAPI.confint(x::BinomialTest; level::Float64=0.95, tail=:both,
+                          method=:clopper_pearson)
     check_level(level)
 
     if tail == :left
-        (0.0, confint(x, level=1-(1-level)*2, method=method)[2])
+        (0.0, confint(x; level=1-(1-level)*2, method=method)[2])
     elseif tail == :right
-        (confint(x, level=1-(1-level)*2, method=method)[1], 1.0)
+        (confint(x; level=1-(1-level)*2, method=method)[1], 1.0)
     elseif tail == :both
         if method == :clopper_pearson
             ci_clopper_pearson(x, 1-level)
@@ -138,8 +138,8 @@ end
 
 # Clopper-Pearson interval (confidence interval by inversion)
 function ci_clopper_pearson(x::BinomialTest, alpha::Float64=0.05)
-    (x.x == 0 ? 0.0 : quantile(Beta(x.x, x.n - x.x + 1), alpha/2),
-     x.x == x.n ? 1.0 : quantile(Beta(x.x + 1, x.n - x.x), 1-alpha/2))
+    return (x.x == 0 ? 0.0 : quantile(Beta(x.x, x.n - x.x + 1), alpha/2),
+            x.x == x.n ? 1.0 : quantile(Beta(x.x + 1, x.n - x.x), 1-alpha/2))
 end
 
 # Wald interval / normal approximation interval
@@ -148,19 +148,20 @@ function ci_wald(x::BinomialTest, alpha::Float64=0.05)
     σ = sqrt(μ*(1-μ)/x.n)
     lower, upper = (quantile(Normal(μ, σ), alpha/2), quantile(Normal(μ, σ), 1-alpha/2))
     # make sure we stay in [0, 1]
-    (max(lower, 0), min(upper, 1))
+    return (max(lower, 0), min(upper, 1))
 end
 
 # Wald interval with continuity correction
 function ci_waldcc(x::BinomialTest, alpha::Float64=0.05)
     lower, upper = ci_wald(x, alpha)
     correction = 1 // (2 * x.n)
-    (max(lower - correction, 0), min(upper + correction, 1))
+    return (max(lower - correction, 0), min(upper + correction, 1))
 end
 
 # Jeffreys interval
 function ci_jeffrey(x::BinomialTest, alpha::Float64=0.05)
-    (quantile(Beta(x.x + 1/2, x.n - x.x + 1/2), alpha/2), quantile(Beta(x.x + 1/2, x.n - x.x + 1/2), 1-alpha/2))
+    return (quantile(Beta(x.x + 1/2, x.n - x.x + 1/2), alpha/2),
+            quantile(Beta(x.x + 1/2, x.n - x.x + 1/2), 1-alpha/2))
 end
 
 # Agresti-Coull interval
@@ -170,7 +171,7 @@ function ci_agresti_coull(x::BinomialTest, alpha::Float64=0.05)
     μ = (x.x + q^2/2)/n
     σ = sqrt(μ*(1-μ)/n)
     # make sure we stay in [0, 1]
-    (max(μ-q*σ, 0), min(μ+q*σ, 1))
+    return (max(μ-q*σ, 0), min(μ+q*σ, 1))
 end
 
 # Wilson score interval
@@ -183,7 +184,7 @@ function ci_wilson(x::BinomialTest, alpha::Float64=0.05)
     σ = sqrt(p*(1-p)/x.n + q^2/(4x.n^2))
     σ /= denominator
     # make sure we stay in [0, 1]
-    (max(μ-q*σ, 0), min(μ+q*σ, 1))
+    return (max(μ-q*σ, 0), min(μ+q*σ, 1))
 end
 
 # Arcsine transformation interval as based on Cohen's H: https://en.wikipedia.org/wiki/Binomial_proportion_confidence_interval#Arcsine_transformation
@@ -191,7 +192,7 @@ function ci_arcsine(x::BinomialTest, alpha::Float64=0.05)
     q = quantile(Normal(), 1-alpha/2)
     p = x.x / x.n
     z = q/(2*sqrt(x.n))
-    (sin(asin(sqrt(p))-z)^2, sin(asin(sqrt(p))+z)^2)
+    return (sin(asin(sqrt(p))-z)^2, sin(asin(sqrt(p))+z)^2)
 end
 
 ## SIGN TEST
@@ -200,7 +201,7 @@ struct SignTest <: HypothesisTest
     median::Float64
     x::Int
     n::Int
-    data
+    data::Any
 end
 
 """
@@ -213,10 +214,12 @@ hypothesis that the median is not equal to `median`.
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
-SignTest(x::AbstractVector{T}, median::Real=0) where {T<:Real} =
-    SignTest(median, sum(x .> median), sum(x .!= median), sort(x))
-SignTest(x::AbstractVector{T}, y::AbstractVector{S}) where {T<:Real, S<:Real} =
-    SignTest(x - y, 0.0)
+function SignTest(x::AbstractVector{T}, median::Real=0) where {T<:Real}
+    return SignTest(median, sum(x .> median), sum(x .!= median), sort(x))
+end
+function SignTest(x::AbstractVector{T}, y::AbstractVector{S}) where {T<:Real,S<:Real}
+    return SignTest(x - y, 0.0)
+end
 
 testname(::SignTest) = "Sign Test"
 population_param_of_interest(x::SignTest) = ("Median", x.median, median(x.data)) # parameter of interest: name, value under h0, point estimate
@@ -228,7 +231,7 @@ function show_params(io::IO, x::SignTest, ident="")
     maxlen = length(text2)
 
     println(io, ident, text1, repeat(" ", maxlen-length(text1)), x.n)
-    println(io, ident, text2, x.x)
+    return println(io, ident, text2, x.x)
 end
 
 StatsAPI.pvalue(x::SignTest; tail=:both) = pvalue(Binomial(x.n, 0.5), x.x; tail=tail)

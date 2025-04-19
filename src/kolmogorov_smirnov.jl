@@ -23,8 +23,8 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 export
-    ExactOneSampleKSTest,
-    ApproximateOneSampleKSTest, ApproximateTwoSampleKSTest
+       ExactOneSampleKSTest,
+       ApproximateOneSampleKSTest, ApproximateTwoSampleKSTest
 
 abstract type KSTest <: HypothesisTest end
 abstract type ApproximateKSTest <: KSTest end
@@ -36,13 +36,13 @@ default_tail(test::KSTest) = :both
 ## ONE SAMPLE KS-TEST
 
 # compute supremum of differences between target and empirical cdf before and after the jump of the empirical cdf.
-function ksstats(x::AbstractVector{T}, d::UnivariateDistribution) where T<:Real
+function ksstats(x::AbstractVector{T}, d::UnivariateDistribution) where {T<:Real}
     n = length(x)
     cdfs = cdf.(Ref(d), sort(x))
     δp = maximum((1:n) / n - cdfs)
-    δn = -minimum((0:n-1) / n - cdfs)
+    δn = -minimum((0:(n - 1)) / n - cdfs)
     δ = max(δn, δp)
-    (n, δ, δp, δn)
+    return (n, δ, δp, δn)
 end
 
 ### EXACT KOLMOGOROV SMIRNOV TEST
@@ -68,13 +68,13 @@ function ExactOneSampleKSTest(x::AbstractVector{<:Real}, d::UnivariateDistributi
         @warn("This test is inaccurate with ties")
     end
 
-    ExactOneSampleKSTest(ksstats(x, d)...)
+    return ExactOneSampleKSTest(ksstats(x, d)...)
 end
 
 testname(::ExactOneSampleKSTest) = "Exact one sample Kolmogorov-Smirnov test"
 
 function show_params(io::IO, x::ExactOneSampleKSTest, ident="")
-    println(io, ident, "number of observations:   $(x.n)")
+    return println(io, ident, "number of observations:   $(x.n)")
 end
 
 function StatsAPI.pvalue(x::ExactKSTest; tail=:both)
@@ -112,14 +112,14 @@ function ApproximateOneSampleKSTest(x::AbstractVector{<:Real}, d::UnivariateDist
         @warn("This test is inaccurate with ties")
     end
 
-    ApproximateOneSampleKSTest(ksstats(x, d)...)
+    return ApproximateOneSampleKSTest(ksstats(x, d)...)
 end
 
 testname(::ApproximateOneSampleKSTest) = "Approximate one sample Kolmogorov-Smirnov test"
 
 function show_params(io::IO, x::ApproximateOneSampleKSTest, ident="")
     println(io, ident, "number of observations:   $(x.n)")
-    println(io, ident, "KS-statistic:             $(sqrt(x.n)*x.δ)")
+    return println(io, ident, "KS-statistic:             $(sqrt(x.n)*x.δ)")
 end
 
 # one-sided: http://www.encyclopediaofmath.org/index.php/Kolmogorov-Smirnov_test
@@ -161,10 +161,11 @@ Implements: [`pvalue`](@ref)
   * [Approximation of one-sided test (Encyclopedia of Mathematics)
     ](https://www.encyclopediaofmath.org/index.php/Kolmogorov-Smirnov_test)
 """
-function ApproximateTwoSampleKSTest(x::AbstractVector{T}, y::AbstractVector{S}) where {T<:Real, S<:Real}
+function ApproximateTwoSampleKSTest(x::AbstractVector{T},
+                                    y::AbstractVector{S}) where {T<:Real,S<:Real}
     n_x, n_y = length(x), length(y)
 
-    ApproximateTwoSampleKSTest(ksstats(x, y)...)
+    return ApproximateTwoSampleKSTest(ksstats(x, y)...)
 end
 
 testname(::ApproximateTwoSampleKSTest) = "Approximate two sample Kolmogorov-Smirnov test"
@@ -172,7 +173,7 @@ testname(::ApproximateTwoSampleKSTest) = "Approximate two sample Kolmogorov-Smir
 function show_params(io::IO, x::ApproximateTwoSampleKSTest, ident="")
     n = x.n_x*x.n_y/(x.n_x+x.n_y)
     println(io, ident, "number of observations:   [$(x.n_x),$(x.n_y)]")
-    println(io, ident, "KS-statistic:              $(sqrt(n)*x.δ)")
+    return println(io, ident, "KS-statistic:              $(sqrt(n)*x.δ)")
 end
 
 function StatsAPI.pvalue(x::ApproximateTwoSampleKSTest; tail=:both)
@@ -189,7 +190,7 @@ function StatsAPI.pvalue(x::ApproximateTwoSampleKSTest; tail=:both)
 end
 
 # compute supremum of differences between empirical cdfs.
-function ksstats(x::AbstractVector{T}, y::AbstractVector{S}) where {T<:Real, S<:Real}
+function ksstats(x::AbstractVector{T}, y::AbstractVector{S}) where {T<:Real,S<:Real}
     n_x, n_y = length(x), length(y)
     all_values = [x; y]
     sort_idx = sortperm(all_values)
@@ -214,5 +215,5 @@ function ksstats(x::AbstractVector{T}, y::AbstractVector{S}) where {T<:Real, S<:
         end
     end
 
-    (n_x, n_y, max(δp, -δn), δp, -δn)
-end   
+    return (n_x, n_y, max(δp, -δn), δp, -δn)
+end

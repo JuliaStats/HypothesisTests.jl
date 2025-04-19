@@ -55,12 +55,12 @@ Implements: [`pvalue`](@ref)
 function ClarkWestTest(e1::AbstractVector{<:Real}, e2::AbstractVector{<:Real},
                        lookahead::Integer=1)
     length(e1) == length(e2) || throw(DimensionMismatch("inputs must have the same length"))
-    n            = length(e1)
-    d            = 2*e1.*(e1 - e2)
-    cw_cov       = autocov(d, 0:lookahead-1)
-    cw_var       = (cw_cov[1] + 2*sum(@view(cw_cov[2:end])))/n
-    xbar         = mean(d)
-    stderr       = sqrt(cw_var)
+    n = length(e1)
+    d = 2*e1 .* (e1 - e2)
+    cw_cov = autocov(d, 0:(lookahead - 1))
+    cw_var = (cw_cov[1] + 2*sum(@view(cw_cov[2:end])))/n
+    xbar = mean(d)
+    stderr = sqrt(cw_var)
     statistic_cw = xbar/stderr
     return ClarkWestTest(n, xbar, stderr, statistic_cw, 0)
 end
@@ -72,5 +72,5 @@ default_tail(::ClarkWestTest) = :both
 function show_params(io::IO, x::ClarkWestTest, ident)
     println(io, ident, "number of observations:    $(x.n)")
     println(io, ident, "CW statistic:              $(x.z)")
-    println(io, ident, "population standard error: $(x.stderr)")
+    return println(io, ident, "population standard error: $(x.stderr)")
 end

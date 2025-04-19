@@ -12,14 +12,12 @@ using DelimitedFiles
         @test_throws MethodError OneWayANOVATest(["A", "B"], ["C", "D"])
 
         # https://en.wikipedia.org/wiki/One-way_analysis_of_variance#Example
-        groups = [
-            [6, 8, 4, 5, 3, 4],
-            [8, 12, 9, 11, 6, 8],
-            [13, 9, 11, 8, 7, 12]
-        ]
+        groups = [[6, 8, 4, 5, 3, 4],
+                  [8, 12, 9, 11, 6, 8],
+                  [13, 9, 11, 8, 7, 12]]
         t = OneWayANOVATest(groups)
         @test nobs(t) == fill(6, 3)
-        @test dof(t) == (2,15)
+        @test dof(t) == (2, 15)
         @test pvalue(t) ≈ 0.002 atol=1e-3
         @test occursin("reject h_0", sprint(show, t))
 
@@ -51,12 +49,10 @@ using DelimitedFiles
         show(IOBuffer(), t)
 
         # http://www.real-statistics.com/one-way-analysis-of-variance-anova/confidence-interval-anova/
-        groups = [
-            [51, 87, 50, 48, 79, 61, 53],
-            [82, 91, 92, 80, 52, 79, 73, 74],
-            [79, 84, 74, 98, 63, 83, 85, 58],
-            [85, 80, 65, 71, 67, 51],
-        ]
+        groups = [[51, 87, 50, 48, 79, 61, 53],
+                  [82, 91, 92, 80, 52, 79, 73, 74],
+                  [79, 84, 74, 98, 63, 83, 85, 58],
+                  [85, 80, 65, 71, 67, 51]]
         t = OneWayANOVATest(groups)
         @test nobs(t) == [7, 8, 8, 6]
         @test dof(t) == (3, 25)
@@ -66,17 +62,15 @@ using DelimitedFiles
     end
 
     # http://www.real-statistics.com/one-way-analysis-of-variance-anova/homogeneity-variances/levenes-test/
-    groups = [
-        [51, 87, 50, 48, 79, 61, 53, 54],
-        [82, 91, 92, 80, 52, 79, 73, 74],
-        [79, 84, 74, 98, 63, 83, 85, 58],
-        [85, 80, 65, 71, 67, 51, 63, 93],
-    ]
+    groups = [[51, 87, 50, 48, 79, 61, 53, 54],
+              [82, 91, 92, 80, 52, 79, 73, 74],
+              [79, 84, 74, 98, 63, 83, 85, 58],
+              [85, 80, 65, 71, 67, 51, 63, 93]]
     @testset "Levene" begin
         # with means
         l = LeveneTest(groups; statistic=mean)
         @test nobs(l) == fill(8, 4)
-        @test dof(l) == (3,28)
+        @test dof(l) == (3, 28)
         @test pvalue(l) ≈ 0.90357 atol=1e-4
 
         l2 = LeveneTest(groups...; statistic=mean)

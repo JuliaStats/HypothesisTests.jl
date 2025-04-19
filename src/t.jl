@@ -23,7 +23,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 export OneSampleTTest, TwoSampleTTest, EqualVarianceTTest,
-    UnequalVarianceTTest
+       UnequalVarianceTTest
 
 abstract type TTest <: HypothesisTest end
 abstract type TwoSampleTTest <: TTest end
@@ -37,9 +37,9 @@ function StatsAPI.confint(x::TTest; level::Float64=0.95, tail=:both)
     check_level(level)
 
     if tail == :left
-        (-Inf, confint(x, level=1-(1-level)*2)[2])
+        (-Inf, confint(x; level=1-(1-level)*2)[2])
     elseif tail == :right
-        (confint(x, level=1-(1-level)*2)[1], Inf)
+        (confint(x; level=1-(1-level)*2)[1], Inf)
     elseif tail == :both
         q = quantile(TDist(x.df), 1-(1-level)/2)
         (x.xbar-q*x.stderr, x.xbar+q*x.stderr)
@@ -47,7 +47,6 @@ function StatsAPI.confint(x::TTest; level::Float64=0.95, tail=:both)
         throw(ArgumentError("tail=$(tail) is invalid"))
     end
 end
-
 
 ## ONE SAMPLE T-TEST
 
@@ -67,7 +66,7 @@ function show_params(io::IO, x::OneSampleTTest, ident="")
     println(io, ident, "number of observations:   $(x.n)")
     println(io, ident, "t-statistic:              $(x.t)")
     println(io, ident, "degrees of freedom:       $(x.df)")
-    println(io, ident, "empirical standard error: $(x.stderr)")
+    return println(io, ident, "empirical standard error: $(x.stderr)")
 end
 
 """
@@ -83,7 +82,7 @@ function OneSampleTTest(xbar::Real, stddev::Real, n::Int, μ0::Real=0)
     stderr = stddev/sqrt(n)
     t = (xbar-μ0)/stderr
     df = n-1
-    OneSampleTTest(n, xbar, df, stderr, t, μ0)
+    return OneSampleTTest(n, xbar, df, stderr, t, μ0)
 end
 
 """
@@ -95,7 +94,9 @@ does not have mean `μ0`.
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
-OneSampleTTest(v::AbstractVector{T}, μ0::Real=0) where {T<:Real} = OneSampleTTest(mean(v), std(v), length(v), μ0)
+function OneSampleTTest(v::AbstractVector{T}, μ0::Real=0) where {T<:Real}
+    return OneSampleTTest(mean(v), std(v), length(v), μ0)
+end
 
 """
     OneSampleTTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real}, μ0::Real = 0)
@@ -110,12 +111,12 @@ Implements: [`pvalue`](@ref), [`confint`](@ref)
     This test is also known as a t-test for paired or dependent samples, see
     [paired difference test](https://en.wikipedia.org/wiki/Paired_difference_test) on Wikipedia.
 """
-function OneSampleTTest(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0) where {T<:Real, S<:Real}
+function OneSampleTTest(x::AbstractVector{T}, y::AbstractVector{S},
+                        μ0::Real=0) where {T<:Real,S<:Real}
     check_same_length(x, y)
 
-    OneSampleTTest(x - y, μ0)
+    return OneSampleTTest(x - y, μ0)
 end
-
 
 ## TWO SAMPLE T-TEST (EQUAL VARIANCE)
 
@@ -133,7 +134,7 @@ function show_params(io::IO, x::TwoSampleTTest, ident="")
     println(io, ident, "number of observations:   [$(x.n_x),$(x.n_y)]")
     println(io, ident, "t-statistic:              $(x.t)")
     println(io, ident, "degrees of freedom:       $(x.df)")
-    println(io, ident, "empirical standard error: $(x.stderr)")
+    return println(io, ident, "empirical standard error: $(x.stderr)")
 end
 
 testname(::EqualVarianceTTest) = "Two sample t-test (equal variance)"
@@ -149,13 +150,14 @@ means but equal variances.
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
-function EqualVarianceTTest(nx::Int, ny::Int, mx::Real, my::Real, vx::Real, vy::Real, μ0::Real=0)
+function EqualVarianceTTest(nx::Int, ny::Int, mx::Real, my::Real, vx::Real, vy::Real,
+                            μ0::Real=0)
     xbar = mx - my
     stddev = sqrt(((nx - 1) * vx + (ny - 1) * vy) / (nx + ny - 2))
     stderr = stddev * sqrt(1/nx + 1/ny)
     t = (xbar - μ0) / stderr
     df = nx + ny - 2
-    EqualVarianceTTest(nx, ny, xbar, df, stderr, t, μ0)
+    return EqualVarianceTTest(nx, ny, xbar, df, stderr, t, μ0)
 end
 
 """
@@ -167,13 +169,13 @@ have different means but equal variances.
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
-function EqualVarianceTTest(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0) where {T<:Real,S<:Real}
+function EqualVarianceTTest(x::AbstractVector{T}, y::AbstractVector{S},
+                            μ0::Real=0) where {T<:Real,S<:Real}
     nx, ny = length(x), length(y)
     mx, my = mean(x), mean(y)
     vx, vy = var(x), var(y)
-    EqualVarianceTTest(nx, ny, mx, my, vx, vy, μ0)
+    return EqualVarianceTTest(nx, ny, mx, my, vx, vy, μ0)
 end
-
 
 ## TWO SAMPLE T-TEST (UNEQUAL VARIANCE)
 
@@ -206,12 +208,13 @@ equation:
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
-function UnequalVarianceTTest(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0) where {T<:Real,S<:Real}
+function UnequalVarianceTTest(x::AbstractVector{T}, y::AbstractVector{S},
+                              μ0::Real=0) where {T<:Real,S<:Real}
     nx, ny = length(x), length(y)
     xbar = mean(x)-mean(y)
     varx, vary = var(x), var(y)
     stderr = sqrt(varx/nx + vary/ny)
     t = (xbar-μ0)/stderr
     df = (varx / nx + vary / ny)^2 / ((varx / nx)^2 / (nx - 1) + (vary / ny)^2 / (ny - 1))
-    UnequalVarianceTTest(nx, ny, xbar, df, stderr, t, μ0)
+    return UnequalVarianceTTest(nx, ny, xbar, df, stderr, t, μ0)
 end

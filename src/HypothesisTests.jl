@@ -30,13 +30,15 @@ using Combinatorics: combinations, permutations
 using StatsFuns: wilcoxcdf, wilcoxccdf, signrankcdf, signrankccdf
 using Printf: @printf
 
-import StatsAPI
+using StatsAPI: StatsAPI
 using StatsAPI: HypothesisTest, confint, pvalue
 
 export testname, pvalue, confint, dof, nobs
 
-check_same_length(x::AbstractVector, y::AbstractVector) = if length(x) != length(y)
-    throw(DimensionMismatch("Vectors must be the same length"))
+function check_same_length(x::AbstractVector, y::AbstractVector)
+    if length(x) != length(y)
+        throw(DimensionMismatch("Vectors must be the same length"))
+    end
 end
 
 function check_level(level::Float64)
@@ -52,7 +54,7 @@ function check_tail(tail::Symbol)
 end
 
 # Pretty-print
-function Base.show(_io::IO, test::T) where T<:HypothesisTest
+function Base.show(_io::IO, test::T) where {T<:HypothesisTest}
     io = IOContext(_io, :compact=>get(_io, :compact, true))
     println(io, testname(test))
     println(io, repeat("-", length(testname(test))))
@@ -79,7 +81,11 @@ function Base.show(_io::IO, test::T) where T<:HypothesisTest
 
     # test summary
     p = pvalue(test)
-    outcome = if p > 0.05 "fail to reject" else "reject" end
+    outcome = if p > 0.05
+        "fail to reject"
+    else
+        "reject"
+    end
     tail = default_tail(test)
     pval = StatsBase.PValue(p)
     println(io, "Test summary:")
@@ -95,25 +101,27 @@ function Base.show(_io::IO, test::T) where T<:HypothesisTest
 
     # further details
     println(io, "Details:")
-    show_params(io, test, "    ")
+    return show_params(io, test, "    ")
 end
 
 # parameter of interest: name, value under h0, point estimate
-population_param_of_interest(test::T) where {T<:HypothesisTest} = ("not implemented yet", NaN, NaN)
+function population_param_of_interest(test::T) where {T<:HypothesisTest}
+    return ("not implemented yet", NaN, NaN)
+end
 
 # is the test one- or two-sided
 default_tail(test::HypothesisTest) = :undefined
 
-function show_params(io::IO, test::T, ident="") where T<:HypothesisTest
+function show_params(io::IO, test::T, ident="") where {T<:HypothesisTest}
     fieldidx = findall(Bool[t<:Number for t in T.types])
     if !isempty(fieldidx)
         lengths = [length(string(T.names[i])) for i in fieldidx]
         maxlen = maximum(lengths)
 
-        for i = 1:length(fieldidx)
+        for i in 1:length(fieldidx)
             name = T.names[fieldidx[i]]
             print(io, ident, repeat(" ", maxlen-lengths[i]),
-                      replace(string(name), "_", " ", " = "))
+                  replace(string(name), "_", " ", " = "))
             show(io, getfield(test, name))
             println(io)
         end

@@ -23,7 +23,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 export OneSampleZTest, TwoSampleZTest, EqualVarianceZTest,
-    UnequalVarianceZTest
+       UnequalVarianceZTest
 
 abstract type ZTest <: HypothesisTest end
 abstract type TwoSampleZTest <: ZTest end
@@ -37,9 +37,9 @@ function StatsAPI.confint(x::ZTest; level::Float64=0.95, tail=:both)
     check_level(level)
 
     if tail == :left
-        (-Inf, confint(x, level=1-(1-level)*2)[2])
+        (-Inf, confint(x; level=1-(1-level)*2)[2])
     elseif tail == :right
-        (confint(x, level=1-(1-level)*2)[1], Inf)
+        (confint(x; level=1-(1-level)*2)[1], Inf)
     elseif tail == :both
         q = cquantile(Normal(0.0, 1.0), (1-level)/2)
         (x.xbar-q*x.stderr, x.xbar+q*x.stderr)
@@ -47,7 +47,6 @@ function StatsAPI.confint(x::ZTest; level::Float64=0.95, tail=:both)
         throw(ArgumentError("tail=$(tail) is invalid"))
     end
 end
-
 
 ## ONE SAMPLE Z-TEST
 
@@ -65,7 +64,7 @@ population_param_of_interest(x::OneSampleZTest) = ("Mean", x.μ0, x.xbar) # para
 function show_params(io::IO, x::OneSampleZTest, ident="")
     println(io, ident, "number of observations:   $(x.n)")
     println(io, ident, "z-statistic:              $(x.z)")
-    println(io, ident, "population standard error: $(x.stderr)")
+    return println(io, ident, "population standard error: $(x.stderr)")
 end
 
 """
@@ -80,7 +79,7 @@ Implements: [`pvalue`](@ref), [`confint`](@ref)
 function OneSampleZTest(xbar::Real, stddev::Real, n::Int, μ0::Real=0)
     stderr = stddev/sqrt(n)
     z = (xbar-μ0)/stderr
-    OneSampleZTest(n, xbar, stderr, z, μ0)
+    return OneSampleZTest(n, xbar, stderr, z, μ0)
 end
 
 """
@@ -92,7 +91,9 @@ does not have mean `μ0`.
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
-OneSampleZTest(v::AbstractVector{T}, μ0::Real=0) where {T<:Real} = OneSampleZTest(mean(v), std(v), length(v), μ0)
+function OneSampleZTest(v::AbstractVector{T}, μ0::Real=0) where {T<:Real}
+    return OneSampleZTest(mean(v), std(v), length(v), μ0)
+end
 
 """
     OneSampleZTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real}, μ0::Real = 0)
@@ -103,12 +104,12 @@ alternative hypothesis that the distribution does not have mean `μ0`.
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
-function OneSampleZTest(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0) where {T<:Real, S<:Real}
+function OneSampleZTest(x::AbstractVector{T}, y::AbstractVector{S},
+                        μ0::Real=0) where {T<:Real,S<:Real}
     check_same_length(x, y)
 
-    OneSampleZTest(x - y, μ0)
+    return OneSampleZTest(x - y, μ0)
 end
-
 
 ## TWO SAMPLE Z-TEST (EQUAL VARIANCE)
 
@@ -124,7 +125,7 @@ end
 function show_params(io::IO, x::TwoSampleZTest, ident="")
     println(io, ident, "number of observations:   [$(x.n_x),$(x.n_y)]")
     println(io, ident, "z-statistic:              $(x.z)")
-    println(io, ident, "population standard error: $(x.stderr)")
+    return println(io, ident, "population standard error: $(x.stderr)")
 end
 
 testname(::EqualVarianceZTest) = "Two sample z-test (equal variance)"
@@ -139,15 +140,15 @@ have different means but equal variances.
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
-function EqualVarianceZTest(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0) where {T<:Real,S<:Real}
+function EqualVarianceZTest(x::AbstractVector{T}, y::AbstractVector{S},
+                            μ0::Real=0) where {T<:Real,S<:Real}
     nx, ny = length(x), length(y)
     xbar = mean(x) - mean(y)
     stddev = sqrt(((nx - 1) * var(x) + (ny - 1) * var(y)) / (nx + ny - 2))
     stderr = stddev * sqrt(1/nx + 1/ny)
     z = (xbar - μ0) / stderr
-    EqualVarianceZTest(nx, ny, xbar, stderr, z, μ0)
+    return EqualVarianceZTest(nx, ny, xbar, stderr, z, μ0)
 end
-
 
 ## TWO SAMPLE Z-TEST (UNEQUAL VARIANCE)
 
@@ -171,11 +172,12 @@ distributions have different means.
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
-function UnequalVarianceZTest(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0) where {T<:Real,S<:Real}
+function UnequalVarianceZTest(x::AbstractVector{T}, y::AbstractVector{S},
+                              μ0::Real=0) where {T<:Real,S<:Real}
     nx, ny = length(x), length(y)
     xbar = mean(x)-mean(y)
     varx, vary = var(x), var(y)
     stderr = sqrt(varx/nx + vary/ny)
     z = (xbar-μ0)/stderr
-    UnequalVarianceZTest(nx, ny, xbar, stderr, z, μ0)
+    return UnequalVarianceZTest(nx, ny, xbar, stderr, z, μ0)
 end

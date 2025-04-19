@@ -47,7 +47,8 @@ directly.
 
 Implements: [`pvalue`](@ref)
 """
-function MannWhitneyUTest(x::AbstractVector{S}, y::AbstractVector{T}) where {S<:Real,T<:Real}
+function MannWhitneyUTest(x::AbstractVector{S},
+                          y::AbstractVector{T}) where {S<:Real,T<:Real}
     (U, ranks, tieadj, nx, ny, median) = mwustats(x, y)
     if nx + ny <= 10 || (nx + ny <= 50 && tieadj == 0)
         ExactMannWhitneyUTest(U, ranks, tieadj, nx, ny, median)
@@ -63,7 +64,7 @@ function mwustats(x::AbstractVector{<:Real}, y::AbstractVector{<:Real})
     nx = length(x)
     ny = length(y)
     if nx <= ny
-        U = sum(@view(ranks[begin:(begin + (nx-1))])) - nx*(nx+1)/2
+        U = sum(@view(ranks[begin:(begin + (nx - 1))])) - nx*(nx+1)/2
     else
         # Sum of adjusted ranks of first and second sample sums to (nx + ny)*(nx + ny + 1)/2, hence
         # U = (nx + ny)*(nx + ny + 1)/2 - sum(ranks_y) - nx*(nx + 1)/2
@@ -71,7 +72,6 @@ function mwustats(x::AbstractVector{<:Real}, y::AbstractVector{<:Real})
     end
     return (U, ranks, tieadj, nx, ny, median(x)-median(y))
 end
-
 
 ## EXACT MANN-WHITNEY U TEST
 struct ExactMannWhitneyUTest{T<:Real} <: HypothesisTest
@@ -99,11 +99,15 @@ enumeration of permutations, which can be very slow for even moderately sized da
 
 Implements: [`pvalue`](@ref)
 """
-ExactMannWhitneyUTest(x::AbstractVector{S}, y::AbstractVector{T}) where {S<:Real,T<:Real} =
-    ExactMannWhitneyUTest(mwustats(x, y)...)
+function ExactMannWhitneyUTest(x::AbstractVector{S},
+                               y::AbstractVector{T}) where {S<:Real,T<:Real}
+    return ExactMannWhitneyUTest(mwustats(x, y)...)
+end
 
 testname(::ExactMannWhitneyUTest) = "Exact Mann-Whitney U test"
-population_param_of_interest(x::ExactMannWhitneyUTest) = ("Location parameter (pseudomedian)", 0, x.median) # parameter of interest: name, value under h0, point estimate
+function population_param_of_interest(x::ExactMannWhitneyUTest)
+    return ("Location parameter (pseudomedian)", 0, x.median)
+end # parameter of interest: name, value under h0, point estimate
 default_tail(test::ExactMannWhitneyUTest) = :both
 
 function show_params(io::IO, x::ExactMannWhitneyUTest, ident)
@@ -112,9 +116,11 @@ function show_params(io::IO, x::ExactMannWhitneyUTest, ident)
     println(io)
     println(io, ident, "Mann-Whitney-U statistic:             ", x.U)
     print(io, ident, "rank sums:                            ")
-    show(io, [sum(@view(x.ranks[begin:(begin + (x.nx - 1))])), sum(@view(x.ranks[(begin + x.nx):end]))])
+    show(io,
+         [sum(@view(x.ranks[begin:(begin + (x.nx - 1))])),
+          sum(@view(x.ranks[(begin + x.nx):end]))])
     println(io)
-    println(io, ident, "adjustment for ties:                  ", x.tie_adjustment)
+    return println(io, ident, "adjustment for ties:                  ", x.tie_adjustment)
 end
 
 # Enumerate all possible Mann-Whitney U results for a given vector,
@@ -145,7 +151,7 @@ function mwuenumerate(x::ExactMannWhitneyUTest)
         le, gr = gr, le
     end
 
-    (le/tot, gr/tot)
+    return (le/tot, gr/tot)
 end
 
 function StatsAPI.pvalue(x::ExactMannWhitneyUTest; tail=:both)
@@ -211,26 +217,33 @@ where ``\\mathcal{T}`` is the set of the counts of tied values at each tied posi
 Implements: [`pvalue`](@ref)
 """
 function ApproximateMannWhitneyUTest(U::Real, ranks::AbstractVector{T},
-    tie_adjustment::Real, nx::Int, ny::Int, median::Real) where T<:Real
+                                     tie_adjustment::Real, nx::Int, ny::Int,
+                                     median::Real) where {T<:Real}
     n = nx + ny
     nxny = nx * ny
     mu = U - nxny / 2
     sigma = sqrt(nxny / 12 * (n + 1 - tie_adjustment / (n * (n - 1))))
-    ApproximateMannWhitneyUTest(U, ranks, tie_adjustment, nx, ny, median, mu, sigma)
+    return ApproximateMannWhitneyUTest(U, ranks, tie_adjustment, nx, ny, median, mu, sigma)
 end
-ApproximateMannWhitneyUTest(x::AbstractVector{S}, y::AbstractVector{T}) where {S<:Real,T<:Real} =
-    ApproximateMannWhitneyUTest(mwustats(x, y)...)
+function ApproximateMannWhitneyUTest(x::AbstractVector{S},
+                                     y::AbstractVector{T}) where {S<:Real,T<:Real}
+    return ApproximateMannWhitneyUTest(mwustats(x, y)...)
+end
 
 testname(::ApproximateMannWhitneyUTest) = "Approximate Mann-Whitney U test"
-population_param_of_interest(x::ApproximateMannWhitneyUTest) = ("Location parameter (pseudomedian)", 0, x.median) # parameter of interest: name, value under h0, point estimate
+function population_param_of_interest(x::ApproximateMannWhitneyUTest)
+    return ("Location parameter (pseudomedian)", 0, x.median)
+end # parameter of interest: name, value under h0, point estimate
 default_tail(test::ApproximateMannWhitneyUTest) = :both
 
 function show_params(io::IO, x::ApproximateMannWhitneyUTest, ident)
     println(io, ident, "number of observations in each group: ", [x.nx, x.ny])
     println(io, ident, "Mann-Whitney-U statistic:             ", x.U)
-    println(io, ident, "rank sums:                            ", [sum(@view(x.ranks[begin:(begin + (x.nx - 1))])), sum(@view(x.ranks[(begin + x.nx):end]))])
+    println(io, ident, "rank sums:                            ",
+            [sum(@view(x.ranks[begin:(begin + (x.nx - 1))])),
+             sum(@view(x.ranks[(begin + x.nx):end]))])
     println(io, ident, "adjustment for ties:                  ", x.tie_adjustment)
-    println(io, ident, "normal approximation (μ, σ):          ", (x.mu, x.sigma))
+    return println(io, ident, "normal approximation (μ, σ):          ", (x.mu, x.sigma))
 end
 
 function StatsAPI.pvalue(x::ApproximateMannWhitneyUTest; tail=:both)

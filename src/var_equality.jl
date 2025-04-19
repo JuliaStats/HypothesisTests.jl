@@ -2,21 +2,21 @@
 
 export OneWayANOVATest, LeveneTest, BrownForsytheTest, FlignerKilleenTest
 
-struct VarianceEqualityTest{TD <: ContinuousUnivariateDistribution} <: HypothesisTest
+struct VarianceEqualityTest{TD<:ContinuousUnivariateDistribution} <: HypothesisTest
     Nᵢ::Vector{Int}
     SStᵢ::Vector{Float64}
     SSeᵢ::Vector{Float64}
     DFt::Int
     DFe::Int
     # test name, parameter of interest, test statistic name
-    description::Tuple{String, String, String}
+    description::Tuple{String,String,String}
 end
 
-population_param_of_interest(t::VarianceEqualityTest) =
-    (t.description[2], "all equal", NaN)
+population_param_of_interest(t::VarianceEqualityTest) = (t.description[2], "all equal", NaN)
 testname(t::VarianceEqualityTest) = t.description[1]
-teststatisticname(t::VarianceEqualityTest{TD}) where {TD <: ContinuousDistribution} =
-    length(t.description[3]) != 0 ? t.description[3] : (TD <: FDist ? "F" : "χ²")
+function teststatisticname(t::VarianceEqualityTest{TD}) where {TD<:ContinuousDistribution}
+    return length(t.description[3]) != 0 ? t.description[3] : (TD <: FDist ? "F" : "χ²")
+end
 
 StatsAPI.nobs(t::VarianceEqualityTest) = t.Nᵢ
 StatsAPI.dof(t::VarianceEqualityTest{Chisq}) = t.DFt
@@ -25,16 +25,18 @@ StatsAPI.dof(t::VarianceEqualityTest{FDist}) = (t.DFt, t.DFe)
 teststatistic(t::VarianceEqualityTest{FDist}) = (t.DFe/t.DFt)*sum(t.SStᵢ)/sum(t.SSeᵢ)
 function teststatistic(t::VarianceEqualityTest{Chisq})
     y = sum(t.SStᵢ)/sum(t.SSeᵢ)
-    y*(t.DFe+t.DFt)/(1 + y) # sum(t.SStᵢ)/t.s²
+    return y*(t.DFe+t.DFt)/(1 + y) # sum(t.SStᵢ)/t.s²
 end
-StatsAPI.pvalue(t::VarianceEqualityTest{TD}; tail=:right) where {TD <: ContinuousDistribution} =
-    pvalue(TD(dof(t)...), teststatistic(t), tail=tail)
+function StatsAPI.pvalue(t::VarianceEqualityTest{TD};
+                         tail=:right) where {TD<:ContinuousDistribution}
+    return pvalue(TD(dof(t)...), teststatistic(t); tail=tail)
+end
 
 function show_params(io::IO, t::VarianceEqualityTest{TD},
-                     indent="") where {TD <: ContinuousDistribution}
+                     indent="") where {TD<:ContinuousDistribution}
     println(io, indent, "number of observations: ", nobs(t))
     println(io, indent, rpad("$(teststatisticname(t)) statistic:", 24), teststatistic(t))
-    println(io, indent, "degrees of freedom:     ", dof(t))
+    return println(io, indent, "degrees of freedom:     ", dof(t))
 end
 
 function Base.show(io::IOContext, t::VarianceEqualityTest)
@@ -67,7 +69,7 @@ function anova(scores)
     Z̄ = dot(Z̄ᵢ, Nᵢ) / sum(Nᵢ)
     SStᵢ = Nᵢ .* abs2.(Z̄ᵢ .- Z̄)
     SSeᵢ = [sum(z -> abs2(z - z̄ᵢ), scoresᵢ) for (scoresᵢ, z̄ᵢ) in zip(scores, Z̄ᵢ)]
-    (Nᵢ, SStᵢ, SSeᵢ)
+    return (Nᵢ, SStᵢ, SSeᵢ)
 end
 
 anova(scores::AbstractVector{<:Real}...) = anova(scores)
@@ -96,8 +98,9 @@ Implements: [`pvalue`](@ref)
 function OneWayANOVATest(groups)
     Nᵢ, SStᵢ, SSeᵢ = anova(groups)
     k = length(Nᵢ)
-    VarianceEqualityTest{FDist}(Nᵢ, SStᵢ, SSeᵢ, k-1, sum(Nᵢ)-k,
-        ("One-way analysis of variance (ANOVA) test", "Means", "F"))
+    return VarianceEqualityTest{FDist}(Nᵢ, SStᵢ, SSeᵢ, k-1, sum(Nᵢ)-k,
+                                       ("One-way analysis of variance (ANOVA) test",
+                                        "Means", "F"))
 end
 
 OneWayANOVATest(groups::AbstractVector{<:Real}...) = OneWayANOVATest(groups)
@@ -150,12 +153,11 @@ function LeveneTest(groups; scorediff=abs, statistic=mean)
     # anova
     Nᵢ, SStᵢ, SSeᵢ = anova(Zᵢⱼ)
     k = length(Nᵢ)
-    VarianceEqualityTest{FDist}(Nᵢ, SStᵢ, SSeᵢ, k-1, sum(Nᵢ)-k,
-        ("Levene's test", "Variances", "W"))
+    return VarianceEqualityTest{FDist}(Nᵢ, SStᵢ, SSeᵢ, k-1, sum(Nᵢ)-k,
+                                       ("Levene's test", "Variances", "W"))
 end
 
-LeveneTest(groups::AbstractVector{<:Real}...; kwargs...) =
-    LeveneTest(groups; kwargs...)
+LeveneTest(groups::AbstractVector{<:Real}...; kwargs...) = LeveneTest(groups; kwargs...)
 
 """
     BrownForsytheTest(groups)
@@ -226,9 +228,8 @@ function FlignerKilleenTest(groups)
     # anova
     Nᵢ, SStᵢ, SSeᵢ = anova(Qᵢⱼ)
     k = length(Nᵢ)
-    VarianceEqualityTest{Chisq}(Nᵢ, SStᵢ, SSeᵢ, k-1, sum(Nᵢ)-k,
-        ("Fligner-Killeen test", "Variances", "FK"))
+    return VarianceEqualityTest{Chisq}(Nᵢ, SStᵢ, SSeᵢ, k-1, sum(Nᵢ)-k,
+                                       ("Fligner-Killeen test", "Variances", "FK"))
 end
 
-FlignerKilleenTest(groups::AbstractVector{<:Real}...) =
-    FlignerKilleenTest(groups)
+FlignerKilleenTest(groups::AbstractVector{<:Real}...) = FlignerKilleenTest(groups)

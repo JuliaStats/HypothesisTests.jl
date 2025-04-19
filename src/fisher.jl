@@ -69,7 +69,7 @@ struct FisherExactTest <: HypothesisTest
 
     function FisherExactTest(a::Int, b::Int, c::Int, d::Int)
         ω = cond_mle_odds_ratio(a, b, c, d)
-        new(a, b, c, d, ω)
+        return new(a, b, c, d, ω)
     end
 end
 
@@ -79,13 +79,13 @@ default_tail(test::FisherExactTest) = :both
 
 # The sizing argument to print_matrix was removed during the 0.5 dev period
 function _print_matrix(io::IO, X::AbstractVecOrMat, pre::AbstractString)
-    Base.print_matrix(io, X, pre)
+    return Base.print_matrix(io, X, pre)
 end
 
 function show_params(io::IO, x::FisherExactTest, ident="")
     println(io, ident, "contingency table:")
     _print_matrix(io, [x.a x.b; x.c x.d], repeat(ident, 2))
-    println(io)
+    return println(io)
 end
 
 # DOC: for tail=:both there exist multiple ``method``s for computing a pvalue and the corresponding ci.
@@ -128,7 +128,7 @@ function StatsAPI.pvalue(x::FisherExactTest; tail=:both, method=:central)
             throw(ArgumentError("method=$(method) is not implemented yet"))
         end
     else
-        p = pvalue(Hypergeometric(x.a + x.b, x.c + x.d, x.a + x.c), x.a, tail=tail)
+        p = pvalue(Hypergeometric(x.a + x.b, x.c + x.d, x.a + x.c), x.a; tail=tail)
     end
     p = max(min(p, 1.0), 0.0)
 
@@ -149,14 +149,14 @@ function pvalue_both_minlike(x::FisherExactTest, ω::Float64=1.0)
     end
 
     # Add p-values of all tables in other tail equally or less probable
-    for i = a+c:-1:a+1
+    for i in (a + c):-1:(a + 1)
         curp = pdf(dist, i)
         if curp > v
             break
         end
         p += curp
     end
-    p
+    return p
 end
 
 # confidence interval by inversion of p-value
@@ -179,7 +179,8 @@ Fisher's non-central hypergeometric distribution. For `tail = :both`, the only
     Blaker’s exact tests". Biostatistics, Volume 11, Issue 2, 1 April 2010, Pages 373–374,
     [link](https://doi.org/10.1093/biostatistics/kxp050)
 """
-function StatsAPI.confint(x::FisherExactTest; level::Float64=0.95, tail=:both, method=:central)
+function StatsAPI.confint(x::FisherExactTest; level::Float64=0.95, tail=:both,
+                          method=:central)
     check_level(level)
     if x.a == x.c == 0 || x.b == x.d == 0
         return (0.0, Inf)
@@ -203,8 +204,8 @@ function StatsAPI.confint(x::FisherExactTest; level::Float64=0.95, tail=:both, m
         end
     elseif tail == :both
         if method == :central
-            (confint(x, level=1-(1-level)/2, tail=:right)[1],
-             confint(x, level=1-(1-level)/2, tail=:left)[2])
+            (confint(x; level=1-(1-level)/2, tail=:right)[1],
+             confint(x; level=1-(1-level)/2, tail=:left)[2])
         else
             throw(ArgumentError("method=$(method) is not implemented yet"))
         end
@@ -215,14 +216,14 @@ end
 
 ## helpers
 
-function reorder(a,b,c,d)
+function reorder(a, b, c, d)
     if a + c > b + d
         a, b, c, d = b, a, d, c
     end
     if a/c > b/d
         a, b, c, d = c, d, a, b
     end
-    (a, b, c, d)
+    return (a, b, c, d)
 end
 
 # find values x_lower and x_upper, s.t. f(x_lower) < 0 and f(x_upper) > 0 or vice versa

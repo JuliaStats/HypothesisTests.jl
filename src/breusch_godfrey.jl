@@ -47,33 +47,34 @@ uses the first `lag` residuals as starting values, i.e. shortening the sample by
   * [Breusch-Godfrey test on Wikipedia](https://en.wikipedia.org/wiki/Breusch–Godfrey_test)
 """
 function BreuschGodfreyTest(xmat::AbstractArray{T}, e::AbstractVector{T},
-                            lag::Int, start0::Bool=true) where T<:Real
-    n = size(e,1)
-    elag = zeros(Float64,n,lag)
-    for ii = 1:lag  # construct lagged residuals
-        elag[ii+1:end,ii] = e[1:end-ii]
+                            lag::Int, start0::Bool=true) where {T<:Real}
+    n = size(e, 1)
+    elag = zeros(Float64, n, lag)
+    for ii in 1:lag  # construct lagged residuals
+        elag[(ii + 1):end, ii] = e[1:(end - ii)]
     end
 
     offset = start0 ? 0 : lag
 
-    regmat = [xmat[offset+1:end,:] elag[offset+1:end,:]]
-    regcoeff = regmat\e[offset+1:end]
-    resid = e[offset+1:end] - regmat*regcoeff
+    regmat = [xmat[(offset + 1):end, :] elag[(offset + 1):end, :]]
+    regcoeff = regmat\e[(offset + 1):end]
+    resid = e[(offset + 1):end] - regmat*regcoeff
 
-    rsq = 1 - dot(resid,resid)/dot(e[offset+1:end],e[offset+1:end]) # uncentered R^2
+    rsq = 1 - dot(resid, resid)/dot(e[(offset + 1):end], e[(offset + 1):end]) # uncentered R^2
     BG = (n-offset)*rsq
-    BreuschGodfreyTest(n-offset,lag,BG)
+    return BreuschGodfreyTest(n-offset, lag, BG)
 end
 
 testname(::BreuschGodfreyTest) = "Breusch-Godfrey autocorrelation test"
-population_param_of_interest(x::BreuschGodfreyTest) =
-    ("coefficients on lagged residuals up to lag p", "all zero", NaN)
+function population_param_of_interest(x::BreuschGodfreyTest)
+    return ("coefficients on lagged residuals up to lag p", "all zero", NaN)
+end
 default_tail(test::BreuschGodfreyTest) = :right
 
 function show_params(io::IO, x::BreuschGodfreyTest, ident)
     println(io, ident, "number of observations:         ", x.n)
     println(io, ident, "number of lags:                 ", x.lag)
-    println(io, ident, "T*R^2 statistic:                ", x.BG)
+    return println(io, ident, "T*R^2 statistic:                ", x.BG)
 end
 
 StatsAPI.pvalue(x::BreuschGodfreyTest) = pvalue(Chisq(x.lag), x.BG; tail=:right)

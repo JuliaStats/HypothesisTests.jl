@@ -62,7 +62,7 @@ and medium sample sizes and it is a modification to the Jarque-Bera test (Urzua,
 
   * [Jarque-Bera test on Wikipedia](https://en.wikipedia.org/wiki/Jarque–Bera_test)
 """
-function JarqueBeraTest(y::AbstractVector{T}; adjusted::Bool=false) where T<:Real
+function JarqueBeraTest(y::AbstractVector{T}; adjusted::Bool=false) where {T<:Real}
     n = length(y)
     M = Base.promote_op(/, T, typeof(n))
     m1r = m2r = m3r = m4r = zero(M)
@@ -90,17 +90,18 @@ function JarqueBeraTest(y::AbstractVector{T}; adjusted::Bool=false) where T<:Rea
         stat = skew^2 / varskew + (kurt - meankurt)^2 / varkurt
     end
 
-    JarqueBeraTest(n, stat, skew, kurt)
+    return JarqueBeraTest(n, stat, skew, kurt)
 end
 
 testname(::JarqueBeraTest) = "Jarque-Bera normality test"
-population_param_of_interest(x::JarqueBeraTest) =
-    ("skewness and kurtosis", "0 and 3", "$(x.skew) and $(x.kurt)")
+function population_param_of_interest(x::JarqueBeraTest)
+    return ("skewness and kurtosis", "0 and 3", "$(x.skew) and $(x.kurt)")
+end
 default_tail(test::JarqueBeraTest) = :right
 
 function show_params(io::IO, x::JarqueBeraTest, ident)
     println(io, ident, "number of observations:         ", x.n)
-    println(io, ident, "JB statistic:                   ", x.JB)
+    return println(io, ident, "JB statistic:                   ", x.JB)
 end
 
 StatsAPI.pvalue(x::JarqueBeraTest) = pvalue(Chisq(2), x.JB; tail=:right)
