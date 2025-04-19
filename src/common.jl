@@ -22,13 +22,12 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-
 ## COMMON FUNCTIONS
 
 # Tied ranking, also computing the adjustment for ties
 # sum(n^3-n) where n is the number of ties for each data point
 function tiedrank_adj!(ord::AbstractVector, v::AbstractArray)
-    n     = length(v)
+    n = length(v)
     (n == length(ord)) ||
         throw(DimensionMismatch("The length of ord ($(length(ord))) differs from v length ($n)"))
     place = sortperm(v)
@@ -46,7 +45,7 @@ function tiedrank_adj!(ord::AbstractVector, v::AbstractArray)
             t = j - i + 1
             m = sum(i:j) / t
             tieadj += t^3 - t
-            for k = i:j
+            for k in i:j
                 ord[place[k]] = m
             end
         else
@@ -56,15 +55,15 @@ function tiedrank_adj!(ord::AbstractVector, v::AbstractArray)
         i = j + 1
     end
 
-    (ord, tieadj)
+    return (ord, tieadj)
 end
 
 tiedrank_adj(v::AbstractArray) = tiedrank_adj!(Vector{Float64}(undef, length(v)), v)
 
 # Pool covariance matrices, overwriting the first
 function poolcov!(Sx::AbstractMatrix, nxm1::Int, Sy::AbstractMatrix, nym1::Int)
-    @inbounds for i = eachindex(Sx, Sy)
+    @inbounds for i in eachindex(Sx, Sy)
         Sx[i] = (Sx[i] * nxm1 + Sy[i] * nym1) / (nxm1 + nym1)
     end
-    Sx
+    return Sx
 end

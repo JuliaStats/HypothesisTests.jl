@@ -67,17 +67,19 @@ Implements: [`pvalue`](@ref)
   * [Kruskal-Wallis test on Wikipedia
     ](https://en.wikipedia.org/wiki/Kruskal-Wallis_one-way_analysis_of_variance)
 """
-function KruskalWallisTest(groups::AbstractVector{T}...) where T<:Real
+function KruskalWallisTest(groups::AbstractVector{T}...) where {T<:Real}
     (H, R_i, tieadj, n_i) = kwstats(groups...)
     if length(groups)<=3 && any(n_i .< 6)
         @warn("This test is only asymptotically correct and might be inaccurate for the given group size")
     end
     df = length(groups) - 1
-    KruskalWallisTest(n_i, df, R_i, H, tieadj)
+    return KruskalWallisTest(n_i, df, R_i, H, tieadj)
 end
 
 testname(::KruskalWallisTest) = "Kruskal-Wallis rank sum test (chi-square approximation)"
-population_param_of_interest(x::KruskalWallisTest) = ("Location parameters", "all equal", NaN) # parameter of interest: name, value under h0, point estimate
+function population_param_of_interest(x::KruskalWallisTest)
+    return ("Location parameters", "all equal", NaN)
+end # parameter of interest: name, value under h0, point estimate
 default_tail(test::KruskalWallisTest) = :right
 
 function show_params(io::IO, x::KruskalWallisTest, ident)
@@ -89,16 +91,15 @@ function show_params(io::IO, x::KruskalWallisTest, ident)
     show(io, x.R_i)
     println(io)
     println(io, ident, "degrees of freedom:                  ", x.df)
-    println(io, ident, "adjustment for ties:                 ", x.tie_adjustment)
+    return println(io, ident, "adjustment for ties:                 ", x.tie_adjustment)
 end
 
 StatsAPI.pvalue(x::KruskalWallisTest) = pvalue(Chisq(x.df), x.H; tail=:right)
 
-
 ## helper
 
 # Get H, rank sums, and tie adjustment for Kruskal-Wallis test
-function kwstats(groups::AbstractVector{T}...) where T<:Real
+function kwstats(groups::AbstractVector{T}...) where {T<:Real}
     n_i = [length(g) for g in groups]
     n = sum(n_i)
 
@@ -110,7 +111,7 @@ function kwstats(groups::AbstractVector{T}...) where T<:Real
     R_i = Vector{Float64}(undef, length(groups))
     n_end = 0
     for i in 1:length(groups)
-        R_i[i] = sum(ranks[n_end+1:n_end+n_i[i]])
+        R_i[i] = sum(ranks[(n_end + 1):(n_end + n_i[i])])
         n_end += n_i[i]
     end
 
@@ -118,5 +119,5 @@ function kwstats(groups::AbstractVector{T}...) where T<:Real
     H = 12 * sum(R_i .^ 2 ./ n_i) / (n * (n + 1)) - 3 * (n + 1)
     H /= C
 
-    (H, R_i, C, n_i)
+    return (H, R_i, C, n_i)
 end

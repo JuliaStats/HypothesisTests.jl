@@ -58,39 +58,40 @@ Implements: [`pvalue`](@ref)
 # External links
   * [White's test on Wikipedia](https://en.wikipedia.org/wiki/White_test)
 """
-function WhiteTest(X::AbstractMatrix{<:Real}, e::AbstractVector{<:Real}; type = :White)
-    (n,K) = (size(X,1),size(X,2))    #nobs,nvars
+function WhiteTest(X::AbstractMatrix{<:Real}, e::AbstractVector{<:Real}; type=:White)
+    (n, K) = (size(X, 1), size(X, 2))    #nobs,nvars
     n == length(e) || throw(DimensionMismatch("inputs must have the same length"))
 
     K >= 2 || throw(ArgumentError("X must have >= 2 columns"))
 
     intercept_col = false
-    for i = 1:K
-        col           = view(X,:,i)
+    for i in 1:K
+        col = view(X, :, i)
         intercept_col = first(col) != 0 && all(==(first(col)), col)
         intercept_col && break
     end
-    intercept_col || throw(ArgumentError("one of the colums of X must be a non-zero constant"))
+    intercept_col ||
+        throw(ArgumentError("one of the colums of X must be a non-zero constant"))
 
     if type == :linear                    #Breush-Pagan/Koenker
         z = X
     elseif type == :linear_and_squares    #White with linear and squares
-        z = [X X.^2]
+        z = [X X .^ 2]
     else                                      #White with linear, squares and cross-products
-        z = fill(NaN,n,round(Int,K*(K+1)/2))
+        z = fill(NaN, n, round(Int, K*(K+1)/2))
         vv = 1
-        @views for i = 1:K, j = i:K
-            z[:,vv] .= X[:,i] .* X[:,j]       #eg. x1*x1, x1*x2, x2*x2
-            vv      += 1
+        @views for i in 1:K, j in i:K
+            z[:, vv] .= X[:, i] .* X[:, j]       #eg. x1*x1, x1*x2, x2*x2
+            vv += 1
         end
     end
 
     dof = rank(z) - 1                        #number of independent regressors in z
-    e2  = e.^2
-    b   = z\e2
+    e2 = e .^ 2
+    b = z\e2
     res = e2 - z*b
-    R2  = 1 - var(res)/var(e2)
-    lm  = n*R2
+    R2 = 1 - var(res)/var(e2)
+    lm = n*R2
     return WhiteTest(dof, lm, type)
 end
 
@@ -103,17 +104,17 @@ Compute Breusch-Pagan's test for heteroskedasticity.
 This is equivalent to `WhiteTest(X, e, type = :linear)`.
 See [`WhiteTest`](@ref) for further details.
 """
-BreuschPaganTest(X, e) = WhiteTest(X, e, type = :linear)
+BreuschPaganTest(X, e) = WhiteTest(X, e, type=:linear)
 
 testname(t::WhiteTest) = "White's (or Breusch-Pagan's) test for heteroskedasticity"
 
 population_param_of_interest(t::WhiteTest) = ("T*R2", 0, t.lm)
-default_tail(test::WhiteTest)              = :right
+default_tail(test::WhiteTest) = :right
 
-function show_params(io::IO, t::WhiteTest, ident = "")
+function show_params(io::IO, t::WhiteTest, ident="")
     println(io, ident, "T*R^2 statistic:        ", t.lm)
     println(io, ident, "degrees of freedom:     ", t.dof)
-    println(io, ident, "type:                   ", t.type)
+    return println(io, ident, "type:                   ", t.type)
 end
 
 StatsAPI.dof(t::WhiteTest) = t.dof

@@ -49,26 +49,28 @@ model, set `dof=p+q`.
 
   * [Box-Pierce test on Wikipedia](https://en.wikipedia.org/wiki/Ljung–Box_test#Box-Pierce_test)
 """
-function BoxPierceTest(y::AbstractVector{T}, lag::Int, dof::Int=0) where T<:Real
+function BoxPierceTest(y::AbstractVector{T}, lag::Int, dof::Int=0) where {T<:Real}
     if dof>=lag
         throw(ArgumentError("Number of lags has to be larger than degrees of" *
-        " freedom correction"))
+                            " freedom correction"))
     end
-    n = size(y,1)
-    Q = n * first(sum(k -> autocor(y,k:k).^2, 1:lag))
-    BoxPierceTest(y,n,lag,dof,Q)
+    n = size(y, 1)
+    Q = n * first(sum(k -> autocor(y, k:k) .^ 2, 1:lag))
+    return BoxPierceTest(y, n, lag, dof, Q)
 end
 
 testname(::BoxPierceTest) = "Box-Pierce autocorrelation test"
-population_param_of_interest(x::BoxPierceTest) = ("autocorrelations up to lag k",
-    "all zero", NaN)
+function population_param_of_interest(x::BoxPierceTest)
+    return ("autocorrelations up to lag k",
+            "all zero", NaN)
+end
 default_tail(test::BoxPierceTest) = :right
 
 function show_params(io::IO, x::BoxPierceTest, ident)
     println(io, ident, "number of observations:         ", x.n)
     println(io, ident, "number of lags:                 ", x.lag)
     println(io, ident, "degrees of freedom correction:  ", x.dof)
-    println(io, ident, "Q statistic:                    ", x.Q)
+    return println(io, ident, "Q statistic:                    ", x.Q)
 end
 
 StatsAPI.pvalue(x::BoxPierceTest) = pvalue(Chisq(x.lag-x.dof), x.Q; tail=:right)
@@ -98,26 +100,28 @@ model, set `dof=p+q`.
 
   * [Ljung-Box test on Wikipedia](https://en.wikipedia.org/wiki/Ljung–Box_test)
 """
-function LjungBoxTest(y::AbstractVector{T}, lag::Int, dof::Int=0) where T<:Real
+function LjungBoxTest(y::AbstractVector{T}, lag::Int, dof::Int=0) where {T<:Real}
     if dof>=lag
         throw(ArgumentError("Number of lags has to be larger than degrees of" *
-        " freedom correction"))
+                            " freedom correction"))
     end
-    n = size(y,1)
-    Q = n*(n+2)* first(sum(k -> autocor(y,k:k).^2/(n-k), 1:lag))
-    LjungBoxTest(y,n,lag,dof,Q)
+    n = size(y, 1)
+    Q = n * (n+2) * first(sum(k -> autocor(y, k:k) .^ 2/(n-k), 1:lag))
+    return LjungBoxTest(y, n, lag, dof, Q)
 end
 
 testname(::LjungBoxTest) = "Ljung-Box autocorrelation test"
-population_param_of_interest(x::LjungBoxTest) = ("autocorrelations up to lag k",
-    "all zero", NaN)
+function population_param_of_interest(x::LjungBoxTest)
+    return ("autocorrelations up to lag k",
+            "all zero", NaN)
+end
 default_tail(test::LjungBoxTest) = :right
 
 function show_params(io::IO, x::LjungBoxTest, ident)
     println(io, ident, "number of observations:         ", x.n)
     println(io, ident, "number of lags:                 ", x.lag)
     println(io, ident, "degrees of freedom correction:  ", x.dof)
-    println(io, ident, "Q statistic:                    ", x.Q)
+    return println(io, ident, "Q statistic:                    ", x.Q)
 end
 
 StatsAPI.pvalue(x::LjungBoxTest) = pvalue(Chisq(x.lag-x.dof), x.Q; tail=:right)

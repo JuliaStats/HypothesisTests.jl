@@ -43,7 +43,7 @@ directly.
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
-function SignedRankTest(x::AbstractVector{T}) where T<:Real
+function SignedRankTest(x::AbstractVector{T}) where {T<:Real}
     (W, ranks, signs, tie_adjustment, n, median) = signedrankstats(x)
     n_nonzero = length(ranks)
     if n_nonzero <= 15 || (n_nonzero <= 50 && tie_adjustment == 0)
@@ -52,19 +52,21 @@ function SignedRankTest(x::AbstractVector{T}) where T<:Real
         ApproximateSignedRankTest(x, W, ranks, signs, tie_adjustment, n, median)
     end
 end
-SignedRankTest(x::AbstractVector{T}, y::AbstractVector{S}) where {T<:Real,S<:Real} = SignedRankTest(x - y)
+function SignedRankTest(x::AbstractVector{T}, y::AbstractVector{S}) where {T<:Real,S<:Real}
+    return SignedRankTest(x - y)
+end
 
 # Get W and absolute ranks for signed rank test
-function signedrankstats(x::AbstractVector{S}) where S<:Real
-   nonzero_x = x[x .!= 0]
-   (ranks, tieadj) = tiedrank_adj(abs.(nonzero_x))
-   W = 0.0
-   for i = 1:length(nonzero_x)
-       if nonzero_x[i] > 0
-           W += ranks[i]
-       end
-   end
-   (W, ranks, nonzero_x .> 0, tieadj, length(x), median(x))
+function signedrankstats(x::AbstractVector{S}) where {S<:Real}
+    nonzero_x = x[x .!= 0]
+    (ranks, tieadj) = tiedrank_adj(abs.(nonzero_x))
+    W = 0.0
+    for i in 1:length(nonzero_x)
+        if nonzero_x[i] > 0
+            W += ranks[i]
+        end
+    end
+    return (W, ranks, nonzero_x .> 0, tieadj, length(x), median(x))
 end
 
 ## EXACT WILCOXON SIGNED RANK TEST
@@ -91,13 +93,18 @@ enumeration of permutations, which can be very slow for even moderately sized da
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
-ExactSignedRankTest(x::AbstractVector{T}) where {T<:Real} =
-    ExactSignedRankTest(x, signedrankstats(x)...)
-ExactSignedRankTest(x::AbstractVector{S}, y::AbstractVector{T}) where {S<:Real,T<:Real} =
-    ExactSignedRankTest(x - y)
+function ExactSignedRankTest(x::AbstractVector{T}) where {T<:Real}
+    return ExactSignedRankTest(x, signedrankstats(x)...)
+end
+function ExactSignedRankTest(x::AbstractVector{S},
+                             y::AbstractVector{T}) where {S<:Real,T<:Real}
+    return ExactSignedRankTest(x - y)
+end
 
 testname(::ExactSignedRankTest) = "Exact Wilcoxon signed rank test"
-population_param_of_interest(x::ExactSignedRankTest) = ("Location parameter (pseudomedian)", 0, x.median) # parameter of interest: name, value under h0, point estimate
+function population_param_of_interest(x::ExactSignedRankTest)
+    return ("Location parameter (pseudomedian)", 0, x.median)
+end # parameter of interest: name, value under h0, point estimate
 default_tail(test::ExactSignedRankTest) = :both
 
 function show_params(io::IO, x::ExactSignedRankTest, ident)
@@ -106,7 +113,7 @@ function show_params(io::IO, x::ExactSignedRankTest, ident)
     print(io, ident, "rank sums:                   ")
     show(io, [sum(x.ranks[x.signs]), sum(x.ranks[map(!, x.signs)])])
     println(io)
-    println(io, ident, "adjustment for ties:         ", x.tie_adjustment)
+    return println(io, ident, "adjustment for ties:         ", x.tie_adjustment)
 end
 
 # Enumerate all possible Wilcoxon rank-sum results for a given vector, determining left-
@@ -116,7 +123,7 @@ function signedrankenumerate(x::ExactSignedRankTest)
     gr = 0
     n = length(x.ranks)
     tot = 2^n
-    for i = 0:tot-1
+    for i in 0:(tot - 1)
         # Interpret bits of i as signs to generate wp for all possible sign combinations
         Wp = 0
         b = i
@@ -129,7 +136,7 @@ function signedrankenumerate(x::ExactSignedRankTest)
         le += Wp <= x.W
         gr += Wp >= x.W
     end
-    (le/tot, gr/tot)
+    return (le/tot, gr/tot)
 end
 
 function StatsAPI.pvalue(x::ExactSignedRankTest; tail=:both)
@@ -163,8 +170,9 @@ function StatsAPI.pvalue(x::ExactSignedRankTest; tail=:both)
     end
 end
 
-StatsAPI.confint(x::ExactSignedRankTest; level::Real=0.95, tail=:both) = calculate_ci(x.vals, level, tail=tail)
-
+function StatsAPI.confint(x::ExactSignedRankTest; level::Real=0.95, tail=:both)
+    return calculate_ci(x.vals, level; tail=tail)
+end
 
 ## APPROXIMATE SIGNED RANK TEST
 
@@ -199,19 +207,26 @@ where ``\\mathcal{T}`` is the set of the counts of tied values at each tied posi
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
-function ApproximateSignedRankTest(x::Vector, W::Float64, ranks::Vector{T}, signs::BitArray{1}, tie_adjustment::Float64, n::Int, median::Float64) where T<:Real
+function ApproximateSignedRankTest(x::Vector, W::Float64, ranks::Vector{T},
+                                   signs::BitArray{1}, tie_adjustment::Float64, n::Int,
+                                   median::Float64) where {T<:Real}
     nz = length(ranks) # num non-zeros
     mu = W - nz * (nz + 1)/4
     std = sqrt(nz * (nz + 1) * (2 * nz + 1) / 24 - tie_adjustment / 48)
-    ApproximateSignedRankTest(x, W, ranks, signs, tie_adjustment, n, median, mu, std)
+    return ApproximateSignedRankTest(x, W, ranks, signs, tie_adjustment, n, median, mu, std)
 end
-ApproximateSignedRankTest(x::AbstractVector{T}) where {T<:Real} =
-    ApproximateSignedRankTest(x, signedrankstats(x)...)
-ApproximateSignedRankTest(x::AbstractVector{S}, y::AbstractVector{T}) where {S<:Real,T<:Real} =
-    ApproximateSignedRankTest(x - y)
+function ApproximateSignedRankTest(x::AbstractVector{T}) where {T<:Real}
+    return ApproximateSignedRankTest(x, signedrankstats(x)...)
+end
+function ApproximateSignedRankTest(x::AbstractVector{S},
+                                   y::AbstractVector{T}) where {S<:Real,T<:Real}
+    return ApproximateSignedRankTest(x - y)
+end
 
 testname(::ApproximateSignedRankTest) = "Approximate Wilcoxon signed rank test"
-population_param_of_interest(x::ApproximateSignedRankTest) = ("Location parameter (pseudomedian)", 0, x.median) # parameter of interest: name, value under h0, point estimate
+function population_param_of_interest(x::ApproximateSignedRankTest)
+    return ("Location parameter (pseudomedian)", 0, x.median)
+end # parameter of interest: name, value under h0, point estimate
 default_tail(test::ApproximateSignedRankTest) = :both
 
 function show_params(io::IO, x::ApproximateSignedRankTest, ident)
@@ -221,7 +236,7 @@ function show_params(io::IO, x::ApproximateSignedRankTest, ident)
     show(io, [sum(x.ranks[x.signs]), sum(x.ranks[map(!, x.signs)])])
     println(io)
     println(io, ident, "adjustment for ties:         ", x.tie_adjustment)
-    println(io, ident, "normal approximation (μ, σ): ", (x.mu, x.sigma))
+    return println(io, ident, "normal approximation (μ, σ): ", (x.mu, x.sigma))
 end
 
 function StatsAPI.pvalue(x::ApproximateSignedRankTest; tail=:both)
@@ -238,7 +253,9 @@ function StatsAPI.pvalue(x::ApproximateSignedRankTest; tail=:both)
     end
 end
 
-StatsAPI.confint(x::ApproximateSignedRankTest; level::Real=0.95, tail=:both) = calculate_ci(x.vals, level, tail=tail)
+function StatsAPI.confint(x::ApproximateSignedRankTest; level::Real=0.95, tail=:both)
+    return calculate_ci(x.vals, level; tail=tail)
+end
 
 # implementation method inspired by these notes: http://www.stat.umn.edu/geyer/old03/5102/notes/rank.pdf
 function calculate_ci(x::AbstractVector, level::Real=0.95; tail=:both)

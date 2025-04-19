@@ -59,18 +59,19 @@ struct CorrelationTest{T<:Real} <: HypothesisTest
     end
 end
 
-testname(p::CorrelationTest) =
-    string("Test for nonzero ", p.k != 0 ? "partial " : "", "correlation")
+function testname(p::CorrelationTest)
+    return string("Test for nonzero ", p.k != 0 ? "partial " : "", "correlation")
+end
 
 function population_param_of_interest(p::CorrelationTest)
     param = p.k != 0 ? "Partial correlation" : "Correlation"
-    (param, zero(p.r), p.r)
+    return (param, zero(p.r), p.r)
 end
 
 StatsAPI.nobs(p::CorrelationTest) = p.n
 StatsAPI.dof(p::CorrelationTest) = p.n - 2 - p.k
 
-function StatsAPI.confint(test::CorrelationTest{T}, level::Float64=0.95) where T
+function StatsAPI.confint(test::CorrelationTest{T}, level::Float64=0.95) where {T}
     dof(test) > 1 || return (-one(T), one(T))  # Otherwise we can get NaNs
     q = quantile(Normal(), 1 - (1-level) / 2)
     fisher = atanh(test.r)
@@ -81,11 +82,13 @@ function StatsAPI.confint(test::CorrelationTest{T}, level::Float64=0.95) where T
 end
 
 default_tail(::CorrelationTest) = :both
-StatsAPI.pvalue(test::CorrelationTest; tail=:both) = pvalue(TDist(dof(test)), test.t, tail=tail)
+function StatsAPI.pvalue(test::CorrelationTest; tail=:both)
+    return pvalue(TDist(dof(test)), test.t; tail=tail)
+end
 
 function show_params(io::IO, test::CorrelationTest, indent="")
     println(io, indent, "number of observations:          ", nobs(test))
     println(io, indent, "number of conditional variables: ", test.k)
     println(io, indent, "t-statistic:                     ", test.t)
-    println(io, indent, "degrees of freedom:              ", dof(test))
+    return println(io, indent, "degrees of freedom:              ", dof(test))
 end

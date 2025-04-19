@@ -5,7 +5,7 @@ using DelimitedFiles
 @testset "Correlation" begin
     # Columns are line number, calcium, iron
     nutrient = readdlm(joinpath(@__DIR__, "data", "nutrient.txt"))[:, 1:3]
-    w = CorrelationTest(nutrient[:,2], nutrient[:,3])
+    w = CorrelationTest(nutrient[:, 2], nutrient[:, 3])
     let out = sprint(show, w)
         @test occursin("reject h_0", out) && !occursin("fail to", out)
     end
@@ -17,7 +17,7 @@ using DelimitedFiles
     @test dof(w) == 735
     @test pvalue(w) < 1e-25
 
-    x = CorrelationTest(nutrient[:,1], nutrient[:,2])
+    x = CorrelationTest(nutrient[:, 1], nutrient[:, 2])
     @test occursin("fail to reject", sprint(show, x))
     let ci = confint(x)
         @test first(ci) ≈ -0.1105478 atol=1e-6
@@ -28,8 +28,8 @@ end
 
 @testset "Partial correlation" begin
     # Columns are information, similarities, arithmetic, picture completion
-    wechsler = readdlm(joinpath(@__DIR__, "data", "wechsler.txt"))[:,2:end]
-    w = CorrelationTest(wechsler[:,1], wechsler[:,2], wechsler[:,3:4])
+    wechsler = readdlm(joinpath(@__DIR__, "data", "wechsler.txt"))[:, 2:end]
+    w = CorrelationTest(wechsler[:, 1], wechsler[:, 2], wechsler[:, 3:4])
     let out = sprint(show, w)
         @test occursin("reject h_0", out) && !occursin("fail to", out)
     end
@@ -41,11 +41,11 @@ end
     @test dof(w) == 33
     @test pvalue(w) < 0.00001
 
-    X = [ 2 1 0
-          4 2 0
+    X = [2 1 0
+         4 2 0
          15 3 1
          20 4 1]
-    x = CorrelationTest(view(X,:,1), view(X,:,2), view(X,:,3))
+    x = CorrelationTest(view(X, :, 1), view(X, :, 2), view(X, :, 3))
     @test occursin("fail to reject", sprint(show, x))
     @test confint(x) == (-1.0, 1.0)
     @test nobs(x) == 4

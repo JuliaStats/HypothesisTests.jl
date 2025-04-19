@@ -4,14 +4,16 @@ export BartlettTest
 
 abstract type CovarianceEqualityTest <: HypothesisTest end
 
-population_param_of_interest(::CovarianceEqualityTest) =
-    ("Equality of covariance matrices", NaN, NaN)
+function population_param_of_interest(::CovarianceEqualityTest)
+    return ("Equality of covariance matrices", NaN, NaN)
+end
 
 ## Utility functions
 
 # Finite population correction factor
-@inline _correction(p::Int, nxm1::Int, nym1::Int) =
-    1 - ((2p^2 + 3p - 1) * (inv(nxm1) + inv(nym1) - inv(nxm1 + nym1)) / 6(p + 1))
+@inline _correction(p::Int, nxm1::Int, nym1::Int) = 1 - ((2p^2 + 3p - 1) *
+                                                         (inv(nxm1) + inv(nym1) -
+                                                          inv(nxm1 + nym1)) / 6(p + 1))
 
 ## Bartlett's test
 
@@ -56,5 +58,5 @@ function show_params(io::IO, B::BartlettTest, indent="")
     println(io, indent, "number of observations: ", nobs(B))
     println(io, indent, "number of variables:    ", B.p)
     println(io, indent, "χ² statistic:           ", B.L′)
-    println(io, indent, "degrees of freedom:     ", dof(B))
+    return println(io, indent, "degrees of freedom:     ", dof(B))
 end

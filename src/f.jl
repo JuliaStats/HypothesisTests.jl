@@ -60,7 +60,7 @@ default_tail(test::VarianceFTest) = :both
 function show_params(io::IO, x::VarianceFTest, ident)
     println(io, ident, "number of observations: [$(x.n_x), $(x.n_y)]")
     println(io, ident, "F statistic:            $(x.F)")
-    println(io, ident, "degrees of freedom:     [$(x.df_x), $(x.df_y)]")
+    return println(io, ident, "degrees of freedom:     [$(x.df_x), $(x.df_y)]")
 end
 
 function StatsAPI.pvalue(x::VarianceFTest; tail=:both)

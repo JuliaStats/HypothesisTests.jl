@@ -50,13 +50,13 @@ Economic Statistics, 13, 253-263. and `lookahead` is the number of steps ahead o
     mean squared errors. International Journal of forecasting, 13(2), 281-291.
   
 """
-function DieboldMarianoTest(e1::AbstractVector{<:Real}, e2::AbstractVector{<:Real}; 
+function DieboldMarianoTest(e1::AbstractVector{<:Real}, e2::AbstractVector{<:Real};
                             loss::Function=abs2, lookahead::Integer=1)
     length(e1) == length(e2) || throw(DimensionMismatch("inputs must have the same length"))
     n = length(e1)
     # Calculate the loss diferential series based on the loss function g
     d = loss.(e1) .- loss.(e2)
-    dm_cov = autocov(d, collect(0:lookahead-1))
+    dm_cov = autocov(d, collect(0:(lookahead - 1)))
     dm_var = (dm_cov[1] + 2 * sum(dm_cov[2:end]))/n
     # Statistic from the original Diebold-Mariano test 
     xbar_dm = mean(d)
@@ -77,5 +77,5 @@ default_tail(test::DieboldMarianoTest) = :both
 function show_params(io::IO, x::DieboldMarianoTest, ident)
     println(io, ident, "number of observations: $(x.n)")
     println(io, ident, "DM statistic:           $(x.t)")
-    println(io, ident, "degrees of freedom:     $(x.df)")
+    return println(io, ident, "degrees of freedom:     $(x.df)")
 end

@@ -1,10 +1,10 @@
 export ExactPermutationTest, ApproximatePermutationTest
 
-function ptstats(x,y)
-    xy = vcat(x,y)
+function ptstats(x, y)
+    xy = vcat(x, y)
     rx = 1:length(x)
-    ry = (length(xy)-length(y)+1):length(xy)
-    (xy, rx, ry)
+    ry = (length(xy) - length(y) + 1):length(xy)
+    return (xy, rx, ry)
 end
 
 struct PermutationTest{T<:Real} <: HypothesisTest
@@ -20,10 +20,10 @@ that `f(x)` is equal to `f(y)`.  All possible permutations are sampled.
 """
 function ExactPermutationTest(x::AbstractVector{R}, y::AbstractVector{S},
                               f::Function) where {R<:Real,S<:Real}
-    xy, rx, ry = ptstats(x,y)
+    xy, rx, ry = ptstats(x, y)
     P = permutations(xy)
-    samples = [f(view(p,rx)) - f(view(p,ry)) for p in P]
-    PermutationTest(f(x) - f(y), samples)
+    samples = [f(view(p, rx)) - f(view(p, ry)) for p in P]
+    return PermutationTest(f(x) - f(y), samples)
 end
 
 """
@@ -34,15 +34,18 @@ that `f(x)` is equal to `f(y)`.  `n` of the `factorial(length(x)+length(y))`
 permutations are sampled at random. A random number generator can optionally
 be passed as the first argument. The default generator is `Random.default_rng()`.
 """
-function ApproximatePermutationTest(rng::AbstractRNG, x::AbstractVector{R}, y::AbstractVector{S},
+function ApproximatePermutationTest(rng::AbstractRNG, x::AbstractVector{R},
+                                    y::AbstractVector{S},
                                     f::Function, n::Int) where {R<:Real,S<:Real}
-    xy, rx, ry = ptstats(x,y)
-    samples = [(shuffle!(rng, xy); f(view(xy,rx)) - f(view(xy,ry))) for i = 1:n]
-    PermutationTest(f(x) - f(y), samples)
+    xy, rx, ry = ptstats(x, y)
+    samples = [(shuffle!(rng, xy); f(view(xy, rx)) - f(view(xy, ry)))
+               for i in 1:n]
+    return PermutationTest(f(x) - f(y), samples)
 end
-ApproximatePermutationTest(x::AbstractVector{R}, y::AbstractVector{S},
-                           f::Function, n::Int) where {R<:Real,S<:Real} =
-    ApproximatePermutationTest(Random.default_rng(), x, y, f, n)
+function ApproximatePermutationTest(x::AbstractVector{R}, y::AbstractVector{S},
+                                    f::Function, n::Int) where {R<:Real,S<:Real}
+    return ApproximatePermutationTest(Random.default_rng(), x, y, f, n)
+end
 
 function StatsAPI.pvalue(apt::PermutationTest; tail=:both)
     if tail == :both
@@ -61,5 +64,5 @@ function show_params(io::IO, apt::PermutationTest, ident)
     println(io, ident, "observation: ", apt.observation)
     print(io, ident, "samples: ")
     show(io, apt.samples)
-    println(io)
+    return println(io)
 end

@@ -73,22 +73,22 @@ and `:right` (positive serial correlation).
   * [Durbin-Watson test on Wikipedia](https://en.wikipedia.org/wiki/Durbin–Watson_statistic)
 """
 function DurbinWatsonTest(xmat::AbstractArray{T}, e::AbstractArray{T};
-    p_compute::Symbol = :ndep) where T<:Real
-
+                          p_compute::Symbol=:ndep) where {T<:Real}
     n = length(e)
-    DW = sum(diff(e) .^2) / sum(e .^2)
+    DW = sum(diff(e) .^ 2) / sum(e .^ 2)
 
-    DurbinWatsonTest(xmat, n, DW, p_compute)
+    return DurbinWatsonTest(xmat, n, DW, p_compute)
 end
 
 testname(::DurbinWatsonTest) = "Durbin-Watson autocorrelation test"
-population_param_of_interest(x::DurbinWatsonTest) =
-    ("sample autocorrelation parameter", "0", 1 - x.DW / 2)
+function population_param_of_interest(x::DurbinWatsonTest)
+    return ("sample autocorrelation parameter", "0", 1 - x.DW / 2)
+end
 default_tail(test::DurbinWatsonTest) = :both
 
 function show_params(io::IO, x::DurbinWatsonTest, ident)
     println(io, ident, "number of observations:     ", x.n)
-    println(io, ident, "DW statistic:               ", x.DW)
+    return println(io, ident, "DW statistic:               ", x.DW)
 end
 
 """
@@ -113,7 +113,6 @@ elements in `a`, and `n` the number of approximation terms (see Farebrother, 198
 
 """
 function pan_algorithm(a::AbstractArray, x::Float64, m::Int, n::Int)
-
     ν = findfirst(ai -> ai >= x, a)
     if ν == 0 || ν === nothing
         return 1.0
@@ -125,19 +124,30 @@ function pan_algorithm(a::AbstractArray, x::Float64, m::Int, n::Int)
         h = m - ν
 
         if ν <= h
-            d  = 2; h  = ν; k  = - k; j1 = 0; j2 = 2; j3 = 3; j4 = 1
+            d = 2;
+            h = ν;
+            k = - k;
+            j1 = 0;
+            j2 = 2;
+            j3 = 3;
+            j4 = 1
         else
-            d  = - 2; ν  = ν + 2; j1 = m - 2; j2 = m - 1; j3 = m + 1; j4 = m
+            d = - 2;
+            ν = ν + 2;
+            j1 = m - 2;
+            j2 = m - 1;
+            j3 = m + 1;
+            j4 = m
         end
 
         pin = pi / (2n)
         sum = (k + 1) / 2
         sgn = k / n
-        n2  = 2n - 1
+        n2 = 2n - 1
 
         # first integral
-        for  f1 = h - 2 * floor(Int,h/2) : -1 : 0
-            for f2 = j2:d:ν
+        for f1 in (h - 2 * floor(Int, h / 2)):-1:0
+            for f2 in j2:d:ν
                 sum1 = a[j4]
                 if f2 == 0
                     prod = x
@@ -147,7 +157,7 @@ function pan_algorithm(a::AbstractArray, x::Float64, m::Int, n::Int)
                 u = 0.5 * (sum1 + prod)
                 v = 0.5 * (sum1 - prod)
                 sum1 = 0.0
-                for  i = n2:-2:1
+                for i in n2:-2:1
                     y = u - v * cos(i * pin)
                     num = y - x
                     prod = 1.0
@@ -170,15 +180,13 @@ function pan_algorithm(a::AbstractArray, x::Float64, m::Int, n::Int)
                 j1 = j2
             end
             j2 = 0
-            ν  = 0
+            ν = 0
         end
         return sum
     end
-
 end
 
 function StatsAPI.pvalue(x::DurbinWatsonTest; tail=:both)
-
     exact_problem_flag = 0
     if (x.p_compute == :ndep && x.n <= 100) || x.p_compute == :exact
         # p-vales based on Pan's algorithm (see Farebrother, 1980)
@@ -198,8 +206,8 @@ function StatsAPI.pvalue(x::DurbinWatsonTest; tail=:both)
         end
     end
 
-    if exact_problem_flag == 1 || (x.p_compute == :ndep && x.n > 100
-        ) || x.p_compute == :approx
+    if exact_problem_flag == 1 || (x.p_compute == :ndep && x.n > 100) ||
+       x.p_compute == :approx
         # p-values based on normal approximation (see Durbin and Watson, 1950)
 
         # the following derivations follow Durbin and Watson (1951, p. 164)
@@ -209,7 +217,7 @@ function StatsAPI.pvalue(x::DurbinWatsonTest; tail=:both)
 
         AX = zeros(x.n, k)
         AX[[1, x.n], :] = X[[1, x.n], :] - X[[2, x.n - 1], :]
-        for i = 2:(x.n - 1)
+        for i in 2:(x.n - 1)
             AX[i, :] = - X[i - 1, :] + 2 * X[i, :] - X[i + 1, :]
         end
 
@@ -233,5 +241,4 @@ function StatsAPI.pvalue(x::DurbinWatsonTest; tail=:both)
     else
         throw(ArgumentError("tail=$(tail) is invalid"))
     end
-
 end

@@ -36,7 +36,7 @@ function shapiro_wilk_coefs(N::Integer)
         throw(ArgumentError("N must be greater than or equal to 3, got $N"))
     elseif N == 3 # exact
         w = sqrt(2.0) / 2.0
-        return [w,zero(w),-w]
+        return [w, zero(w), -w]
     else
         n = div(N, 2)
         swc = Vector{Float64}(undef, N)

@@ -14,10 +14,10 @@ using StableRNGs
         @test t.n_y == 400
         @test t.df_x == 499
         @test t.df_y == 399
-        @test t.F                    ≈ 0.859582  rtol=1e-5
-        @test pvalue(t)              ≈ 0.109714  rtol=1e-5
-        @test pvalue(t, tail=:left)  ≈ 0.0548572 rtol=1e-5
-        @test pvalue(t, tail=:right) ≈ 0.945143  rtol=1e-5
+        @test t.F ≈ 0.859582 rtol=1e-5
+        @test pvalue(t) ≈ 0.109714 rtol=1e-5
+        @test pvalue(t, tail=:left) ≈ 0.0548572 rtol=1e-5
+        @test pvalue(t, tail=:right) ≈ 0.945143 rtol=1e-5
         @test default_tail(t) == :both
 
         t = VarianceFTest(y2_h0, y1_h0)
@@ -26,10 +26,10 @@ using StableRNGs
         @test t.n_y == 500
         @test t.df_x == 399
         @test t.df_y == 499
-        @test t.F                    ≈ 1.163355  rtol=1e-5
-        @test pvalue(t)              ≈ 0.109714  rtol=1e-5
+        @test t.F ≈ 1.163355 rtol=1e-5
+        @test pvalue(t) ≈ 0.109714 rtol=1e-5
         @test pvalue(t, tail=:right) ≈ 0.0548572 rtol=1e-5
-        @test pvalue(t, tail=:left)  ≈ 0.945143 rtol=1e-5
+        @test pvalue(t, tail=:left) ≈ 0.945143 rtol=1e-5
         @test default_tail(t) == :both
 
         y1_h1 = 0.7*randn(rng, 200)

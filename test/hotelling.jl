@@ -11,11 +11,11 @@ using DelimitedFiles
     # Empty observations
     @test_throws ArgumentError HT.checkdims(rand(0, 4), rand(2, 4))
 
-    Sx = [ 3.0 -1.5 0.0
-          -1.5  1.0 0.5
-           0.0  0.5 1.0]
+    Sx = [3.0 -1.5 0.0
+          -1.5 1.0 0.5
+          0.0 0.5 1.0]
     Sy = fill(4.5, (3, 3))
-    out = [3.5 0.5      1.5
+    out = [3.5 0.5 1.5
            0.5 2.166667 1.833333
            1.5 1.833333 2.166667]
     @test HT.poolcov!(Sx, 2, Sy, 1) ≈ out atol=1e-6
@@ -23,22 +23,22 @@ using DelimitedFiles
     @test Sx ≈ out atol=1e-6
 
     # Positive semi-definite but not positive definite
-    P = [ 1.0000  0.7426  0.1601 -0.7000 0.5500
-          0.7426  1.0000 -0.2133 -0.5818 0.5000
-          0.1601 -0.2133  1.0000 -0.1121 0.1000
-         -0.7000 -0.5818 -0.1121  1.0000 0.4500
-          0.5500  0.5000  0.1000  0.4500 1.0000]
+    P = [1.0000 0.7426 0.1601 -0.7000 0.5500
+         0.7426 1.0000 -0.2133 -0.5818 0.5000
+         0.1601 -0.2133 1.0000 -0.1121 0.1000
+         -0.7000 -0.5818 -0.1121 1.0000 0.4500
+         0.5500 0.5000 0.1000 0.4500 1.0000]
     # Positive definite
-    Q = [ 1.0 -0.5  0.0
-         -0.5  1.0 -0.5
-          0.0 -0.5  1.0]
+    Q = [1.0 -0.5 0.0
+         -0.5 1.0 -0.5
+         0.0 -0.5 1.0]
     @test @inferred(HT.At_Binv_A(ones(5), P)) ≈ -0.8008792 atol=1e-6
     @test @inferred(HT.At_Binv_A(ones(3), Q)) ≈ 10.0
 end
 
 @testset "One sample Hotelling's T²" begin
     # Columns are calcium, iron, protein, vitamin A, vitamin C
-    nutrient = readdlm(joinpath(@__DIR__, "data", "nutrient.txt"))[:,2:end]
+    nutrient = readdlm(joinpath(@__DIR__, "data", "nutrient.txt"))[:, 2:end]
 
     t = OneSampleHotellingT2Test(nutrient, [1000, 15, 60, 800, 75])
     @test nobs(t) == 737
@@ -54,7 +54,7 @@ end
     spouse = readdlm(joinpath(@__DIR__, "data", "spouse.txt"))
 
     # Paired
-    p = OneSampleHotellingT2Test(spouse[:,1:4], spouse[:,5:end])
+    p = OneSampleHotellingT2Test(spouse[:, 1:4], spouse[:, 5:end])
     @test nobs(p) == 30
     @test dof(p) == (4, 26)
     @test pvalue(p) ≈ 0.039369144 atol=1e-6

@@ -2,8 +2,8 @@ export PowerDivergenceTest, ChisqTest, MultinomialLRTest
 
 const Levels{T} = Tuple{UnitRange{T},UnitRange{T}}
 
-function boundproportion(x::T) where T<:Real
-    max(min(convert(Float64,x),1.0),0.0)
+function boundproportion(x::T) where {T<:Real}
+    return max(min(convert(Float64, x), 1.0), 0.0)
 end
 
 struct PowerDivergenceTest <: HypothesisTest
@@ -38,10 +38,14 @@ function testname(x::PowerDivergenceTest)
 end
 
 # parameter of interest: name, value under h0, point estimate
-population_param_of_interest(x::PowerDivergenceTest) = ("Multinomial Probabilities", x.theta0, x.thetahat)
+function population_param_of_interest(x::PowerDivergenceTest)
+    return ("Multinomial Probabilities", x.theta0, x.thetahat)
+end
 default_tail(test::PowerDivergenceTest) = :right
 
-StatsAPI.pvalue(x::PowerDivergenceTest; tail=:right) = pvalue(Chisq(x.df),x.stat; tail=tail)
+function StatsAPI.pvalue(x::PowerDivergenceTest; tail=:right)
+    return pvalue(Chisq(x.df), x.stat; tail=tail)
+end
 
 """
     confint(test::PowerDivergenceTest; level = 0.95, tail = :both, method = :auto)
@@ -72,24 +76,24 @@ function StatsAPI.confint(x::PowerDivergenceTest; level::Float64=0.95,
                           bootstrap_iters::Int64=10000, GC::Bool=true)
     check_level(level)
 
-    m  = length(x.thetahat)
+    m = length(x.thetahat)
 
     if tail == :left
-        i = confint(x, level=1-(1-level)*2, method=method, GC=GC)
+        i = confint(x; level=1-(1-level)*2, method=method, GC=GC)
         Tuple{Float64,Float64}[(0.0, i[j][2]) for j in 1:m]
     elseif tail == :right
-        i = confint(x, level=1-(1-level)*2, method=method, GC=GC)
+        i = confint(x; level=1-(1-level)*2, method=method, GC=GC)
         Tuple{Float64,Float64}[(i[j][1], 1.0) for j in 1:m]
     elseif tail == :both
         if method == :auto
             method = minimum(x.expected) > 100 ? :quesenberry_hurst : :sison_glaz
         end
         if method == :gold
-            ci_gold(x, 1-level, correct=correct, GC=GC)
+            ci_gold(x, 1-level; correct=correct, GC=GC)
         elseif method == :sison_glaz
-            ci_sison_glaz(x, 1-level, skew_correct=correct)
+            ci_sison_glaz(x, 1-level; skew_correct=correct)
         elseif method == :quesenberry_hurst
-            ci_quesenberry_hurst(x, 1-level, GC=GC)
+            ci_quesenberry_hurst(x, 1-level; GC=GC)
         elseif method == :bootstrap
             ci_bootstrap(x, 1-level, bootstrap_iters)
         else
@@ -101,30 +105,41 @@ function StatsAPI.confint(x::PowerDivergenceTest; level::Float64=0.95,
 end
 
 # Bootstrap
-function ci_bootstrap(x::PowerDivergenceTest,alpha::Float64, iters::Int64)
-    m = mapslices(x -> quantile(x, [alpha / 2, 1 - alpha / 2]), rand(Multinomial(x.n, convert(Vector{Float64}, x.thetahat)),iters) / x.n, dims=2)
-    Tuple{Float64,Float64}[(boundproportion(m[i,1]), boundproportion(m[i,2])) for i in 1:length(x.thetahat)]
+function ci_bootstrap(x::PowerDivergenceTest, alpha::Float64, iters::Int64)
+    m = mapslices(x -> quantile(x, [alpha / 2, 1 - alpha / 2]),
+                  rand(Multinomial(x.n, convert(Vector{Float64}, x.thetahat)), iters) / x.n;
+                  dims=2)
+    return Tuple{Float64,Float64}[(boundproportion(m[i, 1]), boundproportion(m[i, 2]))
+                                  for i in 1:length(x.thetahat)]
 end
 
 # Quesenberry, Hurst (1964)
 function ci_quesenberry_hurst(x::PowerDivergenceTest, alpha::Float64; GC::Bool=true)
-    m  = length(x.thetahat)
+    m = length(x.thetahat)
     cv = GC ? quantile(Chisq(1), 1 - alpha / m) : quantile(Chisq(m - 1), 1 - alpha)
 
-    u = (cv .+ 2 .* x.observed .+ sqrt.(cv .* (cv .+ 4 .* x.observed .* (x.n .- x.observed) ./ x.n))) ./ (2 .* (x.n .+ cv))
-    l = (cv .+ 2 .* x.observed .- sqrt.(cv .* (cv .+ 4 .* x.observed .* (x.n .- x.observed) ./ x.n))) ./ (2 .* (x.n .+ cv))
-    Tuple{Float64,Float64}[(boundproportion(l[j]), boundproportion(u[j])) for j in 1:m]
+    u = (cv .+ 2 .* x.observed .+
+         sqrt.(cv .* (cv .+ 4 .* x.observed .* (x.n .- x.observed) ./ x.n))) ./
+        (2 .* (x.n .+ cv))
+    l = (cv .+ 2 .* x.observed .-
+         sqrt.(cv .* (cv .+ 4 .* x.observed .* (x.n .- x.observed) ./ x.n))) ./
+        (2 .* (x.n .+ cv))
+    return Tuple{Float64,Float64}[(boundproportion(l[j]), boundproportion(u[j]))
+                                  for j in 1:m]
 end
 
 # asymptotic simultaneous confidence interval
 # Gold (1963)
 function ci_gold(x::PowerDivergenceTest, alpha::Float64; correct::Bool=true, GC::Bool=true)
-    m  = length(x.thetahat)
+    m = length(x.thetahat)
     cv = GC ? quantile(Chisq(1), 1 - alpha / 2m) : quantile(Chisq(m - 1), 1 - alpha / 2)
 
-    u = [x.thetahat[j] + sqrt.(cv * x.thetahat[j] * (1 - x.thetahat[j]) / x.n) + ifelse(correct, inv(2x.n), 0) for j in 1:m]
-    l = [x.thetahat[j] - sqrt.(cv * x.thetahat[j] * (1 - x.thetahat[j]) / x.n) - ifelse(correct, inv(2x.n), 0) for j in 1:m]
-    Tuple{Float64,Float64}[ (boundproportion(l[j]), boundproportion(u[j])) for j in 1:m]
+    u = [x.thetahat[j] + sqrt.(cv * x.thetahat[j] * (1 - x.thetahat[j]) / x.n) +
+         ifelse(correct, inv(2x.n), 0) for j in 1:m]
+    l = [x.thetahat[j] - sqrt.(cv * x.thetahat[j] * (1 - x.thetahat[j]) / x.n) -
+         ifelse(correct, inv(2x.n), 0) for j in 1:m]
+    return Tuple{Float64,Float64}[(boundproportion(l[j]), boundproportion(u[j]))
+                                  for j in 1:m]
 end
 
 # Simultaneous confidence interval
@@ -155,9 +170,9 @@ function ci_sison_glaz(x::PowerDivergenceTest, alpha::Float64; skew_correct::Boo
                 plar = cdf(Poisson(lambda), a - r)
                 plbr = cdf(Poisson(lambda), b - r - 1)
 
-                poisA = ifelse( (a - r) >= 0, poislama - plar, poislama)
+                poisA = ifelse((a - r) >= 0, poislama - plar, poislama)
                 poisB = 0.0
-                if  (b - r - 1) >= 0
+                if (b - r - 1) >= 0
                     poisB = poislamb - plbr
                 end
                 if (b - r - 1) < 0 && b - 1 >= 0
@@ -172,18 +187,20 @@ function ci_sison_glaz(x::PowerDivergenceTest, alpha::Float64; skew_correct::Boo
             m1[i] = mu[1]
             m2[i] = mu[2] + mu[1] - mu[1]^2
             m3[i] = mu[3] + mu[2] * (3 - 3mu[1]) + (mu[1] - 3mu[1]^2 + 2mu[1]^3)
-            m4[i] = mu[4] + mu[3] * (6 - 4mu[1]) + mu[2] * (7 - 12mu[1] + 6mu[1]^2) + mu[1] - 4mu[1]^2 + 6mu[1]^3 - 3mu[1]^4
+            m4[i] = mu[4] + mu[3] * (6 - 4mu[1]) + mu[2] * (7 - 12mu[1] + 6mu[1]^2) +
+                    mu[1] - 4mu[1]^2 + 6mu[1]^3 - 3mu[1]^4
             m5[i] = den
         end
         for i in 1:k
             m4[i] -= 3m2[i]^2
         end
         s1, s2, s3, s4 = sum(m1), sum(m2), sum(m3), sum(m4)
-        z  = (x.n - s1) / sqrt(s2)
+        z = (x.n - s1) / sqrt(s2)
         g1 = s3 / s2^(3/2)
         g2 = s4 / s2^2
 
-        poly = 1 + g1 * (z^3 - 3z) / 6 + g2 * (z^4 - 6z^2 + 3) / 24 + g1^2 * (z^6 - 15z^4 + 45z^2 - 15) / 72
+        poly = 1 + g1 * (z^3 - 3z) / 6 + g2 * (z^4 - 6z^2 + 3) / 24 +
+               g1^2 * (z^6 - 15z^4 + 45z^2 - 15) / 72
         f = poly * exp(-z^2 / 2) / sqrt(2π)
         probx = prod(m5)
 
@@ -208,21 +225,23 @@ function ci_sison_glaz(x::PowerDivergenceTest, alpha::Float64; skew_correct::Boo
     vol1 = 1
     vol2 = 1
     for i in 1:k
-        num[i,1] = i
+        num[i, 1] = i
         cn = c / x.n
         onen = 1 / x.n
-        out[i,1] = x.thetahat[i]
+        out[i, 1] = x.thetahat[i]
 
-        out[i,2] = max(x.thetahat[i] - cn, 0)
-        out[i,3] = min(x.thetahat[i] + cn + 2delta / x.n, 1)
+        out[i, 2] = max(x.thetahat[i] - cn, 0)
+        out[i, 3] = min(x.thetahat[i] + cn + 2delta / x.n, 1)
 
-        out[i,4] = max(x.thetahat[i] - cn - onen, 0)
-        out[i,5] = min(x.thetahat[i] + cn + onen, 1)
+        out[i, 4] = max(x.thetahat[i] - cn - onen, 0)
+        out[i, 5] = min(x.thetahat[i] + cn + onen, 1)
     end
     if skew_correct
-        return Tuple{Float64,Float64}[(boundproportion(out[i,2]), boundproportion(out[i,3])) for i in 1:k]
+        return Tuple{Float64,Float64}[(boundproportion(out[i, 2]),
+                                       boundproportion(out[i, 3])) for i in 1:k]
     else
-        return Tuple{Float64,Float64}[(boundproportion(out[i,4]), boundproportion(out[i,5])) for i in 1:k]
+        return Tuple{Float64,Float64}[(boundproportion(out[i, 4]),
+                                       boundproportion(out[i, 5])) for i in 1:k]
     end
 end
 
@@ -284,31 +303,36 @@ Implements: [`pvalue`](@ref), [`confint(::PowerDivergenceTest)`](@ref)
 
   * Agresti, Alan. Categorical Data Analysis, 3rd Edition. Wiley, 2013.
 """
-function PowerDivergenceTest(x::AbstractMatrix{T}; lambda::U=1.0, theta0::Vector{U} = ones(length(x))/length(x)) where {T<:Integer,U<:AbstractFloat}
-
+function PowerDivergenceTest(x::AbstractMatrix{T}; lambda::U=1.0,
+                             theta0::Vector{U}=ones(length(x))/length(x)) where {T<:Integer,
+                                                                                 U<:AbstractFloat}
     nrows, ncols = size(x)
     n = sum(x)
 
     #validate date
-    (any(x .< 0) || any(!isfinite, x)) && throw(ArgumentError("all entries must be nonnegative and finite"))
+    (any(x .< 0) || any(!isfinite, x)) &&
+        throw(ArgumentError("all entries must be nonnegative and finite"))
     n == 0 && throw(ArgumentError("at least one entry must be positive"))
-    (!isfinite(nrows) || !isfinite(ncols) || !isfinite(nrows*ncols)) && throw(ArgumentError("invalid number of rows or columns"))
+    (!isfinite(nrows) || !isfinite(ncols) || !isfinite(nrows*ncols)) &&
+        throw(ArgumentError("invalid number of rows or columns"))
 
     if nrows > 1 && ncols > 1
-        rowsums = sum(x, dims=2)
-        colsums = sum(x, dims=1)
+        rowsums = sum(x; dims=2)
+        colsums = sum(x; dims=1)
         df = (nrows - 1) * (ncols - 1)
         thetahat = x ./ n
         xhat = rowsums * colsums / n
         theta0 = xhat / n
-        V = Float64[(colsums[j]/n) * (rowsums[i]/n) * (1 - rowsums[i]/n) * (n - colsums[j]) for i in 1:nrows, j in 1:ncols]
+        V = Float64[(colsums[j]/n) * (rowsums[i]/n) * (1 - rowsums[i]/n) * (n - colsums[j])
+                    for i in 1:nrows, j in 1:ncols]
     elseif nrows == 1 || ncols == 1
         df = length(x) - 1
         xhat = reshape(n * theta0, size(x))
         thetahat = x / n
         V = reshape(n .* theta0 .* (1 .- theta0), size(x))
 
-        abs(1 - sum(theta0)) <= sqrt(eps()) || throw(ArgumentError("Probabilities must sum to one"))
+        abs(1 - sum(theta0)) <= sqrt(eps()) ||
+            throw(ArgumentError("Probabilities must sum to one"))
     else
         throw(ArgumentError("Number of rows or columns must be at least 1"))
     end
@@ -331,24 +355,30 @@ function PowerDivergenceTest(x::AbstractMatrix{T}; lambda::U=1.0, theta0::Vector
         stat *= 2 / (lambda * (lambda + 1))
     end
 
-    PowerDivergenceTest(lambda, vec(theta0), stat, df, x, n, vec(thetahat), xhat, (x - xhat) ./ sqrt.(xhat), (x - xhat) ./ sqrt.(V))
+    return PowerDivergenceTest(lambda, vec(theta0), stat, df, x, n, vec(thetahat), xhat,
+                               (x - xhat) ./ sqrt.(xhat), (x - xhat) ./ sqrt.(V))
 end
 
 #convenience functions
 
 #PDT
-function PowerDivergenceTest(x::AbstractVector{T}, y::AbstractVector{T}, levels::Levels{T}; lambda::U=1.0) where {T<:Integer,U<:AbstractFloat}
+function PowerDivergenceTest(x::AbstractVector{T}, y::AbstractVector{T}, levels::Levels{T};
+                             lambda::U=1.0) where {T<:Integer,U<:AbstractFloat}
     d = counts(x, y, levels)
-    PowerDivergenceTest(d, lambda=lambda)
+    return PowerDivergenceTest(d; lambda=lambda)
 end
 
-function PowerDivergenceTest(x::AbstractVector{T}, y::AbstractVector{T}, k::T; lambda::U=1.0) where {T<:Integer,U<:AbstractFloat}
+function PowerDivergenceTest(x::AbstractVector{T}, y::AbstractVector{T}, k::T;
+                             lambda::U=1.0) where {T<:Integer,U<:AbstractFloat}
     d = counts(x, y, k)
-    PowerDivergenceTest(d, lambda=lambda)
+    return PowerDivergenceTest(d; lambda=lambda)
 end
 
-PowerDivergenceTest(x::AbstractVector{T}; lambda::U=1.0, theta0::Vector{U} = ones(length(x))/length(x)) where {T<:Integer,U<:AbstractFloat} =
-    PowerDivergenceTest(reshape(x, length(x), 1), lambda=lambda, theta0=theta0)
+function PowerDivergenceTest(x::AbstractVector{T}; lambda::U=1.0,
+                             theta0::Vector{U}=ones(length(x))/length(x)) where {T<:Integer,
+                                                                                 U<:AbstractFloat}
+    return PowerDivergenceTest(reshape(x, length(x), 1); lambda=lambda, theta0=theta0)
+end
 
 #ChisqTest
 """
@@ -378,27 +408,31 @@ Note that the entries of `x` (and `y` if provided) must be non-negative integers
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
-function ChisqTest(x::AbstractMatrix{T}) where T<:Integer
-    PowerDivergenceTest(x, lambda=1.0)
+function ChisqTest(x::AbstractMatrix{T}) where {T<:Integer}
+    return PowerDivergenceTest(x; lambda=1.0)
 end
 
-function ChisqTest(x::AbstractVector{T}, y::AbstractVector{T}, levels::Levels{T}) where T<:Integer
+function ChisqTest(x::AbstractVector{T}, y::AbstractVector{T},
+                   levels::Levels{T}) where {T<:Integer}
     d = counts(x, y, levels)
-    PowerDivergenceTest(d, lambda=1.0)
+    return PowerDivergenceTest(d; lambda=1.0)
 end
 
-function ChisqTest(x::AbstractVector{T}, y::AbstractVector{T}, k::T) where T<:Integer
+function ChisqTest(x::AbstractVector{T}, y::AbstractVector{T}, k::T) where {T<:Integer}
     d = counts(x, y, k)
-    PowerDivergenceTest(d, lambda=1.0)
+    return PowerDivergenceTest(d; lambda=1.0)
 end
 
 function ChisqTest(x::AbstractVector{T}, y::AbstractVector{T}) where {T<:Integer}
     theta0 = y ./ sum(y)
-    PowerDivergenceTest(reshape(x, length(x), 1), lambda=1.0, theta0=theta0)
+    return PowerDivergenceTest(reshape(x, length(x), 1); lambda=1.0, theta0=theta0)
 end
 
-ChisqTest(x::AbstractVector{T}, theta0::Vector{U} = ones(length(x))/length(x)) where {T<:Integer,U<:AbstractFloat} =
-    PowerDivergenceTest(reshape(x, length(x), 1), lambda=1.0, theta0=theta0)
+function ChisqTest(x::AbstractVector{T},
+                   theta0::Vector{U}=ones(length(x))/length(x)) where {T<:Integer,
+                                                                       U<:AbstractFloat}
+    return PowerDivergenceTest(reshape(x, length(x), 1); lambda=1.0, theta0=theta0)
+end
 
 #MultinomialLRTest
 """
@@ -423,22 +457,27 @@ Note that the entries of `x` (and `y` if provided) must be non-negative integers
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
-function MultinomialLRTest(x::AbstractMatrix{T}) where T<:Integer
-    PowerDivergenceTest(x, lambda=0.0)
+function MultinomialLRTest(x::AbstractMatrix{T}) where {T<:Integer}
+    return PowerDivergenceTest(x; lambda=0.0)
 end
 
-function MultinomialLRTest(x::AbstractVector{T}, y::AbstractVector{T}, levels::Levels{T}) where T<:Integer
+function MultinomialLRTest(x::AbstractVector{T}, y::AbstractVector{T},
+                           levels::Levels{T}) where {T<:Integer}
     d = counts(x, y, levels)
-    PowerDivergenceTest(d, lambda=0.0)
+    return PowerDivergenceTest(d; lambda=0.0)
 end
 
-function MultinomialLRTest(x::AbstractVector{T}, y::AbstractVector{T}, k::T) where T<:Integer
+function MultinomialLRTest(x::AbstractVector{T}, y::AbstractVector{T},
+                           k::T) where {T<:Integer}
     d = counts(x, y, k)
-    PowerDivergenceTest(d, lambda=0.0)
+    return PowerDivergenceTest(d; lambda=0.0)
 end
 
-MultinomialLRTest(x::AbstractVector{T}, theta0::Vector{U} = ones(length(x))/length(x)) where {T<:Integer,U<:AbstractFloat} =
-    PowerDivergenceTest(reshape(x, length(x), 1), lambda=0.0, theta0=theta0)
+function MultinomialLRTest(x::AbstractVector{T},
+                           theta0::Vector{U}=ones(length(x))/length(x)) where {T<:Integer,
+                                                                               U<:AbstractFloat}
+    return PowerDivergenceTest(reshape(x, length(x), 1); lambda=0.0, theta0=theta0)
+end
 
 function show_params(io::IO, x::PowerDivergenceTest, ident="")
     println(io, ident, "Sample size:        $(x.n)")
@@ -449,5 +488,5 @@ function show_params(io::IO, x::PowerDivergenceTest, ident="")
     println(io)
     print(io, ident, "std. residuals:     ")
     show(io, vec(x.stdresiduals))
-    println(io)
+    return println(io)
 end
