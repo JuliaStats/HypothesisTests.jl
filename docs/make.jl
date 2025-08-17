@@ -3,6 +3,9 @@ using Documenter, HypothesisTests
 makedocs(
     modules = [HypothesisTests],
     sitename = "HypothesisTests.jl",
+    format = Documenter.HTML(
+        assets = ["assets/favicon.ico"],
+    ),
     pages = [
         "index.md",
         "methods.md",
@@ -11,7 +14,7 @@ makedocs(
         "time_series.md",
         "multivariate.md",
     ],
-    checkdocs = :exports
+    checkdocs = :exports,
 )
 
 deploydocs(
