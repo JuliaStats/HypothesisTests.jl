@@ -4,6 +4,7 @@ HypothesisTests = "09f84164-cd44-5f33-b23f-e6b0d136a0d5"
 
 [compat]
 Documenter = "1"
+HypothesisTests = "0.11"
 
 [sources]
 HypothesisTests = {path = ".."}
