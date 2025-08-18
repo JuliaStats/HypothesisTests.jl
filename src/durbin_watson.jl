@@ -57,16 +57,12 @@ and `:right` (positive serial correlation).
 
 # References
 
-  * J. Durbin and G. S. Watson, 1951, "Testing for Serial Correlation in Least Squares
-    Regression: II", Biometrika, Vol. 38, No. 1/2, pp. 159-177,
-    [http://www.jstor.org/stable/2332325](http://www.jstor.org/stable/2332325).
-  * J. Durbin and G. S. Watson, 1950, "Testing for Serial Correlation in Least Squares
-    Regression: I", Biometrika, Vol. 37, No. 3/4, pp. 409-428,
-    [http://www.jstor.org/stable/2332391](http://www.jstor.org/stable/2332391).
-  * R. W. Farebrother, 1980, "Algorithm AS 153: Pan's Procedure for the Tail Probabilities
-    of the Durbin-Watson Statistic", Journal of the Royal Statistical Society, Series C
-    (Applied Statistics), Vol. 29, No. 2, pp. 224-227,
-    [http://www.jstor.org/stable/2986316](http://www.jstor.org/stable/2986316).
+  * [Durbin and Watson (1951). Testing for Serial Correlation in Least Squares Regression:
+     II](@cite durbin1951)
+  * [Durbin and Watson (1950). Testing for Serial Correlation in Least Squares Regression:
+     I](@cite durbin1950)
+  * [Farebrother (1980). Algorithm AS 153: Pan's Procedure for the Tail Probabilities of
+     the Durbin-Watson Statistic](@cite farebrother1980)
 
 # External links
 
@@ -103,13 +99,10 @@ elements in `a`, and `n` the number of approximation terms (see Farebrother, 198
 
 # References
 
-  * J. Durbin and G. S. Watson, 1971, "Testing for Serial Correlation in Least Squares
-  Regression: III", Biometrika, Vol. 58, No. 1, pp. 1-19,
-  [http://www.jstor.org/stable/2334313](http://www.jstor.org/stable/2334313).
-  * R. W. Farebrother, 1980, "Algorithm AS 153: Pan's Procedure for the Tail Probabilities
-  of the Durbin-Watson Statistic", Journal of the Royal Statistical Society, Series C
-  (Applied Statistics), Vol. 29, No. 2, pp. 224-227,
-  [http://www.jstor.org/stable/2986316](http://www.jstor.org/stable/2986316).
+  * [Durbin and Watson (1971). Testing for Serial Correlation in Least Squares Regression:
+     III](@cite durbin1971)
+  * [Farebrother (1980). Algorithm AS 153: Pan's Procedure for the Tail Probabilities of the
+     Durbin-Watson Statistic](@cite farebrother1980)
 
 """
 function pan_algorithm(a::AbstractArray, x::Float64, m::Int, n::Int)

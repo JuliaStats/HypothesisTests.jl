@@ -51,9 +51,11 @@ test statistic is large enough.
 Implements: [`pvalue`](@ref)
 
 # References
-  * H. White, (1980): A heteroskedasticity-consistent covariance matrix estimator and a direct test for heteroskedasticity, Econometrica, 48, 817-838.
-  * T.S. Breusch & A.R. Pagan (1979), A simple test for heteroscedasticity and random coefficient variation, Econometrica, 47, 1287-1294
-  * R. Koenker (1981), A note on studentizing a test for heteroscedasticity, Journal of Econometrics, 17, 107-112
+  * [White (1980). A Heteroskedasticity-Consistent Covariance Matrix Estimator and a Direct
+     Test for Heteroskedasticity](@cite white1980)
+  * [Breusch and Pagan (1979). A Simple Test for Heteroscedasticity and
+     Random Coefficient Variation](@cite breusch1979)
+  * [Koenker (1981). A Note on Studentizing a Test for Heteroscedasticity](@cite koenker1981)
 
 # External links
   * [White's test on Wikipedia](https://en.wikipedia.org/wiki/White_test)

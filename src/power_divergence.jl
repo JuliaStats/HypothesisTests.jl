@@ -58,14 +58,12 @@ one of the following methods. Possible values for `method` are:
 
 # References
 
-  * Agresti, Alan. Categorical Data Analysis, 3rd Edition. Wiley, 2013.
-  * Sison, C.P and Glaz, J. Simultaneous confidence intervals and sample size determination
-    for multinomial proportions. Journal of the American Statistical Association,
-    90:366-369, 1995.
-  * Quesensberry, C.P. and Hurst, D.C. Large Sample Simultaneous Confidence Intervals for
-    Multinational Proportions. Technometrics, 6:191-195, 1964.
-  * Gold, R. Z. Tests Auxiliary to ``χ^2`` Tests in a Markov Chain. Annals of
-    Mathematical Statistics, 30:56-74, 1963.
+  * [Agresti (2013). Categorical Data Analysis](@cite agresti2013)
+  * [Sison and Glaz (1995). Simultaneous Confidence Intervals and Sample Size Determination
+     for Multinomial Proportions](@cite sison1995)
+  * [Quesenberry and Hurst (1964). Large Sample Simultaneous Confidence Intervals for
+     Multinomial Proportions](@cite quesenberry1964)
+  * [Gold (1963). Tests Auxiliary to ``χ^2`` Tests in a Markov Chain](@cite gold1963)
 """
 function StatsAPI.confint(x::PowerDivergenceTest; level::Float64=0.95,
                           tail::Symbol=:both, method::Symbol=:auto, correct::Bool=true,
@@ -282,7 +280,7 @@ Implements: [`pvalue`](@ref), [`confint(::PowerDivergenceTest)`](@ref)
 
 # References
 
-  * Agresti, Alan. Categorical Data Analysis, 3rd Edition. Wiley, 2013.
+  * [Agresti (2013). Categorical Data Analysis](@cite agresti2013)
 """
 function PowerDivergenceTest(x::AbstractMatrix{T}; lambda::U=1.0, theta0::Vector{U} = ones(length(x))/length(x)) where {T<:Integer,U<:AbstractFloat}
 

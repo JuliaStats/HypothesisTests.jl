@@ -96,10 +96,9 @@ of the following methods. Possible values for `method` are:
 
 # References
 
-  * Brown, L.D., Cai, T.T., and DasGupta, A. Interval estimation for a binomial proportion.
-    Statistical Science, 16(2):101–117, 2001.
-  * Pires, Ana & Amado, Conceição. (2008). Interval Estimators for a Binomial Proportion: 
-    Comparison of Twenty Methods. REVSTAT. 6. 10.57805/revstat.v6i2.63.
+  * [Brown, Cai, and DasGupta (2001). Interval estimation for a binomial proportion.](@cite brown2001)
+  * [Pires and Amado (2008). Interval Estimators for a Binomial Proportion:
+     Comparison of Twenty Methods](@cite pires2008)
 
 # External links
 

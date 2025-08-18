@@ -58,9 +58,9 @@ Implements: [`pvalue`](@ref)
 
 # References
 
-  * Meyer, J.P, Seaman, M.A., Expanded tables of critical values for the Kruskal-Wallis
-    H statistic. Paper presented at the annual meeting of the American Educational Research
-    Association, San Francisco, April 2006.
+  * [Meyer and Seaman (2008). Expanded Table of the Kruskal-Wallis Statistic](@cite meyer2008)
+  * [Meyer and Seaman (2013). A Comparison of the Exact Kruskal-Wallis Distribution to
+     Asymptotic Approximations for All Sample Sizes up to 105](@cite meyer2013)
 
 # External links
 
