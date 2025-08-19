@@ -96,7 +96,7 @@ of the following methods. Possible values for `method` are:
 
 # References
 
-  * [Brown, Cai, and DasGupta (2001). Interval estimation for a binomial proportion.](@cite brown2001)
+  * [Brown, Cai, and DasGupta (2001). Interval estimation for a binomial proportion](@cite brown2001)
   * [Pires and Amado (2008). Interval Estimators for a Binomial Proportion:
      Comparison of Twenty Methods](@cite pires2008)
 
