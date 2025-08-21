@@ -111,8 +111,7 @@ Implements: [`pvalue`](@ref)
 
 # References
 
-  * F. W. Scholz and M. A. Stephens, K-Sample Anderson-Darling Tests, Journal of the
-    American Statistical Association, Vol. 82, No. 399. (Sep., 1987), pp. 918-924.
+  * [Scholz and Stephens (1987). K-Sample Anderson-Darling Tests](@cite scholz1987)
 """
 KSampleADTest(xs::AbstractVector{T}...; modified = true, nsim = 0) where T<:Real =
     a2_ksample(xs, modified, nsim)

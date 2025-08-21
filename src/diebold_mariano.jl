@@ -43,12 +43,11 @@ Economic Statistics, 13, 253-263. and `lookahead` is the number of steps ahead o
 
 # References
 
-  * Diebold, F.X. and Mariano, R.S. (1995) Comparing predictive accuracy. 
-    Journal of Business and Economic Statistics, 13, 253-263.
+  * [Diebold and Mariano (1995). Comparing predictive accuracy](@cite diebold1995)
 
-  * Harvey, D., Leybourne, S., & Newbold, P. (1997). Testing the equality of prediction 
-    mean squared errors. International Journal of forecasting, 13(2), 281-291.
-  
+  * [Harvey, Leybourne, and Newbold (1997). Testing the Equality of Prediction Mean Squared
+     Errors](@cite harvey1997)
+
 """
 function DieboldMarianoTest(e1::AbstractVector{<:Real}, e2::AbstractVector{<:Real}; 
                             loss::Function=abs2, lookahead::Integer=1)

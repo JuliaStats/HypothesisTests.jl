@@ -41,7 +41,7 @@ Implements: [`pvalue`](@ref)
 
 # References
 
-  * George E. P. Box, "Non-Normality and Tests on Variances", Biometrika 40 (3/4): 318–335, 1953.
+  * [Box (1953). Non-Normality and Tests on Variances](@cite box1953)
 
 # External links
 

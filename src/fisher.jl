@@ -50,9 +50,8 @@ Implements: [`pvalue(::FisherExactTest)`](@ref), [`confint(::FisherExactTest)`](
 
 # References
 
-  * Fay, M.P., Supplementary material to "Confidence intervals that match Fisher’s exact or
-    Blaker’s exact tests". Biostatistics, Volume 11, Issue 2, 1 April 2010, Pages 373–374,
-    [link](https://doi.org/10.1093/biostatistics/kxp050)
+  * [Fay (2010). Confidence Intervals That Match Fisher's Exact or Blaker's
+     Exact Tests](@cite fay2010)
 """
 struct FisherExactTest <: HypothesisTest
     # Format:
@@ -114,11 +113,9 @@ For `tail = :both`, possible values for `method` are:
 
 # References
 
-  * Gibbons, J.D., Pratt, J.W., P-values: Interpretation and Methodology, American
-    Statistican, 29(1):20-25, 1975.
-  * Fay, M.P., Supplementary material to "Confidence intervals that match Fisher’s exact or
-    Blaker’s exact tests". Biostatistics, Volume 11, Issue 2, 1 April 2010, Pages 373–374,
-    [link](https://doi.org/10.1093/biostatistics/kxp050)
+  * [Gibbons and Pratt (1975). P-Values: Interpretation and Methodology](@cite gibbons1975)
+  * [Fay (2010). Confidence Intervals That Match Fisher's Exact or Blaker's
+     Exact Tests](@cite fay2010)
 """
 function StatsAPI.pvalue(x::FisherExactTest; tail=:both, method=:central)
     if tail == :both && method != :central
@@ -173,11 +170,9 @@ Fisher's non-central hypergeometric distribution. For `tail = :both`, the only
 
 # References
 
-  * Gibbons, J.D, Pratt, J.W. P-values: Interpretation and Methodology, American
-    Statistican, 29(1):20-25, 1975.
-  * Fay, M.P., Supplementary material to "Confidence intervals that match Fisher’s exact or
-    Blaker’s exact tests". Biostatistics, Volume 11, Issue 2, 1 April 2010, Pages 373–374,
-    [link](https://doi.org/10.1093/biostatistics/kxp050)
+  * [Gibbons and Pratt (1975). P-Values: Interpretation and Methodology](@cite gibbons1975)
+  * [Fay (2010). Confidence Intervals That Match Fisher's Exact or Blaker's
+     Exact Tests](@cite fay2010)
 """
 function StatsAPI.confint(x::FisherExactTest; level::Float64=0.95, tail=:both, method=:central)
     check_level(level)

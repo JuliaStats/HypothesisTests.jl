@@ -162,23 +162,14 @@ Implements: [`pvalue`](@ref)
   `sorted=true` keyword argument.
 
 # References
-Shapiro, S. S., & Wilk, M. B. (1965). An Analysis of Variance Test for Normality
-(Complete Samples). *Biometrika*, 52, 591–611.
-[doi:10.1093/BIOMET/52.3-4.591](https://doi.org/10.1093/BIOMET/52.3-4.591).
 
-Royston, P. (1992). Approximating the Shapiro-Wilk W-test for non-normality.
-*Statistics and Computing*, 2(3), 117–119.
-[doi:10.1007/BF01891203](https://doi.org/10.1007/BF01891203)
+* [Shapiro and Wilk (1965). An Analysis of Variance Test for Normality (Complete Samples)](@cite shapiro1965)
 
-Royston, P. (1993). A Toolkit for Testing for Non-Normality in Complete and
-Censored Samples. Journal of the Royal Statistical Society Series D
-(The Statistician), 42(1), 37–43.
-[doi:10.2307/2348109](https://doi.org/10.2307/2348109)
+* [Royston (1992). Approximating the Shapiro-Wilk W-test for Non-Normality](@cite royston1992)
 
-Royston, P. (1995). Remark AS R94: A Remark on Algorithm AS 181: The W-test for
-Normality. *Journal of the Royal Statistical Society Series C
-(Applied Statistics)*, 44(4), 547–551.
-[doi:10.2307/2986146](https://doi.org/10.2307/2986146).
+* [Royston (1993). A Toolkit for Testing for Non-Normality in Complete and Censored Samples](@cite royston1993)
+
+* [Royston (1995). Remark AS R94: A Remark on Algorithm AS 181: The W-test for Normality](@cite royston1995)
 """
 function ShapiroWilkTest(sample::AbstractVector{<:Real},
                          swcoefs::AbstractVector{<:Real}=shapiro_wilk_coefs(length(sample));

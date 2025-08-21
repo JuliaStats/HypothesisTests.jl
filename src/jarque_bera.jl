@@ -49,14 +49,10 @@ and medium sample sizes and it is a modification to the Jarque-Bera test (Urzua,
 
 # References
 
-  * Panagiotis Mantalos, 2011, "The three different measures of the sample skewness and
-    kurtosis and the effects to the Jarque-Bera test for normality", International Journal
-    of Computational Economics and Econometrics, Vol. 2, No. 1,
-    [link](http://dx.doi.org/10.1504/IJCEE.2011.040576).
+  * [Mantalos (2011). The three different measures of the sample skewness and
+     kurtosis and the effects to the Jarque-Bera test for normality](@cite mantalos2011)
 
-  * Carlos M. Urzúa, "On the correct use of omnibus tests for normality", Economics Letters,
-    Volume 53, Issue 3,
-    [link](https://doi.org/10.1016/S0165-1765(96)00923-8).
+  * [Urzúa (1996). On the Correct Use of Omnibus Tests for Normality](@cite urzua1996)
 
 # External links
 

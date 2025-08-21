@@ -46,10 +46,10 @@ positive test statistic, for instance, above 1.645 for the 5% significance level
 
 Implements: [`pvalue`](@ref)
 # References
- * Clark, T. E., West, K. D. 2006, Using out-of-sample mean squared prediction errors to test
-   the martingale difference hypothesis. Journal of Econometrics, 135(1): 155–186.
- * Clark, T. E., West, K. D. 2007, Approximately normal tests for equal predictive accuracy
-   in nested models. Journal of Econometrics, 138(1): 291–311.
+ * [Clark and West (2006). Using Out-of-Sample Mean Squared Prediction Errors to Test the
+    Martingale Difference Hypothesis](@cite clark2006)
+ * [Clark and West (2007). Approximately Normal Tests for Equal Predictive Accuracy in
+    Nested Models](@cite clark2007)
 
 """
 function ClarkWestTest(e1::AbstractVector{<:Real}, e2::AbstractVector{<:Real},
