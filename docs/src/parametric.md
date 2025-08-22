@@ -56,3 +56,8 @@ LeveneTest
 ```@docs
 BrownForsytheTest
 ```
+
+## D'Agostino Test
+```@docs
+AgostinoTest
+```
