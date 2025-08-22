@@ -26,10 +26,16 @@ export FisherExactTest
 
 """
     FisherExactTest(a::Integer, b::Integer, c::Integer, d::Integer)
+    FisherExactTest(x[, y])
 
 Perform Fisher's exact test of the null hypothesis that the success probabilities ``a/c``
 and ``b/d`` are equal, that is the odds ratio ``(a/c) / (b/d)`` is one, against the
 alternative hypothesis that they are not equal.
+
+If `x` is a matrix with at least two rows and columns, it is taken as a two-dimensional
+contingency table. Otherwise, `x` and `y` must be vectors of the same length. The contingency
+table is calculated using `counts` function from the `StatsBase` package.
+Note that the entries of `x` (and `y` if provided) must be non-negative integers.
 
 See [`pvalue(::FisherExactTest)`](@ref) and [`confint(::FisherExactTest)`](@ref) for details
 about the computation of the default p-value and confidence interval, respectively.
@@ -70,6 +76,15 @@ struct FisherExactTest <: HypothesisTest
         ω = cond_mle_odds_ratio(a, b, c, d)
         new(a, b, c, d, ω)
     end
+end
+
+function FisherExactTest(x::AbstractMatrix{T}) where T<:Integer
+    FisherExactTest(x[1,1], x[1,2], x[2,1], x[2,2])
+end
+
+function FisherExactTest(x::AbstractVector{T}, y::AbstractVector{T}) where T<:Integer
+    d = counts(x, y)
+    FisherExactTest(d[1,1], d[1,2], d[2,1], d[2,2])
 end
 
 testname(::FisherExactTest) = "Fisher's exact test"
