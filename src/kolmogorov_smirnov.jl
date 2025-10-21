@@ -38,11 +38,22 @@ default_tail(test::KSTest) = :both
 # compute supremum of differences between target and empirical cdf before and after the jump of the empirical cdf.
 function ksstats(x::AbstractVector{T}, d::UnivariateDistribution) where T<:Real
     n = length(x)
-    cdfs = cdf.(Ref(d), sort(x))
-    δp = maximum((1:n) / n - cdfs)
-    δn = -minimum((0:n-1) / n - cdfs)
-    δ = max(δn, δp)
-    (n, δ, δp, δn)
+    sx = sort(float(x))
+    g = cdf.(Ref(d), sx)
+    # http://www.stat.yale.edu/~jay/EmersonMaterials/DiscreteGOF.pdf page 2
+    sx₋ = if d isa DiscreteDistribution
+        prevfloat.(sx)
+    else
+        sx
+    end
+    g₋ = cdf.(Ref(d), sx₋)
+    _ecdf = ecdf(sx)
+    f = _ecdf(sx)
+    f₋ = [0; _ecdf(sx[1:end-1])]
+    δ₊ = mapreduce(-, max, f, g)
+    δ₋ = mapreduce(-, max, g₋, f₋)
+    δ = max(δ₊, δ₋)
+    (n, δ, δ₊, δ₋)
 end
 
 ### EXACT KOLMOGOROV SMIRNOV TEST
@@ -64,10 +75,6 @@ sample is not drawn from `d`.
 Implements: [`pvalue`](@ref)
 """
 function ExactOneSampleKSTest(x::AbstractVector{<:Real}, d::UnivariateDistribution)
-    if !allunique(x)
-        @warn("This test is inaccurate with ties")
-    end
-
     ExactOneSampleKSTest(ksstats(x, d)...)
 end
 
@@ -215,4 +222,4 @@ function ksstats(x::AbstractVector{T}, y::AbstractVector{S}) where {T<:Real, S<:
     end
 
     (n_x, n_y, max(δp, -δn), δp, -δn)
-end   
+end
