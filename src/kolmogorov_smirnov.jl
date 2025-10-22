@@ -48,9 +48,14 @@ function ksstats(x::AbstractVector{T}, d::UnivariateDistribution) where T<:Real
     end
     _ecdf = ecdf(sx)
     f = _ecdf(sx)
-    f₋ = [0; _ecdf(sx[1:end-1])]
-    δ₊ = mapreduce(-, max, f, g)
-    δ₋ = mapreduce(-, max, g₋, f₋)
+    δ₊ = zero(zero(eltype(f)) - zero(eltype(g)))
+    δ₋ = zero(zero(eltype(g₋)) - zero(eltype(f)))
+    f₋i = zero(eltype(f))
+    for (fi, gi, g₋i) in (f, g, g₋)
+       δ₊ = max(δ₊, fi - gi)
+       δ₋ = max(δ₋, g₋i - f₋i)
+       f₋i = fi
+    end
     δ = max(δ₊, δ₋)
     (n, δ, δ₊, δ₋)
 end
