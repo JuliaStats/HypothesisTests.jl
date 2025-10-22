@@ -100,7 +100,7 @@ end
      n = 50
      x = 0.5 .^ (1:n)
      d = DiscreteNonParametric(1:n, x)
-     y = vcat(ones(Int64, 16), 2*ones(Int64, 8), 3*ones(Int64, 4), 4, 4, 5)
+     y = vcat(fill(1, 16), fill(2, 8), fill(3, 4), 4, 4, 5)
      t = ExactOneSampleKSTest(y, d)
      @test t.δ ≈ 0.03125
      @test t.δp ≈ 0.03125
