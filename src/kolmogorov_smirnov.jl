@@ -40,13 +40,12 @@ function ksstats(x::AbstractVector{T}, d::UnivariateDistribution) where T<:Real
     n = length(x)
     sx = sort(x)
     g = cdf.(Ref(d), sx)
-    # http://www.stat.yale.edu/~jay/EmersonMaterials/DiscreteGOF.pdf page 2
-    sx₋ = if d isa DiscreteDistribution
-        prevfloat.(sx)
+    g₋ = if d isa DiscreteDistribution
+        # http://www.stat.yale.edu/~jay/EmersonMaterials/DiscreteGOF.pdf page 2
+        cdf.(Ref(d), prevfloat.(float.(sx)))
     else
-        sx
+        g
     end
-    g₋ = cdf.(Ref(d), sx₋)
     _ecdf = ecdf(sx)
     f = _ecdf(sx)
     f₋ = [0; _ecdf(sx[1:end-1])]
