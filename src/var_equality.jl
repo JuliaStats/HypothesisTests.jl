@@ -134,10 +134,7 @@ Implements: [`pvalue`](@ref)
 
 # References
 
-  * Levene, Howard, "Robust tests for equality of variances".
-     In Ingram Olkin; Harold Hotelling; et al. (eds.).
-     Contributions to Probability and Statistics: Essays in Honor of Harold Hotelling.
-     Stanford University Press. pp. 278–292, 1960
+  * [Brown and Forsythe (1974). Robust Tests for the Equality of Variances](@cite brown1974)
 
 # External links
 
@@ -170,9 +167,7 @@ Implements: [`pvalue`](@ref)
 
 # References
 
-  * Brown, Morton B.; Forsythe, Alan B., "Robust tests for the equality of variances".
-    Journal of the American Statistical Association. 69: 364–367, 1974
-    doi:[10.1080/01621459.1974.10482955](https://doi.org/10.1080%2F01621459.1974.10482955).
+  * [Brown and Forsythe (1974). Robust Tests for the Equality of Variances](@cite brown1974)
 
 # External links
 
@@ -201,9 +196,8 @@ Implements: [`pvalue`](@ref)
 
 # References
 
-  * Conover, W. J., Johnson, M. E., Johnson, M. M., A comparative study of tests
-    for homogeneity of variances, with applications to the outer continental shelf bidding data.
-    Technometrics, 23, 351–361, 1980
+  * [Conover, Johnson, and Johnson (1981). A Comparative Study of Tests for Homogeneity of
+     Variances, with Applications to the Outer Continental Shelf Bidding Data](@cite conover1981)
 
 # External links
 

@@ -1,4 +1,8 @@
-using Documenter, HypothesisTests
+using Documenter
+using DocumenterCitations
+using HypothesisTests
+
+bib = CitationBibliography(joinpath(@__DIR__, "src", "refs.bib"))
 
 makedocs(
     modules = [HypothesisTests],
@@ -13,8 +17,10 @@ makedocs(
         "nonparametric.md",
         "time_series.md",
         "multivariate.md",
+        "bibliography.md",
     ],
     checkdocs = :exports,
+    plugins = [bib],
 )
 
 deploydocs(

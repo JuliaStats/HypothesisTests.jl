@@ -27,7 +27,7 @@ See also `partialcor` from StatsBase.
 * [Partial correlation on Wikipedia](https://en.wikipedia.org/wiki/Partial_correlation#As_conditional_independence_test)
   (for the construction of the confidence interval)
 * [Section testing using Student's t-distribution from Pearson correlation coefficient on Wikipedia](https://en.wikipedia.org/wiki/Pearson_correlation_coefficient#Testing_using_Student's_t-distribution)
-* [K.J. Levy and S.C. Narula (1978): Testing Hypotheses concerning Partial Correlations: Some Methods and Discussion. International Statistical Review 46(2).](https://www.jstor.org/stable/1402814)
+* [Levy and Narula (1978). Testing Hypotheses Concerning Partial Correlations: Some Methods and Discussion](@cite levy1978)
 """
 struct CorrelationTest{T<:Real} <: HypothesisTest
     r::T
