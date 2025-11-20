@@ -7,6 +7,9 @@ bib = CitationBibliography(joinpath(@__DIR__, "src", "refs.bib"))
 makedocs(
     modules = [HypothesisTests],
     sitename = "HypothesisTests.jl",
+    format = Documenter.HTML(
+        assets = ["assets/favicon.ico"],
+    ),
     pages = [
         "index.md",
         "methods.md",
