@@ -37,7 +37,7 @@ end
 
 Perform Kruskal-Wallis rank sum test of the null hypothesis that the `groups`
 ``\\mathcal{G}`` come from the same distribution against the alternative hypothesis that
-that at least one group stochastically dominates one other group.
+at least one group stochastically dominates one other group.
 
 The Kruskal-Wallis test is an extension of the Mann-Whitney U test to more than two groups.
 
