@@ -1,6 +1,6 @@
 name = "HypothesisTests"
 uuid = "09f84164-cd44-5f33-b23f-e6b0d136a0d5"
-version = "0.11.7"
+version = "0.11.8"
 
 [deps]
 Combinatorics = "861a8166-3701-5b0c-9a16-15d98fcdc6aa"
@@ -23,7 +23,7 @@ StableRNGs = "1"
 Statistics = "1"
 StatsAPI = "1.6"
 StatsBase = "0.27, 0.28, 0.29, 0.30, 0.31, 0.32, 0.33, 0.34"
-StatsFuns = "1.4"
+StatsFuns = "1.4, 2"
 Test = "<0.0.1, 1"
 julia = "1.10"
 
