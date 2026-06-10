@@ -41,6 +41,19 @@ ApproximateTwoSampleKSTest
 KruskalWallisTest
 ```
 
+## Friedman rank sum test
+
+```@docs
+FriedmanTest
+```
+
+## Nemenyi all-pairs post-hoc test
+
+```@docs
+NemenyiTest
+issignificant
+```
+
 ## Mann-Whitney U test
 
 ```@docs
