@@ -22,7 +22,7 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-export FriedmanTest, NemenyiTest, issignificant
+export FriedmanTest, NemenyiTest, issignificant, pvalues
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -262,10 +262,10 @@ default_tail(::NemenyiTest) = :both
 """
 	pvalue(x::NemenyiTest)
 
-Return the ``k \\times k`` matrix of pairwise Bonferroni-adjusted p-values.
-Diagonal entries are 0; the matrix is symmetric.
+Return the minimum pairwise Bonferroni-adjusted p-value across all treatment pairs.
 """
-StatsAPI.pvalue(x::NemenyiTest) = x.pvalues
+StatsAPI.pvalue(x::NemenyiTest) =
+	minimum(x.pvalues[i, j] for i in 1:x.k for j in 1:x.k if i != j)
 
 """
 	pvalue(x::NemenyiTest, i::Int, j::Int)
@@ -273,6 +273,14 @@ StatsAPI.pvalue(x::NemenyiTest) = x.pvalues
 Return the p-value for the pairwise comparison of treatments `i` and `j`.
 """
 StatsAPI.pvalue(x::NemenyiTest, i::Int, j::Int) = x.pvalues[i, j]
+
+"""
+	pvalues(x::NemenyiTest)
+
+Return the full ``k × k`` matrix of pairwise Bonferroni-adjusted p-values.
+Diagonal entries are 0; the matrix is symmetric.
+"""
+pvalues(x::NemenyiTest) = x.pvalues
 
 """
 	issignificant(x::NemenyiTest, i::Int, j::Int) -> Bool

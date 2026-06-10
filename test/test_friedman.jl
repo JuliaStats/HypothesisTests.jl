@@ -201,7 +201,8 @@ end  # FriedmanTest
 		for i in 1:nt.k, j in 1:nt.k
 			@test pvalue(nt, i, j) === nt.pvalues[i, j]
 		end
-		@test pvalue(nt) === nt.pvalues
+		@test pvalues(nt) === nt.pvalues
+		@test 0.0 <= pvalue(nt) <= 1.0
 	end
 
 	@testset "p-value for extreme pair is small" begin
@@ -235,10 +236,9 @@ end  # NemenyiTest
 
 
 @testset "show and population_param_of_interest" begin
-	ft = FriedmanTest(test5x3)
+	ft = FriedmanTest(test8x4)
 	nt = NemenyiTest(ft)
 
-	# covers show_params for both (lines 131-138, 285-299)
 	buf = IOBuffer()
 	show(buf, ft)
 	@test length(take!(buf)) > 0
@@ -246,7 +246,6 @@ end  # NemenyiTest
 	show(buf, nt)
 	@test length(take!(buf)) > 0
 
-	# covers population_param_of_interest (lines 117, 257)
 	@test HypothesisTests.population_param_of_interest(ft)[1] == "Average ranks of treatments"
 	@test HypothesisTests.population_param_of_interest(nt)[1] == "Pairwise average rank differences"
 end
