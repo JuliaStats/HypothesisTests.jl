@@ -149,5 +149,6 @@ include("clark_west.jl")
 include("white.jl")
 include("var_equality.jl")
 include("shapiro_wilk.jl")
+include("friedman.jl")
 
 end
