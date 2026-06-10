@@ -180,8 +180,7 @@ end  # FriedmanTest
 		for i in 1:nt.k, j in 1:nt.k
 			@test pvalue(nt, i, j) === nt.pvalues[i, j]
 		end
-		@test pvalues(nt) === nt.pvalues
-		@test 0.0 <= pvalue(nt) <= 1.0
+		@test pvalue(nt) === nt.pvalues
 	end
 
 	@testset "p-value for extreme pair is small" begin

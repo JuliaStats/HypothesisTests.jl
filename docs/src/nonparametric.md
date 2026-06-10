@@ -51,7 +51,6 @@ FriedmanTest
 
 ```@docs
 NemenyiTest
-pvalues
 ```
 
 ## Mann-Whitney U test

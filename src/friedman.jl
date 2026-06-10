@@ -1,4 +1,4 @@
-export FriedmanTest, NemenyiTest, pvalues
+export FriedmanTest, NemenyiTest
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -7,9 +7,8 @@ export FriedmanTest, NemenyiTest, pvalues
 # Compute within-row average ranks (tied values get the average rank).
 # Returns an n × k matrix.
 function _row_ranks(data::AbstractMatrix{<:Real})
-	n, k = size(data)
 	ranks = similar(data, Float64)
-	for i in 1:n
+	for i in axes(data, 1)
 		ranks[i, :] = tiedrank(view(data, i, :))
 	end
 	return ranks
@@ -234,10 +233,10 @@ default_tail(::NemenyiTest) = :both
 """
 	pvalue(x::NemenyiTest)
 
-Return the minimum pairwise Bonferroni-adjusted p-value across all treatment pairs.
+Return the ``k × k`` matrix of pairwise Bonferroni-adjusted p-values.
+Diagonal entries are 0; the matrix is symmetric.
 """
-StatsAPI.pvalue(x::NemenyiTest) =
-	minimum(x.pvalues[i, j] for i in 1:x.k for j in 1:x.k if i != j)
+StatsAPI.pvalue(x::NemenyiTest) = x.pvalues
 
 """
 	pvalue(x::NemenyiTest, i::Int, j::Int)
@@ -246,13 +245,28 @@ Return the p-value for the pairwise comparison of treatments `i` and `j`.
 """
 StatsAPI.pvalue(x::NemenyiTest, i::Int, j::Int) = x.pvalues[i, j]
 
-"""
-	pvalues(x::NemenyiTest)
+function Base.show(_io::IO, test::NemenyiTest)
+	io = IOContext(_io, :compact=>get(_io, :compact, true))
+	println(io, testname(test))
+	println(io, repeat("-", length(testname(test))))
 
-Return the full ``k × k`` matrix of pairwise Bonferroni-adjusted p-values.
-Diagonal entries are 0; the matrix is symmetric.
-"""
-pvalues(x::NemenyiTest) = x.pvalues
+	(param_name, param_under_h0, _) = population_param_of_interest(test)
+	println(io, "Population details:")
+	println(io, "    parameter of interest:   $param_name")
+	print(io, "    value under h_0:         ")
+	show(io, param_under_h0)
+	println(io)
+	println(io)
+
+	println(io, "Test summary:")
+	println(io, "    significance level (α):  $(test.alpha)")
+	println(io, "    critical difference (CD): $(round(test.cd; sigdigits=4))")
+	println(io, "    (see pairwise p-value matrix in Details)")
+	println(io)
+
+	println(io, "Details:")
+	show_params(io, test, "    ")
+end
 
 function show_params(io::IO, x::NemenyiTest, ident)
 	println(io, ident, "number of blocks (n):      ", x.n)
