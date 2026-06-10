@@ -195,8 +195,7 @@ Implements: [`pvalue`](@ref)
 function NemenyiTest(ft::FriedmanTest; alpha::Real = 0.05)
 	0 < alpha < 1 || throw(ArgumentError(lazy"alpha must be in (0, 1), got $alpha"))
 
-	n, k      = ft.n, ft.k
-	avg_ranks = ft.avg_ranks
+	(; n, k, avg_ranks) = ft
 	m         = k * (k - 1)          # total number of pairwise comparisons × 2
 	se        = sqrt(m / (6 * n))
 
