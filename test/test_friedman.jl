@@ -175,27 +175,6 @@ end  # FriedmanTest
 		@test nt10.cd < nt05.cd < nt01.cd
 	end
 
-	@testset "test5x3 — significant pair detected" begin
-		# avg_ranks = [3, 2, 1]; CD ≈ 1.4823 (SciPy verified)
-		# |col1 - col3| = 2.0 > 1.4823  → significant
-		# |col1 - col2| = 1.0 < 1.4823  → not significant
-		nt = NemenyiTest(ft3; alpha = 0.05)
-		@test issignificant(nt, 1, 3)   # clearly worst vs best
-		@test !issignificant(nt, 1, 2)   # adjacent ranks
-		@test !issignificant(nt, 2, 3)
-	end
-
-	@testset "issignificant consistent with CD" begin
-		for ft in (ft3, ft4), alpha in (0.01, 0.05, 0.10)
-			nt = NemenyiTest(ft; alpha = alpha)
-			for i in 1:nt.k, j in 1:nt.k
-				expected = i != j &&
-						   abs(nt.avg_ranks[i] - nt.avg_ranks[j]) > nt.cd
-				@test issignificant(nt, i, j) == expected
-			end
-		end
-	end
-
 	@testset "pvalue(nt, i, j) indexing" begin
 		nt = NemenyiTest(ft4)
 		for i in 1:nt.k, j in 1:nt.k

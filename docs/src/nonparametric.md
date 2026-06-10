@@ -51,7 +51,6 @@ FriedmanTest
 
 ```@docs
 NemenyiTest
-issignificant
 pvalues
 ```
 

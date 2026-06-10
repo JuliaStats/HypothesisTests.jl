@@ -30,99 +30,94 @@ using Combinatorics: combinations, permutations
 using StatsFuns: wilcoxcdf, wilcoxccdf, signrankcdf, signrankccdf
 using Printf: @printf
 
-using StatsAPI: StatsAPI
+import StatsAPI
 using StatsAPI: HypothesisTest, confint, pvalue
 
 export testname, pvalue, confint, dof, nobs
 
-check_same_length(x::AbstractVector, y::AbstractVector) =
-	if length(x) != length(y)
-		throw(DimensionMismatch("Vectors must be the same length"))
-	end
+check_same_length(x::AbstractVector, y::AbstractVector) = if length(x) != length(y)
+    throw(DimensionMismatch("Vectors must be the same length"))
+end
 
 function check_level(level::Float64)
-	if level >= 1 || level <= 0.5
-		throw(ArgumentError("coverage level $level not in range (0.5, 1)"))
-	end
+    if level >= 1 || level <= 0.5
+        throw(ArgumentError("coverage level $level not in range (0.5, 1)"))
+    end
 end
 
 function check_tail(tail::Symbol)
-	if tail !== :both && tail !== :left && tail !== :right
-		throw(ArgumentError("tail=$(tail) is invalid"))
-	end
+    if tail !== :both && tail !== :left && tail !== :right
+        throw(ArgumentError("tail=$(tail) is invalid"))
+    end
 end
 
 # Pretty-print
-function Base.show(_io::IO, test::T) where T <: HypothesisTest
-	io = IOContext(_io, :compact=>get(_io, :compact, true))
-	println(io, testname(test))
-	println(io, repeat("-", length(testname(test))))
+function Base.show(_io::IO, test::T) where T<:HypothesisTest
+    io = IOContext(_io, :compact=>get(_io, :compact, true))
+    println(io, testname(test))
+    println(io, repeat("-", length(testname(test))))
 
-	# population details
-	has_ci = applicable(confint, test)
-	(param_name, param_under_h0, param_estimate) = population_param_of_interest(test)
-	println(io, "Population details:")
-	println(io, "    parameter of interest:   $param_name")
-	print(io, "    value under h_0:         ")
-	show(io, param_under_h0)
-	println(io)
-	print(io, "    point estimate:          ")
-	show(io, param_estimate)
-	println(io)
+    # population details
+    has_ci = applicable(confint, test)
+    (param_name, param_under_h0, param_estimate) = population_param_of_interest(test)
+    println(io, "Population details:")
+    println(io, "    parameter of interest:   $param_name")
+    print(io, "    value under h_0:         ")
+    show(io, param_under_h0)
+    println(io)
+    print(io, "    point estimate:          ")
+    show(io, param_estimate)
+    println(io)
 
-	if has_ci
-		ci = map(x -> round.(x; sigdigits = 4, base = 10), confint(test))
-		print(io, "    95% confidence interval: ")
-		show(io, ci)
-		println(io)
-	end
-	println(io)
+    if has_ci
+        ci = map(x -> round.(x; sigdigits=4, base=10), confint(test))
+        print(io, "    95% confidence interval: ")
+        show(io, ci)
+        println(io)
+    end
+    println(io)
 
-	# test summary
-	p = pvalue(test)
-	outcome = if p > 0.05
-		"fail to reject"
-	else
-		"reject"
-	end
-	tail = default_tail(test)
-	pval = StatsBase.PValue(p)
-	println(io, "Test summary:")
-	println(io, "    outcome with 95% confidence: $outcome h_0")
-	if tail == :both
-		println(io, "    two-sided p-value:           $pval")
-	elseif tail == :left || tail == :right
-		println(io, "    one-sided p-value:           $pval")
-	else
-		println(io, "    p-value:                     $pval")
-	end
-	println(io)
+    # test summary
+    p = pvalue(test)
+    outcome = if p > 0.05 "fail to reject" else "reject" end
+    tail = default_tail(test)
+    pval = StatsBase.PValue(p)
+    println(io, "Test summary:")
+    println(io, "    outcome with 95% confidence: $outcome h_0")
+    if tail == :both
+        println(io, "    two-sided p-value:           $pval")
+    elseif tail == :left || tail == :right
+        println(io, "    one-sided p-value:           $pval")
+    else
+        println(io, "    p-value:                     $pval")
+    end
+    println(io)
 
-	# further details
-	println(io, "Details:")
-	show_params(io, test, "    ")
+    # further details
+    println(io, "Details:")
+    show_params(io, test, "    ")
 end
 
 # parameter of interest: name, value under h0, point estimate
-population_param_of_interest(test::T) where {T <: HypothesisTest} = ("not implemented yet", NaN, NaN)
+population_param_of_interest(test::T) where {T<:HypothesisTest} = ("not implemented yet", NaN, NaN)
 
 # is the test one- or two-sided
 default_tail(test::HypothesisTest) = :undefined
 
-function show_params(io::IO, test::T, ident = "") where T <: HypothesisTest
-	fieldidx = findall(Bool[t<:Number for t in T.types])
-	if !isempty(fieldidx)
-		lengths = [length(string(T.names[i])) for i in fieldidx]
-		maxlen = maximum(lengths)
+function show_params(io::IO, test::T, ident="") where T<:HypothesisTest
+    fieldidx = findall(Bool[t<:Number for t in T.types])
+    if !isempty(fieldidx)
+        lengths = [length(string(T.names[i])) for i in fieldidx]
+        maxlen = maximum(lengths)
 
-		for i ∈ 1:length(fieldidx)
-			name = T.names[fieldidx[i]]
-			print(io, ident, repeat(" ", maxlen-lengths[i]),
-				replace(string(name), "_", " ", " = "))
-			show(io, getfield(test, name))
-			println(io)
-		end
-	end
+        for i = 1:length(fieldidx)
+            name = T.names[fieldidx[i]]
+            print(io, ident, repeat(" ", maxlen-lengths[i]),
+                      replace(string(name), "_", " ", " = "))
+            show(io, getfield(test, name))
+            println(io)
+        end
+    end
 end
 
 include("common.jl")
@@ -155,5 +150,4 @@ include("white.jl")
 include("var_equality.jl")
 include("shapiro_wilk.jl")
 include("friedman.jl")
-
 end

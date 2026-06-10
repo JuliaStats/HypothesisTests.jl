@@ -1,28 +1,4 @@
-# friedman.jl
-# Friedman rank sum test and Nemenyi all-pairs post-hoc test
-#
-# Copyright (C) 2026 Devesh Jawla
-#
-# Permission is hereby granted, free of charge, to any person obtaining
-# a copy of this software and associated documentation files (the
-# "Software"), to deal in the Software without restriction, including
-# without limitation the rights to use, copy, modify, merge, publish,
-# distribute, sublicense, and/or sell copies of the Software, and to
-# permit persons to whom the Software is furnished to do so, subject to
-# the following conditions:
-#
-# The above copyright notice and this permission notice shall be
-# included in all copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-# LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-export FriedmanTest, NemenyiTest, issignificant, pvalues
+export FriedmanTest, NemenyiTest, pvalues
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -198,9 +174,6 @@ p_{ij} = \\min\\!\\left(1,\\; k(k-1) \\cdot 2\\Phi\\!\\left(
 		  \\right)\\right)
 ```
 
-Use [`issignificant`](@ref) for a quick binary test, or inspect the
-`.pvalues` matrix and `.cd` field directly.
-
 Implements: [`pvalue`](@ref)
 
 !!! note
@@ -281,15 +254,6 @@ Return the full ``k × k`` matrix of pairwise Bonferroni-adjusted p-values.
 Diagonal entries are 0; the matrix is symmetric.
 """
 pvalues(x::NemenyiTest) = x.pvalues
-
-"""
-	issignificant(x::NemenyiTest, i::Int, j::Int) -> Bool
-
-Return `true` if treatments `i` and `j` are significantly different at the
-α level used to construct `x`, i.e. if ``|\\bar{r}_i - \\bar{r}_j| > CD``.
-"""
-issignificant(x::NemenyiTest, i::Int, j::Int) =
-	abs(x.avg_ranks[i] - x.avg_ranks[j]) > x.cd
 
 function show_params(io::IO, x::NemenyiTest, ident)
 	println(io, ident, "number of blocks (n):      ", x.n)
