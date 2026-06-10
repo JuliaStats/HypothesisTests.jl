@@ -219,7 +219,7 @@ function NemenyiTest(ft::FriedmanTest; alpha::Real = 0.05)
 		vals[1]
 	else
 		# Conservative fallback: Bonferroni normal quantile
-		quantile(Normal(), 1 - alpha / m)
+		quantile(Normal(), 1 - alpha / n_comparisons)
 	end
 
 	return NemenyiTest(n, k, avg_ranks, q * se, pvalues, Float64(alpha))
