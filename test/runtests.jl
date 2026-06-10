@@ -5,11 +5,11 @@ using Test, Random, Statistics
 # approximate array equality is incorrect when either limit is
 # infinite.
 macro test_ci_approx(x::Expr, y::Expr)
-	return quote
-		Test.@test typeof($(esc(x))) <: Tuple{Real, Real}
-		Test.@test typeof($(esc(x))) == typeof($(esc(y)))
-		Test.@test all(map(isapprox, $(esc(x)), $(esc(y))))
-	end
+    return quote
+        Test.@test typeof($(esc(x))) <: Tuple{Real,Real}
+        Test.@test typeof($(esc(x))) == typeof($(esc(y)))
+        Test.@test all(map(isapprox, $(esc(x)), $(esc(y))))
+    end
 end
 
 include("anderson_darling.jl")
