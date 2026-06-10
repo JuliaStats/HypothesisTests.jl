@@ -198,7 +198,7 @@ function NemenyiTest(ft::FriedmanTest; alpha::Real = 0.05)
 	n, k      = ft.n, ft.k
 	avg_ranks = ft.avg_ranks
 	m         = k * (k - 1)          # total number of pairwise comparisons × 2
-	se        = sqrt(k * (k + 1) / (6n))
+	se        = sqrt(m / (6 * n))
 
 	# Bonferroni-adjusted two-sided p-values using the Normal approximation
 	# to the Studentized range distribution at ∞ degrees of freedom.
