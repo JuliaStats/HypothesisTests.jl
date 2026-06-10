@@ -52,6 +52,7 @@ FriedmanTest
 ```@docs
 NemenyiTest
 issignificant
+pvalues
 ```
 
 ## Mann-Whitney U test
