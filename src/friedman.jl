@@ -195,8 +195,8 @@ function NemenyiTest(ft::FriedmanTest; alpha::Real = 0.05)
 	0 < alpha < 1 || throw(ArgumentError(lazy"alpha must be in (0, 1), got $alpha"))
 
 	(; n, k, avg_ranks) = ft
-	m         = k * (k - 1)          # total number of pairwise comparisons × 2
-	se        = sqrt(m / (6 * n))
+	n_comparisons = k * (k - 1)          # Bonferroni correction factor (= 2 * C(k,2))
+	se            = sqrt(k * (k + 1) / (6 * n))
 
 	# Bonferroni-adjusted two-sided p-values using the Normal approximation
 	# to the Studentized range distribution at ∞ degrees of freedom.
@@ -205,7 +205,7 @@ function NemenyiTest(ft::FriedmanTest; alpha::Real = 0.05)
 	for i in 1:k
 		for j in (i+1):k
 			z = abs(avg_ranks[i] - avg_ranks[j]) / se
-			p = min(1.0, m * 2 * cdf(Normal(), -z))
+			p = min(1.0, n_comparisons * 2 * cdf(Normal(), -z))
 			pvalues[i, j] = p
 			pvalues[j, i] = p
 		end
