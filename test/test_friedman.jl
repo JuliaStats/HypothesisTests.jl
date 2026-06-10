@@ -232,3 +232,21 @@ end  # FriedmanTest
 	end
 
 end  # NemenyiTest
+
+
+@testset "show and population_param_of_interest" begin
+	ft = FriedmanTest(test5x3)
+	nt = NemenyiTest(ft)
+
+	# covers show_params for both (lines 131-138, 285-299)
+	buf = IOBuffer()
+	show(buf, ft)
+	@test length(take!(buf)) > 0
+
+	show(buf, nt)
+	@test length(take!(buf)) > 0
+
+	# covers population_param_of_interest (lines 117, 257)
+	@test HypothesisTests.population_param_of_interest(ft)[1] == "Average ranks of treatments"
+	@test HypothesisTests.population_param_of_interest(nt)[1] == "Pairwise average rank differences"
+end
