@@ -193,7 +193,7 @@ Implements: [`pvalue`](@ref)
   * [Nemenyi test on Wikipedia](https://en.wikipedia.org/wiki/Nemenyi_test)
 """
 function NemenyiTest(ft::FriedmanTest; alpha::Real = 0.05)
-	0 < alpha < 1 || throw(ArgumentError("alpha must be in (0, 1), got $alpha"))
+	0 < alpha < 1 || throw(ArgumentError(lazy"alpha must be in (0, 1), got $alpha"))
 
 	n, k      = ft.n, ft.k
 	avg_ranks = ft.avg_ranks
