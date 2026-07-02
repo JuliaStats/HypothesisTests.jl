@@ -122,6 +122,7 @@ end
 
 include("common.jl")
 
+include("agostino_test.jl")
 include("binomial.jl")
 include("circular.jl")
 include("fisher.jl")
