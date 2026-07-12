@@ -126,7 +126,7 @@ struct EqualVarianceTTest <: TwoSampleTTest
     df::Int      # degrees of freedom
     stderr::Real # empirical standard error
     t::Real      # t-statistic
-    μ0::Real     # mean difference under h_0
+    Δμ0::Real    # mean difference under h_0
 end
 
 function show_params(io::IO, x::TwoSampleTTest, ident="")
@@ -137,41 +137,49 @@ function show_params(io::IO, x::TwoSampleTTest, ident="")
 end
 
 testname(::EqualVarianceTTest) = "Two sample t-test (equal variance)"
-population_param_of_interest(x::TwoSampleTTest) = ("Mean difference", x.μ0, x.xbar) # parameter of interest: name, value under h0, point estimate
+population_param_of_interest(x::TwoSampleTTest) = ("Mean difference", x.Δμ0, x.xbar) # parameter of interest: name, value under h0, point estimate
 
 """
-    EqualVarianceTTest(nx::Int, ny::Int, mx::Real, my::Real, vx::Real, vy::Real, μ0::Real=0)
+    EqualVarianceTTest(nx::Int, ny::Int, mx::Real, my::Real, vx::Real, vy::Real, Δμ0::Real=0)
 
 Perform a two-sample t-test of the null hypothesis that samples `x` and `y` described by the number
 of elements `nx` and `ny`, the mean `mx` and `my`, and variance `vx` and `vy` come from distributions
-with equals means and variances. The alternative hypothesis is that the distributions have different
-means but equal variances.
+with equal variances and a difference between their means equal to `Δμ0`
+(i.e. `mean(X) - mean(Y) == Δμ0`) against the alternative hypothesis that
+the distributions have equal variances and a difference between their means
+different from `Δμ0`. By default `Δμ0 = 0`, that is the null hypothesis
+is that means are equal.
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
-function EqualVarianceTTest(nx::Int, ny::Int, mx::Real, my::Real, vx::Real, vy::Real, μ0::Real=0)
+function EqualVarianceTTest(nx::Int, ny::Int, mx::Real, my::Real, vx::Real, vy::Real, Δμ0::Real=0)
     xbar = mx - my
     stddev = sqrt(((nx - 1) * vx + (ny - 1) * vy) / (nx + ny - 2))
     stderr = stddev * sqrt(1/nx + 1/ny)
-    t = (xbar - μ0) / stderr
+    t = (xbar - Δμ0) / stderr
     df = nx + ny - 2
-    EqualVarianceTTest(nx, ny, xbar, df, stderr, t, μ0)
+    EqualVarianceTTest(nx, ny, xbar, df, stderr, t, Δμ0)
 end
 
 """
-    EqualVarianceTTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real})
+    EqualVarianceTTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real}, Δμ0::Real=0)
 
 Perform a two-sample t-test of the null hypothesis that `x` and `y` come from distributions
-with equal means and variances against the alternative hypothesis that the distributions
-have different means but equal variances.
+with equal variances and a difference between their means equal to `Δμ0`
+(i.e. `mean(X) - mean(Y) == Δμ0`) against the alternative hypothesis that
+the distributions have equal variances and a difference between their means
+different from `Δμ0`. By default `Δμ0 = 0`, that is the null hypothesis
+is that means are equal.
 
+See also: [`VarianceFTest`](@ref) to test whether two datasets have equal variance.
+    
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
-function EqualVarianceTTest(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0) where {T<:Real,S<:Real}
+function EqualVarianceTTest(x::AbstractVector{T}, y::AbstractVector{S}, Δμ0::Real=0) where {T<:Real,S<:Real}
     nx, ny = length(x), length(y)
     mx, my = mean(x), mean(y)
     vx, vy = var(x), var(y)
-    EqualVarianceTTest(nx, ny, mx, my, vx, vy, μ0)
+    EqualVarianceTTest(nx, ny, mx, my, vx, vy, Δμ0)
 end
 
 
@@ -184,17 +192,20 @@ struct UnequalVarianceTTest <: TwoSampleTTest
     df::Real     # degrees of freedom
     stderr::Real # empirical standard error
     t::Real      # t-statistic
-    μ0::Real     # mean under h_0
+    Δμ0::Real    # mean under h_0
 end
 
 testname(::UnequalVarianceTTest) = "Two sample t-test (unequal variance)"
 
 """
-    UnequalVarianceTTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real})
+    UnequalVarianceTTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real}, Δμ0::Real=0)
 
-Perform an unequal variance two-sample t-test of the null hypothesis that `x` and `y` come
-from distributions with equal means against the alternative hypothesis that the
-distributions have different means.
+Perform a two-sample t-test of the null hypothesis that `x` and `y` come from distributions
+with different variances and a difference between their means equal to `Δμ0`
+(i.e. `mean(X) - mean(Y) == Δμ0`) against the alternative hypothesis that
+the distributions have different variances and a difference between their means
+different from `Δμ0`. By default `Δμ0 = 0`, that is the null hypothesis
+is that means are equal.
 
 This test is sometimes known as Welch's t-test. It differs from the equal variance t-test in
 that it computes the number of degrees of freedom of the test using the Welch-Satterthwaite
@@ -204,14 +215,16 @@ equation:
         \\frac{(k_i s_i^2)^2}{ν_i}}
 ```
 
+See also: [`VarianceFTest`](@ref) to test whether two datasets have equal variance.
+    
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
-function UnequalVarianceTTest(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0) where {T<:Real,S<:Real}
+function UnequalVarianceTTest(x::AbstractVector{T}, y::AbstractVector{S}, Δμ0::Real=0) where {T<:Real,S<:Real}
     nx, ny = length(x), length(y)
     xbar = mean(x)-mean(y)
     varx, vary = var(x), var(y)
     stderr = sqrt(varx/nx + vary/ny)
-    t = (xbar-μ0)/stderr
+    t = (xbar-Δμ0)/stderr
     df = (varx / nx + vary / ny)^2 / ((varx / nx)^2 / (nx - 1) + (vary / ny)^2 / (ny - 1))
-    UnequalVarianceTTest(nx, ny, xbar, df, stderr, t, μ0)
+    UnequalVarianceTTest(nx, ny, xbar, df, stderr, t, Δμ0)
 end
