@@ -200,6 +200,29 @@ end
     end
 end
 
+@testset "Element types other than Float64" begin
+    ints = [3, -1, 4, -1, 5, 9, -2, 6, 5, 3]
+    ref = confint(SignedRankTest(Float64.(ints)))
+    for T in (Int, Int32, Float64, Float32, Float16, BigFloat, Rational{Int})
+        x = T.(ints)
+        t = SignedRankTest(x)
+        @test t.median == median(x)                       # and not silently widened
+        @test all(isapprox.(confint(t), ref; atol = 1e-2)) # Float16 is the loose one
+        @test hodgeslehmann(t) ≈ hodgeslehmann(SignedRankTest(Float64.(ints))) atol = 1e-2
+    end
+    # the median keeps its own type rather than being truncated to Float64
+    @test SignedRankTest(Float32.(ints)).median isa Float32
+    @test SignedRankTest(BigFloat.(ints)).median isa BigFloat
+    @test SignedRankTest(BigFloat.(ints)).median == median(BigFloat.(ints))
+    # integers still give a Float64 median, as median() does
+    @test SignedRankTest(ints).median isa Float64
+    # both concrete types, and the two-sample form
+    @test ExactSignedRankTest(Float32.(ints)) isa ExactSignedRankTest
+    @test ApproximateSignedRankTest(Float32.(ints)) isa ApproximateSignedRankTest
+    @test SignedRankTest(Float32[1, 2, 3, 4, 5, 6], Float32[2, 3, 4, 5, 6, 8]) isa
+        HypothesisTests.HypothesisTest
+end
+
 @testset "Contrast set is bounded" begin
     @test HypothesisTests.MAX_RANK_CONTRASTS == 100_000_000
     @test HypothesisTests.check_contrast_count(10, "Walsh averages") === nothing

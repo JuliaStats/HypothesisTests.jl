@@ -86,14 +86,14 @@ end
 
 ## EXACT WILCOXON SIGNED RANK TEST
 
-struct ExactSignedRankTest{T<:Real} <: HypothesisTest
+struct ExactSignedRankTest{T<:Real,S<:Real} <: HypothesisTest
     vals::Vector{T} # original values
     W::Float64              # test statistic: Wilcoxon rank-sum statistic
     ranks::Vector{Float64}           # ranks without ties (zero values)
     signs::BitArray{1}      # signs of input of ranks
     tie_adjustment::Float64 # adjustment for ties
     n::Int                  # number of observations
-    median::Float64         # sample median
+    median::S               # sample median
 end
 """
     ExactSignedRankTest(x::AbstractVector{<:Real}[, y::AbstractVector{<:Real}])
@@ -219,14 +219,14 @@ end
 
 ## APPROXIMATE SIGNED RANK TEST
 
-struct ApproximateSignedRankTest{T<:Real} <: HypothesisTest
+struct ApproximateSignedRankTest{T<:Real,S<:Real} <: HypothesisTest
     vals::Vector{T} # original values
     W::Float64              # test statistic: Wilcoxon rank-sum statistic
     ranks::Vector{Float64} # ranks without ties (zero values)
     signs::BitArray{1}      # signs of input of ranks
     tie_adjustment::Float64 # adjustment for ties
     n::Int                  # number of observations
-    median::Float64         # sample median
+    median::S               # sample median
     mu::Float64             # normal approximation: mean
     sigma::Float64          # normal approximation: std
 end
@@ -253,7 +253,7 @@ distribution.
 
 Implements: [`pvalue`](@ref), [`confint`](@ref), [`hodgeslehmann`](@ref)
 """
-function ApproximateSignedRankTest(x::Vector, W::Float64, ranks::Vector{T}, signs::BitArray{1}, tie_adjustment::Float64, n::Int, median::Float64) where T<:Real
+function ApproximateSignedRankTest(x::Vector, W::Float64, ranks::Vector{T}, signs::BitArray{1}, tie_adjustment::Float64, n::Int, median::Real) where T<:Real
     nz = length(ranks) # num non-zeros
     mu = W - nz * (nz + 1)/4
     std = sqrt(nz * (nz + 1) * (2 * nz + 1) / 24 - tie_adjustment / 48)
