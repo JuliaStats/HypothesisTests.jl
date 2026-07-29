@@ -1,5 +1,6 @@
 using HypothesisTests, Test
-using HypothesisTests: default_tail
+using HypothesisTests: default_tail, population_param_of_interest
+using Statistics: median
 
 @testset "Mann-Whitney" begin
 @testset "Basic exact test" begin
@@ -19,7 +20,8 @@ using HypothesisTests: default_tail
         parameter of interest:   Location parameter (pseudomedian)
         value under h_0:         0
         point estimate:          -5.6
-    
+        95% confidence interval: (-11.1, -0.1)
+
     Test summary:
         outcome with 95% confidence: reject h_0
         two-sided p-value:           0.0232
@@ -98,6 +100,7 @@ end
         parameter of interest:   Location parameter (pseudomedian)
         value under h_0:         0
         point estimate:          -7.5
+        95% confidence interval: (-14.0, -1.0)
 
     Test summary:
         outcome with 95% confidence: reject h_0
@@ -116,6 +119,7 @@ end
         parameter of interest:   Location parameter (pseudomedian)
         value under h_0:         0
         point estimate:          7.5
+        95% confidence interval: (1.0, 14.0)
 
     Test summary:
         outcome with 95% confidence: reject h_0
@@ -193,5 +197,74 @@ end
 
 	m = ApproximateMannWhitneyUTest(A, B)
 	p = @inferred(pvalue(m; tail = :both))
+end
+
+@testset "Confidence interval and Hodges-Lehmann estimate" begin
+    # R: wilcox.test(x, y, conf.int = TRUE) -> (-11.1, -0.1), estimate -5.6
+    x = [1:10;]
+    y = [2.1:2:21;]
+    @test all(isapprox.(@inferred(confint(ExactMannWhitneyUTest(x, y))), (-11.1, -0.1); atol=1e-8))
+    @test @inferred(hodgeslehmann(ExactMannWhitneyUTest(x, y))) ≈ -5.6
+    @test hodgeslehmann(ExactMannWhitneyUTest(x, y)) ≈ median([xi - yj for xi in x, yj in y])
+    @test population_param_of_interest(ExactMannWhitneyUTest(x, y))[3] ==
+        hodgeslehmann(ExactMannWhitneyUTest(x, y))
+
+    # the samples are kept so that the cross-differences can be formed
+    t = MannWhitneyUTest(x, y)
+    @test t.x == x
+    @test t.y == y
+
+    # ties: R -> (-13.99997, -1.00003), i.e. the order statistics (-14, -1)
+    @test confint(ExactMannWhitneyUTest([1:10;], [2:2:24;])) == (-14.0, -1.0)
+    @test confint(ExactMannWhitneyUTest([2:2:24;], [1:10;])) == (1.0, 14.0)
+
+    # approximate, with ties. R (correct = TRUE) -> (-0.36998, 1.18297), estimate 0.56
+    a = [1.83, 0.50, 1.62, 2.48, 1.68, 1.88, 1.55, 3.06, 1.30]
+    b = [0.878, 0.647, 0.598, 2.05, 1.06, 1.29, 1.06, 3.14, 1.29]
+    ta = MannWhitneyUTest(a, b)
+    @test ta isa ApproximateMannWhitneyUTest
+    @test all(isapprox.(confint(ta), (-0.37, 1.183); atol = 1e-4))
+    @test hodgeslehmann(ta) ≈ 0.56
+
+    # one-sided bounds
+    @test confint(ExactMannWhitneyUTest(x, y); tail=:left)[2] == Inf
+    @test confint(ExactMannWhitneyUTest(x, y); tail=:right)[1] == -Inf
+
+    # a narrower interval for a lower confidence level
+    lo95, hi95 = confint(ExactMannWhitneyUTest(x, y); level=0.95)
+    lo80, hi80 = confint(ExactMannWhitneyUTest(x, y); level=0.80)
+    @test lo95 <= lo80 <= hi80 <= hi95
+end
+
+@testset "method keyword" begin
+    x = [1:10;]
+    y = [2.1:2:21;]
+    big1 = collect(1.0:40)
+    big2 = collect(1.5:1:45)               # nx + ny > 50, untied: auto picks approximate
+    @test MannWhitneyUTest(x, y) isa ExactMannWhitneyUTest
+    @test MannWhitneyUTest(big1, big2) isa ApproximateMannWhitneyUTest
+    @test MannWhitneyUTest(x, y; method=:auto) isa ExactMannWhitneyUTest
+    @test MannWhitneyUTest(x, y; method=:approximate) isa ApproximateMannWhitneyUTest
+    @test MannWhitneyUTest(big1, big2; method=:exact) isa ExactMannWhitneyUTest
+    @test MannWhitneyUTest(big1, big2; method = s -> s.nx + s.ny <= 100 ? :exact : :approximate) isa
+        ExactMannWhitneyUTest
+    @test_throws ArgumentError MannWhitneyUTest(x, y; method=:fastest)
+    @test_throws ArgumentError MannWhitneyUTest(x, y; method = s -> :fastest)
+end
+
+@testset "Exact branch refuses where it is not computable" begin
+    # StatsFuns.wilcoxcdf is silently invalid once binomial(nx + ny, nx) grows (StatsFuns#220);
+    # (30, 35) is the largest split that is still valid, (31, 34) the smallest that is not
+    @test HypothesisTests.MAX_EXACT_WILCOX_BINOMIAL == 3_009_106_305_270_645_216
+    @test binomial(Int128(65), Int128(30)) <= HypothesisTests.MAX_EXACT_WILCOX_BINOMIAL
+    @test binomial(Int128(65), Int128(31)) > HypothesisTests.MAX_EXACT_WILCOX_BINOMIAL
+    ok = MannWhitneyUTest(collect(1.0:30), collect(1.5:1:35.5); method=:exact)
+    @test pvalue(ok) isa Float64
+    bad = MannWhitneyUTest(collect(1.0:31), collect(1.5:1:35.5); method=:exact)
+    @test_throws ArgumentError pvalue(bad)
+    @test_throws ArgumentError confint(bad)
+    # ... and the tied branch will not enumerate without bound
+    tied = MannWhitneyUTest(repeat([1.0, 2.0], 15), repeat([1.0, 3.0], 15); method=:exact)
+    @test_throws ArgumentError pvalue(tied)
 end
 end
