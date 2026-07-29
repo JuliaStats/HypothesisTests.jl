@@ -163,6 +163,47 @@ end
 
     @test_throws ArgumentError SignedRankTest(x; method=:fastest)
     @test_throws ArgumentError SignedRankTest(x; method = s -> :fastest)
+
+    # the choice reaches the interval, not just the type
+    @test confint(SignedRankTest(x; method=:exact)) !=
+          confint(SignedRankTest(x; method=:approximate))
+
+    # the callable is handed the documented fields
+    seen = Ref{Any}(nothing)
+    SignedRankTest([1.0, 2, 3, 3, 4]; method = s -> (seen[] = s; :exact))
+    @test issetequal(keys(seen[]), (:n, :n_nonzero, :ties, :tie_adjustment))
+    @test seen[].n == 5
+    @test seen[].n_nonzero == 5
+    @test seen[].ties
+    @test seen[].tie_adjustment == SignedRankTest([1.0, 2, 3, 3, 4]).tie_adjustment
+    # and zeros are excluded from n_nonzero but not from n
+    SignedRankTest([0.0, 1, 2, 3]; method = s -> (seen[] = s; :exact))
+    @test (seen[].n, seen[].n_nonzero, seen[].ties) == (4, 3, false)
+end
+
+@testset "Interval invariants" begin
+    for n in (8, 13, 21, 34), seed in (1, 2)
+        v = [sin(seed * 1.7 + i * 0.9) * 3 + cos(i * 0.31) for i in 1:n]
+        for t in (SignedRankTest(v; method=:exact), SignedRankTest(v; method=:approximate))
+            # the estimate the interval is built around lies inside it
+            lo, hi = confint(t)
+            @test lo <= hodgeslehmann(t) <= hi
+            # raising the level cannot narrow the interval
+            wide = confint(t; level=0.99)
+            @test wide[1] <= lo && wide[2] >= hi
+            # one-sided bounds are the corresponding two-sided endpoints, and open
+            @test confint(t; tail=:left)[2] == Inf
+            @test confint(t; tail=:right)[1] == -Inf
+            @test confint(t; tail=:left)[1] >= lo
+            @test confint(t; tail=:right)[2] <= hi
+        end
+    end
+end
+
+@testset "Contrast set is bounded" begin
+    @test HypothesisTests.MAX_RANK_CONTRASTS == 100_000_000
+    @test HypothesisTests.check_contrast_count(10, "Walsh averages") === nothing
+    @test_throws ArgumentError HypothesisTests.check_contrast_count(10^9, "Walsh averages")
 end
 
 @testset "Exact branch refuses where it is not computable" begin
