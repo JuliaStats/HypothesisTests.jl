@@ -1,5 +1,6 @@
 using HypothesisTests, Test
-using HypothesisTests: default_tail
+using HypothesisTests: default_tail, population_param_of_interest
+using Statistics: median
 
 @testset "Mann-Whitney" begin
 @testset "Basic exact test" begin
@@ -19,7 +20,8 @@ using HypothesisTests: default_tail
         parameter of interest:   Location parameter (pseudomedian)
         value under h_0:         0
         point estimate:          -5.6
-    
+        95% confidence interval: (-11.1, -0.1)
+
     Test summary:
         outcome with 95% confidence: reject h_0
         two-sided p-value:           0.0232
@@ -98,6 +100,7 @@ end
         parameter of interest:   Location parameter (pseudomedian)
         value under h_0:         0
         point estimate:          -7.5
+        95% confidence interval: (-14.0, -1.0)
 
     Test summary:
         outcome with 95% confidence: reject h_0
@@ -116,6 +119,7 @@ end
         parameter of interest:   Location parameter (pseudomedian)
         value under h_0:         0
         point estimate:          7.5
+        95% confidence interval: (1.0, 14.0)
 
     Test summary:
         outcome with 95% confidence: reject h_0
@@ -193,5 +197,112 @@ end
 
 	m = ApproximateMannWhitneyUTest(A, B)
 	p = @inferred(pvalue(m; tail = :both))
+end
+
+@testset "Confidence interval and Hodges-Lehmann estimate" begin
+    # R: wilcox.test(x, y, conf.int = TRUE) -> (-11.1, -0.1), estimate -5.6
+    x = [1:10;]
+    y = [2.1:2:21;]
+    @test all(isapprox.(@inferred(confint(ExactMannWhitneyUTest(x, y))), (-11.1, -0.1); atol=1e-8))
+    @test @inferred(hodgeslehmann(ExactMannWhitneyUTest(x, y))) ≈ -5.6
+    @test hodgeslehmann(ExactMannWhitneyUTest(x, y)) ≈ median([xi - yj for xi in x, yj in y])
+
+    # the samples are kept so that the cross-differences can be formed
+    t = MannWhitneyUTest(x, y)
+    @test t.x == x
+    @test t.y == y
+
+    # ties: R -> (-13.99997, -1.00003), i.e. the order statistics (-14, -1)
+    @test confint(ExactMannWhitneyUTest([1:10;], [2:2:24;])) == (-14.0, -1.0)
+    @test confint(ExactMannWhitneyUTest([2:2:24;], [1:10;])) == (1.0, 14.0)
+
+    # approximate, with ties. R (correct = TRUE) -> (-0.36998, 1.18297), estimate 0.56
+    a = [1.83, 0.50, 1.62, 2.48, 1.68, 1.88, 1.55, 3.06, 1.30]
+    b = [0.878, 0.647, 0.598, 2.05, 1.06, 1.29, 1.06, 3.14, 1.29]
+    ta = MannWhitneyUTest(a, b)
+    @test ta isa ApproximateMannWhitneyUTest
+    @test all(isapprox.(confint(ta), (-0.37, 1.183); atol = 1e-4))
+    @test hodgeslehmann(ta) ≈ 0.56
+
+    # PENDING #363: the reported estimate is still the difference of sample medians,
+    # not the Hodges-Lehmann estimate the "pseudomedian" label names and the interval
+    # above is built around. R reports 0.56005616 for this sample.
+    @test population_param_of_interest(ta)[3] ≈ 0.62
+    @test population_param_of_interest(ta)[3] == median(a) - median(b)
+    @test population_param_of_interest(ta)[3] != hodgeslehmann(ta)
+
+    # one-sided bounds
+    @test confint(ExactMannWhitneyUTest(x, y); tail=:left)[2] == Inf
+    @test confint(ExactMannWhitneyUTest(x, y); tail=:right)[1] == -Inf
+
+    # a narrower interval for a lower confidence level
+    lo95, hi95 = confint(ExactMannWhitneyUTest(x, y); level=0.95)
+    lo80, hi80 = confint(ExactMannWhitneyUTest(x, y); level=0.80)
+    @test lo95 <= lo80 <= hi80 <= hi95
+end
+
+@testset "method keyword" begin
+    x = [1:10;]
+    y = [2.1:2:21;]
+    big1 = collect(1.0:40)
+    big2 = collect(1.5:1:45)               # nx + ny > 50, untied: auto picks approximate
+    @test MannWhitneyUTest(x, y) isa ExactMannWhitneyUTest
+    @test MannWhitneyUTest(big1, big2) isa ApproximateMannWhitneyUTest
+    @test MannWhitneyUTest(x, y; method=:auto) isa ExactMannWhitneyUTest
+    @test MannWhitneyUTest(x, y; method=:approximate) isa ApproximateMannWhitneyUTest
+    @test MannWhitneyUTest(big1, big2; method=:exact) isa ExactMannWhitneyUTest
+    @test MannWhitneyUTest(big1, big2; method = s -> s.nx + s.ny <= 100 ? :exact : :approximate) isa
+        ExactMannWhitneyUTest
+    @test_throws ArgumentError MannWhitneyUTest(x, y; method=:fastest)
+    @test_throws ArgumentError MannWhitneyUTest(x, y; method = s -> :fastest)
+
+    # the callable is handed the documented fields
+    seen = Ref{Any}(nothing)
+    MannWhitneyUTest([1.0, 2, 3], [3.0, 4, 5, 6]; method = s -> (seen[] = s; :exact))
+    @test issetequal(keys(seen[]), (:nx, :ny, :ties, :tie_adjustment))
+    @test (seen[].nx, seen[].ny) == (3, 4)
+    @test seen[].ties
+    MannWhitneyUTest([1.0, 2, 3], [4.0, 5, 6]; method = s -> (seen[] = s; :exact))
+    @test !seen[].ties
+end
+
+@testset "Samples are carried through faithfully" begin
+    # the interval and the estimator need the values, not just the ranks
+    x = [3.0, 1.0, 4.0, 1.5, 5.0]
+    y = [2.0, 7.0, 1.0, 8.0]
+    for t in (MannWhitneyUTest(x, y),
+              MannWhitneyUTest(x, y; method=:approximate))
+        @test t.x == x
+        @test t.y == y
+        @test hodgeslehmann(t) ≈ median([xi - yj for xi in x, yj in y])
+    end
+    # eltype is preserved rather than widened to Float64
+    t32 = MannWhitneyUTest(Float32[1:10;], Float32[2.5f0:2:21;])
+    @test eltype(confint(t32)) === Float32
+    @test hodgeslehmann(t32) isa Float32
+    # mixed eltypes promote instead of erroring
+    tm = MannWhitneyUTest([1, 2, 3, 4, 5, 6], [2.5, 3.5, 4.5, 5.5, 6.5, 7.5])
+    @test eltype(confint(tm)) === Float64
+end
+
+@testset "Exact route past the automatic thresholds" begin
+    # StatsFuns 2.2.1 fixed the Int overflow in wilcoxcdf (StatsFuns#220, #221). The
+    # frontier used to be binomial(nx + ny, nx): (30, 35) was the largest valid split
+    # and (31, 34) the smallest invalid one. Both are fine now, as is (40, 45), where
+    # binomial(85, 40) is about 2.9e24 and the old code could not even form the count.
+    for (nx, ny) in ((30, 35), (31, 34), (40, 45))
+        t = MannWhitneyUTest(collect(1.0:nx), collect(1.5:1:(ny + 0.5)); method=:exact)
+        @test 0 <= pvalue(t) <= 1
+        lo, hi = confint(t)
+        @test lo <= hodgeslehmann(t) <= hi
+    end
+    # the null distribution is symmetric about nx*ny/2
+    for (nx, ny, u) in ((40, 45, 500), (40, 45, 900), (31, 34, 300))
+        @test HypothesisTests.wilcoxcdf(nx, ny, u) +
+              HypothesisTests.wilcoxcdf(nx, ny, nx * ny - u - 1) ≈ 1
+    end
+    # the tied branch will not enumerate without bound, though
+    tied = MannWhitneyUTest(repeat([1.0, 2.0], 15), repeat([1.0, 3.0], 15); method=:exact)
+    @test_throws ArgumentError pvalue(tied)
 end
 end
