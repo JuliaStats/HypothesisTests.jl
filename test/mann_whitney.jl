@@ -230,12 +230,9 @@ end
     @test all(isapprox.(confint(ta), (-0.37, 1.183); atol = 1e-4))
     @test hodgeslehmann(ta) ≈ 0.56
 
-    # PENDING #363: the reported estimate is still the difference of sample medians,
-    # not the Hodges-Lehmann estimate the "pseudomedian" label names and the interval
-    # above is built around. R reports 0.56005616 for this sample.
-    @test population_param_of_interest(ta)[3] ≈ 0.62
-    @test population_param_of_interest(ta)[3] == median(a) - median(b)
-    @test population_param_of_interest(ta)[3] != hodgeslehmann(ta)
+    # the estimate that is reported is the one the interval is built around
+    @test population_param_of_interest(ta)[3] == hodgeslehmann(ta)
+    @test population_param_of_interest(ta)[3] != median(a) - median(b)
 
     # one-sided bounds
     @test confint(ExactMannWhitneyUTest(x, y); tail=:left)[2] == Inf

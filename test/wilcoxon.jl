@@ -122,10 +122,9 @@ end
     # R: wilcox.test(x, conf.int = TRUE, exact = TRUE)  ->  (3.3, 15.5)
     @test isapprox(@inferred(confint(ExactSignedRankTest(x)))[1], 3.3, atol=1e-4)
     @test isapprox(@inferred(confint(ExactSignedRankTest(x)))[2], 15.5, atol=1e-4)
-    # PENDING #361: the approximate test still reports the exact interval, because
-    # `calculate_ci` inverts the exact null distribution whichever test it is called on.
-    # R with exact = FALSE gives (3.05004, 15.50001).
-    @test isapprox(@inferred(confint(ApproximateSignedRankTest(x)))[1], 3.3, atol=1e-4)
+    # R: wilcox.test(x, conf.int = TRUE, exact = FALSE)  ->  (3.05004, 15.50001).
+    # The approximate test now gets the approximate interval; it used to report the exact one.
+    @test isapprox(@inferred(confint(ApproximateSignedRankTest(x)))[1], 3.05, atol=1e-4)
     @test isapprox(@inferred(confint(ApproximateSignedRankTest(x)))[2], 15.5, atol=1e-4)
     @test isapprox(@inferred(confint(SignedRankTest(x); tail=:left))[1], 4.45, atol=1e-4)
     @test isapprox(@inferred(confint(SignedRankTest(x); tail=:right))[2], 14.45, atol=1e-4)
@@ -139,10 +138,9 @@ end
     @test hodgeslehmann(ExactSignedRankTest(x)) == hodgeslehmann(ApproximateSignedRankTest(x))
     lo, hi = confint(ExactSignedRankTest(x))
     @test lo <= hodgeslehmann(ExactSignedRankTest(x)) <= hi
-    # PENDING #363: the reported estimate is still the sample median, not the
-    # Hodges-Lehmann estimate the "pseudomedian" label names.
-    @test population_param_of_interest(ExactSignedRankTest(x))[3] == median(x) == 10.1
-    @test population_param_of_interest(ExactSignedRankTest(x))[3] != hodgeslehmann(ExactSignedRankTest(x))
+    # the estimate that is reported is the one the interval is built around
+    @test population_param_of_interest(ExactSignedRankTest(x))[3] == hodgeslehmann(ExactSignedRankTest(x))
+    @test population_param_of_interest(ExactSignedRankTest(x))[3] != median(x)
 
     # ties: R reports -2.1
     h = [1, 2, 3, 4, 5, 6, 7, 10, 10, 10, 10, 10, 13, 14, 15] .- 10.1
@@ -167,36 +165,23 @@ end
     @test confint(MannWhitneyUTest([4.0], [2.5])) == (1.5, 1.5)
 end
 
-@testset "Zero differences" begin
+@testset "Zero differences are dropped consistently" begin
+    # the statistic already ignores zeros; the interval and the estimate now do too
     d = [0.0, 0, 0, 0.5, 0.5, 1, -0.5, -1, 1.5, -1.5, 0.5, 0, 1, -0.5, 2, 0, 0.5, -1, 1, 0.5]
     nz = d[d .!= 0]
-    # the statistic and the p-value already ignore zeros
     @test SignedRankTest(d).W == SignedRankTest(nz).W
     @test pvalue(SignedRankTest(d)) == pvalue(SignedRankTest(nz))
-    # and so does the estimate, which is formed from the same pairwise estimates
-    @test hodgeslehmann(SignedRankTest(d)) == hodgeslehmann(SignedRankTest(nz)) == 0.5
-
-    # PENDING #362: the interval does not. It is built from the Walsh averages of all
-    # 20 differences rather than the 15 non-zero ones, so it describes a different
-    # sample from the p-value beside it. R gives (-0.24999, 0.75005) at this level.
-    @test confint(SignedRankTest(d); level=0.9) != confint(SignedRankTest(nz); level=0.9)
-    @test confint(SignedRankTest(d); level=0.9) == (0.0, 0.5)
+    @test confint(SignedRankTest(d); level=0.9) == confint(SignedRankTest(nz); level=0.9)
+    @test hodgeslehmann(SignedRankTest(d)) == hodgeslehmann(SignedRankTest(nz))
+    # R: wilcox.test(d, conf.int = TRUE, conf.level = 0.9) -> (-0.24999, 0.75005), est 0.5
+    @test confint(SignedRankTest(d); level=0.9) == (-0.25, 0.75)
+    @test hodgeslehmann(SignedRankTest(d)) == 0.5
+    # the interval is read off the 120 Walsh averages of the 15 non-zero differences,
+    # not the 210 of all 20
     @test length(HypothesisTests.walsh_averages(d)) == 210
     @test length(HypothesisTests.signedrank_pairwise_estimates(d)) == 120
-
-    # PENDING #362: and so the estimate can fall outside the interval printed beside it.
-    # Here the p-value and the estimate describe the seven non-zero differences while the
-    # interval is built from all fourteen, so it lands entirely below the estimate. The
-    # interval of the sample the estimate does describe contains it. This happens on
-    # roughly a tenth of samples that contain zeros, so it is worth a sample of its own.
-    e = [0.0, 3, 2, 0, 0, 3, 0, -1, 0, 0, 3, 0, 3, 3]
-    enz = e[e .!= 0]
-    @test pvalue(SignedRankTest(e)) == pvalue(SignedRankTest(enz))
-    @test hodgeslehmann(SignedRankTest(e)) == hodgeslehmann(SignedRankTest(enz)) == 3.0
-    lo, hi = confint(SignedRankTest(e))
-    @test (lo, hi) == (0.0, 1.5)
-    @test !(lo <= hodgeslehmann(SignedRankTest(e)) <= hi)
-    @test confint(SignedRankTest(enz)) == (1.0, 3.0)
+    # all-zero input still yields the degenerate interval rather than an error
+    @test confint(SignedRankTest(zeros(6))) == (0.0, 0.0)
 end
 
 @testset "method keyword" begin
@@ -229,8 +214,8 @@ end
     # than raising a MethodError from inside the constructor
     @test_throws ArgumentError SignedRankTest(x; method = (a, b) -> :exact)
 
-    # PENDING #361: the choice reaches the type but not yet the interval
-    @test confint(SignedRankTest(x; method=:exact)) ==
+    # the choice reaches the interval, not just the type
+    @test confint(SignedRankTest(x; method=:exact)) !=
           confint(SignedRankTest(x; method=:approximate))
 
     # the callable is handed the documented fields
@@ -244,6 +229,25 @@ end
     # and zeros are excluded from n_nonzero but not from n
     SignedRankTest([0.0, 1, 2, 3]; method = s -> (seen[] = s; :exact))
     @test (seen[].n, seen[].n_nonzero, seen[].ties) == (4, 3, false)
+end
+
+@testset "Interval invariants" begin
+    for n in (8, 13, 21, 34), seed in (1, 2)
+        v = [sin(seed * 1.7 + i * 0.9) * 3 + cos(i * 0.31) for i in 1:n]
+        for t in (SignedRankTest(v; method=:exact), SignedRankTest(v; method=:approximate))
+            # the estimate the interval is built around lies inside it
+            lo, hi = confint(t)
+            @test lo <= hodgeslehmann(t) <= hi
+            # raising the level cannot narrow the interval
+            wide = confint(t; level=0.99)
+            @test wide[1] <= lo && wide[2] >= hi
+            # one-sided bounds are the corresponding two-sided endpoints, and open
+            @test confint(t; tail=:left)[2] == Inf
+            @test confint(t; tail=:right)[1] == -Inf
+            @test confint(t; tail=:left)[1] >= lo
+            @test confint(t; tail=:right)[2] <= hi
+        end
+    end
 end
 
 @testset "Element types other than Float64" begin
