@@ -69,6 +69,34 @@ ExactSignedRankTest
 ApproximateSignedRankTest
 ```
 
+## Rank tests: intervals and point estimates
+
+The Wilcoxon signed rank and Mann-Whitney U tests share their interval and estimator
+machinery.
+
+Both are built on a set of pairwise contrasts: the Walsh averages ``(dᵢ + dⱼ)/2`` for the
+signed rank tests, the cross-group differences ``xᵢ - yⱼ`` for the Mann-Whitney tests.
+`confint` returns a pair of order statistics of that set, chosen by inverting the test,
+and `hodgeslehmann` returns its median.
+
+```@docs
+hodgeslehmann
+```
+
+The Hodges-Lehmann estimate is the point estimate the interval brackets. It is generally
+not the sample median: exact symmetry makes the two agree, but they can also agree by
+coincidence, as on `[0, 2, 2, 7]`, where both are `2`. Agreement is therefore no evidence
+of symmetry.
+
+Two named bounds apply, one to the tied-data enumeration and one to the contrast set.
+Past either the tests raise rather than run unbounded, and `method = :approximate` is the
+way on.
+
+```@docs
+HypothesisTests.MAX_EXACT_ENUMERATION_N
+HypothesisTests.MAX_RANK_CONTRASTS
+```
+
 ## Permutation test
 
 ```@docs
