@@ -161,11 +161,13 @@ function StatsAPI.pvalue(x::ExactSignedRankTest; tail=:both)
     elseif x.tie_adjustment == 0
         # Compute exact p-value using method from StatsFuns, which is fast but cannot account for ties
         if tail == :both
-            if x.W <= n * (n + 1)/4
-                2 * signrankcdf(n, x.W)
-            else
-                2 * signrankccdf(n, x.W - 1)
-            end
+            # The smaller tail, doubled and clipped. Doubling a discrete tail can
+            # overshoot: where n(n+1)/2 is even the null mean is attainable, and at
+            # W == n(n+1)/4 each tail is (1 + P(W == mean))/2, so the doubling gives
+            # 1 + P(W == mean), which is 1.25 for n = 3 at W = 3. The tied branch below
+            # and both exact Mann-Whitney branches clip for the same reason.
+            p = x.W <= n * (n + 1)/4 ? signrankcdf(n, x.W) : signrankccdf(n, x.W - 1)
+            min(2 * p, 1.0)
         elseif tail == :left
             signrankcdf(n, x.W)
         else
