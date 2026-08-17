@@ -30,12 +30,19 @@ export MannWhitneyUTest, ExactMannWhitneyUTest, ApproximateMannWhitneyUTest
 """
     MannWhitneyUTest(x::AbstractVector{<:Real}, y::AbstractVector{<:Real}; method = :auto)
 
-Perform a Mann-Whitney U test of the null hypothesis that the probability that an
-observation drawn from the same population as `x` is greater than an observation drawn
-from the same population as `y` is equal to the probability that an observation drawn
-from the same population as `y` is greater than an observation drawn from the same
-population as `x` against the alternative hypothesis that these probabilities are not
-equal.
+Perform a Mann-Whitney U test of the null hypothesis that `x` and `y`
+are drawn from the same distribution, against the alternative that one tends to exceed
+the other.
+
+Equality of the two distributions is what makes the test exact: it renders the pooled
+observations exchangeable, which is what the null distribution of the statistic rests on.
+This is *not* a test of `P(x > y) = P(y > x)` alone. That weaker equality permits the two
+distributions to differ in spread, and then the test does not hold its level: for
+`Normal(0, 1)` against `Normal(0, 9)`, where it holds exactly, a nominal 0.05 test rejects
+about 13% of the time at `nx, ny = 30, 10`, and about 1.6% at `10, 30`.
+
+Under a shift model the location estimated is the median of `x - y`, reported by
+[`hodgeslehmann`](@ref).
 
 The Mann-Whitney U test is sometimes known as the Wilcoxon rank-sum test.
 
@@ -107,12 +114,9 @@ end
 """
     ExactMannWhitneyUTest(x::AbstractVector{<:Real}, y::AbstractVector{<:Real})
 
-Perform an exact Mann-Whitney U test of the null hypothesis that the probability that an
-observation drawn from the same population as `x` is greater than an observation drawn
-from the same population as `y` is equal to the probability that an observation drawn
-from the same population as `y` is greater than an observation drawn from the same
-population as `x` against the alternative hypothesis that these probabilities are not
-equal.
+Perform an exact Mann-Whitney U test of the null hypothesis that `x` and `y` are drawn
+from the same distribution, against the alternative that one tends to exceed the other.
+See [`MannWhitneyUTest`](@ref) on what that null does and does not assume.
 
 When there are no tied ranks, the exact p-value is computed using the `wilcoxcdf` and `wilcoxccdf`
 functions from the `StatsFuns` package. In the presence of tied ranks, a p-value is computed by exhaustive
@@ -234,19 +238,16 @@ end
 """
     ApproximateMannWhitneyUTest(x::AbstractVector{<:Real}, y::AbstractVector{<:Real})
 
-Perform an approximate Mann-Whitney U test of the null hypothesis that the probability that
-an observation drawn from the same population as `x` is greater than an observation drawn
-from the same population as `y` is equal to the probability that an observation drawn
-from the same population as `y` is greater than an observation drawn from the same
-population as `x` against the alternative hypothesis that these probabilities are not
-equal.
+Perform an approximate Mann-Whitney U test of the null hypothesis that `x` and `y` are drawn
+from the same distribution, against the alternative that one tends to exceed the other.
+See [`MannWhitneyUTest`](@ref) on what that null does and does not assume.
 
 The p-value is computed using a normal approximation to the distribution of the
 Mann-Whitney U statistic:
 ```math
     \\begin{align*}
         μ & = \\frac{n_x n_y}{2}\\\\
-        σ & = \\frac{n_x n_y}{12}\\left(n_x + n_y + 1 - \\frac{a}{(n_x + n_y)(n_x +
+        σ^2 & = \\frac{n_x n_y}{12}\\left(n_x + n_y + 1 - \\frac{a}{(n_x + n_y)(n_x +
             n_y - 1)}\\right)\\\\
         a & = \\sum_{t \\in \\mathcal{T}} t^3 - t
     \\end{align*}

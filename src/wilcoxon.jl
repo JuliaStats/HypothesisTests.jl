@@ -250,7 +250,7 @@ statistic:
 ```math
     \\begin{align*}
         μ & = \\frac{n(n + 1)}{4}\\\\
-        σ & = \\frac{n(n + 1)(2 * n + 1)}{24} - \\frac{a}{48}\\\\
+        σ^2 & = \\frac{n(n + 1)(2n + 1)}{24} - \\frac{a}{48}\\\\
         a & = \\sum_{t \\in \\mathcal{T}} t^3 - t
     \\end{align*}
 ```
