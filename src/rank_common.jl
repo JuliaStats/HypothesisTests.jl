@@ -49,9 +49,16 @@ end
 # the pairwise estimates the intervals are read off. Both are cost, not correctness.
 
 """
-Largest sample for which the tied-data branch of an exact test will enumerate. The
-signed rank enumeration is ``2^n`` and the Mann-Whitney one ``\\binom{n_x + n_y}{n_x}``;
-past this the tests refuse rather than run for an unbounded time. See #7.
+Bound on the tied-data enumerations, which is where an exact rank test computes its p-value
+when the tie total is not zero.
+
+The signed rank test enumerates ``2^n`` sign assignments over its ``n`` non-zero
+observations, and refuses past `n = MAX_EXACT_ENUMERATION_N`. The Mann-Whitney test
+enumerates ``\\binom{n_x + n_y}{\\min(n_x, n_y)}`` rank assignments, so the bound is on that
+count rather than on the sample size: it refuses once there are more than
+`2^MAX_EXACT_ENUMERATION_N` of them. Either way the p-value raises rather than run for an
+unbounded time, and `method = :approximate` is the way on; `confint` is unaffected, since it
+inverts the tie-free distribution whichever route the p-value took. See #7.
 """
 const MAX_EXACT_ENUMERATION_N = 25
 
