@@ -33,15 +33,17 @@ export SignedRankTest, ExactSignedRankTest, ApproximateSignedRankTest
 
 Perform a Wilcoxon signed rank test of the null hypothesis that the distribution of `x`
 (or the difference `x - y` if `y` is provided) is symmetric about zero, against the
-alternative that it is symmetric about some other location.
+alternative that it is not. Under a location model, where the distribution is symmetric about
+some `θ`, that is `θ = 0` against `θ ≠ 0`, with `tail = :left` and `tail = :right` giving
+`θ < 0` and `θ > 0`.
 
 Symmetry is what the test needs, not a zero median: against a null of zero median alone it
 does not hold its level. The location it estimates is the pseudomedian (see
 [`hodgeslehmann`](@ref)), which equals the median when the distribution is symmetric.
 
-When there are no tied ranks and ≤50 samples, or tied ranks and ≤15 samples,
-`SignedRankTest` performs an exact signed rank test. In all other cases,
-`SignedRankTest` performs an approximate signed rank test.
+`SignedRankTest` chooses between the exact and the approximate test by the tie pattern and
+the number `n` of non-zero observations: with no tied ranks it is exact for `n ≤ 50`, with
+tied ranks for `n ≤ 15`, and approximate above whichever of those two applies.
 
 `method` overrides that choice:
 
@@ -103,8 +105,8 @@ end
 
 Perform an exact Wilcoxon signed rank test of the null hypothesis that the distribution of
 `x` (or the difference `x - y` if `y` is provided) is symmetric about zero, against the
-alternative that it is symmetric about some other location. See [`SignedRankTest`](@ref) on
-what that null does and does not assume.
+alternative that it is not. See [`SignedRankTest`](@ref) on what that null does and does not
+assume, and on the alternatives the `tail` keyword selects.
 
 When there are no tied ranks, the exact p-value is computed using the `signrankcdf` and `signrankccdf`
 functions from the `StatsFuns` package. In the presence of tied ranks, a p-value is computed by exhaustive
@@ -242,7 +244,7 @@ end
 
 Perform an approximate Wilcoxon signed rank test of the null hypothesis that the
 distribution of `x` (or the difference `x - y` if `y` is provided) is symmetric about zero,
-against the alternative that it is symmetric about some other location. See
+against the alternative that it is not. See
 [`SignedRankTest`](@ref) on what that null does and does not assume.
 
 The p-value is computed using a normal approximation to the distribution of the signed rank

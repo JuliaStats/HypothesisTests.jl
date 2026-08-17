@@ -46,9 +46,9 @@ Under a shift model the location estimated is the median of `x - y`, reported by
 
 The Mann-Whitney U test is sometimes known as the Wilcoxon rank-sum test.
 
-When there are no tied ranks and ≤50 samples, or tied ranks and ≤10 samples,
-`MannWhitneyUTest` performs an exact Mann-Whitney U test. In all other cases,
-`MannWhitneyUTest` performs an approximate Mann-Whitney U test.
+`MannWhitneyUTest` chooses between the exact and the approximate test by the tie pattern and
+the pooled sample size `nx + ny`: with no tied ranks it is exact for `nx + ny ≤ 50`, with tied
+ranks for `nx + ny ≤ 10`, and approximate above whichever of those two applies.
 
 `method` overrides that choice:
 
