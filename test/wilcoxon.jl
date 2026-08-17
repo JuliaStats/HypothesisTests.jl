@@ -483,4 +483,45 @@ end
         end
     end
 end
+
+@testset "AbstractVector inputs" begin
+    # ranges and views used to fail with a MethodError: the structs store Vector,
+    # and nothing converted on the way in
+    @test pvalue(SignedRankTest(-2:7)) == pvalue(SignedRankTest([-2:7;]))
+    @test pvalue(ExactSignedRankTest(-2:7)) == pvalue(ExactSignedRankTest([-2:7;]))
+    @test pvalue(ApproximateSignedRankTest(1.0:20.0)) ==
+          pvalue(ApproximateSignedRankTest([1.0:20.0;]))
+    v = [1.0, -2.0, 3.0, -4.0, 5.0, 6.0]
+    @test pvalue(SignedRankTest(view(v, 2:5))) == pvalue(SignedRankTest(v[2:5]))
+end
+
+@testset "No Int64 overflow at two million observations" begin
+    # nz(nz+1)(2nz+1) wrapped in Int64 from nz = 2^21, making sigma three orders of
+    # magnitude too small with no error raised; t^3 in the tie adjustment wrapped the
+    # same way for a single group of 2^21 equal values
+    nz = 2^21
+    t = ApproximateSignedRankTest(collect(1.0:nz))
+    @test t.sigma ≈ Float64(sqrt(big(nz) * (nz + 1) * (2 * nz + 1) // 24)) rtol = 1e-12
+    @test HypothesisTests.tiedrank_adj(fill(1.0, nz))[2] ≈ Float64(big(nz)^3 - nz) rtol = 1e-12
+end
+
+@testset "Attainable levels do not warn" begin
+    small = [1.4, -0.6, 2.3, 0.8, -1.9]              # n = 5: P(W <= 0) = 1/32
+    # alpha/2 = 1/32 exactly: k = 0 attains the request, so there is nothing to warn
+    # about. R returns the same (-1.9, 2.3) at conf.level = 0.9375, silently.
+    @test (@test_logs confint(ExactSignedRankTest(small); level = 1 - 2/32)) == (-1.9, 2.3)
+end
+
+@testset "One-sided warnings name the one-sided request" begin
+    small = [1.4, -0.6, 2.3, 0.8, -1.9]
+    logs, ci = Test.collect_test_logs() do
+        confint(ExactSignedRankTest(small); level = 0.99, tail = :left)
+    end
+    @test ci == (-Inf, 2.3)
+    @test length(logs) == 1
+    # the request was 0.99, not the two-sided 0.98 this used to report, and the bound
+    # misses by its one overshooting tail only: 1 - 1/32, not 1 - 2/32
+    @test logs[1].kwargs[:requested] == 0.99
+    @test logs[1].kwargs[:attainable] == 1 - 1/32
+end
 end
