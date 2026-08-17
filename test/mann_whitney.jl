@@ -236,12 +236,45 @@ end
 
     # one-sided bounds, on the same convention as every other test here and as R: the
     # alternative :left names is a shift below zero, which an upper bound is compatible
-    # with (#368)
-    @test confint(ExactMannWhitneyUTest(x, y); tail=:left)[1] == -Inf
-    @test confint(ExactMannWhitneyUTest(x, y); tail=:right)[2] == Inf
+    # with (#368). R: wilcox.test(x, y, conf.int = TRUE, alternative = "less") ->
+    # (-Inf, -1.1), "greater" -> (-10.1, Inf)
+    @test all(isapprox.(confint(ExactMannWhitneyUTest(x, y); tail=:left), (-Inf, -1.1); atol=1e-8))
+    @test all(isapprox.(confint(ExactMannWhitneyUTest(x, y); tail=:right), (-10.1, Inf); atol=1e-8))
     lo, hi = confint(ExactMannWhitneyUTest(x, y))
     @test confint(ExactMannWhitneyUTest(x, y); tail=:left)[2] <= hi
     @test confint(ExactMannWhitneyUTest(x, y); tail=:right)[1] >= lo
+    # R: conf.level = 0.90 -> (-10.1, -1.1)
+    @test all(isapprox.(confint(ExactMannWhitneyUTest(x, y); level=0.90), (-10.1, -1.1); atol=1e-8))
+
+    # the approximate route on the same untied sample. R with exact = FALSE,
+    # correct = TRUE: p = 0.02574808082, interval (-11.09998, -0.10008) solved
+    # numerically beside the order statistics returned here, "less" -> (-Inf, -1.10004),
+    # "greater" -> (-10.09992, Inf)
+    ma = ApproximateMannWhitneyUTest(Float64.(x), Float64.(y))
+    @test isapprox(pvalue(ma), 0.02574808082, atol=1e-9)
+    @test all(isapprox.(confint(ma), (-11.1, -0.1); atol=1e-3))
+    @test all(isapprox.(confint(ma; tail=:left), (-Inf, -1.1); atol=1e-3))
+    @test all(isapprox.(confint(ma; tail=:right), (-10.1, Inf); atol=1e-3))
+
+    # tied one-sided p-values against exactRankTests::wilcox.exact, which computes the
+    # same conditional distribution: "less" -> 0.0060017382, "greater" -> 0.9949199407.
+    # One-sided values are convention-free. The two-sided ones differ: doubling here
+    # (0.0120034764) against summing the far tail there (0.0118890398), and the tied
+    # two-sample conditional distribution is asymmetric, so the two need not agree.
+    tt = ExactMannWhitneyUTest([1:10;], [2:2:24;])
+    @test isapprox(pvalue(tt; tail=:left), 0.0060017382, atol=1e-9)
+    @test isapprox(pvalue(tt; tail=:right), 0.9949199407, atol=1e-9)
+    @test pvalue(tt) == 2 * pvalue(tt; tail=:left)
+
+    # tied approximate one-sided intervals: R (approximate route, uniroot) gives
+    # (-Inf, -2.000005) and (-13.0, Inf); the order statistics land there too
+    tta = ApproximateMannWhitneyUTest(Float64.([1:10;]), Float64.([2:2:24;]))
+    @test all(isapprox.(confint(tta; tail=:left), (-Inf, -2.0); atol=1e-3))
+    @test all(isapprox.(confint(tta; tail=:right), (-13.0, Inf); atol=1e-3))
+
+    # and the 9 v 9 tied sample: R "less" -> (-Inf, 1.010023), "greater" -> (-0.098019, Inf)
+    @test all(isapprox.(confint(ta; tail=:left), (-Inf, 1.01); atol=1e-3))
+    @test all(isapprox.(confint(ta; tail=:right), (-0.098, Inf); atol=1e-3))
 
     # a narrower interval for a lower confidence level
     lo95, hi95 = confint(ExactMannWhitneyUTest(x, y); level=0.95)

@@ -159,6 +159,48 @@ end
     l = confint(SignedRankTest(x); tail=:right)[1]
     @test pvalue(SignedRankTest(x .- (l + 0.02)); tail=:right) > 0.05
     @test pvalue(SignedRankTest(x .- (l - 0.02)); tail=:right) < 0.05
+
+    # one-sided p-values on the same sample, against R:
+    # wilcox.test(x, alternative = "less")    -> 0.9986877441
+    # wilcox.test(x, alternative = "greater") -> 0.001678466797
+    @test isapprox(pvalue(ExactSignedRankTest(x); tail=:left), 0.9986877441, atol=1e-9)
+    @test isapprox(pvalue(ExactSignedRankTest(x); tail=:right), 0.001678466797, atol=1e-9)
+    # and the approximate route, R with exact = FALSE, correct = TRUE:
+    # "less" -> 0.9975337639, "greater" -> 0.002938062707
+    @test isapprox(pvalue(ApproximateSignedRankTest(x); tail=:left), 0.9975337639, atol=1e-9)
+    @test isapprox(pvalue(ApproximateSignedRankTest(x); tail=:right), 0.002938062707, atol=1e-9)
+    # approximate one-sided intervals: R solves numerically for (-Inf, 14.45001612) and
+    # (4.450022698, Inf); these are the order statistics it lands beside
+    @test confint(ApproximateSignedRankTest(x); tail=:left)[1] == -Inf
+    @test isapprox(confint(ApproximateSignedRankTest(x); tail=:left)[2], 14.45, atol=1e-4)
+    @test isapprox(confint(ApproximateSignedRankTest(x); tail=:right)[1], 4.45, atol=1e-4)
+    @test confint(ApproximateSignedRankTest(x); tail=:right)[2] == Inf
+
+    # the sample from #368, all three tails against R:
+    # wilcox.test(z, conf.int = TRUE, alternative = "less")    -> (-Inf, 0.95)
+    # wilcox.test(z, conf.int = TRUE, alternative = "greater") -> (-0.45, Inf)
+    # wilcox.test(z, conf.int = TRUE)                          -> (-0.7, 1.1)
+    z = [1.2, 2.3, 3.1, 4.4, 2.8, 3.9, 5.1, 2.2, 3.3, 4.0] .- 3
+    @test all(isapprox.(confint(ExactSignedRankTest(z); tail=:left), (-Inf, 0.95); atol=1e-9))
+    @test all(isapprox.(confint(ExactSignedRankTest(z); tail=:right), (-0.45, Inf); atol=1e-9))
+    @test all(isapprox.(confint(ExactSignedRankTest(z)), (-0.7, 1.1); atol=1e-9))
+end
+
+@testset "Tied one-sided p-values against exactRankTests" begin
+    # R's exactRankTests::wilcox.exact computes the same conditional distribution as the
+    # tied enumeration here. Its one-sided p-values are convention-free and pin ours
+    # exactly; its two-sided can differ from doubling only where the conditional
+    # distribution is asymmetric, which the sign-flip symmetry rules out one-sample.
+    h = [1, 2, 3, 4, 5, 6, 7, 10, 10, 10, 10, 10, 13, 14, 15] .- 10.1
+    # wilcox.exact(h): 0.04052734375; "less": 0.02026367188; "greater": 0.9828491211
+    @test pvalue(ExactSignedRankTest(h)) == 0.04052734375
+    @test isapprox(pvalue(ExactSignedRankTest(h); tail=:left), 0.02026367188, atol=1e-9)
+    @test isapprox(pvalue(ExactSignedRankTest(h); tail=:right), 0.9828491211, atol=1e-9)
+    # with zeros as well as ties; wilcox.exact drops the zeros likewise
+    # wilcox.exact(d): 0.3071899414; "less": 0.8592834473; "greater": 0.1535949707
+    d = [0, 0, 0, 0.5, 0.5, 1, -0.5, -1, 1.5, -1.5, 0.5, 0, 1, -0.5, 2, 0, 0.5, -1, 1, 0.5]
+    @test isapprox(pvalue(SignedRankTest(d); tail=:left), 0.8592834473, atol=1e-9)
+    @test isapprox(pvalue(SignedRankTest(d); tail=:right), 0.1535949707, atol=1e-9)
 end
 
 @testset "Hodges-Lehmann estimate" begin
@@ -223,8 +265,13 @@ end
     ci = @test_logs (:warn, r"not attainable") confint(ExactSignedRankTest(small))
     walsh = sort([(small[i] + small[j]) / 2 for i in eachindex(small) for j in i:length(small)])
     @test ci == (first(walsh), last(walsh))                   # the widest available
+    # R warns here too and returns the same interval: (-1.9, 2.3)
+    @test ci == (-1.9, 2.3)
     @test_logs (:warn, r"not attainable") confint(ExactSignedRankTest(small); level=0.99)
-    @test_logs (:warn, r"not attainable") confint(ExactMannWhitneyUTest([1.0, 2.0], [3.0, 4.0]))
+    # R returns (-3, -1) with an achieved conf.level attribute of 2/3, which is the
+    # attainable coverage the warning here names: 1 - 2 P(U <= 0) = 1 - 2/6
+    ci22 = @test_logs (:warn, r"not attainable") confint(ExactMannWhitneyUTest([1.0, 2.0], [3.0, 4.0]))
+    @test ci22 == (-3.0, -1.0)
     # the approximate route warns for its own reason, and does not claim unattainability:
     # at n = 8, level = 0.99 it asks for k = -1 while the exact route reaches 0.9922
     @test_logs (:warn, r"outside the set of pairwise estimates") confint(ApproximateSignedRankTest(small))
