@@ -229,9 +229,24 @@ at most `k`.
 
 This is the rule R's `wilcox.test` uses, where the lower endpoint is
 `diffs[qsignrank(alpha/2, n)]`; taking `k = qsignrank(alpha/2, n) - 1` reproduces it.
+
+Small samples cannot reach every level: the widest interval this form admits,
+`k = 0`, has coverage `1 - 2 cdf(0)`, which is `1 - 2^(1-n)` for an untied signed rank
+sample, so `0.95` is out of reach below `n = 6` and `0.99` below `n = 8`. That interval
+is still the best available and is returned, with a warning naming the coverage it
+actually has, rather than being returned as though it met the request. R warns here too.
 """
 function exact_ci_index(m::Integer, alpha::Real, cdf)
     half = alpha / 2
+    p0 = cdf(0)
+    if p0 >= half
+        # `1 - 2 p0` double-counts the atom at 0 when the null distribution is degenerate,
+        # so it can come out negative; the coverage is nowhere below zero.
+        @warn "the requested confidence level is not attainable for a sample this small; " *
+              "returning the widest interval this construction admits" requested = 1 - alpha attainable =
+              max(0.0, 1 - 2 * p0)
+        return 0
+    end
     return last_true(div(m, 2), k -> cdf(k) < half)
 end
 
@@ -260,10 +275,23 @@ designs: at `level = 0.90` that happens for 131 of the 1444 Mann-Whitney shapes 
 there rather than this one that is loose, and coverage stays at nominal rather than
 falling below it: at `(3, 12)`, `(3, 15)` and `(3, 21)` the normal route covers `0.902`,
 `0.901` and `0.900` against the exact route's `0.932`, `0.927` and `0.919`.
+
+A negative `k` means the approximation puts the endpoint outside the contrast set, so the
+widest interval available is returned instead, with a warning. The warning does not claim
+the level is unattainable, because that does not follow: at `n = 8` and `level = 0.99` this
+rule asks for `k = -1` while the exact route reaches `0.9922`, which meets the request.
+What it does mean is that the sample is too small for this route, and `method = :exact` is
+where to go.
 """
 function normal_ci_index(m::Integer, mu::Real, sigma::Real, alpha::Real)
     q = quantile(Normal(mu, sigma), alpha / 2)
-    return clamp(ceil(Int, q - one(q) / 2) - 1, 0, div(m, 2))
+    k = ceil(Int, q - one(q) / 2) - 1
+    if k < 0
+        @warn "the normal approximation puts the interval endpoint outside the contrast " *
+              "set for a sample this small; returning the widest interval it admits, " *
+              "which may not reach the requested level. The exact test is the way on" requested = 1 - alpha
+    end
+    return clamp(k, 0, div(m, 2))
 end
 
 # `level`/`tail` to the two-sided alpha the index rules work in. A one-sided bound

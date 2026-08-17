@@ -62,7 +62,9 @@ end
 end
 
 @testset "Exact with ties" begin
-    show(IOBuffer(), ExactSignedRankTest([1:10;], [1:10;]))
+    # every difference is zero here, so the interval shown cannot have 95% coverage and
+    # `show` says so
+    @test_logs (:warn, r"not attainable") show(IOBuffer(), ExactSignedRankTest([1:10;], [1:10;]))
 
     # Two-sided
     for kwargs in ((), (; tail = :both))
@@ -195,8 +197,28 @@ end
     # not the 210 of all 20
     @test length(HypothesisTests.walsh_averages(d)) == 210
     @test length(HypothesisTests.signedrank_pairwise_estimates(d)) == 120
-    # all-zero input still yields the degenerate interval rather than an error
-    @test confint(SignedRankTest(zeros(6))) == (0.0, 0.0)
+    # all-zero input still yields the degenerate interval rather than an error, and says
+    # that the level was not met
+    @test (@test_logs (:warn, r"not attainable") confint(SignedRankTest(zeros(6)))) == (0.0, 0.0)
+end
+
+@testset "Unattainable levels warn" begin
+    # the widest interval a sample of n has is (V_(1), V_(m)), covering 1 - 2^(1-n), so
+    # 0.95 is out of reach below n = 6 and 0.99 below n = 8
+    small = [1.4, -0.6, 2.3, 0.8, -1.9]                       # n = 5, widest is 0.9375
+    ci = @test_logs (:warn, r"not attainable") confint(ExactSignedRankTest(small))
+    walsh = sort([(small[i] + small[j]) / 2 for i in eachindex(small) for j in i:length(small)])
+    @test ci == (first(walsh), last(walsh))                   # the widest available
+    @test_logs (:warn, r"not attainable") confint(ExactSignedRankTest(small); level=0.99)
+    @test_logs (:warn, r"not attainable") confint(ExactMannWhitneyUTest([1.0, 2.0], [3.0, 4.0]))
+    # the approximate route warns for its own reason, and does not claim unattainability:
+    # at n = 8, level = 0.99 it asks for k = -1 while the exact route reaches 0.9922
+    @test_logs (:warn, r"outside the contrast set") confint(ApproximateSignedRankTest(small))
+    @test_logs (:warn, r"outside the contrast set") confint(
+        ApproximateSignedRankTest([1.4, -0.6, 2.3, 0.8, -1.9, 3.1, 2.7, -0.3]); level=0.99)
+    # and no warning once the level is attainable
+    @test_logs confint(ExactSignedRankTest([1.4, -0.6, 2.3, 0.8, -1.9, 3.1]))
+    @test_logs confint(ExactSignedRankTest(collect(1.0:15)); level=0.99)
 end
 
 @testset "method keyword" begin
@@ -253,8 +275,11 @@ end
             # the estimate the interval is built around lies inside it
             lo, hi = confint(t)
             @test lo <= hodgeslehmann(t) <= hi
-            # raising the level cannot narrow the interval
-            wide = confint(t; level=0.99)
+            # raising the level cannot narrow the interval (the approximate route warns at
+            # n = 8, where its rule wants an endpoint outside the contrast set)
+            wide = n == 8 && t isa ApproximateSignedRankTest ?
+                (@test_logs (:warn, r"outside the contrast set") confint(t; level=0.99)) :
+                confint(t; level=0.99)
             @test wide[1] <= lo && wide[2] >= hi
             # one-sided bounds are the corresponding two-sided endpoints, and open
             @test confint(t; tail=:left)[2] == Inf
