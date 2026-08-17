@@ -131,7 +131,7 @@ ExactMannWhitneyUTest(x::AbstractVector{S}, y::AbstractVector{T}) where {S<:Real
     ExactMannWhitneyUTest(mwustats(x, y)...)
 
 testname(::ExactMannWhitneyUTest) = "Exact Mann-Whitney U test"
-population_param_of_interest(x::ExactMannWhitneyUTest) = ("Location parameter (pseudomedian)", 0, hodgeslehmann(x)) # parameter of interest: name, value under h0, point estimate
+population_param_of_interest(x::ExactMannWhitneyUTest) = ("Location shift", 0, hodgeslehmann(x)) # parameter of interest: name, value under h0, point estimate
 default_tail(test::ExactMannWhitneyUTest) = :both
 
 function show_params(io::IO, x::ExactMannWhitneyUTest, ident)
@@ -275,7 +275,7 @@ ApproximateMannWhitneyUTest(x::AbstractVector{S}, y::AbstractVector{T}) where {S
     ApproximateMannWhitneyUTest(mwustats(x, y)...)
 
 testname(::ApproximateMannWhitneyUTest) = "Approximate Mann-Whitney U test"
-population_param_of_interest(x::ApproximateMannWhitneyUTest) = ("Location parameter (pseudomedian)", 0, hodgeslehmann(x)) # parameter of interest: name, value under h0, point estimate
+population_param_of_interest(x::ApproximateMannWhitneyUTest) = ("Location shift", 0, hodgeslehmann(x)) # parameter of interest: name, value under h0, point estimate
 default_tail(test::ApproximateMannWhitneyUTest) = :both
 
 function show_params(io::IO, x::ApproximateMannWhitneyUTest, ident)

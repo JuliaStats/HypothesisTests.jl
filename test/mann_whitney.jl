@@ -23,7 +23,7 @@ end
     Exact Mann-Whitney U test
     -------------------------
     Population details:
-        parameter of interest:   Location parameter (pseudomedian)
+        parameter of interest:   Location shift
         value under h_0:         0
         point estimate:          -5.6
         95% confidence interval: (-11.1, -0.1)
@@ -103,7 +103,7 @@ end
     Exact Mann-Whitney U test
     -------------------------
     Population details:
-        parameter of interest:   Location parameter (pseudomedian)
+        parameter of interest:   Location shift
         value under h_0:         0
         point estimate:          -7.5
         95% confidence interval: (-14.0, -1.0)
@@ -122,7 +122,7 @@ end
     Exact Mann-Whitney U test
     -------------------------
     Population details:
-        parameter of interest:   Location parameter (pseudomedian)
+        parameter of interest:   Location shift
         value under h_0:         0
         point estimate:          7.5
         95% confidence interval: (1.0, 14.0)
