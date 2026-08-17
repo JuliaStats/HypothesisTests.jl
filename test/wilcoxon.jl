@@ -269,7 +269,9 @@ end
     ci = @test_logs (:warn, r"not attainable") confint(ExactSignedRankTest(small))
     walsh = sort([(small[i] + small[j]) / 2 for i in eachindex(small) for j in i:length(small)])
     @test ci == (first(walsh), last(walsh))                   # the widest available
-    # R warns here too and returns the same interval: (-1.9, 2.3)
+    # R returns the same interval, (-1.9, 2.3), but silently: its conf.level attribute
+    # still claims 0.95, and it warns only once the shortfall exceeds alpha/2, as at
+    # the 2 v 2 case below
     @test ci == (-1.9, 2.3)
     @test_logs (:warn, r"not attainable") confint(ExactSignedRankTest(small); level=0.99)
     # R returns (-3, -1) with an achieved conf.level attribute of 2/3, which is the
