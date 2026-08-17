@@ -445,4 +445,61 @@ end
         end
     end
 end
+
+@testset "The approximate interval rule is its own rule" begin
+    # on 3 v 6 the exact and the normal index rules pick different order statistics,
+    # so these two pins hold the routes apart. R: wilcox.test(x3, y6, conf.int = TRUE)
+    # -> (-8.0, 4.9); exact = FALSE -> (-9.09992, 6.09992), whose order statistics
+    # are (-9.1, 6.1).
+    x3 = [1.1, 4.7, 8.3]
+    y6 = [2.2, 3.4, 5.6, 6.8, 9.1, 10.2]
+    @test all(isapprox.(confint(ExactMannWhitneyUTest(x3, y6)), (-8.0, 4.9); atol = 1e-8))
+    @test all(isapprox.(confint(ApproximateMannWhitneyUTest(x3, y6)), (-9.1, 6.1); atol = 1e-8))
+end
+
+@testset "Approximate one-sided p-values against R" begin
+    # R: wilcox.test(1:10, seq(2.1, 21, 2), exact = FALSE, correct = TRUE,
+    #    alternative = "less") -> 0.0128740404106, "greater" -> 0.989433035935
+    am = ApproximateMannWhitneyUTest([1:10;], [2.1:2:21;])
+    @test isapprox(@inferred(pvalue(am; tail = :left)), 0.0128740404106, atol = 1e-10)
+    @test isapprox(@inferred(pvalue(am; tail = :right)), 0.989433035935, atol = 1e-10)
+end
+
+@testset "Tied exact one-sided intervals" begin
+    # under ties this route inverts the untied lattice; base R falls back to the
+    # normal approximation and lands on the same order statistics:
+    # wilcox.test(1:10, seq(2, 24, 2), conf.int = TRUE, alternative = "less") ->
+    # (-Inf, -2.000005), "greater" -> (-13.0, Inf)
+    tt = ExactMannWhitneyUTest([1:10;], [2:2:24;])
+    @test confint(tt; tail = :left) == (-Inf, -2.0)
+    @test confint(tt; tail = :right) == (-13.0, Inf)
+end
+
+@testset "Untied with nx > ny" begin
+    # exercises the swap onto the smaller sample on the StatsFuns route.
+    # R: wilcox.test(1:12, seq(2.5, 16.5, 2), conf.int = TRUE): W = 30,
+    # p = 0.181344764626, "less" -> 0.0906723823132, "greater" -> 0.921568627451,
+    # interval (-7.5, 1.5)
+    t = ExactMannWhitneyUTest([1:12;], [2.5:2:16.5;])
+    @test t.U == 30.0
+    @test isapprox(pvalue(t), 0.181344764626, atol = 1e-10)
+    @test isapprox(pvalue(t; tail = :left), 0.0906723823132, atol = 1e-10)
+    @test isapprox(pvalue(t; tail = :right), 0.921568627451, atol = 1e-10)
+    @test confint(t) == (-7.5, 1.5)
+end
+
+@testset "Tied auto boundary at N = 10 and 11" begin
+    xa = [1.0, 2.0, 2.0, 3.0, 7.0]
+    ya = [2.0, 4.0, 5.0, 6.0, 8.0]                   # N = 10, tied: still exact
+    @test MannWhitneyUTest(xa, ya) isa ExactMannWhitneyUTest
+    @test MannWhitneyUTest(xa, [ya; 9.0]) isa ApproximateMannWhitneyUTest
+end
+
+@testset "All-equal samples" begin
+    # R: exactRankTests::wilcox.exact(rep(1, 4), rep(1, 5)) -> p = 1
+    @test pvalue(ExactMannWhitneyUTest(ones(4), ones(5))) == 1
+    # mu and sigma are both zero here, which is its own branch of the normal route
+    @test pvalue(ApproximateMannWhitneyUTest(ones(4), ones(5))) == 1
+    @test pvalue(ApproximateMannWhitneyUTest(ones(4), ones(5)); tail = :left) == 1
+end
 end

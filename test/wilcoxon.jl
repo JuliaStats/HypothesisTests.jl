@@ -1,6 +1,7 @@
 using HypothesisTests, Test
 using HypothesisTests: default_tail, population_param_of_interest
-using Statistics: median
+using Statistics: median, quantile
+using Distributions: Normal
 
 # A parameterised route rule written the natural way, as a struct you can store, reuse
 # and print. It is callable, and it is not a subtype of `Function`: defining a call
@@ -110,7 +111,9 @@ end
 
 @testset "Tests for automatic selection" begin
     @test abs(@inferred(pvalue(SignedRankTest([1:10;], [2:2:20;]))) - 0.0020) <= 1e-4
-    @test abs(@inferred(pvalue(SignedRankTest([1:10;], [2:11;]))) - 0.0020) <= 1e-4
+    # 2/2^10 exactly, from the tied enumeration; the approximate route gives
+    # 0.0019042, which an atol of 1e-4 against 0.0020 would also have accepted
+    @test @inferred(pvalue(SignedRankTest([1:10;], [2:11;]))) == 0.001953125
 	@test default_tail(SignedRankTest([1:10;], [2:2:20;])) == :both
 	show(IOBuffer(), SignedRankTest([1:10;], [2:2:20;]))
 end
@@ -215,7 +218,8 @@ end
     @test population_param_of_interest(ExactSignedRankTest(x))[3] == hodgeslehmann(ExactSignedRankTest(x))
     @test population_param_of_interest(ExactSignedRankTest(x))[3] != median(x)
 
-    # ties: R reports -2.1
+    # ties: R's wilcox.test reports -2.1; exactRankTests::wilcox.exact reports -2.35,
+    # which is its conditional estimator, not this one
     h = [1, 2, 3, 4, 5, 6, 7, 10, 10, 10, 10, 10, 13, 14, 15] .- 10.1
     @test hodgeslehmann(SignedRankTest(h)) ≈ -2.1
 end
@@ -523,5 +527,54 @@ end
     # misses by its one overshooting tail only: 1 - 1/32, not 1 - 2/32
     @test logs[1].kwargs[:requested] == 0.99
     @test logs[1].kwargs[:attainable] == 1 - 1/32
+end
+
+@testset "One-sided intervals on the tied routes against R" begin
+    h = [1, 2, 3, 4, 5, 6, 7, 10, 10, 10, 10, 10, 13, 14, 15] .- 10.1
+    # base R falls back to the normal approximation under ties and lands on the same
+    # order statistics as this route, which inverts the untied lattice:
+    # wilcox.test(h, conf.int = TRUE, alternative = "less") -> (-Inf, -0.09997),
+    # "greater" -> (-4.10001, Inf). exactRankTests::wilcox.exact, which inverts the
+    # tied conditional distribution instead, gives (-4.6, Inf) for "greater".
+    te = ExactSignedRankTest(h)
+    @test confint(te; tail = :left)[1] == -Inf
+    @test isapprox(confint(te; tail = :left)[2], -0.1, atol = 1e-9)
+    @test isapprox(confint(te; tail = :right)[1], -4.1, atol = 1e-9)
+    @test confint(te; tail = :right)[2] == Inf
+
+    # the approximate test's tie-corrected sigma reaches one order statistic further
+    # on the left: R gives (-4.60008, -0.09997) with exact = FALSE
+    ta = ApproximateSignedRankTest(h)
+    @test all(isapprox.(confint(ta), (-4.6, -0.1); atol = 1e-9))
+end
+
+@testset "Auto boundaries at n = 50 and 51, against R" begin
+    s50 = quantile.(Normal(), (1:50) ./ 51) .+ 0.3
+    s51 = quantile.(Normal(), (1:51) ./ 52) .+ 0.3
+    @test SignedRankTest(s50) isa ExactSignedRankTest
+    @test SignedRankTest(s51) isa ApproximateSignedRankTest
+    # R switches at n < 50, so its exact side must be forced to compare:
+    # wilcox.test(qnorm((1:50)/51) + 0.3, exact = TRUE)  -> 0.0371666050798
+    # wilcox.test(qnorm((1:51)/52) + 0.3, exact = FALSE) -> 0.0345394645593
+    @test isapprox(pvalue(SignedRankTest(s50)), 0.0371666050798, atol = 1e-10)
+    @test isapprox(pvalue(SignedRankTest(s51)), 0.0345394645593, atol = 1e-10)
+end
+
+@testset "Tied auto boundary counts non-zero observations" begin
+    tied16 = repeat([1.0, -1.0, 2.5, 3.5], 4)        # 16 non-zero, tied
+    @test SignedRankTest(tied16) isa ApproximateSignedRankTest
+    @test SignedRankTest(tied16[1:15]) isa ExactSignedRankTest
+end
+
+@testset "Levels at the edges of (0.5, 1)" begin
+    x = [-7.8, -6.9, -4.7, 3.7, 6.5, 8.7, 9.1, 10.1, 10.8, 13.6, 14.4, 16.6, 20.2, 22.4, 23.5]
+    t = ExactSignedRankTest(x)
+    @test_throws ArgumentError confint(t; level = 0.5)
+    @test_throws ArgumentError confint(t; level = 1.0)
+    # R: wilcox.test(x, conf.int = TRUE, conf.level = 0.51) -> (7.85, 11.75)
+    @test all(isapprox.(confint(t; level = 0.51), (7.85, 11.75); atol = 1e-9))
+    # R: alternative = "less", conf.level = 0.99 -> (-Inf, 16.3)
+    @test confint(t; level = 0.99, tail = :left)[1] == -Inf
+    @test isapprox(confint(t; level = 0.99, tail = :left)[2], 16.3, atol = 1e-9)
 end
 end
