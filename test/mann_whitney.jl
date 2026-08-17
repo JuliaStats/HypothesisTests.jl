@@ -234,9 +234,14 @@ end
     @test population_param_of_interest(ta)[3] == hodgeslehmann(ta)
     @test population_param_of_interest(ta)[3] != median(a) - median(b)
 
-    # one-sided bounds
-    @test confint(ExactMannWhitneyUTest(x, y); tail=:left)[2] == Inf
-    @test confint(ExactMannWhitneyUTest(x, y); tail=:right)[1] == -Inf
+    # one-sided bounds, on the same convention as every other test here and as R: the
+    # alternative :left names is a shift below zero, which an upper bound is compatible
+    # with (#368)
+    @test confint(ExactMannWhitneyUTest(x, y); tail=:left)[1] == -Inf
+    @test confint(ExactMannWhitneyUTest(x, y); tail=:right)[2] == Inf
+    lo, hi = confint(ExactMannWhitneyUTest(x, y))
+    @test confint(ExactMannWhitneyUTest(x, y); tail=:left)[2] <= hi
+    @test confint(ExactMannWhitneyUTest(x, y); tail=:right)[1] >= lo
 
     # a narrower interval for a lower confidence level
     lo95, hi95 = confint(ExactMannWhitneyUTest(x, y); level=0.95)

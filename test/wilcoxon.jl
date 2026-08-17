@@ -143,8 +143,22 @@ end
     # The approximate test now gets the approximate interval; it used to report the exact one.
     @test isapprox(@inferred(confint(ApproximateSignedRankTest(x)))[1], 3.05, atol=1e-4)
     @test isapprox(@inferred(confint(ApproximateSignedRankTest(x)))[2], 15.5, atol=1e-4)
-    @test isapprox(@inferred(confint(SignedRankTest(x); tail=:left))[1], 4.45, atol=1e-4)
-    @test isapprox(@inferred(confint(SignedRankTest(x); tail=:right))[2], 14.45, atol=1e-4)
+    # one-sided, at level 0.95, is the corresponding endpoint of the two-sided 0.90
+    # interval, and the tail names the alternative: :left is location below the null, so it
+    # keeps the upper bound. R: wilcox.test(x, alternative = "less", conf.int = TRUE) ->
+    # (-Inf, 14.45), and "greater" -> (4.45, Inf). See #368.
+    @test @inferred(confint(SignedRankTest(x); tail=:left))[1] == -Inf
+    @test isapprox(@inferred(confint(SignedRankTest(x); tail=:left))[2], 14.45, atol=1e-4)
+    @test isapprox(@inferred(confint(SignedRankTest(x); tail=:right))[1], 4.45, atol=1e-4)
+    @test @inferred(confint(SignedRankTest(x); tail=:right))[2] == Inf
+    # and the pair matches what pvalue means by the same tail: the :left bound is the
+    # acceptance limit of the left-tailed test
+    u = confint(SignedRankTest(x); tail=:left)[2]
+    @test pvalue(SignedRankTest(x .- (u - 0.02)); tail=:left) > 0.05
+    @test pvalue(SignedRankTest(x .- (u + 0.02)); tail=:left) < 0.05
+    l = confint(SignedRankTest(x); tail=:right)[1]
+    @test pvalue(SignedRankTest(x .- (l + 0.02)); tail=:right) > 0.05
+    @test pvalue(SignedRankTest(x .- (l - 0.02)); tail=:right) < 0.05
 end
 
 @testset "Hodges-Lehmann estimate" begin
@@ -281,11 +295,12 @@ end
                 (@test_logs (:warn, r"outside the set of pairwise estimates") confint(t; level=0.99)) :
                 confint(t; level=0.99)
             @test wide[1] <= lo && wide[2] >= hi
-            # one-sided bounds are the corresponding two-sided endpoints, and open
-            @test confint(t; tail=:left)[2] == Inf
-            @test confint(t; tail=:right)[1] == -Inf
-            @test confint(t; tail=:left)[1] >= lo
-            @test confint(t; tail=:right)[2] <= hi
+            # one-sided bounds are the corresponding two-sided endpoints, and open on the
+            # side the tail's alternative allows (#368)
+            @test confint(t; tail=:left)[1] == -Inf
+            @test confint(t; tail=:right)[2] == Inf
+            @test confint(t; tail=:left)[2] <= hi
+            @test confint(t; tail=:right)[1] >= lo
         end
     end
 end
