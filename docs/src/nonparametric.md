@@ -90,8 +90,9 @@ exact symmetry makes the two agree, but they can also agree by coincidence, as o
 
 Which order statistics `confint` returns depends on the test: the `Exact*` types invert
 the exact null distribution, conservatively, and the `Approximate*` types invert the
-normal approximation with a continuity correction and a tie-corrected variance. The
-`Exact*` interval agrees with R's `wilcox.test` at `exact = TRUE` digit for digit; the
+normal approximation with a continuity correction and a tie-corrected variance. On untied
+data the `Exact*` interval agrees with R's `wilcox.test` at `exact = TRUE` digit for digit,
+and under ties R declines an exact interval even when asked for one; the
 `Approximate*` interval agrees with `exact = FALSE` to within one order statistic, since
 R solves for its endpoints numerically rather than reading them off the pairwise estimates.
 

@@ -120,7 +120,7 @@ See [`MannWhitneyUTest`](@ref) on what that null does and does not assume.
 
 When there are no tied ranks, the exact p-value is computed using the `wilcoxcdf` and `wilcoxccdf`
 functions from the `StatsFuns` package. In the presence of tied ranks, a p-value is computed by exhaustive
-enumeration of permutations, which can be very slow for even moderately sized data sets.
+enumeration of the assignments of the pooled midranks to the smaller sample.
 
 The tied route is bounded by [`MAX_EXACT_ENUMERATION_N`](@ref): beyond it this test
 refuses rather than enumerate indefinitely, and `method = :approximate` is the way on.
@@ -243,16 +243,19 @@ from the same distribution, against the alternative that one tends to exceed the
 See [`MannWhitneyUTest`](@ref) on what that null does and does not assume.
 
 The p-value is computed using a normal approximation to the distribution of the
-Mann-Whitney U statistic:
+Mann-Whitney U statistic, which under the null has mean and variance
 ```math
     \\begin{align*}
-        μ & = \\frac{n_x n_y}{2}\\\\
+        μ_0 & = \\frac{n_x n_y}{2}\\\\
         σ^2 & = \\frac{n_x n_y}{12}\\left(n_x + n_y + 1 - \\frac{a}{(n_x + n_y)(n_x +
             n_y - 1)}\\right)\\\\
         a & = \\sum_{t \\in \\mathcal{T}} t^3 - t
     \\end{align*}
 ```
 where ``\\mathcal{T}`` is the set of the counts of tied values at each tied position.
+What `show` reports as `normal approximation (μ, σ)` is the pair ``(U - μ_0, σ)``: the
+statistic centred at its null mean, and the tie-corrected standard deviation, not ``μ_0``
+itself.
 
 The confidence interval inverts the same approximation, rather than the exact null
 distribution.

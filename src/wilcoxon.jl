@@ -93,8 +93,8 @@ end
 
 struct ExactSignedRankTest <: HypothesisTest
     vals::Vector{Float64}   # original values
-    W::Float64              # test statistic: Wilcoxon rank-sum statistic
-    ranks::Vector{Float64}           # ranks without ties (zero values)
+    W::Float64              # test statistic: the signed rank statistic W+
+    ranks::Vector{Float64}           # midranks of |d| over the non-zero observations
     signs::BitArray{1}      # signs of input of ranks
     tie_adjustment::Float64 # adjustment for ties
     n::Int                  # number of observations
@@ -110,7 +110,7 @@ assume, and on the alternatives the `tail` keyword selects.
 
 When there are no tied ranks, the exact p-value is computed using the `signrankcdf` and `signrankccdf`
 functions from the `StatsFuns` package. In the presence of tied ranks, a p-value is computed by exhaustive
-enumeration of permutations, which can be very slow for even moderately sized data sets.
+enumeration of the ``2^n`` sign assignments over the non-zero observations.
 
 The tied route is bounded by [`MAX_EXACT_ENUMERATION_N`](@ref): beyond it this test
 refuses rather than enumerate indefinitely, and `method = :approximate` is the way on.
@@ -230,8 +230,8 @@ end
 
 struct ApproximateSignedRankTest <: HypothesisTest
     vals::Vector{Float64}   # original values
-    W::Float64              # test statistic: Wilcoxon rank-sum statistic
-    ranks::Vector{Float64} # ranks without ties (zero values)
+    W::Float64              # test statistic: the signed rank statistic W+
+    ranks::Vector{Float64} # midranks of |d| over the non-zero observations
     signs::BitArray{1}      # signs of input of ranks
     tie_adjustment::Float64 # adjustment for ties
     n::Int                  # number of observations
@@ -248,15 +248,18 @@ against the alternative that it is not. See
 [`SignedRankTest`](@ref) on what that null does and does not assume.
 
 The p-value is computed using a normal approximation to the distribution of the signed rank
-statistic:
+statistic ``W^+``, which under the null has mean and variance
 ```math
     \\begin{align*}
-        μ & = \\frac{n(n + 1)}{4}\\\\
+        μ_0 & = \\frac{n(n + 1)}{4}\\\\
         σ^2 & = \\frac{n(n + 1)(2n + 1)}{24} - \\frac{a}{48}\\\\
         a & = \\sum_{t \\in \\mathcal{T}} t^3 - t
     \\end{align*}
 ```
-where ``\\mathcal{T}`` is the set of the counts of tied values at each tied position.
+where ``\\mathcal{T}`` is the set of the counts of tied values at each tied position and
+``n`` counts the non-zero observations. What `show` reports as `normal approximation (μ, σ)`
+is the pair ``(W^+ - μ_0, σ)``: the statistic centred at its null mean, and the
+tie-corrected standard deviation, not ``μ_0`` itself.
 
 The confidence interval inverts the same approximation, rather than the exact null
 distribution.
