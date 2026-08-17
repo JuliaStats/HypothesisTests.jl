@@ -126,6 +126,7 @@ default_tail(test::ExactSignedRankTest) = :both
 
 function show_params(io::IO, x::ExactSignedRankTest, ident)
     println(io, ident, "number of observations:      ", x.n)
+    println(io, ident, "non-zero observations:       ", length(x.ranks))
     println(io, ident, "Wilcoxon rank-sum statistic: ", x.W)
     print(io, ident, "rank sums:                   ")
     show(io, [sum(x.ranks[x.signs]), sum(x.ranks[map(!, x.signs)])])
@@ -277,6 +278,7 @@ default_tail(test::ApproximateSignedRankTest) = :both
 
 function show_params(io::IO, x::ApproximateSignedRankTest, ident)
     println(io, ident, "number of observations:      ", x.n)
+    println(io, ident, "non-zero observations:       ", length(x.ranks))
     println(io, ident, "Wilcoxon rank-sum statistic: ", x.W)
     print(io, ident, "rank sums:                   ")
     show(io, [sum(x.ranks[x.signs]), sum(x.ranks[map(!, x.signs)])])
