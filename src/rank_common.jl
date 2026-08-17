@@ -1,6 +1,6 @@
 # rank_common.jl
 # Machinery shared by the Wilcoxon signed rank and Mann-Whitney U tests:
-# selection of the exact/approximate method, the contrast sets that the
+# selection of the exact/approximate method, the pairwise estimates that the
 # distribution-free intervals and the point estimates are read off, the two index
 # rules used to invert the test, and bounds on the cost of both.
 
@@ -46,7 +46,7 @@ end
 # See JuliaStats/StatsFuns.jl#219 and #220.
 #
 # What does still need bounding is this package's own tied-data enumeration, and
-# the contrast sets the intervals are read off. Both are cost, not correctness.
+# the pairwise estimates the intervals are read off. Both are cost, not correctness.
 
 """
 Largest sample for which the tied-data branch of an exact test will enumerate. The
@@ -84,19 +84,19 @@ function rank_binomial(nx::Integer, ny::Integer)
     end
 end
 
-## CONTRAST SETS
+## PAIRWISE ESTIMATES
 
 """
-Largest contrast set (Walsh averages, or cross-group differences) that will be
+Largest set of pairwise estimates (Walsh averages, or cross-group differences) that will be
 materialised. The estimators and intervals below are ``O(n^2)`` in memory; beyond
 this bound they refuse rather than exhaust the machine. See #7 and #97.
 """
-const MAX_RANK_CONTRASTS = 100_000_000
+const MAX_PAIRWISE_ESTIMATES = 100_000_000
 
-function check_contrast_count(m::Integer, what::AbstractString)
-    m <= MAX_RANK_CONTRASTS && return nothing
+function check_estimate_count(m::Integer, what::AbstractString)
+    m <= MAX_PAIRWISE_ESTIMATES && return nothing
     throw(ArgumentError(
-        "refusing to form $m $what: more than MAX_RANK_CONTRASTS = $MAX_RANK_CONTRASTS. " *
+        "refusing to form $m $what: more than MAX_PAIRWISE_ESTIMATES = $MAX_PAIRWISE_ESTIMATES. " *
         "The distribution-free interval and the Hodges-Lehmann estimator are computed " *
         "by materialising this set, which is quadratic in the sample size (see #7)."))
 end
@@ -111,7 +111,7 @@ interval for the pseudomedian is a pair of their order statistics.
 function walsh_averages(x::AbstractVector{T}) where T<:Real
     n = length(x)
     m = div(n * (n + 1), 2)
-    check_contrast_count(m, "Walsh averages")
+    check_estimate_count(m, "Walsh averages")
     out = Vector{float(T)}(undef, m)
     k = 0
     @inbounds for i in 1:n, j in i:n
@@ -130,7 +130,7 @@ shift is a pair of their order statistics.
 function cross_differences(x::AbstractVector{T}, y::AbstractVector{S}) where {T<:Real,S<:Real}
     nx, ny = length(x), length(y)
     m = nx * ny
-    check_contrast_count(m, "cross-group differences")
+    check_estimate_count(m, "cross-group differences")
     out = Vector{float(promote_type(T, S))}(undef, m)
     k = 0
     @inbounds for xi in x, yj in y
@@ -141,7 +141,7 @@ end
 
 ## INDEX RULES
 #
-# Both intervals are read off a sorted contrast set `vals` of length `m` as
+# Both intervals are read off a sorted set of pairwise estimates `vals` of length `m` as
 # `(vals[k + 1], vals[m - k])`. All that differs between the exact and the
 # approximate test is how `k` is chosen.
 
@@ -206,7 +206,7 @@ function ci_alpha(level::Real, tail::Symbol)
     return tail === :both ? 1 - level : 2 * (1 - level)
 end
 
-function ci_from_contrasts(vals::AbstractVector, k::Integer, tail::Symbol)
+function ci_from_estimates(vals::AbstractVector, k::Integer, tail::Symbol)
     m = length(vals)
     left = vals[k + 1]
     right = vals[m - k]

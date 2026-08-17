@@ -137,7 +137,7 @@ end
     # the statistic and the p-value already ignore zeros
     @test SignedRankTest(d).W == SignedRankTest(nz).W
     @test pvalue(SignedRankTest(d)) == pvalue(SignedRankTest(nz))
-    # and so does the estimate, which is formed from the same contrast set
+    # and so does the estimate, which is formed from the same pairwise estimates
     @test hodgeslehmann(SignedRankTest(d)) == hodgeslehmann(SignedRankTest(nz)) == 0.5
 
     # PENDING #362: the interval does not. It is built from the Walsh averages of all
@@ -146,7 +146,7 @@ end
     @test confint(SignedRankTest(d); level=0.9) != confint(SignedRankTest(nz); level=0.9)
     @test confint(SignedRankTest(d); level=0.9) == (0.0, 0.5)
     @test length(HypothesisTests.walsh_averages(d)) == 210
-    @test length(HypothesisTests.signedrank_contrasts(d)) == 120
+    @test length(HypothesisTests.signedrank_pairwise_estimates(d)) == 120
 end
 
 @testset "method keyword" begin
@@ -210,10 +210,10 @@ end
         HypothesisTests.HypothesisTest
 end
 
-@testset "Enumeration and contrast set are bounded" begin
-    @test HypothesisTests.MAX_RANK_CONTRASTS == 100_000_000
-    @test HypothesisTests.check_contrast_count(10, "Walsh averages") === nothing
-    @test_throws ArgumentError HypothesisTests.check_contrast_count(10^9, "Walsh averages")
+@testset "Enumeration and pairwise estimates are bounded" begin
+    @test HypothesisTests.MAX_PAIRWISE_ESTIMATES == 100_000_000
+    @test HypothesisTests.check_estimate_count(10, "Walsh averages") === nothing
+    @test_throws ArgumentError HypothesisTests.check_estimate_count(10^9, "Walsh averages")
 
     # the enumeration bound bites at exactly MAX_EXACT_ENUMERATION_N non-zero values
     N = HypothesisTests.MAX_EXACT_ENUMERATION_N

@@ -214,7 +214,7 @@ function StatsAPI.confint(x::ExactMannWhitneyUTest; level::Real=0.95, tail=:both
     alpha = ci_alpha(level, tail)
     vals = cross_differences(x.x, x.y)
     k = exact_ci_index(length(vals), alpha, u -> wilcoxcdf(x.nx, x.ny, u))
-    return ci_from_contrasts(vals, k, tail)
+    return ci_from_estimates(vals, k, tail)
 end
 
 struct ApproximateMannWhitneyUTest{T<:Real,S<:Real} <: HypothesisTest
@@ -308,5 +308,5 @@ function StatsAPI.confint(x::ApproximateMannWhitneyUTest; level::Real=0.95, tail
     vals = cross_differences(x.x, x.y)
     m = length(vals)
     k = normal_ci_index(m, m / 2, x.sigma, alpha)
-    return ci_from_contrasts(vals, k, tail)
+    return ci_from_estimates(vals, k, tail)
 end

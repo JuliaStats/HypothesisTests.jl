@@ -195,14 +195,14 @@ end
 # `confint` does not yet use this: it still forms its Walsh averages from every
 # difference, zeros included, so the interval and the estimate can describe
 # different samples. See #362.
-function signedrank_contrasts(vals::AbstractVector{<:Real})
+function signedrank_pairwise_estimates(vals::AbstractVector{<:Real})
     nonzero = filter(!iszero, vals)
-    # every difference is zero: nothing to drop, and the contrast set degenerates to
+    # every difference is zero: nothing to drop, and the pairwise estimates degenerate to
     # the point zero either way
     return walsh_averages(isempty(nonzero) ? vals : nonzero)
 end
 
-hodgeslehmann(x::ExactSignedRankTest) = median(signedrank_contrasts(x.vals))
+hodgeslehmann(x::ExactSignedRankTest) = median(signedrank_pairwise_estimates(x.vals))
 
 StatsAPI.confint(x::ExactSignedRankTest; level::Real=0.95, tail=:both) =
     calculate_ci(x.vals, level, tail=tail)
@@ -285,7 +285,7 @@ function StatsAPI.pvalue(x::ApproximateSignedRankTest; tail=:both)
     end
 end
 
-hodgeslehmann(x::ApproximateSignedRankTest) = median(signedrank_contrasts(x.vals))
+hodgeslehmann(x::ApproximateSignedRankTest) = median(signedrank_pairwise_estimates(x.vals))
 
 # Still the exact interval, on both signed rank types: `calculate_ci` inverts the
 # exact null distribution whichever test it was called on, so selecting the
@@ -309,5 +309,5 @@ function calculate_ci(x::AbstractVector, level::Real=0.95; tail=:both)
     k_range = 1:div(m, 2)
     l = [1 - 2 * signrankcdf(n, i) for i in k_range]
     k = argmin(abs.(l .- c))
-    return ci_from_contrasts(walsh_averages(x), k, tail)
+    return ci_from_estimates(walsh_averages(x), k, tail)
 end
