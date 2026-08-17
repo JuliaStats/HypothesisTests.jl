@@ -306,6 +306,9 @@ function calculate_ci(x::AbstractVector, level::Real=0.95; tail=:both)
     end
     n = length(x)
     m = div(n * (n + 1), 2)
+    # bound the set before the k scan below, which alone runs m/2 lattice
+    # recursions and would hang long before `walsh_averages` refuses
+    check_estimate_count(m, "Walsh averages")
     k_range = 1:div(m, 2)
     l = [1 - 2 * signrankcdf(n, i) for i in k_range]
     k = argmin(abs.(l .- c))
