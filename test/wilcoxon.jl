@@ -213,8 +213,8 @@ end
     @test_logs (:warn, r"not attainable") confint(ExactMannWhitneyUTest([1.0, 2.0], [3.0, 4.0]))
     # the approximate route warns for its own reason, and does not claim unattainability:
     # at n = 8, level = 0.99 it asks for k = -1 while the exact route reaches 0.9922
-    @test_logs (:warn, r"outside the contrast set") confint(ApproximateSignedRankTest(small))
-    @test_logs (:warn, r"outside the contrast set") confint(
+    @test_logs (:warn, r"outside the set of pairwise estimates") confint(ApproximateSignedRankTest(small))
+    @test_logs (:warn, r"outside the set of pairwise estimates") confint(
         ApproximateSignedRankTest([1.4, -0.6, 2.3, 0.8, -1.9, 3.1, 2.7, -0.3]); level=0.99)
     # and no warning once the level is attainable
     @test_logs confint(ExactSignedRankTest([1.4, -0.6, 2.3, 0.8, -1.9, 3.1]))
@@ -276,9 +276,9 @@ end
             lo, hi = confint(t)
             @test lo <= hodgeslehmann(t) <= hi
             # raising the level cannot narrow the interval (the approximate route warns at
-            # n = 8, where its rule wants an endpoint outside the contrast set)
+            # n = 8, where its rule wants an endpoint outside the pairwise estimates)
             wide = n == 8 && t isa ApproximateSignedRankTest ?
-                (@test_logs (:warn, r"outside the contrast set") confint(t; level=0.99)) :
+                (@test_logs (:warn, r"outside the set of pairwise estimates") confint(t; level=0.99)) :
                 confint(t; level=0.99)
             @test wide[1] <= lo && wide[2] >= hi
             # one-sided bounds are the corresponding two-sided endpoints, and open

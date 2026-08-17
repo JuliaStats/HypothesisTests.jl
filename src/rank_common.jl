@@ -276,9 +276,9 @@ there rather than this one that is loose, and coverage stays at nominal rather t
 falling below it: at `(3, 12)`, `(3, 15)` and `(3, 21)` the normal route covers `0.902`,
 `0.901` and `0.900` against the exact route's `0.932`, `0.927` and `0.919`.
 
-A negative `k` means the approximation puts the endpoint outside the contrast set, so the
-widest interval available is returned instead, with a warning. The warning does not claim
-the level is unattainable, because that does not follow: at `n = 8` and `level = 0.99` this
+A negative `k` means the approximation puts the endpoint outside the pairwise estimates, so
+the widest interval available is returned instead, with a warning. The warning does not
+claim the level is unattainable, because that does not follow: at `n = 8` and `level = 0.99` this
 rule asks for `k = -1` while the exact route reaches `0.9922`, which meets the request.
 What it does mean is that the sample is too small for this route, and `method = :exact` is
 where to go.
@@ -287,9 +287,10 @@ function normal_ci_index(m::Integer, mu::Real, sigma::Real, alpha::Real)
     q = quantile(Normal(mu, sigma), alpha / 2)
     k = ceil(Int, q - one(q) / 2) - 1
     if k < 0
-        @warn "the normal approximation puts the interval endpoint outside the contrast " *
-              "set for a sample this small; returning the widest interval it admits, " *
-              "which may not reach the requested level. The exact test is the way on" requested = 1 - alpha
+        @warn "the normal approximation puts the interval endpoint outside the set of " *
+              "pairwise estimates for a sample this small; returning the widest interval " *
+              "it admits, which may not reach the requested level. The exact test is " *
+              "the way on" requested = 1 - alpha
     end
     return clamp(k, 0, div(m, 2))
 end

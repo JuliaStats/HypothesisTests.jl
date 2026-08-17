@@ -93,7 +93,7 @@ the exact null distribution, conservatively, and the `Approximate*` types invert
 normal approximation with a continuity correction and a tie-corrected variance. The
 `Exact*` interval agrees with R's `wilcox.test` at `exact = TRUE` digit for digit; the
 `Approximate*` interval agrees with `exact = FALSE` to within one order statistic, since
-R solves for its endpoints numerically rather than reading them off the contrast set.
+R solves for its endpoints numerically rather than reading them off the pairwise estimates.
 
 Three named bounds apply, and past any of them the tests raise rather than run unbounded.
 The first bounds the tied-data enumeration a p-value runs, and `method = :approximate` is
