@@ -38,8 +38,9 @@ Equality of the two distributions is what makes the test exact: it renders the p
 observations exchangeable, which is what the null distribution of the statistic rests on.
 This is *not* a test of `P(x > y) = P(y > x)` alone. That weaker equality permits the two
 distributions to differ in spread, and then the test does not hold its level: for
-`Normal(0, 1)` against `Normal(0, 9)`, where it holds exactly, a nominal 0.05 test rejects
-about 13% of the time at `nx, ny = 30, 10`, and about 1.6% at `10, 30`.
+`Normal(0, 1)` against `Normal(0, 3)` (σ = 3, so three times the spread), where it holds
+exactly, a nominal 0.05 test rejects about 13% of the time at `nx, ny = 30, 10`, and about
+1.7% at `10, 30`.
 
 Under a shift model the location estimated is the median of `x - y`, reported by
 [`hodgeslehmann`](@ref).

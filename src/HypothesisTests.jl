@@ -102,7 +102,7 @@ function Base.show(_io::IO, test::T) where T<:HypothesisTest
     params = show_or_nothing(population_param_of_interest, test)
     println(io, "Population details:")
     if params === nothing
-        println(io, "    parameter of interest:   not computed for a sample this size")
+        println(io, "    parameter of interest:   not computed (over MAX_PAIRWISE_ESTIMATES)")
     else
         (param_name, param_under_h0, param_estimate) = params
         println(io, "    parameter of interest:   $param_name")

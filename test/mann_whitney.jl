@@ -391,6 +391,7 @@ end
     @test occursin("number of observations in each group", out)
     @test !occursin("confidence interval", out)
     @test !occursin("point estimate", out)
+    @test occursin("not computed (over MAX_PAIRWISE_ESTIMATES)", out)
 
     # and where it can afford one it still prints it
     @test occursin("95% confidence interval",

@@ -320,8 +320,10 @@ end
 # A one-sided interval keeps the endpoint that inverts the test of the same name, which is
 # the opposite endpoint to the one the tail is named after: the alternative `tail = :left`
 # stands for is location *below* the null, and what is compatible with that is an upper
-# bound. Every other test here that takes a `tail` does the same, as does R's `wilcox.test`
-# under `alternative = "less"`. These four returned the other endpoint until #368.
+# bound. Eight of the nine other `confint` methods here that take a `tail` do the same, as
+# does R's `wilcox.test` under `alternative = "less"`. These four returned the other
+# endpoint until #368. `SignTest` is the ninth and still returns a lower bound, capped at
+# the null rather than infinite; that is the same defect and is filed separately.
 function ci_from_estimates(vals::AbstractVector, k::Integer, tail::Symbol)
     m = length(vals)
     left = vals[k + 1]
