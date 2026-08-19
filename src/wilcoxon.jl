@@ -310,6 +310,10 @@ function calculate_ci(x::AbstractVector, level::Real=0.95; tail=:both)
     # recursions and would hang long before `walsh_averages` refuses
     check_estimate_count(m, "Walsh averages")
     k_range = 1:div(m, 2)
+    # A single observation has a single Walsh average, so the only interval is that
+    # point and there is no k to choose between. The scan below was handed the empty
+    # range 1:0 and `argmin` refused it. R's `wilcox.test` returns the point here too.
+    isempty(k_range) && return ci_from_estimates(walsh_averages(x), 0, tail)
     l = [1 - 2 * signrankcdf(n, i) for i in k_range]
     k = argmin(abs.(l .- c))
     return ci_from_estimates(walsh_averages(x), k, tail)

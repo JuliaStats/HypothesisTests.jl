@@ -131,6 +131,24 @@ end
     @test hodgeslehmann(SignedRankTest(h)) ≈ -2.1
 end
 
+@testset "One observation" begin
+    # One difference gives one Walsh average, so the only interval is that point, and
+    # the scan that picks an order statistic has nothing to pick between: it was handed
+    # the empty range 1:0 and `argmin` raised. R's `wilcox.test` returns (1.5, 1.5).
+    t = SignedRankTest([1.5])
+    @test confint(t) == (1.5, 1.5)
+    @test confint(t; level=0.99) == (1.5, 1.5)
+    @test confint(t; tail=:left) == (1.5, Inf)
+    @test confint(t; tail=:right) == (-Inf, 1.5)
+    @test hodgeslehmann(t) == 1.5
+    @test pvalue(t) == 1.0
+    @test confint(ApproximateSignedRankTest([1.5])) == (1.5, 1.5)
+    # and through the two-sample form
+    @test confint(SignedRankTest([4.0], [2.5])) == (1.5, 1.5)
+    # the two-sample tests already agreed: one against one is the one difference
+    @test confint(MannWhitneyUTest([4.0], [2.5])) == (1.5, 1.5)
+end
+
 @testset "Zero differences" begin
     d = [0.0, 0, 0, 0.5, 0.5, 1, -0.5, -1, 1.5, -1.5, 0.5, 0, 1, -0.5, 2, 0, 0.5, -1, 1, 0.5]
     nz = d[d .!= 0]
