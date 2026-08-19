@@ -88,9 +88,10 @@ not the sample median: exact symmetry makes the two agree, but they can also agr
 coincidence, as on `[0, 2, 2, 7]`, where both are `2`. Agreement is therefore no evidence
 of symmetry.
 
-Two named bounds apply, one to the tied-data enumeration and one to the pairwise estimates.
-Past either the tests raise rather than run unbounded, and `method = :approximate` is the
-way on.
+Two named bounds apply, and past either the tests raise rather than run unbounded. The
+first bounds the tied-data enumeration a p-value runs, and `method = :approximate` is the
+way past it. The second bounds the set of pairwise estimates, which `confint` and
+`hodgeslehmann` form whichever route the p-value took, so `method` is no help there.
 
 ```@docs
 HypothesisTests.MAX_EXACT_ENUMERATION_N

@@ -147,6 +147,20 @@ end
     @test confint(SignedRankTest(d); level=0.9) == (0.0, 0.5)
     @test length(HypothesisTests.walsh_averages(d)) == 210
     @test length(HypothesisTests.signedrank_pairwise_estimates(d)) == 120
+
+    # PENDING #362: and so the estimate can fall outside the interval printed beside it.
+    # Here the p-value and the estimate describe the seven non-zero differences while the
+    # interval is built from all fourteen, so it lands entirely below the estimate. The
+    # interval of the sample the estimate does describe contains it. This happens on
+    # roughly a tenth of samples that contain zeros, so it is worth a sample of its own.
+    e = [0.0, 3, 2, 0, 0, 3, 0, -1, 0, 0, 3, 0, 3, 3]
+    enz = e[e .!= 0]
+    @test pvalue(SignedRankTest(e)) == pvalue(SignedRankTest(enz))
+    @test hodgeslehmann(SignedRankTest(e)) == hodgeslehmann(SignedRankTest(enz)) == 3.0
+    lo, hi = confint(SignedRankTest(e))
+    @test (lo, hi) == (0.0, 1.5)
+    @test !(lo <= hodgeslehmann(SignedRankTest(e)) <= hi)
+    @test confint(SignedRankTest(enz)) == (1.0, 3.0)
 end
 
 @testset "method keyword" begin
