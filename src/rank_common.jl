@@ -22,7 +22,13 @@ function resolve_rank_method(method, stats::NamedTuple, default::Symbol)
         return default
     elseif method === :exact || method === :approximate
         return method
-    elseif method isa Function
+    elseif applicable(method, stats)
+        # `applicable` rather than `method isa Function`, which asks about type ancestry
+        # and not about callability: a struct with a call method is callable but is not
+        # under `Function` unless it says so, and a parameterised rule is the reason this
+        # keyword exists. The symbol branches are tested first, so nothing that should be
+        # a symbol reaches here, and a callable whose signature does not match falls
+        # through to the message below rather than raising a MethodError from in here.
         resolved = method(stats)
         if resolved !== :exact && resolved !== :approximate
             throw(ArgumentError(

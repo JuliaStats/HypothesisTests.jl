@@ -2,6 +2,14 @@ using HypothesisTests, Test
 using HypothesisTests: default_tail, population_param_of_interest
 using Statistics: median
 
+# A parameterised route rule written the natural way, as a struct you can store, reuse
+# and print. It is callable, and it is not a subtype of `Function`: defining a call
+# method does not place a type under `Function` unless it says so.
+struct SignedRankExactBelow
+    n::Int
+end
+(r::SignedRankExactBelow)(s) = s.n_nonzero <= r.n ? :exact : :approximate
+
 @testset "Wilcoxon" begin
 @testset "Basic exact test" begin
     @test default_tail(ExactSignedRankTest([1:10;], [2:2:20;])) == :both
@@ -199,8 +207,17 @@ end
         ApproximateSignedRankTest
     @test SignedRankTest(x, x .+ 1; method=:approximate) isa ApproximateSignedRankTest
 
+    # a callable need not be a `Function`; the keyword documents "a callable"
+    @test !(SignedRankExactBelow(100) isa Function)
+    @test SignedRankTest(big; method = SignedRankExactBelow(100)) isa ExactSignedRankTest
+    @test SignedRankTest(big; method = SignedRankExactBelow(10)) isa ApproximateSignedRankTest
+
     @test_throws ArgumentError SignedRankTest(x; method=:fastest)
     @test_throws ArgumentError SignedRankTest(x; method = s -> :fastest)
+    @test_throws ArgumentError SignedRankTest(x; method = 3)
+    # a callable this cannot be called with is rejected with the same message rather
+    # than raising a MethodError from inside the constructor
+    @test_throws ArgumentError SignedRankTest(x; method = (a, b) -> :exact)
 
     # PENDING #361: the choice reaches the type but not yet the interval
     @test confint(SignedRankTest(x; method=:exact)) ==

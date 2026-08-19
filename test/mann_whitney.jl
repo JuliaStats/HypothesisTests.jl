@@ -2,6 +2,12 @@ using HypothesisTests, Test
 using HypothesisTests: default_tail, population_param_of_interest
 using Statistics: median
 
+# Callable, and deliberately not a subtype of `Function`. See test/wilcoxon.jl.
+struct MannWhitneyExactBelow
+    n::Int
+end
+(r::MannWhitneyExactBelow)(s) = s.nx + s.ny <= r.n ? :exact : :approximate
+
 @testset "Mann-Whitney" begin
 @testset "Basic exact test" begin
     test = ExactMannWhitneyUTest([1:10;], [2.1:2:21;])
@@ -253,8 +259,19 @@ end
     @test MannWhitneyUTest(big1, big2; method=:exact) isa ExactMannWhitneyUTest
     @test MannWhitneyUTest(big1, big2; method = s -> s.nx + s.ny <= 100 ? :exact : :approximate) isa
         ExactMannWhitneyUTest
+    # a callable need not be a `Function`; the keyword documents "a callable"
+    @test !(MannWhitneyExactBelow(100) isa Function)
+    @test MannWhitneyUTest(big1, big2; method = MannWhitneyExactBelow(100)) isa
+        ExactMannWhitneyUTest
+    @test MannWhitneyUTest(big1, big2; method = MannWhitneyExactBelow(10)) isa
+        ApproximateMannWhitneyUTest
+
     @test_throws ArgumentError MannWhitneyUTest(x, y; method=:fastest)
     @test_throws ArgumentError MannWhitneyUTest(x, y; method = s -> :fastest)
+    @test_throws ArgumentError MannWhitneyUTest(x, y; method = 3)
+    # a callable this cannot be called with is rejected with the same message rather
+    # than raising a MethodError from inside the constructor
+    @test_throws ArgumentError MannWhitneyUTest(x, y; method = (a, b) -> :exact)
 
     # the callable is handed the documented fields
     seen = Ref{Any}(nothing)
