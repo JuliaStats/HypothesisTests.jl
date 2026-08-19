@@ -323,4 +323,43 @@ end
     @test occursin("95% confidence interval",
                    sprint(show, MannWhitneyUTest([1.0, 3, 5, 7], [2.0, 4, 6, 8])))
 end
+
+@testset "Reflection under argument swap" begin
+    # Swapping the samples negates the shift the test is about, so every quantity
+    # carrying that sign flips and every quantity that does not is unchanged. The
+    # arithmetic is exact rather than approximate: IEEE subtraction gives
+    # xi - yj == -(yj - xi), negation is exact, and the index rules see only nx, ny
+    # and the tie adjustment, all three symmetric in the two samples. So `==` here,
+    # not `≈`: an off-by-one in either index rule breaks it.
+    #
+    # The last two samples are separated on purpose. Where U sits near its null mean
+    # the normal index rule cannot tell that mean from the centred statistic, and the
+    # reflection holds either way; on a clearly shifted sample it does not, which is
+    # what makes this testset detect the confusion its `confint` comment warns about.
+    for (x, y) in (([1.0, 4, 6, 9, 11, 14], [2.0, 5, 7, 8, 12, 13]),   # no ties
+                   ([1.0, 2, 2, 5, 5, 5, 8], [2.0, 3, 5, 5, 9, 9]),    # tied within and across
+                   ([1.0, 2, 3], [10.0, 11, 12, 13]),                  # disjoint, unequal sizes
+                   ([10.0, 11, 12, 13, 14, 15], [1.0, 2, 3, 4, 5, 6]), # shifted well clear
+                   ([5.0, 5, 6, 8, 9, 9, 12], [1.0, 2, 2, 4, 6, 7]))   # shifted, and tied
+        for T in (ExactMannWhitneyUTest, ApproximateMannWhitneyUTest)
+            a, b = T(x, y), T(y, x)
+            @test hodgeslehmann(a) == -hodgeslehmann(b)
+            @test population_param_of_interest(a)[3] ==
+                  -population_param_of_interest(b)[3]
+            # U is complementary rather than antisymmetric: it counts pairs one way
+            @test a.U + b.U == length(x) * length(y)
+            @test pvalue(a) == pvalue(b)
+            @test pvalue(a; tail=:left) == pvalue(b; tail=:right)
+            # the two-sided interval reflects about zero, ends exchanged
+            for level in (0.90, 0.95, 0.99)
+                lo_a, hi_a = confint(a; level=level)
+                lo_b, hi_b = confint(b; level=level)
+                @test lo_a == -hi_b
+                @test hi_a == -lo_b
+            end
+            # and a lower bound becomes the negated upper bound
+            @test confint(a; tail=:left)[1] == -confint(b; tail=:right)[2]
+        end
+    end
+end
 end

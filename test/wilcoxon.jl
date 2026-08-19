@@ -246,4 +246,33 @@ end
     tied = repeat([1.0, 2.0], 20)
     @test_throws ArgumentError pvalue(SignedRankTest(tied; method=:exact))
 end
+
+@testset "Reflection under negation" begin
+    # The two-sample reflection is swapping the samples; the one-sample one is negating
+    # the sample, which negates the location the test is about. Exact for the same
+    # reason: negation is exact, and the index rules see only n and the tie adjustment.
+    for x in ([1.4, -2.6, 3.1, -0.7, 5.2, -4.8, 2.9],        # no ties, no zeros
+              [1.0, -1.0, 2.0, 2.0, -2.0, 3.0, 3.0, -3.0],   # tied absolute values
+              [0.0, 1.5, -2.5, 0.0, 3.5, -0.5, 4.0, 0.0])    # zeros, which are dropped
+        for T in (ExactSignedRankTest, ApproximateSignedRankTest)
+            a, b = T(x), T(-x)
+            @test hodgeslehmann(a) == -hodgeslehmann(b)
+            @test population_param_of_interest(a)[3] ==
+                  -population_param_of_interest(b)[3]
+            # W sums the positive signed ranks, so the pair exhausts the rank total
+            # over the non-zero observations rather than negating
+            nz = length(a.ranks)
+            @test a.W + b.W == nz * (nz + 1) / 2
+            @test pvalue(a) == pvalue(b)
+            @test pvalue(a; tail=:left) == pvalue(b; tail=:right)
+            for level in (0.90, 0.95, 0.99)
+                lo_a, hi_a = confint(a; level=level)
+                lo_b, hi_b = confint(b; level=level)
+                @test lo_a == -hi_b
+                @test hi_a == -lo_b
+            end
+            @test confint(a; tail=:left)[1] == -confint(b; tail=:right)[2]
+        end
+    end
+end
 end
