@@ -305,4 +305,22 @@ end
     tied = MannWhitneyUTest(repeat([1.0, 2.0], 15), repeat([1.0, 3.0], 15); method=:exact)
     @test_throws ArgumentError pvalue(tied)
 end
+
+@testset "show past the pairwise bound" begin
+    # `show` reads the interval off nx * ny cross-group differences, which `confint`
+    # refuses to form past MAX_PAIRWISE_ESTIMATES. The name, the statistic and the
+    # p-value are still worth printing, so it is the line that goes, not the display.
+    nx = ny = 10_001  # nx * ny = 100_020_001
+    t = MannWhitneyUTest(collect(1.0:nx), collect(1.5:1:(ny + 0.5)))
+    @test nx * ny > HypothesisTests.MAX_PAIRWISE_ESTIMATES
+    @test_throws ArgumentError confint(t)
+    out = sprint(show, t)
+    @test occursin("Approximate Mann-Whitney U test", out)
+    @test occursin("two-sided p-value", out)
+    @test !occursin("confidence interval", out)
+
+    # and where it can afford one it still prints it
+    @test occursin("95% confidence interval",
+                   sprint(show, MannWhitneyUTest([1.0, 3, 5, 7], [2.0, 4, 6, 8])))
+end
 end

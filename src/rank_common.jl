@@ -96,7 +96,9 @@ end
 """
 Largest set of pairwise estimates (Walsh averages, or cross-group differences) that will be
 materialised. The estimators and intervals below are ``O(n^2)`` in memory; beyond
-this bound they refuse rather than exhaust the machine. See #7 and #97.
+this bound they refuse rather than exhaust the machine. Displaying such a test still
+works: `show` drops its confidence interval line rather than failing to print at all.
+See #7 and #97.
 """
 const MAX_PAIRWISE_ESTIMATES = 100_000_000
 

@@ -51,6 +51,22 @@ function check_tail(tail::Symbol)
     end
 end
 
+# The interval `show` prints beside the point estimate, or `nothing` where there is none
+# to print. A test whose `confint` refuses the sample it was given still has a name, a
+# statistic and a p-value worth displaying, so the offending line is dropped rather than
+# the whole display: the rank tests bound the pairwise estimates their intervals are read
+# off (see `MAX_PAIRWISE_ESTIMATES`), and past that bound a large `MannWhitneyUTest` would
+# otherwise be impossible to look at.
+function show_confint(test::HypothesisTest)
+    applicable(confint, test) || return nothing
+    try
+        return confint(test)
+    catch err
+        err isa ArgumentError || rethrow()
+        return nothing
+    end
+end
+
 # Pretty-print
 function Base.show(_io::IO, test::T) where T<:HypothesisTest
     io = IOContext(_io, :compact=>get(_io, :compact, true))
@@ -58,7 +74,7 @@ function Base.show(_io::IO, test::T) where T<:HypothesisTest
     println(io, repeat("-", length(testname(test))))
 
     # population details
-    has_ci = applicable(confint, test)
+    ci = show_confint(test)
     (param_name, param_under_h0, param_estimate) = population_param_of_interest(test)
     println(io, "Population details:")
     println(io, "    parameter of interest:   $param_name")
@@ -69,10 +85,9 @@ function Base.show(_io::IO, test::T) where T<:HypothesisTest
     show(io, param_estimate)
     println(io)
 
-    if has_ci
-        ci = map(x -> round.(x; sigdigits=4, base=10), confint(test))
+    if ci !== nothing
         print(io, "    95% confidence interval: ")
-        show(io, ci)
+        show(io, map(x -> round.(x; sigdigits=4, base=10), ci))
         println(io)
     end
     println(io)
