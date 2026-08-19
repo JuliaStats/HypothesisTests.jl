@@ -382,10 +382,15 @@ end
     t = MannWhitneyUTest(collect(1.0:nx), collect(1.5:1:(ny + 0.5)))
     @test nx * ny > HypothesisTests.MAX_PAIRWISE_ESTIMATES
     @test_throws HypothesisTests.ComputationTooLarge confint(t)
+    # #363 made the reported estimate the Hodges-Lehmann one, read off the same set,
+    # so past the bound the point estimate goes the same way the interval does
+    @test_throws HypothesisTests.ComputationTooLarge hodgeslehmann(t)
     out = sprint(show, t)
     @test occursin("Approximate Mann-Whitney U test", out)
     @test occursin("two-sided p-value", out)
+    @test occursin("number of observations in each group", out)
     @test !occursin("confidence interval", out)
+    @test !occursin("point estimate", out)
 
     # and where it can afford one it still prints it
     @test occursin("95% confidence interval",
@@ -440,8 +445,9 @@ end
                 @test lo_a == -hi_b
                 @test hi_a == -lo_b
             end
-            # and a lower bound becomes the negated upper bound
-            @test confint(a; tail=:left)[1] == -confint(b; tail=:right)[2]
+            # compare the finite ends: under the #368 convention `:left` is an upper
+            # bound and `:right` a lower one, so `[1]` on both would be -Inf either way
+            @test confint(a; tail=:left)[2] == -confint(b; tail=:right)[1]
         end
     end
 end

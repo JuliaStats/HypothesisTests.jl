@@ -69,26 +69,27 @@ end
 
 Base.showerror(io::IO, err::ComputationTooLarge) = print(io, "ComputationTooLarge: ", err.msg)
 
-# The interval `show` prints beside the point estimate, or `nothing` where there is none
-# to print. A test whose `confint` refuses the sample it was given still has a name, a
-# statistic and a p-value worth displaying, so the offending line is dropped rather than
-# the whole display: the rank tests bound the pairwise estimates their intervals are read
-# off (see `MAX_PAIRWISE_ESTIMATES`), and past that bound a large `MannWhitneyUTest` would
-# otherwise be impossible to look at.
+# `show` asks a test for two things it may not be able to give for the sample it was
+# handed: its point estimate and its interval. For the rank tests both are read off a
+# pairwise set bounded by `MAX_PAIRWISE_ESTIMATES`, so past that bound each raises. A
+# test that cannot afford one still has a name, a statistic and a p-value worth seeing,
+# so what cannot be computed is dropped rather than the whole display.
 #
-# Only `ComputationTooLarge` is caught. `confint` is generic over `HypothesisTest`, so
-# catching `ArgumentError` here would also swallow a genuine argument bug in any
-# downstream package's `confint` method and print a test with no interval line instead of
-# raising, which is a hard thing to debug.
-function show_confint(test::HypothesisTest)
-    applicable(confint, test) || return nothing
+# Only `ComputationTooLarge` is caught. These functions are generic over
+# `HypothesisTest`, so catching `ArgumentError` here would also swallow a genuine
+# argument bug in any downstream package's method and print a test with a line missing
+# instead of raising, which is a hard thing to debug.
+function show_or_nothing(f, test::HypothesisTest)
     try
-        return confint(test)
+        return f(test)
     catch err
         err isa ComputationTooLarge || rethrow()
         return nothing
     end
 end
+
+show_confint(test::HypothesisTest) =
+    applicable(confint, test) ? show_or_nothing(confint, test) : nothing
 
 # Pretty-print
 function Base.show(_io::IO, test::T) where T<:HypothesisTest
@@ -98,15 +99,20 @@ function Base.show(_io::IO, test::T) where T<:HypothesisTest
 
     # population details
     ci = show_confint(test)
-    (param_name, param_under_h0, param_estimate) = population_param_of_interest(test)
+    params = show_or_nothing(population_param_of_interest, test)
     println(io, "Population details:")
-    println(io, "    parameter of interest:   $param_name")
-    print(io, "    value under h_0:         ")
-    show(io, param_under_h0)
-    println(io)
-    print(io, "    point estimate:          ")
-    show(io, param_estimate)
-    println(io)
+    if params === nothing
+        println(io, "    parameter of interest:   not computed for a sample this size")
+    else
+        (param_name, param_under_h0, param_estimate) = params
+        println(io, "    parameter of interest:   $param_name")
+        print(io, "    value under h_0:         ")
+        show(io, param_under_h0)
+        println(io)
+        print(io, "    point estimate:          ")
+        show(io, param_estimate)
+        println(io)
+    end
 
     if ci !== nothing
         print(io, "    95% confidence interval: ")

@@ -231,8 +231,9 @@ end
     t = SignedRankTest([1.5])
     @test confint(t) == (1.5, 1.5)
     @test confint(t; level=0.99) == (1.5, 1.5)
-    @test confint(t; tail=:left) == (1.5, Inf)
-    @test confint(t; tail=:right) == (-Inf, 1.5)
+    # `tail = :left` keeps the endpoint inverting the test of the same name (#368)
+    @test confint(t; tail=:left) == (-Inf, 1.5)
+    @test confint(t; tail=:right) == (1.5, Inf)
     @test hodgeslehmann(t) == 1.5
     @test pvalue(t) == 1.0
     @test confint(ApproximateSignedRankTest([1.5])) == (1.5, 1.5)
@@ -485,7 +486,9 @@ end
                 @test lo_a == -hi_b
                 @test hi_a == -lo_b
             end
-            @test confint(a; tail=:left)[1] == -confint(b; tail=:right)[2]
+            # compare the finite ends: under the #368 convention `:left` is an upper
+            # bound and `:right` a lower one, so `[1]` on both would be -Inf either way
+            @test confint(a; tail=:left)[2] == -confint(b; tail=:right)[1]
         end
     end
 end
