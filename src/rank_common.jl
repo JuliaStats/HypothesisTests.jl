@@ -207,6 +207,13 @@ with `k = Cα - 1`. This is the continuity correction R's `wilcox.test` applies 
 default. Dropping it makes the interval narrower than the exact one for 7 of 66 signed
 rank sample sizes at `level = 0.95` and 45 of 66 at `level = 0.90`; with it the interval
 is never narrower than exact at `level = 0.95` or above.
+
+Below that it can still be narrower by one order statistic, on strongly unbalanced
+designs: at `level = 0.90` that happens for 131 of the 1444 Mann-Whitney shapes with
+`nx, ny` in `3:40`, concentrated at `nx = 3`. It is the exact rule that is conservative
+there rather than this one that is loose, and coverage stays at nominal rather than
+falling below it: at `(3, 12)`, `(3, 15)` and `(3, 21)` the normal route covers `0.902`,
+`0.901` and `0.900` against the exact route's `0.932`, `0.927` and `0.919`.
 """
 function normal_ci_index(m::Integer, mu::Real, sigma::Real, alpha::Real)
     z = quantile(Normal(), 1 - alpha / 2)
