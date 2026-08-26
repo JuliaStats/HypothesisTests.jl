@@ -64,7 +64,7 @@ function signedrankstats(x::AbstractVector{S}) where S<:Real
            W += ranks[i]
        end
    end
-   (W, ranks, nonzero_x .> 0, tieadj, length(x), median(x))
+   (W, ranks, nonzero_x .> 0, tieadj, length(x), Float64(median(x)))
 end
 
 ## EXACT WILCOXON SIGNED RANK TEST
