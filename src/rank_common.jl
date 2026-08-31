@@ -124,6 +124,10 @@ Their median is the one-sample Hodges-Lehmann estimator, and the distribution-fr
 interval for the pseudomedian is a pair of their order statistics.
 """
 function walsh_averages(x::AbstractVector{T}) where T<:Real
+    # the triangular loop below indexes `x` over `1:n` with bounds checking off, so state
+    # the assumption rather than corrupting memory if it is ever broken. `cross_differences`
+    # needs no such guard: it iterates the values and indexes only its own fresh output.
+    Base.require_one_based_indexing(x)
     n = length(x)
     m = div(n * (n + 1), 2)
     check_estimate_count(m, "Walsh averages")

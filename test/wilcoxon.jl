@@ -10,6 +10,16 @@ struct SignedRankExactBelow
 end
 (r::SignedRankExactBelow)(s) = s.n_nonzero <= r.n ? :exact : :approximate
 
+# A vector whose indices do not start at 1, enough to check that the pairwise-estimate
+# loop refuses one rather than reading out of bounds. Avoids a dependency on OffsetArrays
+# for a single assertion.
+struct ZeroBasedVector{T} <: AbstractVector{T}
+    data::Vector{T}
+end
+Base.size(v::ZeroBasedVector) = size(v.data)
+Base.axes(v::ZeroBasedVector) = (Base.IdentityUnitRange(0:(length(v.data) - 1)),)
+Base.getindex(v::ZeroBasedVector, i::Int) = v.data[i + 1]
+
 @testset "Wilcoxon" begin
 @testset "Basic exact test" begin
     @test default_tail(ExactSignedRankTest([1:10;], [2:2:20;])) == :both
@@ -285,6 +295,13 @@ end
         @test confint(t) == ci
         @test hodgeslehmann(t) == hl
     end
+    # `walsh_averages` indexes over `1:n` with `@inbounds`, so a vector indexed otherwise
+    # is refused rather than read out of bounds
+    @test_throws ArgumentError HypothesisTests.walsh_averages(ZeroBasedVector([1.0, 2.0, 3.0]))
+    @test HypothesisTests.walsh_averages([1.0, 2.0, 3.0]) == [1.0, 1.5, 2.0, 2.0, 2.5, 3.0]
+    # `cross_differences` iterates values, so it needs no such guard
+    @test HypothesisTests.cross_differences(ZeroBasedVector([3.0]), ZeroBasedVector([1.0])) == [2.0]
+
     # the seven-argument approximate constructor can be called directly, so it takes
     # the snapshot itself rather than relying on its callers to have done so
     xs = [1.0, 2.0, 3.0, 4.0, 9.0, -2.0, 0.5]
