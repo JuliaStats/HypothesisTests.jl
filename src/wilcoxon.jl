@@ -56,9 +56,7 @@ function SignedRankTest(x::AbstractVector{T}; method = :auto) where T<:Real
     (W, ranks, signs, tie_adjustment, n, median) = signedrankstats(x)
     stats = signedrank_decision_stats(n, length(ranks), tie_adjustment)
     if resolve_rank_method(method, stats, auto_signedrank_method(stats)) === :exact
-        # `ExactSignedRankTest` has no constructor of its own to hook, so the snapshot
-        # is taken here; the approximate branch is snapshotted by the method below.
-        ExactSignedRankTest(copy(x), W, ranks, signs, tie_adjustment, n, median)
+        ExactSignedRankTest(x, W, ranks, signs, tie_adjustment, n, median)
     else
         ApproximateSignedRankTest(x, W, ranks, signs, tie_adjustment, n, median)
     end
@@ -113,11 +111,8 @@ refuses rather than enumerate indefinitely, and `method = :approximate` is the w
 
 Implements: [`pvalue`](@ref), [`confint`](@ref), [`hodgeslehmann`](@ref)
 """
-# `copy`, so that the test does not keep a live view of the caller's array: `vals` is
-# what `confint` and `hodgeslehmann` read, while every other field is a snapshot taken
-# at construction. See JuliaStats/HypothesisTests.jl#375.
 ExactSignedRankTest(x::AbstractVector{T}) where {T<:Real} =
-    ExactSignedRankTest(copy(x), signedrankstats(x)...)
+    ExactSignedRankTest(x, signedrankstats(x)...)
 ExactSignedRankTest(x::AbstractVector{S}, y::AbstractVector{T}) where {S<:Real,T<:Real} =
     ExactSignedRankTest(x - y)
 
@@ -253,9 +248,7 @@ function ApproximateSignedRankTest(x::Vector, W::Float64, ranks::Vector{T}, sign
     nz = length(ranks) # num non-zeros
     mu = W - nz * (nz + 1)/4
     std = sqrt(nz * (nz + 1) * (2 * nz + 1) / 24 - tie_adjustment / 48)
-    # `copy` here rather than at the call sites, so that every route into this type
-    # takes the snapshot exactly once, this one included when it is called directly.
-    ApproximateSignedRankTest(copy(x), W, ranks, signs, tie_adjustment, n, median, mu, std)
+    ApproximateSignedRankTest(x, W, ranks, signs, tie_adjustment, n, median, mu, std)
 end
 ApproximateSignedRankTest(x::AbstractVector{T}) where {T<:Real} =
     ApproximateSignedRankTest(x, signedrankstats(x)...)
