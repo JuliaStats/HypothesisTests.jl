@@ -70,7 +70,7 @@ const MAX_EXACT_ENUMERATION_N = 25
 
 function check_exact_enumeration(n::Integer)
     n <= MAX_EXACT_ENUMERATION_N && return nothing
-    throw(ArgumentError(
+    throw(ComputationTooLarge(
         "an exact test with ties enumerates all 2^n sign assignments, which is not " *
         "feasible for n = $n non-zero observations (limit " *
         "MAX_EXACT_ENUMERATION_N = $MAX_EXACT_ENUMERATION_N). Pass `method = :approximate`."))
@@ -79,7 +79,7 @@ end
 function check_exact_enumeration(nx::Integer, ny::Integer)
     count = rank_binomial(nx, ny)
     (count !== nothing && count <= Int128(2)^MAX_EXACT_ENUMERATION_N) && return nothing
-    throw(ArgumentError(
+    throw(ComputationTooLarge(
         "an exact test with ties enumerates all binomial(nx + ny, min(nx, ny)) rank " *
         "assignments, which is not feasible for nx = $nx, ny = $ny (limit " *
         "2^MAX_EXACT_ENUMERATION_N = $(Int128(2)^MAX_EXACT_ENUMERATION_N)). " *
@@ -110,7 +110,7 @@ const MAX_PAIRWISE_ESTIMATES = 100_000_000
 
 function check_estimate_count(m::Integer, what::AbstractString)
     m <= MAX_PAIRWISE_ESTIMATES && return nothing
-    throw(ArgumentError(
+    throw(ComputationTooLarge(
         "refusing to form $m $what: more than MAX_PAIRWISE_ESTIMATES = $MAX_PAIRWISE_ESTIMATES. " *
         "The distribution-free interval and the Hodges-Lehmann estimator are computed " *
         "by materialising this set, which is quadratic in the sample size (see #7)."))

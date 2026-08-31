@@ -54,18 +54,40 @@ function check_tail(tail::Symbol)
     end
 end
 
+"""
+    ComputationTooLarge <: Exception
+
+Thrown where a test refuses a computation whose cost this package bounds, rather than
+run for an unbounded time or exhaust memory. See [`MAX_EXACT_ENUMERATION_N`](@ref) and
+[`MAX_PAIRWISE_ESTIMATES`](@ref) for the two bounds and the way past each.
+
+It is deliberately not an `ArgumentError`: the argument is not wrong, the cost of
+answering for it is refused, and `show` needs to tell that apart from a genuine
+argument bug in a `confint` method it knows nothing about.
+"""
+struct ComputationTooLarge <: Exception
+    msg::String
+end
+
+Base.showerror(io::IO, err::ComputationTooLarge) = print(io, "ComputationTooLarge: ", err.msg)
+
 # The interval `show` prints beside the point estimate, or `nothing` where there is none
 # to print. A test whose `confint` refuses the sample it was given still has a name, a
 # statistic and a p-value worth displaying, so the offending line is dropped rather than
 # the whole display: the rank tests bound the pairwise estimates their intervals are read
 # off (see `MAX_PAIRWISE_ESTIMATES`), and past that bound a large `MannWhitneyUTest` would
 # otherwise be impossible to look at.
+#
+# Only `ComputationTooLarge` is caught. `confint` is generic over `HypothesisTest`, so
+# catching `ArgumentError` here would also swallow a genuine argument bug in any
+# downstream package's `confint` method and print a test with no interval line instead of
+# raising, which is a hard thing to debug.
 function show_confint(test::HypothesisTest)
     applicable(confint, test) || return nothing
     try
         return confint(test)
     catch err
-        err isa ArgumentError || rethrow()
+        err isa ComputationTooLarge || rethrow()
         return nothing
     end
 end

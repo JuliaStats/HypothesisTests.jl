@@ -315,19 +315,19 @@ end
 @testset "Enumeration and pairwise estimates are bounded" begin
     @test HypothesisTests.MAX_PAIRWISE_ESTIMATES == 100_000_000
     @test HypothesisTests.check_estimate_count(10, "Walsh averages") === nothing
-    @test_throws ArgumentError HypothesisTests.check_estimate_count(10^9, "Walsh averages")
+    @test_throws HypothesisTests.ComputationTooLarge HypothesisTests.check_estimate_count(10^9, "Walsh averages")
 
     # the enumeration bound bites at exactly MAX_EXACT_ENUMERATION_N non-zero values
     N = HypothesisTests.MAX_EXACT_ENUMERATION_N
     @test N == 25
     @test HypothesisTests.check_exact_enumeration(N) === nothing
-    @test_throws ArgumentError HypothesisTests.check_exact_enumeration(N + 1)
+    @test_throws HypothesisTests.ComputationTooLarge HypothesisTests.check_exact_enumeration(N + 1)
     # and on the two-sample side at binomial(nx + ny, min(nx, ny)) > 2^N
     @test HypothesisTests.check_exact_enumeration(2, 2) === nothing
-    @test_throws ArgumentError HypothesisTests.check_exact_enumeration(30, 30)
+    @test_throws HypothesisTests.ComputationTooLarge HypothesisTests.check_exact_enumeration(30, 30)
     # a binomial too large to represent is bounded rather than thrown from
     @test HypothesisTests.rank_binomial(10^6, 10^6) === nothing
-    @test_throws ArgumentError HypothesisTests.check_exact_enumeration(10^6, 10^6)
+    @test_throws HypothesisTests.ComputationTooLarge HypothesisTests.check_exact_enumeration(10^6, 10^6)
 end
 
 @testset "Exact route past the automatic thresholds" begin
@@ -346,7 +346,7 @@ end
     end
     # the tied branch will not enumerate without bound, though
     tied = repeat([1.0, 2.0], 20)
-    @test_throws ArgumentError pvalue(SignedRankTest(tied; method=:exact))
+    @test_throws HypothesisTests.ComputationTooLarge pvalue(SignedRankTest(tied; method=:exact))
 end
 
 @testset "Reflection under negation" begin

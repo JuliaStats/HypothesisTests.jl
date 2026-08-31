@@ -92,10 +92,13 @@ Two named bounds apply, and past either the tests raise rather than run unbounde
 first bounds the tied-data enumeration a p-value runs, and `method = :approximate` is the
 way past it. The second bounds the set of pairwise estimates, which `confint` and
 `hodgeslehmann` form whichever route the p-value took, so `method` is no help there.
+Both raise `ComputationTooLarge`, which is its own type rather than an `ArgumentError`
+so that `show` can drop a refused interval line without also hiding real errors.
 
 ```@docs
 HypothesisTests.MAX_EXACT_ENUMERATION_N
 HypothesisTests.MAX_PAIRWISE_ESTIMATES
+HypothesisTests.ComputationTooLarge
 ```
 
 ## Permutation test

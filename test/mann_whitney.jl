@@ -349,7 +349,7 @@ end
     end
     # the tied branch will not enumerate without bound, though
     tied = MannWhitneyUTest(repeat([1.0, 2.0], 15), repeat([1.0, 3.0], 15); method=:exact)
-    @test_throws ArgumentError pvalue(tied)
+    @test_throws HypothesisTests.ComputationTooLarge pvalue(tied)
 end
 
 @testset "show past the pairwise bound" begin
@@ -359,7 +359,7 @@ end
     nx = ny = 10_001  # nx * ny = 100_020_001
     t = MannWhitneyUTest(collect(1.0:nx), collect(1.5:1:(ny + 0.5)))
     @test nx * ny > HypothesisTests.MAX_PAIRWISE_ESTIMATES
-    @test_throws ArgumentError confint(t)
+    @test_throws HypothesisTests.ComputationTooLarge confint(t)
     out = sprint(show, t)
     @test occursin("Approximate Mann-Whitney U test", out)
     @test occursin("two-sided p-value", out)
