@@ -257,6 +257,13 @@ end
     @test ApproximateSignedRankTest(Float32.(ints)) isa ApproximateSignedRankTest
     @test SignedRankTest(Float32[1, 2, 3, 4, 5, 6], Float32[2, 3, 4, 5, 6, 8]) isa
         HypothesisTests.HypothesisTest
+    # `level` is declared `Real` too, so it accepts any real rather than only Float64
+    for t in (ExactSignedRankTest(Float64.(ints)), ApproximateSignedRankTest(Float64.(ints)))
+        lref = confint(t; level=0.90)
+        @test confint(t; level=0.90f0) == lref
+        @test confint(t; level=9//10) == lref
+        @test_throws ArgumentError confint(t; level=1//2)
+    end
 end
 
 @testset "Construction snapshots the sample" begin

@@ -245,6 +245,17 @@ end
     lo95, hi95 = confint(ExactMannWhitneyUTest(x, y); level=0.95)
     lo80, hi80 = confint(ExactMannWhitneyUTest(x, y); level=0.80)
     @test lo95 <= lo80 <= hi80 <= hi95
+
+    # `level` is declared `Real` here rather than `Float64`, so any real has to work and
+    # not merely avoid a MethodError from `check_level`. The endpoints come from the
+    # sample, so they do not take the level's type.
+    for t in (ExactMannWhitneyUTest(x, y), ApproximateMannWhitneyUTest(x, y))
+        ref = confint(t; level=0.90)
+        @test confint(t; level=0.90f0) == ref
+        @test confint(t; level=9//10) == ref
+        @test_throws ArgumentError confint(t; level=1//2)
+        @test_throws ArgumentError confint(t; level=0.4f0)
+    end
 end
 
 @testset "method keyword" begin
