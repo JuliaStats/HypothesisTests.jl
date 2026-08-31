@@ -300,6 +300,24 @@ end
     # mixed eltypes promote instead of erroring
     tm = MannWhitneyUTest([1, 2, 3, 4, 5, 6], [2.5, 3.5, 4.5, 5.5, 6.5, 7.5])
     @test eltype(confint(tm)) === Float64
+    # `x` and `y` are a snapshot rather than a view of the caller's arrays. Every other
+    # field is computed at construction, so a view would let `confint` and
+    # `hodgeslehmann` describe a different sample from the one the p-value describes.
+    # `convert(Vector{R}, x)` returns its argument when the eltype already matches,
+    # which is the trap here. See JuliaStats/HypothesisTests.jl#375.
+    for f in (MannWhitneyUTest, ExactMannWhitneyUTest, ApproximateMannWhitneyUTest)
+        xs = [3.0, 1.0, 4.0, 1.5, 5.0]
+        ys = [2.0, 7.0, 1.0, 8.0]
+        t = f(xs, ys)
+        @test t.x !== xs
+        @test t.y !== ys
+        p, ci, hl = pvalue(t), confint(t), hodgeslehmann(t)
+        xs[1] += 100.0
+        ys[1] -= 100.0
+        @test pvalue(t) == p
+        @test confint(t) == ci
+        @test hodgeslehmann(t) == hl
+    end
 end
 
 @testset "Exact route past the automatic thresholds" begin

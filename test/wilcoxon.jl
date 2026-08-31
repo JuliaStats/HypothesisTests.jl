@@ -259,6 +259,35 @@ end
         HypothesisTests.HypothesisTest
 end
 
+@testset "Construction snapshots the sample" begin
+    # `vals` is what `confint` and `hodgeslehmann` read, while every other field is
+    # computed at construction, so keeping a view of the caller's array would let the
+    # interval and the estimate describe a different sample from the p-value. This was
+    # already so on master, where `confint` read `vals`. See
+    # JuliaStats/HypothesisTests.jl#375.
+    for f in (SignedRankTest,
+              x -> SignedRankTest(x; method = :approximate),
+              ExactSignedRankTest,
+              ApproximateSignedRankTest)
+        xs = [1.0, 2.0, 3.0, 4.0, 9.0, -2.0, 0.5]
+        t = f(xs)
+        @test t.vals !== xs
+        p, ci, hl = pvalue(t), confint(t), hodgeslehmann(t)
+        xs[1] += 100.0
+        @test pvalue(t) == p
+        @test confint(t) == ci
+        @test hodgeslehmann(t) == hl
+    end
+    # the seven-argument approximate constructor can be called directly, so it takes
+    # the snapshot itself rather than relying on its callers to have done so
+    xs = [1.0, 2.0, 3.0, 4.0, 9.0, -2.0, 0.5]
+    t = ApproximateSignedRankTest(xs, HypothesisTests.signedrankstats(xs)...)
+    @test t.vals !== xs
+    ci = confint(t)
+    xs[1] += 100.0
+    @test confint(t) == ci
+end
+
 @testset "Enumeration and pairwise estimates are bounded" begin
     @test HypothesisTests.MAX_PAIRWISE_ESTIMATES == 100_000_000
     @test HypothesisTests.check_estimate_count(10, "Walsh averages") === nothing

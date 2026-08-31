@@ -89,8 +89,13 @@ function mwustats(x::AbstractVector{<:Real}, y::AbstractVector{<:Real})
         U = ny*(2 * nx + ny + 1)/2 - sum(@view(ranks[(begin + nx):end]))
     end
     R = promote_type(eltype(x), eltype(y))
+    # `Vector{R}(x)` rather than `convert(Vector{R}, x)`: `convert` returns the argument
+    # itself when the eltype already matches, which would leave the test holding a live
+    # view of the caller's array. Every other field is a snapshot taken here, and these
+    # two are what `confint` and `hodgeslehmann` read, so a later mutation would move the
+    # interval and the estimate while the statistic and the p-value stayed put.
     return (U, ranks, tieadj, nx, ny, median(x)-median(y),
-            convert(Vector{R}, x), convert(Vector{R}, y))
+            Vector{R}(x), Vector{R}(y))
 end
 
 
