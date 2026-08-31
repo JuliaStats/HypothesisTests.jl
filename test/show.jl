@@ -52,7 +52,9 @@ m = PowerDivergenceTest(d)
         std. residuals:     [0.0, -1.36931, 1.36931]
     """
 
-# based on t.jl tests
+# based on t.jl tests. The two full-precision floats are interpolated rather than
+# spelled out: `std(-5:10)` moves by one ulp between Statistics 1.11.1 and 1.11.4,
+# and layout is what this test is for
 tst = OneSampleTTest(-5:10)
 
 @test sprint(show, tst) ==
@@ -71,9 +73,9 @@ tst = OneSampleTTest(-5:10)
 
     Details:
         number of observations:   16
-        t-statistic:              2.100420126042015
+        t-statistic:              $(tst.t)
         degrees of freedom:       15
-        empirical standard error: 1.1902380714238083
+        empirical standard error: $(tst.stderr)
     """
 
 # issue #248
