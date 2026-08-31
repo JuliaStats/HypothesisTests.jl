@@ -356,7 +356,7 @@ end
     # `show` reads the interval off nx * ny cross-group differences, which `confint`
     # refuses to form past MAX_PAIRWISE_ESTIMATES. The name, the statistic and the
     # p-value are still worth printing, so it is the line that goes, not the display.
-    nx = ny = 10_001  # nx * ny = 100_020_001
+    nx = ny = 1_001  # nx * ny = 1_002_001
     t = MannWhitneyUTest(collect(1.0:nx), collect(1.5:1:(ny + 0.5)))
     @test nx * ny > HypothesisTests.MAX_PAIRWISE_ESTIMATES
     @test_throws HypothesisTests.ComputationTooLarge confint(t)
@@ -368,6 +368,21 @@ end
     # and where it can afford one it still prints it
     @test occursin("95% confidence interval",
                    sprint(show, MannWhitneyUTest([1.0, 3, 5, 7], [2.0, 4, 6, 8])))
+end
+
+@testset "The exact interval is bounded in time" begin
+    # `exact_ci_index` runs a lattice recursion per candidate endpoint, which `:auto` never
+    # reached, since it leaves the exact route at nx + ny > 50. `method = :exact` does reach
+    # it at any size, so the interval is bounded rather than left to run.
+    x = collect(1.0:200); y = collect(1.5:1:200.5)
+    @test 200 * 200 > HypothesisTests.MAX_EXACT_CI_ESTIMATES
+    @test_throws HypothesisTests.ComputationTooLarge confint(MannWhitneyUTest(x, y; method=:exact))
+    # the approximate interval inverts a closed form, so it is unaffected
+    @test confint(MannWhitneyUTest(x, y; method=:approximate)) isa Tuple
+    # and inside the bound the exact interval is still computed
+    xs = collect(1.0:100); ys = collect(1.5:1:100.5)
+    @test 100 * 100 <= HypothesisTests.MAX_EXACT_CI_ESTIMATES
+    @test confint(MannWhitneyUTest(xs, ys; method=:exact)) isa Tuple
 end
 
 @testset "Reflection under argument swap" begin

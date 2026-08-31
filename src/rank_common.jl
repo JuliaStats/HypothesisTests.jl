@@ -63,10 +63,17 @@ observations, and refuses past `n = MAX_EXACT_ENUMERATION_N`. The Mann-Whitney t
 enumerates ``\\binom{n_x + n_y}{\\min(n_x, n_y)}`` rank assignments, so the bound is on that
 count rather than on the sample size: it refuses once there are more than
 `2^MAX_EXACT_ENUMERATION_N` of them. Either way the p-value raises rather than run for an
-unbounded time, and `method = :approximate` is the way on; `confint` is unaffected, since it
-inverts the tie-free distribution whichever route the p-value took. See #7.
+unbounded time, and `method = :approximate` is the way on.
+
+`confint` does not enumerate, since it inverts the tie-free distribution whichever route the
+p-value took, so this bound does not reach it. Its own cost is bounded by
+[`MAX_EXACT_CI_ESTIMATES`](@ref). See #7.
+
+At the bound itself a tied signed rank p-value takes about 14 s over its ``2^{30}`` sign
+assignments, and the largest two-sample split it admits, 16 against 16, about 20 s over
+`binomial(32, 16)` rank assignments. One observation further doubles both.
 """
-const MAX_EXACT_ENUMERATION_N = 25
+const MAX_EXACT_ENUMERATION_N = 30
 
 function check_exact_enumeration(n::Integer)
     n <= MAX_EXACT_ENUMERATION_N && return nothing
@@ -105,8 +112,14 @@ materialised. The estimators and intervals below are ``O(n^2)`` in memory; beyon
 this bound they refuse rather than exhaust the machine. Displaying such a test still
 works: `show` drops its confidence interval line rather than failing to print at all.
 See #7 and #97.
+
+The bound is on memory alone, which is what the approximate routes spend: forming this many
+estimates costs about 8 MB, and sorting them about that again. It admits a signed rank
+sample of roughly 1400 observations and a two-sample design of 1000 against 1000. The exact
+routes spend time as well, and are bounded far below this by
+[`MAX_EXACT_CI_ESTIMATES`](@ref).
 """
-const MAX_PAIRWISE_ESTIMATES = 100_000_000
+const MAX_PAIRWISE_ESTIMATES = 1_000_000
 
 function check_estimate_count(m::Integer, what::AbstractString)
     m <= MAX_PAIRWISE_ESTIMATES && return nothing
@@ -114,6 +127,33 @@ function check_estimate_count(m::Integer, what::AbstractString)
         "refusing to form $m $what: more than MAX_PAIRWISE_ESTIMATES = $MAX_PAIRWISE_ESTIMATES. " *
         "The distribution-free interval and the Hodges-Lehmann estimator are computed " *
         "by materialising this set, which is quadratic in the sample size (see #7)."))
+end
+
+"""
+Largest set of pairwise estimates whose *exact* interval will be inverted.
+
+Selecting an endpoint from the exact null distribution costs a lattice recursion for every
+candidate it considers, so this route spends time where the approximate one spends only the
+memory [`MAX_PAIRWISE_ESTIMATES`](@ref) bounds, and it needs a bound of its own, far below.
+Past this one the exact interval is refused; the approximate interval, where the test has
+one, is not.
+
+Sized by the slower of the two procedures. The signed rank interval scans every candidate,
+``m/2`` recursions, and at the bound, a sample of 223, takes about 9 s; the two-sample
+interval bisects instead, about ``\\log_2(m/2)`` of them, and takes under a second at the
+same point. The scan grows steeply past it: a signed rank sample of 250 takes 16 s, one of
+300 takes 39 s, and one of 400 does not finish.
+"""
+const MAX_EXACT_CI_ESTIMATES = 25_000
+
+function check_exact_ci_cost(m::Integer, escape::AbstractString)
+    m <= MAX_EXACT_CI_ESTIMATES && return nothing
+    throw(ComputationTooLarge(
+        "refusing to invert the exact null distribution over $m pairwise estimates: more " *
+        "than MAX_EXACT_CI_ESTIMATES = $MAX_EXACT_CI_ESTIMATES. Choosing an endpoint costs " *
+        "a lattice recursion per candidate, so this route is bounded well below " *
+        "MAX_PAIRWISE_ESTIMATES = $MAX_PAIRWISE_ESTIMATES, which bounds memory alone. " *
+        escape))
 end
 
 """

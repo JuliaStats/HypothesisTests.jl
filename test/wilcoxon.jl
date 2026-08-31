@@ -313,13 +313,13 @@ end
 end
 
 @testset "Enumeration and pairwise estimates are bounded" begin
-    @test HypothesisTests.MAX_PAIRWISE_ESTIMATES == 100_000_000
+    @test HypothesisTests.MAX_PAIRWISE_ESTIMATES == 1_000_000
     @test HypothesisTests.check_estimate_count(10, "Walsh averages") === nothing
-    @test_throws HypothesisTests.ComputationTooLarge HypothesisTests.check_estimate_count(10^9, "Walsh averages")
+    @test_throws HypothesisTests.ComputationTooLarge HypothesisTests.check_estimate_count(10^7, "Walsh averages")
 
     # the enumeration bound bites at exactly MAX_EXACT_ENUMERATION_N non-zero values
     N = HypothesisTests.MAX_EXACT_ENUMERATION_N
-    @test N == 25
+    @test N == 30
     @test HypothesisTests.check_exact_enumeration(N) === nothing
     @test_throws HypothesisTests.ComputationTooLarge HypothesisTests.check_exact_enumeration(N + 1)
     # and on the two-sample side at binomial(nx + ny, min(nx, ny)) > 2^N
@@ -328,6 +328,24 @@ end
     # a binomial too large to represent is bounded rather than thrown from
     @test HypothesisTests.rank_binomial(10^6, 10^6) === nothing
     @test_throws HypothesisTests.ComputationTooLarge HypothesisTests.check_exact_enumeration(10^6, 10^6)
+
+    # the exact interval is bounded separately and far lower, because choosing an endpoint
+    # costs a lattice recursion per candidate rather than a slot in an array
+    @test HypothesisTests.MAX_EXACT_CI_ESTIMATES == 25_000
+    @test HypothesisTests.MAX_EXACT_CI_ESTIMATES < HypothesisTests.MAX_PAIRWISE_ESTIMATES
+    @test HypothesisTests.check_exact_ci_cost(25_000, "") === nothing
+    @test_throws HypothesisTests.ComputationTooLarge HypothesisTests.check_exact_ci_cost(25_001, "")
+
+    # the scan is what #97 describes, and it is reached by both signed rank types, since
+    # neither has an approximate interval yet: n = 2000 hung indefinitely before this
+    big = SignedRankTest(collect(1.0:2000))
+    @test_throws HypothesisTests.ComputationTooLarge confint(big)
+    # the test is still printable, without its interval line
+    out = sprint(show, big)
+    @test occursin("Wilcoxon signed rank", out) || occursin("Wilcoxon", out)
+    @test !occursin("confidence interval", out)
+    # and a sample inside the bound still gets one
+    @test confint(SignedRankTest(collect(1.0:60))) isa Tuple
 end
 
 @testset "Exact route past the automatic thresholds" begin

@@ -313,9 +313,13 @@ function calculate_ci(x::AbstractVector, level::Real=0.95; tail=:both)
     end
     n = length(x)
     m = div(n * (n + 1), 2)
-    # bound the set before the k scan below, which alone runs m/2 lattice
-    # recursions and would hang long before `walsh_averages` refuses
     check_estimate_count(m, "Walsh averages")
+    # and bound the k scan below, which runs m/2 lattice recursions and so becomes
+    # unusable at a sample size far short of what materialising the set costs. Both
+    # signed rank types arrive here, since neither has an approximate interval yet.
+    check_exact_ci_cost(m,
+        "Both signed rank tests invert the exact distribution for their interval " *
+        "whichever route their p-value took, so `method` does not reach this (see #361).")
     k_range = 1:div(m, 2)
     # A single observation has a single Walsh average, so the only interval is that
     # point and there is no k to choose between. The scan below was handed the empty

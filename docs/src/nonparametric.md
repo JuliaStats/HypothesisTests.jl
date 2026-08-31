@@ -88,16 +88,21 @@ not the sample median: exact symmetry makes the two agree, but they can also agr
 coincidence, as on `[0, 2, 2, 7]`, where both are `2`. Agreement is therefore no evidence
 of symmetry.
 
-Two named bounds apply, and past either the tests raise rather than run unbounded. The
-first bounds the tied-data enumeration a p-value runs, and `method = :approximate` is the
-way past it. The second bounds the set of pairwise estimates, which `confint` and
-`hodgeslehmann` form whichever route the p-value took, so `method` is no help there.
-Both raise `ComputationTooLarge`, which is its own type rather than an `ArgumentError`
+Three named bounds apply, and past any of them the tests raise rather than run unbounded.
+The first bounds the tied-data enumeration a p-value runs, and `method = :approximate` is
+the way past it. The second bounds the set of pairwise estimates, which `confint` and
+`hodgeslehmann` form whichever route the p-value took, so `method` is no help there; it is a
+bound on memory, which is all the approximate interval spends. The third bounds the exact
+interval, which spends time as well, a lattice recursion for every candidate endpoint it
+considers, and so is bounded far below the second.
+
+All three raise `ComputationTooLarge`, which is its own type rather than an `ArgumentError`
 so that `show` can drop a refused interval line without also hiding real errors.
 
 ```@docs
 HypothesisTests.MAX_EXACT_ENUMERATION_N
 HypothesisTests.MAX_PAIRWISE_ESTIMATES
+HypothesisTests.MAX_EXACT_CI_ESTIMATES
 HypothesisTests.ComputationTooLarge
 ```
 

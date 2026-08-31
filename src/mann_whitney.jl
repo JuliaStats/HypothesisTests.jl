@@ -217,6 +217,11 @@ hodgeslehmann(x::ExactMannWhitneyUTest) = median(cross_differences(x.x, x.y))
 # inverts the untied one anyway; R declines an exact interval in that case.
 function StatsAPI.confint(x::ExactMannWhitneyUTest; level::Real=0.95, tail=:both)
     alpha = ci_alpha(level, tail)
+    # before the differences are formed, so an oversized request is refused rather than
+    # paid for: `exact_ci_index` below runs a lattice recursion per candidate endpoint
+    check_exact_ci_cost(x.nx * x.ny,
+        "Pass `method = :approximate` for the normal-approximation interval, which " *
+        "inverts a closed form and is bounded by memory alone.")
     vals = cross_differences(x.x, x.y)
     k = exact_ci_index(length(vals), alpha, u -> wilcoxcdf(x.nx, x.ny, u))
     return ci_from_estimates(vals, k, tail)
