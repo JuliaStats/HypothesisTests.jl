@@ -70,7 +70,7 @@ p-value took, so this bound does not reach it. Its own cost is bounded by
 [`MAX_EXACT_CI_ESTIMATES`](@ref). See #7.
 
 At the bound itself a tied signed rank p-value takes about 14 s over its ``2^{30}`` sign
-assignments, and the largest two-sample split it admits, 16 against 16, about 20 s over
+assignments, and the largest balanced split it admits, 16 against 16, about 20 s over
 `binomial(32, 16)` rank assignments. One observation further doubles both.
 """
 const MAX_EXACT_ENUMERATION_N = 30

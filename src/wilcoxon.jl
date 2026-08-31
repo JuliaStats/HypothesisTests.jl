@@ -244,8 +244,8 @@ statistic:
 ```
 where ``\\mathcal{T}`` is the set of the counts of tied values at each tied position.
 
-The confidence interval inverts the same approximation, rather than the exact null
-distribution.
+The confidence interval still inverts the exact null distribution, whichever route the
+p-value took (see #361).
 
 Implements: [`pvalue`](@ref), [`confint`](@ref), [`hodgeslehmann`](@ref)
 """

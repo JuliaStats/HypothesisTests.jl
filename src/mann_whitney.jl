@@ -28,7 +28,7 @@ export MannWhitneyUTest, ExactMannWhitneyUTest, ApproximateMannWhitneyUTest
 
 # Automatic exact/normal selection
 """
-    MannWhitneyUTest(x::AbstractVector{<:Real}, y::AbstractVector{<:Real})
+    MannWhitneyUTest(x::AbstractVector{<:Real}, y::AbstractVector{<:Real}; method = :auto)
 
 Perform a Mann-Whitney U test of the null hypothesis that the probability that an
 observation drawn from the same population as `x` is greater than an observation drawn

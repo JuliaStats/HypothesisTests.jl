@@ -58,8 +58,9 @@ end
     ComputationTooLarge <: Exception
 
 Thrown where a test refuses a computation whose cost this package bounds, rather than
-run for an unbounded time or exhaust memory. See [`MAX_EXACT_ENUMERATION_N`](@ref) and
-[`MAX_PAIRWISE_ESTIMATES`](@ref) for the two bounds and the way past each.
+run for an unbounded time or exhaust memory. See [`MAX_EXACT_ENUMERATION_N`](@ref),
+[`MAX_PAIRWISE_ESTIMATES`](@ref) and [`MAX_EXACT_CI_ESTIMATES`](@ref) for the three bounds
+and the way past each.
 
 It is deliberately not an `ArgumentError`: the argument is not wrong, the cost of
 answering for it is refused, and `show` needs to tell that apart from a genuine
