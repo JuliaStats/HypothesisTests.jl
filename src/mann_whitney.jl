@@ -57,21 +57,18 @@ Equivalently, construct [`ExactMannWhitneyUTest`](@ref) or
 Implements: [`pvalue`](@ref), [`confint`](@ref), [`hodgeslehmann`](@ref)
 """
 function MannWhitneyUTest(x::AbstractVector{S}, y::AbstractVector{T}; method = :auto) where {S<:Real,T<:Real}
-    stats0 = mwustats(x, y)
-    (U, ranks, tieadj, nx, ny, median) = stats0
-    stats = mwu_decision_stats(nx, ny, tieadj)
-    if resolve_rank_method(method, stats, auto_mwu_method(stats)) === :exact
-        ExactMannWhitneyUTest(stats0...)
+    fields = mwustats(x, y)
+    (U, ranks, tieadj, nx, ny, median) = fields
+    # the named tuple the `method` callable is documented to receive, and the automatic
+    # rule it defaults to, which is the threshold this constructor has always applied
+    stats = (nx = nx, ny = ny, ties = tieadj != 0, tie_adjustment = tieadj)
+    default = nx + ny <= 10 || (nx + ny <= 50 && tieadj == 0) ? :exact : :approximate
+    if resolve_rank_method(method, stats, default) === :exact
+        ExactMannWhitneyUTest(fields...)
     else
-        ApproximateMannWhitneyUTest(stats0...)
+        ApproximateMannWhitneyUTest(fields...)
     end
 end
-
-mwu_decision_stats(nx, ny, tie_adjustment) =
-    (nx = nx, ny = ny, ties = tie_adjustment != 0, tie_adjustment = tie_adjustment)
-
-auto_mwu_method(s) =
-    (s.nx + s.ny <= 10 || (s.nx + s.ny <= 50 && !s.ties)) ? :exact : :approximate
 
 # Get U, ranks, and tie adjustment for Mann-Whitney U test
 # U is the sum of adjusted ranks in the first sample minus the minimal sum of ranks (ie sum(1:length(x))

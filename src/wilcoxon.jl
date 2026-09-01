@@ -54,8 +54,14 @@ Implements: [`pvalue`](@ref), [`confint`](@ref), [`hodgeslehmann`](@ref)
 """
 function SignedRankTest(x::AbstractVector{T}; method = :auto) where T<:Real
     (W, ranks, signs, tie_adjustment, n, median) = signedrankstats(x)
-    stats = signedrank_decision_stats(n, length(ranks), tie_adjustment)
-    if resolve_rank_method(method, stats, auto_signedrank_method(stats)) === :exact
+    # `ranks` covers the non-zero observations alone, so its length is that count
+    n_nonzero = length(ranks)
+    # the named tuple the `method` callable is documented to receive, and the automatic
+    # rule it defaults to, which is the threshold this constructor has always applied
+    stats = (n = n, n_nonzero = n_nonzero, ties = tie_adjustment != 0,
+             tie_adjustment = tie_adjustment)
+    default = n_nonzero <= 15 || (n_nonzero <= 50 && tie_adjustment == 0) ? :exact : :approximate
+    if resolve_rank_method(method, stats, default) === :exact
         ExactSignedRankTest(x, W, ranks, signs, tie_adjustment, n, median)
     else
         ApproximateSignedRankTest(x, W, ranks, signs, tie_adjustment, n, median)
@@ -63,13 +69,6 @@ function SignedRankTest(x::AbstractVector{T}; method = :auto) where T<:Real
 end
 SignedRankTest(x::AbstractVector{T}, y::AbstractVector{S}; method = :auto) where {T<:Real,S<:Real} =
     SignedRankTest(x - y; method = method)
-
-signedrank_decision_stats(n, n_nonzero, tie_adjustment) =
-    (n = n, n_nonzero = n_nonzero, ties = tie_adjustment != 0,
-     tie_adjustment = tie_adjustment)
-
-auto_signedrank_method(s) =
-    (s.n_nonzero <= 15 || (s.n_nonzero <= 50 && !s.ties)) ? :exact : :approximate
 
 # Get W and absolute ranks for signed rank test
 function signedrankstats(x::AbstractVector{S}) where S<:Real
