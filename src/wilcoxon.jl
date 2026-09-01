@@ -86,14 +86,14 @@ end
 
 ## EXACT WILCOXON SIGNED RANK TEST
 
-struct ExactSignedRankTest{T<:Real,S<:Real} <: HypothesisTest
-    vals::Vector{T} # original values
+struct ExactSignedRankTest <: HypothesisTest
+    vals::Vector{Float64}   # original values
     W::Float64              # test statistic: Wilcoxon rank-sum statistic
     ranks::Vector{Float64}           # ranks without ties (zero values)
     signs::BitArray{1}      # signs of input of ranks
     tie_adjustment::Float64 # adjustment for ties
     n::Int                  # number of observations
-    median::S               # sample median
+    median::Float64         # sample median
 end
 """
     ExactSignedRankTest(x::AbstractVector{<:Real}[, y::AbstractVector{<:Real}])
@@ -210,14 +210,14 @@ StatsAPI.confint(x::ExactSignedRankTest; level::Real=0.95, tail=:both) =
 
 ## APPROXIMATE SIGNED RANK TEST
 
-struct ApproximateSignedRankTest{T<:Real,S<:Real} <: HypothesisTest
-    vals::Vector{T} # original values
+struct ApproximateSignedRankTest <: HypothesisTest
+    vals::Vector{Float64}   # original values
     W::Float64              # test statistic: Wilcoxon rank-sum statistic
     ranks::Vector{Float64} # ranks without ties (zero values)
     signs::BitArray{1}      # signs of input of ranks
     tie_adjustment::Float64 # adjustment for ties
     n::Int                  # number of observations
-    median::S               # sample median
+    median::Float64         # sample median
     mu::Float64             # normal approximation: mean
     sigma::Float64          # normal approximation: std
 end
@@ -296,6 +296,8 @@ StatsAPI.confint(x::ApproximateSignedRankTest; level::Real=0.95, tail=:both) =
 
 # implementation method inspired by these notes: http://www.stat.umn.edu/geyer/old03/5102/notes/rank.pdf
 function calculate_ci(x::AbstractVector, level::Real=0.95; tail=:both)
+    # `Float64` for the same reason as in `ci_alpha`: `check_level` is `Float64`-only
+    level = Float64(level)
     check_level(level)
     check_tail(tail)
 

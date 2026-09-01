@@ -39,10 +39,7 @@ check_same_length(x::AbstractVector, y::AbstractVector) = if length(x) != length
     throw(DimensionMismatch("Vectors must be the same length"))
 end
 
-# `Real` rather than `Float64`: most `confint` methods here declare `level::Float64` and
-# get the conversion for free at the call boundary, but the rank tests accept any real, so
-# this has to as well. The comparisons hold for any of them.
-function check_level(level::Real)
+function check_level(level::Float64)
     if level >= 1 || level <= 0.5
         throw(ArgumentError("coverage level $level not in range (0.5, 1)"))
     end

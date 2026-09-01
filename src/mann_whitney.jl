@@ -76,7 +76,10 @@ auto_mwu_method(s) =
 # Get U, ranks, and tie adjustment for Mann-Whitney U test
 # U is the sum of adjusted ranks in the first sample minus the minimal sum of ranks (ie sum(1:length(x))
 # The samples themselves are carried through as well: `confint` and `hodgeslehmann`
-# need the cross-group differences, which cannot be recovered from the ranks.
+# need the cross-group differences, which cannot be recovered from the ranks. They are
+# returned in the caller's own element type and narrowed to `Float64` by the struct
+# fields, so ranking and the median are computed at the input's precision and only what
+# is stored is converted.
 function mwustats(x::AbstractVector{<:Real}, y::AbstractVector{<:Real})
     ranks, tieadj = tiedrank_adj([x; y])
     nx = length(x)
@@ -88,22 +91,20 @@ function mwustats(x::AbstractVector{<:Real}, y::AbstractVector{<:Real})
         # U = (nx + ny)*(nx + ny + 1)/2 - sum(ranks_y) - nx*(nx + 1)/2
         U = ny*(2 * nx + ny + 1)/2 - sum(@view(ranks[(begin + nx):end]))
     end
-    R = promote_type(eltype(x), eltype(y))
-    return (U, ranks, tieadj, nx, ny, median(x)-median(y),
-            convert(Vector{R}, x), convert(Vector{R}, y))
+    return (U, ranks, tieadj, nx, ny, median(x)-median(y), x, y)
 end
 
 
 ## EXACT MANN-WHITNEY U TEST
-struct ExactMannWhitneyUTest{T<:Real,S<:Real} <: HypothesisTest
+struct ExactMannWhitneyUTest <: HypothesisTest
     U::Float64              # test statistic: Mann-Whitney-U statistic
     ranks::Vector{Float64}  # ranks
     tie_adjustment::Float64 # adjustment for ties
     nx::Int                 # number of observations
     ny::Int
-    median::T               # difference of sample medians
-    x::Vector{S}            # original values, first sample
-    y::Vector{S}            # original values, second sample
+    median::Float64         # difference of sample medians
+    x::Vector{Float64}      # original values, first sample
+    y::Vector{Float64}      # original values, second sample
 end
 
 """
@@ -222,17 +223,17 @@ function StatsAPI.confint(x::ExactMannWhitneyUTest; level::Real=0.95, tail=:both
     return ci_from_estimates(vals, k, tail)
 end
 
-struct ApproximateMannWhitneyUTest{T<:Real,S<:Real} <: HypothesisTest
+struct ApproximateMannWhitneyUTest <: HypothesisTest
     U::Float64              # test statistic: Mann-Whitney-U statistic
     ranks::Vector{Float64}  # ranks
     tie_adjustment::Float64 # adjustment for ties
     nx::Int                 # number of observations
     ny::Int
-    median::T               # difference of sample medians
+    median::Float64         # difference of sample medians
     mu::Float64             # normal approximation: mean
     sigma::Float64          # normal approximation: std
-    x::Vector{S}            # original values, first sample
-    y::Vector{S}            # original values, second sample
+    x::Vector{Float64}      # original values, first sample
+    y::Vector{Float64}      # original values, second sample
 end
 
 ## APPROXIMATE MANN-WHITNEY U TEST
@@ -263,9 +264,9 @@ distribution.
 
 Implements: [`pvalue`](@ref), [`confint`](@ref), [`hodgeslehmann`](@ref)
 """
-function ApproximateMannWhitneyUTest(U::Real, ranks::AbstractVector{T},
+function ApproximateMannWhitneyUTest(U::Real, ranks::AbstractVector{<:Real},
     tie_adjustment::Real, nx::Int, ny::Int, median::Real,
-    x::AbstractVector{S}, y::AbstractVector{S}) where {T<:Real,S<:Real}
+    x::AbstractVector{<:Real}, y::AbstractVector{<:Real})
     n = nx + ny
     nxny = nx * ny
     mu = U - nxny / 2

@@ -267,9 +267,13 @@ end
 # `level`/`tail` to the two-sided alpha the index rules work in. A one-sided bound
 # at `level` is the corresponding endpoint of the two-sided interval at `2 level - 1`.
 function ci_alpha(level::Real, tail::Symbol)
-    check_level(level)
+    # the rank tests are the only `confint` methods here declaring `level::Real`; every
+    # other one declares `Float64` and gets this conversion for free at its own boundary,
+    # so `check_level` stays `Float64`-only and the conversion happens here instead
+    lev = Float64(level)
+    check_level(lev)
     check_tail(tail)
-    return tail === :both ? 1 - level : 2 * (1 - level)
+    return tail === :both ? 1 - lev : 2 * (1 - lev)
 end
 
 function ci_from_estimates(vals::AbstractVector, k::Integer, tail::Symbol)

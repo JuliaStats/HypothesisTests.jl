@@ -304,13 +304,18 @@ end
         @test t.y == y
         @test hodgeslehmann(t) ≈ median([xi - yj for xi in x, yj in y])
     end
-    # eltype is preserved rather than widened to Float64
+    # the samples are stored as Float64 whatever they arrive as, so the interval and the
+    # estimator are Float64 too
     t32 = MannWhitneyUTest(Float32[1:10;], Float32[2.5f0:2:21;])
-    @test eltype(confint(t32)) === Float32
-    @test hodgeslehmann(t32) isa Float32
-    # mixed eltypes promote instead of erroring
+    @test t32.x isa Vector{Float64}
+    @test eltype(confint(t32)) === Float64
+    @test hodgeslehmann(t32) isa Float64
+    # mixed eltypes convert instead of erroring
     tm = MannWhitneyUTest([1, 2, 3, 4, 5, 6], [2.5, 3.5, 4.5, 5.5, 6.5, 7.5])
     @test eltype(confint(tm)) === Float64
+    # and neither type carries a parameter, so these spellings stay concrete
+    @test isconcretetype(ExactMannWhitneyUTest)
+    @test isconcretetype(ApproximateMannWhitneyUTest)
 end
 
 @testset "Exact route past the automatic thresholds" begin
