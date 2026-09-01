@@ -218,12 +218,12 @@ hodgeslehmann(x::ExactSignedRankTest) = median(signedrank_pairwise_estimates(x.v
 function StatsAPI.confint(x::ExactSignedRankTest; level::Real=0.95, tail=:both)
     alpha = ci_alpha(level, tail)
     n = length(x.ranks)
+    # No time bound here, where the scan this bisection replaced carried
+    # MAX_EXACT_CI_ESTIMATES: `signrankcdf` per step is cheap enough that the memory
+    # bound inside `walsh_averages` is the one this route meets, about 6 s in total at
+    # its boundary, a sample of 1413. The two-sample route runs `wilcoxcdf` instead,
+    # which is the expensive recursion, and keeps that bound.
     vals = signedrank_pairwise_estimates(x.vals)
-    # this route still inverts the exact distribution, a lattice recursion per candidate
-    # endpoint, so it keeps the bound the scan it replaces was given
-    check_exact_ci_cost(length(vals),
-        "Pass `method = :approximate` for the normal-approximation interval, which " *
-        "inverts a closed form and is bounded by memory alone.")
     k = exact_ci_index(length(vals), alpha, i -> signrankcdf(n, i); tail = tail)
     return ci_from_estimates(vals, k, tail)
 end
