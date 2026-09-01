@@ -226,21 +226,26 @@ end
 
 @testset "One observation" begin
     # One difference gives one Walsh average, so the only interval is that point, and
-    # the scan that picks an order statistic has nothing to pick between: it was handed
-    # the empty range 1:0 and `argmin` raised. R's `wilcox.test` returns (1.5, 1.5).
+    # the index rule has nothing to choose between: the scan this bisection replaced was
+    # handed the empty range 1:0 and `argmin` raised. R's `wilcox.test` returns (1.5, 1.5).
+    #
+    # Every interval here warns, and should: one observation cannot cover 95% by either
+    # route. The exact route names the coverage it does reach, 0 two-sided and 0.5
+    # one-sided; the approximate route reports its endpoint falling outside the set
+    # instead, since unattainability is not what its rule establishes.
     t = SignedRankTest([1.5])
-    @test confint(t) == (1.5, 1.5)
-    @test confint(t; level=0.99) == (1.5, 1.5)
+    @test (@test_logs (:warn, r"not attainable") confint(t)) == (1.5, 1.5)
+    @test (@test_logs (:warn, r"not attainable") confint(t; level=0.99)) == (1.5, 1.5)
     # `tail = :left` keeps the endpoint inverting the test of the same name (#368)
-    @test confint(t; tail=:left) == (-Inf, 1.5)
-    @test confint(t; tail=:right) == (1.5, Inf)
+    @test (@test_logs (:warn, r"not attainable") confint(t; tail=:left)) == (-Inf, 1.5)
+    @test (@test_logs (:warn, r"not attainable") confint(t; tail=:right)) == (1.5, Inf)
     @test hodgeslehmann(t) == 1.5
     @test pvalue(t) == 1.0
-    @test confint(ApproximateSignedRankTest([1.5])) == (1.5, 1.5)
+    @test (@test_logs (:warn, r"outside the set of pairwise estimates") confint(ApproximateSignedRankTest([1.5]))) == (1.5, 1.5)
     # and through the two-sample form
-    @test confint(SignedRankTest([4.0], [2.5])) == (1.5, 1.5)
+    @test (@test_logs (:warn, r"not attainable") confint(SignedRankTest([4.0], [2.5]))) == (1.5, 1.5)
     # the two-sample tests already agreed: one against one is the one difference
-    @test confint(MannWhitneyUTest([4.0], [2.5])) == (1.5, 1.5)
+    @test (@test_logs (:warn, r"not attainable") confint(MannWhitneyUTest([4.0], [2.5]))) == (1.5, 1.5)
 end
 
 @testset "Zero differences are dropped consistently" begin
@@ -476,8 +481,14 @@ end
             @test pvalue(a) == pvalue(b)
             @test pvalue(a; tail=:left) == pvalue(b; tail=:right)
             for level in (0.90, 0.95, 0.99)
-                lo_a, hi_a = confint(a; level=level)
-                lo_b, hi_b = confint(b; level=level)
+                # these samples are small enough that the higher levels are out of
+                # reach, so both routes warn here. That behaviour is pinned in
+                # "Unattainable levels warn"; in this testset it is noise, and the
+                # identity being checked is the reflection.
+                (lo_a, hi_a), (lo_b, hi_b) =
+                    Base.CoreLogging.with_logger(Base.CoreLogging.NullLogger()) do
+                        confint(a; level=level), confint(b; level=level)
+                    end
                 @test lo_a == -hi_b
                 @test hi_a == -lo_b
             end

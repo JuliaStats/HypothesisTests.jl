@@ -238,7 +238,10 @@ Small samples cannot reach every level: the widest interval this form admits,
 `k = 0`, has coverage `1 - 2 cdf(0)`, which is `1 - 2^(1-n)` for an untied signed rank
 sample, so `0.95` is out of reach below `n = 6` and `0.99` below `n = 8`. That interval
 is still the best available and is returned, with a warning naming the coverage it
-actually has, rather than being returned as though it met the request. R warns here too.
+actually has, rather than being returned as though it met the request. R returns the same
+interval, but silently: its `conf.level` attribute still claims the level that was asked
+for, and it warns only once the shortfall exceeds `alpha/2`, as at two observations
+against two.
 
 `tail` only shapes that warning: `alpha` is already the two-sided mass whichever tail
 the interval keeps, but the level a one-sided caller asked for is `1 - alpha/2`, not
@@ -326,8 +329,10 @@ end
 # stands for is location *below* the null, and what is compatible with that is an upper
 # bound. Eight of the nine other `confint` methods here that take a `tail` do the same, as
 # does R's `wilcox.test` under `alternative = "less"`. These four returned the other
-# endpoint until #368. `SignTest` is the ninth and still returns a lower bound, capped at
-# the null rather than infinite; that is the same defect and is filed separately.
+# endpoint until #368. `SignTest` is the ninth and is wrong twice over, both out of scope
+# here: it still returns a lower bound for `:left`, which is this same defect (#372), and
+# it caps the far side at the hypothesised median rather than leaving it infinite, so its
+# interval moves when the null moves (#369).
 function ci_from_estimates(vals::AbstractVector, k::Integer, tail::Symbol)
     m = length(vals)
     left = vals[k + 1]

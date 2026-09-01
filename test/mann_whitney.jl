@@ -450,8 +450,13 @@ end
             @test pvalue(a; tail=:left) == pvalue(b; tail=:right)
             # the two-sided interval reflects about zero, ends exchanged
             for level in (0.90, 0.95, 0.99)
-                lo_a, hi_a = confint(a; level=level)
-                lo_b, hi_b = confint(b; level=level)
+                # the smaller designs here cannot attain the higher levels, so both
+                # routes warn. That behaviour is pinned in "Unattainable levels warn"
+                # in test/wilcoxon.jl; here it is noise over the reflection identity.
+                (lo_a, hi_a), (lo_b, hi_b) =
+                    Base.CoreLogging.with_logger(Base.CoreLogging.NullLogger()) do
+                        confint(a; level=level), confint(b; level=level)
+                    end
                 @test lo_a == -hi_b
                 @test hi_a == -lo_b
             end
