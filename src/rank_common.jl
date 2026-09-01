@@ -247,7 +247,9 @@ The exact rule takes the lower endpoint to be the `Cα`-th order statistic, for
 
     Cα = ceil(mu - z * sigma - 1/2)
 
-with `k = Cα - 1`. This is the continuity correction R's `wilcox.test` applies by
+with `k = Cα - 1`. `mu - z * sigma` is the `alpha/2` quantile of that normal, which is
+how it is read below, off the parameterised distribution rather than by scaling the
+standard one. This is the continuity correction R's `wilcox.test` applies by
 default. Dropping it makes the interval narrower than the exact one for 7 of 66 signed
 rank sample sizes at `level = 0.95` and 45 of 66 at `level = 0.90`; with it the interval
 is never narrower than exact at `level = 0.95` or above.
@@ -260,8 +262,8 @@ falling below it: at `(3, 12)`, `(3, 15)` and `(3, 21)` the normal route covers 
 `0.901` and `0.900` against the exact route's `0.932`, `0.927` and `0.919`.
 """
 function normal_ci_index(m::Integer, mu::Real, sigma::Real, alpha::Real)
-    z = quantile(Normal(), 1 - alpha / 2)
-    return clamp(ceil(Int, mu - z * sigma - 0.5) - 1, 0, div(m, 2))
+    q = quantile(Normal(mu, sigma), alpha / 2)
+    return clamp(ceil(Int, q - one(q) / 2) - 1, 0, div(m, 2))
 end
 
 # `level`/`tail` to the two-sided alpha the index rules work in. A one-sided bound
