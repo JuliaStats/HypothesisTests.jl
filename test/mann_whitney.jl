@@ -23,7 +23,7 @@ end
     Exact Mann-Whitney U test
     -------------------------
     Population details:
-        parameter of interest:   Location parameter (pseudomedian)
+        parameter of interest:   Location shift
         value under h_0:         0
         point estimate:          -5.6
         95% confidence interval: (-11.1, -0.1)
@@ -103,7 +103,7 @@ end
     Exact Mann-Whitney U test
     -------------------------
     Population details:
-        parameter of interest:   Location parameter (pseudomedian)
+        parameter of interest:   Location shift
         value under h_0:         0
         point estimate:          -7.5
         95% confidence interval: (-14.0, -1.0)
@@ -122,7 +122,7 @@ end
     Exact Mann-Whitney U test
     -------------------------
     Population details:
-        parameter of interest:   Location parameter (pseudomedian)
+        parameter of interest:   Location shift
         value under h_0:         0
         point estimate:          7.5
         95% confidence interval: (1.0, 14.0)
@@ -230,12 +230,9 @@ end
     @test all(isapprox.(confint(ta), (-0.37, 1.183); atol = 1e-4))
     @test hodgeslehmann(ta) ≈ 0.56
 
-    # PENDING #363: the reported estimate is still the difference of sample medians,
-    # not the Hodges-Lehmann estimate the "pseudomedian" label names and the interval
-    # above is built around. R reports 0.56005616 for this sample.
-    @test population_param_of_interest(ta)[3] ≈ 0.62
-    @test population_param_of_interest(ta)[3] == median(a) - median(b)
-    @test population_param_of_interest(ta)[3] != hodgeslehmann(ta)
+    # the estimate that is reported is the one the interval is built around
+    @test population_param_of_interest(ta)[3] == hodgeslehmann(ta)
+    @test population_param_of_interest(ta)[3] != median(a) - median(b)
 
     # one-sided bounds
     @test confint(ExactMannWhitneyUTest(x, y); tail=:left)[2] == Inf
@@ -347,10 +344,16 @@ end
     t = MannWhitneyUTest(collect(1.0:nx), collect(1.5:1:(ny + 0.5)))
     @test nx * ny > HypothesisTests.MAX_PAIRWISE_ESTIMATES
     @test_throws HypothesisTests.ComputationTooLarge confint(t)
+    # #363 made the reported estimate the Hodges-Lehmann one, read off the same set,
+    # so past the bound the point estimate goes the same way the interval does
+    @test_throws HypothesisTests.ComputationTooLarge hodgeslehmann(t)
     out = sprint(show, t)
     @test occursin("Approximate Mann-Whitney U test", out)
     @test occursin("two-sided p-value", out)
+    @test occursin("number of observations in each group", out)
     @test !occursin("confidence interval", out)
+    @test !occursin("point estimate", out)
+    @test occursin("not computed (over MAX_PAIRWISE_ESTIMATES)", out)
 
     # and where it can afford one it still prints it
     @test occursin("95% confidence interval",

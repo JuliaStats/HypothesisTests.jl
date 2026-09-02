@@ -154,12 +154,12 @@ end
     @test hodgeslehmann(ExactSignedRankTest(x)) == hodgeslehmann(ApproximateSignedRankTest(x))
     lo, hi = confint(ExactSignedRankTest(x))
     @test lo <= hodgeslehmann(ExactSignedRankTest(x)) <= hi
-    # PENDING #363: the reported estimate is still the sample median, not the
-    # Hodges-Lehmann estimate the "pseudomedian" label names.
-    @test population_param_of_interest(ExactSignedRankTest(x))[3] == median(x) == 10.1
-    @test population_param_of_interest(ExactSignedRankTest(x))[3] != hodgeslehmann(ExactSignedRankTest(x))
+    # the estimate that is reported is the one the interval is built around
+    @test population_param_of_interest(ExactSignedRankTest(x))[3] == hodgeslehmann(ExactSignedRankTest(x))
+    @test population_param_of_interest(ExactSignedRankTest(x))[3] != median(x)
 
-    # ties: R reports -2.1
+    # ties: R's wilcox.test reports -2.1; exactRankTests::wilcox.exact reports -2.35,
+    # which is its conditional estimator, not this one
     h = [1, 2, 3, 4, 5, 6, 7, 10, 10, 10, 10, 10, 13, 14, 15] .- 10.1
     @test hodgeslehmann(SignedRankTest(h)) ≈ -2.1
 end

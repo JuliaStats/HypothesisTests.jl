@@ -119,9 +119,7 @@ ExactSignedRankTest(x::AbstractVector{S}, y::AbstractVector{T}) where {S<:Real,T
     ExactSignedRankTest(x - y)
 
 testname(::ExactSignedRankTest) = "Exact Wilcoxon signed rank test"
-# Still the sample median, not the Hodges-Lehmann estimate the label names and the
-# interval is built around. See #363.
-population_param_of_interest(x::ExactSignedRankTest) = ("Location parameter (pseudomedian)", 0, x.median) # parameter of interest: name, value under h0, point estimate
+population_param_of_interest(x::ExactSignedRankTest) = ("Location parameter (pseudomedian)", 0, hodgeslehmann(x)) # parameter of interest: name, value under h0, point estimate
 default_tail(test::ExactSignedRankTest) = :both
 
 function show_params(io::IO, x::ExactSignedRankTest, ident)
@@ -262,9 +260,7 @@ ApproximateSignedRankTest(x::AbstractVector{S}, y::AbstractVector{T}) where {S<:
     ApproximateSignedRankTest(x - y)
 
 testname(::ApproximateSignedRankTest) = "Approximate Wilcoxon signed rank test"
-# Still the sample median, not the Hodges-Lehmann estimate the label names and the
-# interval is built around. See #363.
-population_param_of_interest(x::ApproximateSignedRankTest) = ("Location parameter (pseudomedian)", 0, x.median) # parameter of interest: name, value under h0, point estimate
+population_param_of_interest(x::ApproximateSignedRankTest) = ("Location parameter (pseudomedian)", 0, hodgeslehmann(x)) # parameter of interest: name, value under h0, point estimate
 default_tail(test::ApproximateSignedRankTest) = :both
 
 function show_params(io::IO, x::ApproximateSignedRankTest, ident)
