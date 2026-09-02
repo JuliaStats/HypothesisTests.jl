@@ -364,6 +364,17 @@ end
     @test_throws HypothesisTests.ComputationTooLarge pvalue(SignedRankTest(tied; method=:exact))
 end
 
+@testset "AbstractVector inputs" begin
+    # ranges and views used to fail with a MethodError: the structs store Vector,
+    # and nothing converted on the way in
+    @test pvalue(SignedRankTest(-2:7)) == pvalue(SignedRankTest([-2:7;]))
+    @test pvalue(ExactSignedRankTest(-2:7)) == pvalue(ExactSignedRankTest([-2:7;]))
+    @test pvalue(ApproximateSignedRankTest(1.0:20.0)) ==
+          pvalue(ApproximateSignedRankTest([1.0:20.0;]))
+    v = [1.0, -2.0, 3.0, -4.0, 5.0, 6.0]
+    @test pvalue(SignedRankTest(view(v, 2:5))) == pvalue(SignedRankTest(v[2:5]))
+end
+
 @testset "Reflection under negation" begin
     # The two-sample reflection is swapping the samples; the one-sample one is negating
     # the sample, which negates the location the test is about. Exact for the same
