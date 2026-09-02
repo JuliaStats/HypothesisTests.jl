@@ -21,9 +21,60 @@ Base.axes(v::ZeroBasedVector) = (Base.IdentityUnitRange(0:(length(v.data) - 1)),
 Base.getindex(v::ZeroBasedVector, i::Int) = v.data[i + 1]
 
 @testset "Wilcoxon" begin
+@testset "show output" begin
+    # A sample with zeros, so the two observation counts differ: the statistic, the
+    # p-value and the ranks describe the seven non-zero differences, while `n` counts
+    # all ten. Both are printed, and the statistic is named for the test that computes
+    # it rather than for the two-sample one.
+    d = [0.0, 1.5, -2.5, 0.0, 3.5, -0.5, 4.0, 2.2, -1.1, 0.0]
+
+    @test repr(MIME"text/plain"(), ExactSignedRankTest(d)) == """
+    Exact Wilcoxon signed rank test
+    -------------------------------
+    Population details:
+        parameter of interest:   Location parameter (pseudomedian)
+        value under h_0:         0
+        point estimate:          1.025
+        95% confidence interval: (-0.55, 2.0)
+
+    Test summary:
+        outcome with 95% confidence: fail to reject h_0
+        two-sided p-value:           0.3750
+
+    Details:
+        number of observations:         10
+        non-zero observations:          7
+        Wilcoxon signed rank statistic: 20.0
+        rank sums:                      [20.0, 8.0]
+        adjustment for ties:            0.0
+    """
+
+    # the approximate type prints one line more, the centred statistic beside sigma
+    @test repr(MIME"text/plain"(), ApproximateSignedRankTest(d)) == """
+    Approximate Wilcoxon signed rank test
+    -------------------------------------
+    Population details:
+        parameter of interest:   Location parameter (pseudomedian)
+        value under h_0:         0
+        point estimate:          1.025
+        95% confidence interval: (-0.55, 2.0)
+
+    Test summary:
+        outcome with 95% confidence: fail to reject h_0
+        two-sided p-value:           0.3525
+
+    Details:
+        number of observations:         10
+        non-zero observations:          7
+        Wilcoxon signed rank statistic: 20.0
+        rank sums:                      [20.0, 8.0]
+        adjustment for ties:            0.0
+        normal approximation (μ, σ):    (6.0, 5.91608)
+    """
+end
+
 @testset "Basic exact test" begin
     @test default_tail(ExactSignedRankTest([1:10;], [2:2:20;])) == :both
-	show(IOBuffer(), ExactSignedRankTest([1:10;], [2:2:20;]))
 
     # Two-sided
     for kwargs in ((), (; tail = :both))
