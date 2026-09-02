@@ -88,6 +88,12 @@ not the sample median: exact symmetry makes the two agree, but they can also agr
 coincidence, as on `[0, 2, 2, 7]`, where both are `2`. Agreement is therefore no evidence
 of symmetry.
 
+A one-sided interval keeps the endpoint that inverts the test of the same name:
+`tail = :left`, whose alternative is location below the null, gives an upper bound, and
+`tail = :right` a lower one. That is the convention of every other test here that takes a
+`tail`, and of R's `alternative = "less"` and `"greater"`. These four tests returned the
+other endpoint before this change (#368).
+
 Three named bounds apply, and past any of them the tests raise rather than run unbounded.
 The first bounds the tied-data enumeration a p-value runs, and `method = :approximate` is
 the way past it. The second bounds the set of pairwise estimates, which `confint` and

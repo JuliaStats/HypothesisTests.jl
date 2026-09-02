@@ -234,9 +234,37 @@ end
     @test population_param_of_interest(ta)[3] == hodgeslehmann(ta)
     @test population_param_of_interest(ta)[3] != median(a) - median(b)
 
-    # one-sided bounds
-    @test confint(ExactMannWhitneyUTest(x, y); tail=:left)[2] == Inf
-    @test confint(ExactMannWhitneyUTest(x, y); tail=:right)[1] == -Inf
+    # one-sided bounds, on the same convention as every other test here and as R: the
+    # alternative :left names is a shift below zero, which an upper bound is compatible
+    # with (#368). R: wilcox.test(x, y, conf.int = TRUE, alternative = "less") ->
+    # (-Inf, -1.1), "greater" -> (-10.1, Inf)
+    @test all(isapprox.(confint(ExactMannWhitneyUTest(x, y); tail=:left), (-Inf, -1.1); atol=1e-8))
+    @test all(isapprox.(confint(ExactMannWhitneyUTest(x, y); tail=:right), (-10.1, Inf); atol=1e-8))
+    lo, hi = confint(ExactMannWhitneyUTest(x, y))
+    @test confint(ExactMannWhitneyUTest(x, y); tail=:left)[2] <= hi
+    @test confint(ExactMannWhitneyUTest(x, y); tail=:right)[1] >= lo
+    # R: conf.level = 0.90 -> (-10.1, -1.1)
+    @test all(isapprox.(confint(ExactMannWhitneyUTest(x, y); level=0.90), (-10.1, -1.1); atol=1e-8))
+
+    # the approximate route on the same untied sample. R with exact = FALSE,
+    # correct = TRUE: p = 0.02574808082, interval (-11.09998, -0.10008) solved
+    # numerically beside the order statistics returned here, "less" -> (-Inf, -1.10004),
+    # "greater" -> (-10.09992, Inf)
+    ma = ApproximateMannWhitneyUTest(Float64.(x), Float64.(y))
+    @test isapprox(pvalue(ma), 0.02574808082, atol=1e-9)
+    @test all(isapprox.(confint(ma), (-11.1, -0.1); atol=1e-3))
+    @test all(isapprox.(confint(ma; tail=:left), (-Inf, -1.1); atol=1e-3))
+    @test all(isapprox.(confint(ma; tail=:right), (-10.1, Inf); atol=1e-3))
+
+    # tied approximate one-sided intervals: R (approximate route, uniroot) gives
+    # (-Inf, -2.000005) and (-13.0, Inf); the order statistics land there too
+    tta = ApproximateMannWhitneyUTest(Float64.([1:10;]), Float64.([2:2:24;]))
+    @test all(isapprox.(confint(tta; tail=:left), (-Inf, -2.0); atol=1e-3))
+    @test all(isapprox.(confint(tta; tail=:right), (-13.0, Inf); atol=1e-3))
+
+    # and the 9 v 9 tied sample: R "less" -> (-Inf, 1.010023), "greater" -> (-0.098019, Inf)
+    @test all(isapprox.(confint(ta; tail=:left), (-Inf, 1.01); atol=1e-3))
+    @test all(isapprox.(confint(ta; tail=:right), (-0.098, Inf); atol=1e-3))
 
     # a narrower interval for a lower confidence level
     lo95, hi95 = confint(ExactMannWhitneyUTest(x, y); level=0.95)
@@ -375,6 +403,16 @@ end
     @test confint(MannWhitneyUTest(xs, ys; method=:exact)) isa Tuple
 end
 
+@testset "Tied exact one-sided intervals" begin
+    # under ties this route inverts the untied lattice; base R falls back to the
+    # normal approximation and lands on the same order statistics:
+    # wilcox.test(1:10, seq(2, 24, 2), conf.int = TRUE, alternative = "less") ->
+    # (-Inf, -2.000005), "greater" -> (-13.0, Inf)
+    tt = ExactMannWhitneyUTest([1:10;], [2:2:24;])
+    @test confint(tt; tail = :left) == (-Inf, -2.0)
+    @test confint(tt; tail = :right) == (-13.0, Inf)
+end
+
 @testset "Reflection under argument swap" begin
     # Swapping the samples negates the shift the test is about, so every quantity
     # carrying that sign flips and every quantity that does not is unchanged. The
@@ -409,7 +447,9 @@ end
                 @test hi_a == -lo_b
             end
             # and a lower bound becomes the negated upper bound
-            @test confint(a; tail=:left)[1] == -confint(b; tail=:right)[2]
+            # compare the finite ends: under the #368 convention `:left` is an upper
+            # bound and `:right` a lower one, so `[1]` on both would be -Inf either way
+            @test confint(a; tail=:left)[2] == -confint(b; tail=:right)[1]
         end
     end
 end
