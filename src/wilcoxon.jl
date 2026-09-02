@@ -53,7 +53,8 @@ Equivalently, construct [`ExactSignedRankTest`](@ref) or
 Implements: [`pvalue`](@ref), [`confint`](@ref), [`hodgeslehmann`](@ref)
 """
 function SignedRankTest(x::AbstractVector{T}; method = :auto) where T<:Real
-    (W, ranks, signs, tie_adjustment, n, median) = signedrankstats(x)
+    v = convert(Vector{T}, x)
+    (W, ranks, signs, tie_adjustment, n, median) = signedrankstats(v)
     # `ranks` covers the non-zero observations alone, so its length is that count
     n_nonzero = length(ranks)
     # the named tuple the `method` callable is documented to receive, and the automatic
@@ -62,9 +63,9 @@ function SignedRankTest(x::AbstractVector{T}; method = :auto) where T<:Real
              tie_adjustment = tie_adjustment)
     default = n_nonzero <= 15 || (n_nonzero <= 50 && tie_adjustment == 0) ? :exact : :approximate
     if resolve_rank_method(method, stats, default) === :exact
-        ExactSignedRankTest(x, W, ranks, signs, tie_adjustment, n, median)
+        ExactSignedRankTest(v, W, ranks, signs, tie_adjustment, n, median)
     else
-        ApproximateSignedRankTest(x, W, ranks, signs, tie_adjustment, n, median)
+        ApproximateSignedRankTest(v, W, ranks, signs, tie_adjustment, n, median)
     end
 end
 SignedRankTest(x::AbstractVector{T}, y::AbstractVector{S}; method = :auto) where {T<:Real,S<:Real} =
@@ -110,8 +111,10 @@ refuses rather than enumerate indefinitely, and `method = :approximate` is the w
 
 Implements: [`pvalue`](@ref), [`confint`](@ref), [`hodgeslehmann`](@ref)
 """
-ExactSignedRankTest(x::AbstractVector{T}) where {T<:Real} =
-    ExactSignedRankTest(x, signedrankstats(x)...)
+function ExactSignedRankTest(x::AbstractVector{T}) where {T<:Real}
+    v = convert(Vector{T}, x)
+    return ExactSignedRankTest(v, signedrankstats(v)...)
+end
 ExactSignedRankTest(x::AbstractVector{S}, y::AbstractVector{T}) where {S<:Real,T<:Real} =
     ExactSignedRankTest(x - y)
 
@@ -251,8 +254,10 @@ function ApproximateSignedRankTest(x::Vector, W::Float64, ranks::Vector{T}, sign
     std = sqrt(nz * (nz + 1) * (2 * nz + 1) / 24 - tie_adjustment / 48)
     ApproximateSignedRankTest(x, W, ranks, signs, tie_adjustment, n, median, mu, std)
 end
-ApproximateSignedRankTest(x::AbstractVector{T}) where {T<:Real} =
-    ApproximateSignedRankTest(x, signedrankstats(x)...)
+function ApproximateSignedRankTest(x::AbstractVector{T}) where {T<:Real}
+    v = convert(Vector{T}, x)
+    return ApproximateSignedRankTest(v, signedrankstats(v)...)
+end
 ApproximateSignedRankTest(x::AbstractVector{S}, y::AbstractVector{T}) where {S<:Real,T<:Real} =
     ApproximateSignedRankTest(x - y)
 
