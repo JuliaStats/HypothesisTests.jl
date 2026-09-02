@@ -45,8 +45,8 @@ function tiedrank_adj!(ord::AbstractVector, v::AbstractArray)
         if j > i
             t = j - i + 1
             m = sum(i:j) / t
-            # in Int128: t^3 wraps Int64 for a tie group of 2^21 or more equal values
-            tieadj += Int128(t)^3 - t
+            # avoid integer overflow
+            tieadj += (float(t) - 1)^2 * t
             for k = i:j
                 ord[place[k]] = m
             end
