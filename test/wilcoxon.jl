@@ -142,8 +142,31 @@ end
     # R with exact = FALSE gives (3.05004, 15.50001).
     @test isapprox(@inferred(confint(ApproximateSignedRankTest(x)))[1], 3.3, atol=1e-4)
     @test isapprox(@inferred(confint(ApproximateSignedRankTest(x)))[2], 15.5, atol=1e-4)
-    @test isapprox(@inferred(confint(SignedRankTest(x); tail=:left))[1], 4.45, atol=1e-4)
-    @test isapprox(@inferred(confint(SignedRankTest(x); tail=:right))[2], 14.45, atol=1e-4)
+    # one-sided, at level 0.95, is the corresponding endpoint of the two-sided 0.90
+    # interval, and the tail names the alternative: :left is location below the null, so it
+    # keeps the upper bound. R: wilcox.test(x, alternative = "less", conf.int = TRUE) ->
+    # (-Inf, 14.45), and "greater" -> (4.45, Inf). See #368.
+    @test @inferred(confint(SignedRankTest(x); tail=:left))[1] == -Inf
+    @test isapprox(@inferred(confint(SignedRankTest(x); tail=:left))[2], 14.45, atol=1e-4)
+    @test isapprox(@inferred(confint(SignedRankTest(x); tail=:right))[1], 4.45, atol=1e-4)
+    @test @inferred(confint(SignedRankTest(x); tail=:right))[2] == Inf
+    # and the pair matches what pvalue means by the same tail: the :left bound is the
+    # acceptance limit of the left-tailed test
+    u = confint(SignedRankTest(x); tail=:left)[2]
+    @test pvalue(SignedRankTest(x .- (u - 0.02)); tail=:left) > 0.05
+    @test pvalue(SignedRankTest(x .- (u + 0.02)); tail=:left) < 0.05
+    l = confint(SignedRankTest(x); tail=:right)[1]
+    @test pvalue(SignedRankTest(x .- (l + 0.02)); tail=:right) > 0.05
+    @test pvalue(SignedRankTest(x .- (l - 0.02)); tail=:right) < 0.05
+
+    # the sample from #368, all three tails against R:
+    # wilcox.test(z, conf.int = TRUE, alternative = "less")    -> (-Inf, 0.95)
+    # wilcox.test(z, conf.int = TRUE, alternative = "greater") -> (-0.45, Inf)
+    # wilcox.test(z, conf.int = TRUE)                          -> (-0.7, 1.1)
+    z = [1.2, 2.3, 3.1, 4.4, 2.8, 3.9, 5.1, 2.2, 3.3, 4.0] .- 3
+    @test all(isapprox.(confint(ExactSignedRankTest(z); tail=:left), (-Inf, 0.95); atol=1e-9))
+    @test all(isapprox.(confint(ExactSignedRankTest(z); tail=:right), (-0.45, Inf); atol=1e-9))
+    @test all(isapprox.(confint(ExactSignedRankTest(z)), (-0.7, 1.1); atol=1e-9))
 end
 
 @testset "Hodges-Lehmann estimate" begin
@@ -171,8 +194,9 @@ end
     t = SignedRankTest([1.5])
     @test confint(t) == (1.5, 1.5)
     @test confint(t; level=0.99) == (1.5, 1.5)
-    @test confint(t; tail=:left) == (1.5, Inf)
-    @test confint(t; tail=:right) == (-Inf, 1.5)
+    # `tail = :left` keeps the endpoint inverting the test of the same name (#368)
+    @test confint(t; tail=:left) == (-Inf, 1.5)
+    @test confint(t; tail=:right) == (1.5, Inf)
     @test hodgeslehmann(t) == 1.5
     @test pvalue(t) == 1.0
     @test confint(ApproximateSignedRankTest([1.5])) == (1.5, 1.5)
@@ -399,7 +423,9 @@ end
                 @test lo_a == -hi_b
                 @test hi_a == -lo_b
             end
-            @test confint(a; tail=:left)[1] == -confint(b; tail=:right)[2]
+            # compare the finite ends: under the #368 convention `:left` is an upper
+            # bound and `:right` a lower one, so `[1]` on both would be -Inf either way
+            @test confint(a; tail=:left)[2] == -confint(b; tail=:right)[1]
         end
     end
 end

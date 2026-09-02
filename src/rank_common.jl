@@ -278,6 +278,15 @@ function ci_alpha(level::Real, tail::Symbol)
     return tail === :both ? 1 - lev : 2 * (1 - lev)
 end
 
+# A one-sided interval keeps the endpoint that inverts the test of the same name, which is
+# the opposite endpoint to the one the tail is named after: the alternative `tail = :left`
+# stands for is location *below* the null, and what is compatible with that is an upper
+# bound. Eight of the nine other `confint` methods here that take a `tail` do the same, as
+# does R's `wilcox.test` under `alternative = "less"`. These four returned the other
+# endpoint until #368. `SignTest` is the ninth and is wrong twice over, both out of scope
+# here: it still returns a lower bound for `:left`, which is this same defect (#372), and
+# it caps the far side at the hypothesised median rather than leaving it infinite, so its
+# interval moves when the null moves (#369).
 function ci_from_estimates(vals::AbstractVector, k::Integer, tail::Symbol)
     m = length(vals)
     left = vals[k + 1]
@@ -285,9 +294,9 @@ function ci_from_estimates(vals::AbstractVector, k::Integer, tail::Symbol)
     if tail === :both
         return (left, right)
     elseif tail === :left
-        return (left, oftype(left, Inf))
-    else # tail === :right
         return (oftype(right, -Inf), right)
+    else # tail === :right
+        return (left, oftype(left, Inf))
     end
 end
 
