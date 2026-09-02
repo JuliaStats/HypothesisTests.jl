@@ -191,6 +191,7 @@ testname(::UnequalVarianceTTest) = "Two sample t-test (unequal variance)"
 
 """
     UnequalVarianceTTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real})
+    UnequalVarianceTTest(meanx::T, varx::T, nx::Int, meany::S, vary::S, ny::Int, μ0::Real=0) where {T<:Real,S<:Real}
 
 Perform an unequal variance two-sample t-test of the null hypothesis that `x` and `y` come
 from distributions with equal means against the alternative hypothesis that the
@@ -208,8 +209,13 @@ Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
 function UnequalVarianceTTest(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0) where {T<:Real,S<:Real}
     nx, ny = length(x), length(y)
-    xbar = mean(x)-mean(y)
+    meanx, meany = mean(x), mean(y)
     varx, vary = var(x), var(y)
+    UnequalVarianceTTest(meanx, varx, nx, meany, vary, ny, μ0)
+end
+
+function UnequalVarianceTTest(meanx::T, varx::T, nx::Int, meany::S, vary::S, ny::Int, μ0::Real=0) where {T<:Real,S<:Real}
+    xbar = meanx - meany
     stderr = sqrt(varx/nx + vary/ny)
     t = (xbar-μ0)/stderr
     df = (varx / nx + vary / ny)^2 / ((varx / nx)^2 / (nx - 1) + (vary / ny)^2 / (ny - 1))
