@@ -46,6 +46,21 @@ Base.getindex(v::ZeroBasedVector, i::Int) = v.data[i + 1]
     @test abs(@inferred(pvalue(ExactSignedRankTest([2:2:16; -1; 1], [1:10;]); tail = :right)) - 0.2158) <= 1e-4
 end
 
+@testset "Two-sided p-values are probabilities" begin
+    # Doubling a discrete tail overshoots at `W == n(n+1)/4`, which is attainable
+    # whenever `n(n+1)/2` is even. Sweep every sign pattern of every untied sample
+    # up to n = 12; 220 of the 8190 used to come back above 1.
+    signed_ranks(n, bits) =
+        [(bits >> (i - 1)) & 1 == 1 ? float(i) : -float(i) for i in 1:n]
+    overshoots = [(n, bits) for n in 1:12 for bits in 0:(2^n - 1)
+                  if pvalue(ExactSignedRankTest(signed_ranks(n, bits))) > 1]
+    @test isempty(overshoots)
+    # the worst of them: W = 3 = 3*4/4, both tails 0.625
+    @test pvalue(ExactSignedRankTest([1.0, 2.0, -3.0])) == 1
+    # and unchanged away from the null mean
+    @test pvalue(ExactSignedRankTest([1.0, 2.0, 3.0])) ≈ 0.25
+end
+
 @testset "Exact with ties" begin
     show(IOBuffer(), ExactSignedRankTest([1:10;], [1:10;]))
 
