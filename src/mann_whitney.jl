@@ -218,7 +218,7 @@ function StatsAPI.confint(x::ExactMannWhitneyUTest; level::Real=0.95, tail=:both
         "Pass `method = :approximate` for the normal-approximation interval, which " *
         "inverts a closed form and is bounded by memory alone.")
     vals = cross_differences(x.x, x.y)
-    k = exact_ci_index(length(vals), alpha, u -> wilcoxcdf(x.nx, x.ny, u))
+    k = exact_ci_index(length(vals), alpha, u -> wilcoxcdf(x.nx, x.ny, u); tail = tail)
     return ci_from_estimates(vals, k, tail)
 end
 
@@ -309,6 +309,6 @@ function StatsAPI.confint(x::ApproximateMannWhitneyUTest; level::Real=0.95, tail
     alpha = ci_alpha(level, tail)
     vals = cross_differences(x.x, x.y)
     m = length(vals)
-    k = normal_ci_index(m, m / 2, x.sigma, alpha)
+    k = normal_ci_index(m, m / 2, x.sigma, alpha; tail = tail)
     return ci_from_estimates(vals, k, tail)
 end

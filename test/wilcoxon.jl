@@ -254,7 +254,7 @@ end
     # and through the two-sample form
     @test confint(SignedRankTest([4.0], [2.5])) == (1.5, 1.5)
     # the two-sample tests already agreed: one against one is the one difference
-    @test confint(MannWhitneyUTest([4.0], [2.5])) == (1.5, 1.5)
+    @test (@test_logs (:warn, r"not attainable") confint(MannWhitneyUTest([4.0], [2.5]))) == (1.5, 1.5)
 end
 
 @testset "Zero differences" begin
@@ -287,6 +287,20 @@ end
     @test (lo, hi) == (0.0, 1.5)
     @test !(lo <= hodgeslehmann(SignedRankTest(e)) <= hi)
     @test confint(SignedRankTest(enz)) == (1.0, 3.0)
+end
+
+@testset "Unattainable levels warn" begin
+    # The widest interval this construction admits is (V_(1), V_(m)); where even that
+    # falls short of the requested level, it is returned with a warning naming the
+    # coverage actually attained, rather than as though it met the request. Only the
+    # Mann-Whitney intervals reach these index rules today; the signed rank route
+    # still inverts through its own scan and gains the same warnings with #361.
+    # R returns (-3, -1) with an achieved conf.level attribute of 2/3, which is the
+    # attainable coverage the warning here names: 1 - 2 P(U <= 0) = 1 - 2/6
+    ci22 = @test_logs (:warn, r"not attainable") confint(ExactMannWhitneyUTest([1.0, 2.0], [3.0, 4.0]))
+    @test ci22 == (-3.0, -1.0)
+    # and no warning once the level is attainable
+    @test_logs confint(ExactMannWhitneyUTest([1.0, 2.0, 5.0, 6.0], [3.0, 4.0, 7.0, 9.0]); level = 0.9)
 end
 
 @testset "method keyword" begin
