@@ -425,6 +425,7 @@ end
     # the normal index rule cannot tell that mean from the centred statistic, and the
     # reflection holds either way; on a clearly shifted sample it does not, which is
     # what makes this testset detect the confusion its `confint` comment warns about.
+    warned = 0
     for (x, y) in (([1.0, 4, 6, 9, 11, 14], [2.0, 5, 7, 8, 12, 13]),   # no ties
                    ([1.0, 2, 2, 5, 5, 5, 8], [2.0, 3, 5, 5, 9, 9]),    # tied within and across
                    ([1.0, 2, 3], [10.0, 11, 12, 13]),                  # disjoint, unequal sizes
@@ -441,21 +442,26 @@ end
             @test pvalue(a; tail=:left) == pvalue(b; tail=:right)
             # the two-sided interval reflects about zero, ends exchanged
             for level in (0.90, 0.95, 0.99)
-                # the smaller designs here cannot attain the higher levels, so both
-                # routes warn. That behaviour is pinned in "Unattainable levels warn"
-                # in test/wilcoxon.jl; here it is noise over the reflection identity.
-                (lo_a, hi_a), (lo_b, hi_b) =
-                    Base.CoreLogging.with_logger(Base.CoreLogging.NullLogger()) do
-                        confint(a; level=level), confint(b; level=level)
-                    end
+                # The smallest design here cannot attain the higher levels, and both
+                # routes say so. Capture rather than silence: every record has to be
+                # one of those two warnings, naming the level actually asked for, so
+                # an unexpected message fails here instead of scrolling past.
+                logs, ((lo_a, hi_a), (lo_b, hi_b)) = Test.collect_test_logs() do
+                    confint(a; level=level), confint(b; level=level)
+                end
+                @test all(r -> r.level == Base.CoreLogging.Warn &&
+                               r.kwargs[:requested] == level, logs)
+                warned += length(logs)
                 @test lo_a == -hi_b
                 @test hi_a == -lo_b
             end
-            # and a lower bound becomes the negated upper bound
             # compare the finite ends: under the #368 convention `:left` is an upper
             # bound and `:right` a lower one, so `[1]` on both would be -Inf either way
             @test confint(a; tail=:left)[2] == -confint(b; tail=:right)[1]
         end
     end
+    # and they do fire: the 3 v 4 design, on both routes, at 0.95 and 0.99, and twice
+    # over since each iteration confints the design and its swap
+    @test warned == 8
 end
 end
