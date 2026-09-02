@@ -108,7 +108,9 @@ end
 
 @testset "Tests for automatic selection" begin
     @test abs(@inferred(pvalue(SignedRankTest([1:10;], [2:2:20;]))) - 0.0020) <= 1e-4
-    @test abs(@inferred(pvalue(SignedRankTest([1:10;], [2:11;]))) - 0.0020) <= 1e-4
+    # 2/2^10 exactly, from the tied enumeration; the approximate route gives
+    # 0.0019042, which an atol of 1e-4 against 0.0020 would also have accepted
+    @test @inferred(pvalue(SignedRankTest([1:10;], [2:11;]))) == 0.001953125
 	@test default_tail(SignedRankTest([1:10;], [2:2:20;])) == :both
 	show(IOBuffer(), SignedRankTest([1:10;], [2:2:20;]))
 end
@@ -167,6 +169,23 @@ end
     @test all(isapprox.(confint(ExactSignedRankTest(z); tail=:left), (-Inf, 0.95); atol=1e-9))
     @test all(isapprox.(confint(ExactSignedRankTest(z); tail=:right), (-0.45, Inf); atol=1e-9))
     @test all(isapprox.(confint(ExactSignedRankTest(z)), (-0.7, 1.1); atol=1e-9))
+end
+
+@testset "Tied one-sided p-values against exactRankTests" begin
+    # R's exactRankTests::wilcox.exact computes the same conditional distribution as the
+    # tied enumeration here. Its one-sided p-values are convention-free and pin ours
+    # exactly; its two-sided can differ from doubling only where the conditional
+    # distribution is asymmetric, which the sign-flip symmetry rules out one-sample.
+    h = [1, 2, 3, 4, 5, 6, 7, 10, 10, 10, 10, 10, 13, 14, 15] .- 10.1
+    # wilcox.exact(h): 0.04052734375; "less": 0.02026367188; "greater": 0.9828491211
+    @test pvalue(ExactSignedRankTest(h)) == 0.04052734375
+    @test isapprox(pvalue(ExactSignedRankTest(h); tail=:left), 0.02026367188, atol=1e-9)
+    @test isapprox(pvalue(ExactSignedRankTest(h); tail=:right), 0.9828491211, atol=1e-9)
+    # with zeros as well as ties; wilcox.exact drops the zeros likewise
+    # wilcox.exact(d): 0.3071899414; "less": 0.8592834473; "greater": 0.1535949707
+    d = [0, 0, 0, 0.5, 0.5, 1, -0.5, -1, 1.5, -1.5, 0.5, 0, 1, -0.5, 2, 0, 0.5, -1, 1, 0.5]
+    @test isapprox(pvalue(SignedRankTest(d); tail=:left), 0.8592834473, atol=1e-9)
+    @test isapprox(pvalue(SignedRankTest(d); tail=:right), 0.1535949707, atol=1e-9)
 end
 
 @testset "Hodges-Lehmann estimate" begin
@@ -397,6 +416,24 @@ end
           pvalue(ApproximateSignedRankTest([1.0:20.0;]))
     v = [1.0, -2.0, 3.0, -4.0, 5.0, 6.0]
     @test pvalue(SignedRankTest(view(v, 2:5))) == pvalue(SignedRankTest(v[2:5]))
+end
+
+@testset "Auto boundaries at n = 50 and 51, against R" begin
+    s50 = quantile.(Normal(), (1:50) ./ 51) .+ 0.3
+    s51 = quantile.(Normal(), (1:51) ./ 52) .+ 0.3
+    @test SignedRankTest(s50) isa ExactSignedRankTest
+    @test SignedRankTest(s51) isa ApproximateSignedRankTest
+    # R switches at n < 50, so its exact side must be forced to compare:
+    # wilcox.test(qnorm((1:50)/51) + 0.3, exact = TRUE)  -> 0.0371666050798
+    # wilcox.test(qnorm((1:51)/52) + 0.3, exact = FALSE) -> 0.0345394645593
+    @test isapprox(pvalue(SignedRankTest(s50)), 0.0371666050798, atol = 1e-10)
+    @test isapprox(pvalue(SignedRankTest(s51)), 0.0345394645593, atol = 1e-10)
+end
+
+@testset "Tied auto boundary counts non-zero observations" begin
+    tied16 = repeat([1.0, -1.0, 2.5, 3.5], 4)        # 16 non-zero, tied
+    @test SignedRankTest(tied16) isa ApproximateSignedRankTest
+    @test SignedRankTest(tied16[1:15]) isa ExactSignedRankTest
 end
 
 @testset "Reflection under negation" begin
