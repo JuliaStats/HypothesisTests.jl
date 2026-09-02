@@ -282,12 +282,13 @@ default. Dropping it makes the interval narrower than the exact one for 7 of 66 
 rank sample sizes at `level = 0.95` and 45 of 66 at `level = 0.90`; with it the interval
 is never narrower than exact at `level = 0.95` or above.
 
-Below that it can still be narrower by one order statistic, on strongly unbalanced
-designs: at `level = 0.90` that happens for 131 of the 1444 Mann-Whitney shapes with
-`nx, ny` in `3:40`, concentrated at `nx = 3`. It is the exact rule that is conservative
-there rather than this one that is loose, and coverage stays at nominal rather than
-falling below it: at `(3, 12)`, `(3, 15)` and `(3, 21)` the normal route covers `0.902`,
-`0.901` and `0.900` against the exact route's `0.932`, `0.927` and `0.919`.
+Below that it can still be narrower by one order statistic, in both procedures: at
+`level = 0.90` that happens for 10 of the 66 signed rank sizes `n = 5:70`, and for 131 of
+the 1444 Mann-Whitney shapes with `nx, ny` in `3:40`, where it concentrates on strongly
+unbalanced designs at `nx = 3`. It is the exact rule that is conservative there rather
+than this one that is loose, and coverage stays at nominal rather than falling below it:
+at `(3, 12)`, `(3, 15)` and `(3, 21)` the normal route covers `0.902`, `0.901` and
+`0.900` against the exact route's `0.932`, `0.927` and `0.919`.
 
 A negative `k` means the approximation puts the endpoint outside the pairwise estimates, so
 the widest interval available is returned instead, with a warning. The warning does not
