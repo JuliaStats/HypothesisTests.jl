@@ -28,8 +28,8 @@ export SignedRankTest, ExactSignedRankTest, ApproximateSignedRankTest
 
 # Automatic exact/normal selection
 """
-    SignedRankTest(x::AbstractVector{<:Real})
-    SignedRankTest(x::AbstractVector{<:Real}, y::AbstractVector{<:Real})
+    SignedRankTest(x::AbstractVector{<:Real}; method = :auto)
+    SignedRankTest(x::AbstractVector{<:Real}, y::AbstractVector{<:Real}; method = :auto)
 
 Perform a Wilcoxon signed rank test of the null hypothesis that the distribution of `x`
 (or the difference `x - y` if `y` is provided) has zero median against the alternative
@@ -37,22 +37,38 @@ hypothesis that the median is non-zero.
 
 When there are no tied ranks and ≤50 samples, or tied ranks and ≤15 samples,
 `SignedRankTest` performs an exact signed rank test. In all other cases,
-`SignedRankTest` performs an approximate signed rank test. Behavior may be further
-controlled by using [`ExactSignedRankTest`](@ref) or [`ApproximateSignedRankTest`](@ref)
-directly.
+`SignedRankTest` performs an approximate signed rank test.
 
-Implements: [`pvalue`](@ref), [`confint`](@ref)
+`method` overrides that choice:
+
+  - `:auto` (the default) applies the rule above.
+  - `:exact` and `:approximate` force the corresponding test, which is what an analysis
+    that must reproduce across versions of this package should do.
+  - a callable is passed `(; n, n_nonzero, ties, tie_adjustment)` and must return
+    `:exact` or `:approximate`.
+
+Equivalently, construct [`ExactSignedRankTest`](@ref) or
+[`ApproximateSignedRankTest`](@ref) directly.
+
+Implements: [`pvalue`](@ref), [`confint`](@ref), [`hodgeslehmann`](@ref)
 """
-function SignedRankTest(x::AbstractVector{T}) where T<:Real
+function SignedRankTest(x::AbstractVector{T}; method = :auto) where T<:Real
     (W, ranks, signs, tie_adjustment, n, median) = signedrankstats(x)
+    # `ranks` covers the non-zero observations alone, so its length is that count
     n_nonzero = length(ranks)
-    if n_nonzero <= 15 || (n_nonzero <= 50 && tie_adjustment == 0)
+    # the named tuple the `method` callable is documented to receive, and the automatic
+    # rule it defaults to, which is the threshold this constructor has always applied
+    stats = (n = n, n_nonzero = n_nonzero, ties = tie_adjustment != 0,
+             tie_adjustment = tie_adjustment)
+    default = n_nonzero <= 15 || (n_nonzero <= 50 && tie_adjustment == 0) ? :exact : :approximate
+    if resolve_rank_method(method, stats, default) === :exact
         ExactSignedRankTest(x, W, ranks, signs, tie_adjustment, n, median)
     else
         ApproximateSignedRankTest(x, W, ranks, signs, tie_adjustment, n, median)
     end
 end
-SignedRankTest(x::AbstractVector{T}, y::AbstractVector{S}) where {T<:Real,S<:Real} = SignedRankTest(x - y)
+SignedRankTest(x::AbstractVector{T}, y::AbstractVector{S}; method = :auto) where {T<:Real,S<:Real} =
+    SignedRankTest(x - y; method = method)
 
 # Get W and absolute ranks for signed rank test
 function signedrankstats(x::AbstractVector{S}) where S<:Real
@@ -69,8 +85,8 @@ end
 
 ## EXACT WILCOXON SIGNED RANK TEST
 
-struct ExactSignedRankTest{T<:Real} <: HypothesisTest
-    vals::Vector{T} # original values
+struct ExactSignedRankTest <: HypothesisTest
+    vals::Vector{Float64}   # original values
     W::Float64              # test statistic: Wilcoxon rank-sum statistic
     ranks::Vector{Float64}           # ranks without ties (zero values)
     signs::BitArray{1}      # signs of input of ranks
@@ -89,7 +105,10 @@ When there are no tied ranks, the exact p-value is computed using the `signrankc
 functions from the `StatsFuns` package. In the presence of tied ranks, a p-value is computed by exhaustive
 enumeration of permutations, which can be very slow for even moderately sized data sets.
 
-Implements: [`pvalue`](@ref), [`confint`](@ref)
+The tied route is bounded by [`MAX_EXACT_ENUMERATION_N`](@ref): beyond it this test
+refuses rather than enumerate indefinitely, and `method = :approximate` is the way on.
+
+Implements: [`pvalue`](@ref), [`confint`](@ref), [`hodgeslehmann`](@ref)
 """
 ExactSignedRankTest(x::AbstractVector{T}) where {T<:Real} =
     ExactSignedRankTest(x, signedrankstats(x)...)
@@ -97,6 +116,8 @@ ExactSignedRankTest(x::AbstractVector{S}, y::AbstractVector{T}) where {S<:Real,T
     ExactSignedRankTest(x - y)
 
 testname(::ExactSignedRankTest) = "Exact Wilcoxon signed rank test"
+# Still the sample median, not the Hodges-Lehmann estimate the label names and the
+# interval is built around. See #363.
 population_param_of_interest(x::ExactSignedRankTest) = ("Location parameter (pseudomedian)", 0, x.median) # parameter of interest: name, value under h0, point estimate
 default_tail(test::ExactSignedRankTest) = :both
 
@@ -115,6 +136,7 @@ function signedrankenumerate(x::ExactSignedRankTest)
     le = 0
     gr = 0
     n = length(x.ranks)
+    check_exact_enumeration(n)
     tot = 2^n
     for i = 0:tot-1
         # Interpret bits of i as signs to generate wp for all possible sign combinations
@@ -163,13 +185,32 @@ function StatsAPI.pvalue(x::ExactSignedRankTest; tail=:both)
     end
 end
 
-StatsAPI.confint(x::ExactSignedRankTest; level::Real=0.95, tail=:both) = calculate_ci(x.vals, level, tail=tail)
+# The Walsh averages that the point estimate is read off.
+#
+# `signedrankstats` drops zero differences before ranking, so the statistic and the
+# p-value describe the non-zero differences, and the estimate must describe the same
+# sample. R's `wilcox.test` drops them likewise.
+#
+# `confint` does not yet use this: it still forms its Walsh averages from every
+# difference, zeros included, so the interval and the estimate can describe
+# different samples. See #362.
+function signedrank_pairwise_estimates(vals::AbstractVector{<:Real})
+    nonzero = filter(!iszero, vals)
+    # every difference is zero: nothing to drop, and the pairwise estimates degenerate to
+    # the point zero either way
+    return walsh_averages(isempty(nonzero) ? vals : nonzero)
+end
+
+hodgeslehmann(x::ExactSignedRankTest) = median(signedrank_pairwise_estimates(x.vals))
+
+StatsAPI.confint(x::ExactSignedRankTest; level::Real=0.95, tail=:both) =
+    calculate_ci(x.vals, level, tail=tail)
 
 
 ## APPROXIMATE SIGNED RANK TEST
 
-struct ApproximateSignedRankTest{T<:Real} <: HypothesisTest
-    vals::Vector{T} # original values
+struct ApproximateSignedRankTest <: HypothesisTest
+    vals::Vector{Float64}   # original values
     W::Float64              # test statistic: Wilcoxon rank-sum statistic
     ranks::Vector{Float64} # ranks without ties (zero values)
     signs::BitArray{1}      # signs of input of ranks
@@ -197,9 +238,12 @@ statistic:
 ```
 where ``\\mathcal{T}`` is the set of the counts of tied values at each tied position.
 
-Implements: [`pvalue`](@ref), [`confint`](@ref)
+The confidence interval still inverts the exact null distribution, whichever route the
+p-value took (see #361).
+
+Implements: [`pvalue`](@ref), [`confint`](@ref), [`hodgeslehmann`](@ref)
 """
-function ApproximateSignedRankTest(x::Vector, W::Float64, ranks::Vector{T}, signs::BitArray{1}, tie_adjustment::Float64, n::Int, median::Float64) where T<:Real
+function ApproximateSignedRankTest(x::Vector, W::Float64, ranks::Vector{T}, signs::BitArray{1}, tie_adjustment::Float64, n::Int, median::Real) where T<:Real
     nz = length(ranks) # num non-zeros
     mu = W - nz * (nz + 1)/4
     std = sqrt(nz * (nz + 1) * (2 * nz + 1) / 24 - tie_adjustment / 48)
@@ -211,6 +255,8 @@ ApproximateSignedRankTest(x::AbstractVector{S}, y::AbstractVector{T}) where {S<:
     ApproximateSignedRankTest(x - y)
 
 testname(::ApproximateSignedRankTest) = "Approximate Wilcoxon signed rank test"
+# Still the sample median, not the Hodges-Lehmann estimate the label names and the
+# interval is built around. See #363.
 population_param_of_interest(x::ApproximateSignedRankTest) = ("Location parameter (pseudomedian)", 0, x.median) # parameter of interest: name, value under h0, point estimate
 default_tail(test::ApproximateSignedRankTest) = :both
 
@@ -238,10 +284,19 @@ function StatsAPI.pvalue(x::ApproximateSignedRankTest; tail=:both)
     end
 end
 
-StatsAPI.confint(x::ApproximateSignedRankTest; level::Real=0.95, tail=:both) = calculate_ci(x.vals, level, tail=tail)
+hodgeslehmann(x::ApproximateSignedRankTest) = median(signedrank_pairwise_estimates(x.vals))
+
+# Still the exact interval, on both signed rank types: `calculate_ci` inverts the
+# exact null distribution whichever test it was called on, so selecting the
+# approximate test does not yet produce an approximate interval, and the tie
+# correction this type carries in `sigma` does not reach the interval. See #361.
+StatsAPI.confint(x::ApproximateSignedRankTest; level::Real=0.95, tail=:both) =
+    calculate_ci(x.vals, level, tail=tail)
 
 # implementation method inspired by these notes: http://www.stat.umn.edu/geyer/old03/5102/notes/rank.pdf
 function calculate_ci(x::AbstractVector, level::Real=0.95; tail=:both)
+    # `Float64` for the same reason as in `ci_alpha`: `check_level` is `Float64`-only
+    level = Float64(level)
     check_level(level)
     check_tail(tail)
 
@@ -252,27 +307,19 @@ function calculate_ci(x::AbstractVector, level::Real=0.95; tail=:both)
     end
     n = length(x)
     m = div(n * (n + 1), 2)
+    check_estimate_count(m, "Walsh averages")
+    # and bound the k scan below, which runs m/2 lattice recursions and so becomes
+    # unusable at a sample size far short of what materialising the set costs. Both
+    # signed rank types arrive here, since neither has an approximate interval yet.
+    check_exact_ci_cost(m,
+        "Both signed rank tests invert the exact distribution for their interval " *
+        "whichever route their p-value took, so `method` does not reach this (see #361).")
     k_range = 1:div(m, 2)
+    # A single observation has a single Walsh average, so the only interval is that
+    # point and there is no k to choose between. The scan below was handed the empty
+    # range 1:0 and `argmin` refused it. R's `wilcox.test` returns the point here too.
+    isempty(k_range) && return ci_from_estimates(walsh_averages(x), 0, tail)
     l = [1 - 2 * signrankcdf(n, i) for i in k_range]
     k = argmin(abs.(l .- c))
-    vals = Float64[]
-    enumerated = enumerate(x)
-    for (outer_index, outer_value) in enumerated
-        for (inner_index, inner_value) in enumerated
-            if outer_index > inner_index
-                continue
-            end
-            push!(vals, (inner_value + outer_value) / 2)
-        end
-    end
-    sort!(vals)
-    left = vals[k + 1]
-    right = vals[m - k]
-    if tail == :both
-        return (left, right)
-    elseif tail == :left
-        return (left, Inf)
-    else # tail == :right
-        return (-Inf, right)
-    end
+    return ci_from_estimates(walsh_averages(x), k, tail)
 end

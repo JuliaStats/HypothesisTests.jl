@@ -28,7 +28,7 @@ export MannWhitneyUTest, ExactMannWhitneyUTest, ApproximateMannWhitneyUTest
 
 # Automatic exact/normal selection
 """
-    MannWhitneyUTest(x::AbstractVector{<:Real}, y::AbstractVector{<:Real})
+    MannWhitneyUTest(x::AbstractVector{<:Real}, y::AbstractVector{<:Real}; method = :auto)
 
 Perform a Mann-Whitney U test of the null hypothesis that the probability that an
 observation drawn from the same population as `x` is greater than an observation drawn
@@ -41,23 +41,42 @@ The Mann-Whitney U test is sometimes known as the Wilcoxon rank-sum test.
 
 When there are no tied ranks and ≤50 samples, or tied ranks and ≤10 samples,
 `MannWhitneyUTest` performs an exact Mann-Whitney U test. In all other cases,
-`MannWhitneyUTest` performs an approximate Mann-Whitney U test. Behavior may be further
-controlled by using [`ExactMannWhitneyUTest`](@ref) or [`ApproximateMannWhitneyUTest`](@ref)
-directly.
+`MannWhitneyUTest` performs an approximate Mann-Whitney U test.
 
-Implements: [`pvalue`](@ref)
+`method` overrides that choice:
+
+  - `:auto` (the default) applies the rule above.
+  - `:exact` and `:approximate` force the corresponding test, which is what an analysis
+    that must reproduce across versions of this package should do.
+  - a callable is passed `(; nx, ny, ties, tie_adjustment)` and must return `:exact` or
+    `:approximate`.
+
+Equivalently, construct [`ExactMannWhitneyUTest`](@ref) or
+[`ApproximateMannWhitneyUTest`](@ref) directly.
+
+Implements: [`pvalue`](@ref), [`confint`](@ref), [`hodgeslehmann`](@ref)
 """
-function MannWhitneyUTest(x::AbstractVector{S}, y::AbstractVector{T}) where {S<:Real,T<:Real}
-    (U, ranks, tieadj, nx, ny, median) = mwustats(x, y)
-    if nx + ny <= 10 || (nx + ny <= 50 && tieadj == 0)
-        ExactMannWhitneyUTest(U, ranks, tieadj, nx, ny, median)
+function MannWhitneyUTest(x::AbstractVector{S}, y::AbstractVector{T}; method = :auto) where {S<:Real,T<:Real}
+    fields = mwustats(x, y)
+    (U, ranks, tieadj, nx, ny, median) = fields
+    # the named tuple the `method` callable is documented to receive, and the automatic
+    # rule it defaults to, which is the threshold this constructor has always applied
+    stats = (nx = nx, ny = ny, ties = tieadj != 0, tie_adjustment = tieadj)
+    default = nx + ny <= 10 || (nx + ny <= 50 && tieadj == 0) ? :exact : :approximate
+    if resolve_rank_method(method, stats, default) === :exact
+        ExactMannWhitneyUTest(fields...)
     else
-        ApproximateMannWhitneyUTest(U, ranks, tieadj, nx, ny, median)
+        ApproximateMannWhitneyUTest(fields...)
     end
 end
 
 # Get U, ranks, and tie adjustment for Mann-Whitney U test
 # U is the sum of adjusted ranks in the first sample minus the minimal sum of ranks (ie sum(1:length(x))
+# The samples themselves are carried through as well: `confint` and `hodgeslehmann`
+# need the cross-group differences, which cannot be recovered from the ranks. They are
+# returned in the caller's own element type and narrowed to `Float64` by the struct
+# fields, so ranking and the median are computed at the input's precision and only what
+# is stored is converted.
 function mwustats(x::AbstractVector{<:Real}, y::AbstractVector{<:Real})
     ranks, tieadj = tiedrank_adj([x; y])
     nx = length(x)
@@ -69,18 +88,20 @@ function mwustats(x::AbstractVector{<:Real}, y::AbstractVector{<:Real})
         # U = (nx + ny)*(nx + ny + 1)/2 - sum(ranks_y) - nx*(nx + 1)/2
         U = ny*(2 * nx + ny + 1)/2 - sum(@view(ranks[(begin + nx):end]))
     end
-    return (U, ranks, tieadj, nx, ny, median(x)-median(y))
+    return (U, ranks, tieadj, nx, ny, median(x)-median(y), x, y)
 end
 
 
 ## EXACT MANN-WHITNEY U TEST
-struct ExactMannWhitneyUTest{T<:Real} <: HypothesisTest
+struct ExactMannWhitneyUTest <: HypothesisTest
     U::Float64              # test statistic: Mann-Whitney-U statistic
     ranks::Vector{Float64}  # ranks
     tie_adjustment::Float64 # adjustment for ties
     nx::Int                 # number of observations
     ny::Int
-    median::T               # sample median
+    median::Float64         # difference of sample medians
+    x::Vector{Float64}      # original values, first sample
+    y::Vector{Float64}      # original values, second sample
 end
 
 """
@@ -97,12 +118,18 @@ When there are no tied ranks, the exact p-value is computed using the `wilcoxcdf
 functions from the `StatsFuns` package. In the presence of tied ranks, a p-value is computed by exhaustive
 enumeration of permutations, which can be very slow for even moderately sized data sets.
 
-Implements: [`pvalue`](@ref)
+The tied route is bounded by [`MAX_EXACT_ENUMERATION_N`](@ref): beyond it this test
+refuses rather than enumerate indefinitely, and `method = :approximate` is the way on.
+
+Implements: [`pvalue`](@ref), [`confint`](@ref), [`hodgeslehmann`](@ref)
 """
 ExactMannWhitneyUTest(x::AbstractVector{S}, y::AbstractVector{T}) where {S<:Real,T<:Real} =
     ExactMannWhitneyUTest(mwustats(x, y)...)
 
 testname(::ExactMannWhitneyUTest) = "Exact Mann-Whitney U test"
+# Still the difference of sample medians, not the Hodges-Lehmann estimate the label
+# names and `confint` is built around. Changing it moves a number users see, so it
+# waits for the breaking pull request. See #363.
 population_param_of_interest(x::ExactMannWhitneyUTest) = ("Location parameter (pseudomedian)", 0, x.median) # parameter of interest: name, value under h0, point estimate
 default_tail(test::ExactMannWhitneyUTest) = :both
 
@@ -123,6 +150,7 @@ function mwuenumerate(x::ExactMannWhitneyUTest)
     # Compute sum of ranks of the smaller group
     nx = x.nx
     ny = x.ny
+    check_exact_enumeration(nx, ny)
     if nx <= ny
         n = nx
         R = x.U + n*(n + 1)/2
@@ -174,15 +202,35 @@ function StatsAPI.pvalue(x::ExactMannWhitneyUTest; tail=:both)
     end
 end
 
-struct ApproximateMannWhitneyUTest{T<:Real} <: HypothesisTest
+hodgeslehmann(x::ExactMannWhitneyUTest) = median(cross_differences(x.x, x.y))
+
+# Under ties the achieved coverage is approximate rather than exact: the null
+# distribution inverted here is the untied one, where the tied data has the
+# conditional distribution `mwuenumerate` computes. The classical construction
+# inverts the untied one anyway; R declines an exact interval in that case.
+function StatsAPI.confint(x::ExactMannWhitneyUTest; level::Real=0.95, tail=:both)
+    alpha = ci_alpha(level, tail)
+    # before the differences are formed, so an oversized request is refused rather than
+    # paid for: `exact_ci_index` below runs a lattice recursion per candidate endpoint
+    check_exact_ci_cost(x.nx * x.ny,
+        "Pass `method = :approximate` for the normal-approximation interval, which " *
+        "inverts a closed form and is bounded by memory alone.")
+    vals = cross_differences(x.x, x.y)
+    k = exact_ci_index(length(vals), alpha, u -> wilcoxcdf(x.nx, x.ny, u))
+    return ci_from_estimates(vals, k, tail)
+end
+
+struct ApproximateMannWhitneyUTest <: HypothesisTest
     U::Float64              # test statistic: Mann-Whitney-U statistic
     ranks::Vector{Float64}  # ranks
     tie_adjustment::Float64 # adjustment for ties
     nx::Int                 # number of observations
     ny::Int
-    median::T               # sample median
+    median::Float64         # difference of sample medians
     mu::Float64             # normal approximation: mean
     sigma::Float64          # normal approximation: std
+    x::Vector{Float64}      # original values, first sample
+    y::Vector{Float64}      # original values, second sample
 end
 
 ## APPROXIMATE MANN-WHITNEY U TEST
@@ -208,20 +256,27 @@ Mann-Whitney U statistic:
 ```
 where ``\\mathcal{T}`` is the set of the counts of tied values at each tied position.
 
-Implements: [`pvalue`](@ref)
+The confidence interval inverts the same approximation, rather than the exact null
+distribution.
+
+Implements: [`pvalue`](@ref), [`confint`](@ref), [`hodgeslehmann`](@ref)
 """
-function ApproximateMannWhitneyUTest(U::Real, ranks::AbstractVector{T},
-    tie_adjustment::Real, nx::Int, ny::Int, median::Real) where T<:Real
+function ApproximateMannWhitneyUTest(U::Real, ranks::AbstractVector{<:Real},
+    tie_adjustment::Real, nx::Int, ny::Int, median::Real,
+    x::AbstractVector{<:Real}, y::AbstractVector{<:Real})
     n = nx + ny
     nxny = nx * ny
     mu = U - nxny / 2
     sigma = sqrt(nxny / 12 * (n + 1 - tie_adjustment / (n * (n - 1))))
-    ApproximateMannWhitneyUTest(U, ranks, tie_adjustment, nx, ny, median, mu, sigma)
+    ApproximateMannWhitneyUTest(U, ranks, tie_adjustment, nx, ny, median, mu, sigma, x, y)
 end
 ApproximateMannWhitneyUTest(x::AbstractVector{S}, y::AbstractVector{T}) where {S<:Real,T<:Real} =
     ApproximateMannWhitneyUTest(mwustats(x, y)...)
 
 testname(::ApproximateMannWhitneyUTest) = "Approximate Mann-Whitney U test"
+# Still the difference of sample medians, not the Hodges-Lehmann estimate the label
+# names and `confint` is built around. Changing it moves a number users see, so it
+# waits for the breaking pull request. See #363.
 population_param_of_interest(x::ApproximateMannWhitneyUTest) = ("Location parameter (pseudomedian)", 0, x.median) # parameter of interest: name, value under h0, point estimate
 default_tail(test::ApproximateMannWhitneyUTest) = :both
 
@@ -246,4 +301,15 @@ function StatsAPI.pvalue(x::ApproximateMannWhitneyUTest; tail=:both)
     else # tail == :right
         ccdf(Normal(), (x.mu - 0.5)/x.sigma)
     end
+end
+
+hodgeslehmann(x::ApproximateMannWhitneyUTest) = median(cross_differences(x.x, x.y))
+
+# `x.mu` is the centred statistic, not the null mean; the null mean of U is nx*ny/2.
+function StatsAPI.confint(x::ApproximateMannWhitneyUTest; level::Real=0.95, tail=:both)
+    alpha = ci_alpha(level, tail)
+    vals = cross_differences(x.x, x.y)
+    m = length(vals)
+    k = normal_ci_index(m, m / 2, x.sigma, alpha)
+    return ci_from_estimates(vals, k, tail)
 end

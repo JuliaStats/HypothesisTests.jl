@@ -1,5 +1,9 @@
 name = "HypothesisTests"
 uuid = "09f84164-cd44-5f33-b23f-e6b0d136a0d5"
+# Deliberately not 0.12.0 yet. This branch is breaking and 0.12.0 is what it will
+# be, but the bump lands with the stacked PR, so nothing between the two can be
+# registered by accident: 0.11.8 is already in General against a different hash,
+# so the registrator refuses it.
 version = "0.11.8"
 
 [deps]
@@ -23,7 +27,7 @@ StableRNGs = "1"
 Statistics = "1"
 StatsAPI = "1.6"
 StatsBase = "0.27, 0.28, 0.29, 0.30, 0.31, 0.32, 0.33, 0.34"
-StatsFuns = "1.4, 2"
+StatsFuns = "2.2.1"
 Test = "<0.0.1, 1"
 julia = "1.10"
 
