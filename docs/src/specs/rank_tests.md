@@ -1722,7 +1722,7 @@ routes are this package's own, and are bounded rather than corrected.
     difference of sample medians for the Mann-Whitney ones. Both are descriptive statistics
     rather than the estimand of [§5](@ref "5. Point estimation"), which is reported separately
     and is what the interval is built around. The signed rank one is taken over all ``N``
-    differences, zeros included, so it is the one number these tests report that the discard
+    differences, zeros included, so it is the one number these types carry that the discard
     of [§2.1](@ref "2.1 Model, estimand, statistic") does not reach. It is also that field,
     rather than anything the procedure needs, that makes an empty sample throw instead of
     returning the degenerate p-value of [§3.3](@ref "3.3 p-values").
