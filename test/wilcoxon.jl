@@ -254,7 +254,7 @@ end
     # and through the two-sample form
     @test confint(SignedRankTest([4.0], [2.5])) == (1.5, 1.5)
     # the two-sample tests already agreed: one against one is the one difference
-    @test confint(MannWhitneyUTest([4.0], [2.5])) == (1.5, 1.5)
+    @test (@test_logs (:warn, r"not attainable") confint(MannWhitneyUTest([4.0], [2.5]))) == (1.5, 1.5)
 end
 
 @testset "Zero differences" begin
@@ -287,6 +287,50 @@ end
     @test (lo, hi) == (0.0, 1.5)
     @test !(lo <= hodgeslehmann(SignedRankTest(e)) <= hi)
     @test confint(SignedRankTest(enz)) == (1.0, 3.0)
+end
+
+@testset "Unattainable levels warn" begin
+    # The widest interval this construction admits is (V_(1), V_(m)); where even that
+    # falls short of the requested level, it is returned with a warning naming the
+    # coverage actually attained, rather than as though it met the request. Only the
+    # Mann-Whitney intervals reach these index rules today; the signed rank route
+    # still inverts through its own scan and gains the same warnings with #361.
+    # R returns (-3, -1) with an achieved conf.level attribute of 2/3, which is the
+    # attainable coverage the warning here names: 1 - 2 P(U <= 0) = 1 - 2/6
+    logs, ci22 = Test.collect_test_logs() do
+        confint(ExactMannWhitneyUTest([1.0, 2.0], [3.0, 4.0]))
+    end
+    @test ci22 == (-3.0, -1.0)
+    @test length(logs) == 1
+    @test logs[1].level == Base.CoreLogging.Warn
+    @test occursin("not attainable", logs[1].message)
+    # the payload is the point of the warning: what was asked for, and what this
+    # construction can actually cover, which is R's achieved conf.level attribute
+    @test logs[1].kwargs[:requested] == 0.95
+    @test logs[1].kwargs[:attainable] ≈ 1 - 2/6   # 1 - 2 P(U <= 0), to the last ulp
+
+    # a one-sided caller asked for `level`, not the two-sided `2 level - 1` the index
+    # rule works in, and only its one overshooting tail can miss
+    logs1, ci1 = Test.collect_test_logs() do
+        confint(ExactMannWhitneyUTest([1.0, 2.0], [3.0, 4.0]); tail = :left)
+    end
+    @test ci1 == (-Inf, -1.0)
+    @test length(logs1) == 1
+    @test logs1[1].kwargs[:requested] == 0.95
+    @test logs1[1].kwargs[:attainable] ≈ 1 - 1/6
+
+    # the approximate rule warns for its own, weaker reason, and claims nothing about
+    # coverage: it names the request only
+    logsa, _ = Test.collect_test_logs() do
+        confint(ApproximateMannWhitneyUTest([1.0, 2.0], [3.0, 4.0]))
+    end
+    @test length(logsa) == 1
+    @test occursin("outside the set of pairwise estimates", logsa[1].message)
+    @test logsa[1].kwargs[:requested] == 0.95
+    @test !haskey(logsa[1].kwargs, :attainable)
+
+    # and no warning once the level is attainable
+    @test_logs confint(ExactMannWhitneyUTest([1.0, 2.0, 5.0, 6.0], [3.0, 4.0, 7.0, 9.0]); level = 0.9)
 end
 
 @testset "method keyword" begin
