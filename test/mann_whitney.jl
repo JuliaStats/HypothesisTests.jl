@@ -399,11 +399,20 @@ end
 end
 
 @testset "The exact interval is bounded in time" begin
-    # `exact_ci_index` runs a lattice recursion per candidate endpoint, which `:auto` never
-    # reached, since it leaves the exact route at nx + ny > 50. `method = :exact` does reach
-    # it at any size, so the interval is bounded rather than left to run.
-    x = collect(1.0:200); y = collect(1.5:1:200.5)
-    @test 200 * 200 > HypothesisTests.MAX_EXACT_CI_ESTIMATES
+    # `exact_ci_index` runs a `wilcoxcdf` lattice recursion per bisection step, which
+    # `:auto` never reaches, since it leaves the exact route at nx + ny > 50.
+    # `method = :exact` does reach it at any size, so the interval is bounded rather than
+    # left to run: about 11 s at the bound, a 300-against-300 design, 35 s at 400 against
+    # 400 and 93 s at 500 against 500. This is the only route the bound reaches; the
+    # signed rank bisection is cheap enough to run to its memory bound (test/wilcoxon.jl).
+    @test HypothesisTests.MAX_EXACT_CI_ESTIMATES == 90_000
+    @test HypothesisTests.MAX_EXACT_CI_ESTIMATES < HypothesisTests.MAX_PAIRWISE_ESTIMATES
+    @test HypothesisTests.check_exact_ci_cost(90_000, "") === nothing
+    @test_throws HypothesisTests.ComputationTooLarge HypothesisTests.check_exact_ci_cost(90_001, "")
+
+    x = collect(1.0:400); y = collect(1.5:1:400.5)
+    @test 400 * 400 > HypothesisTests.MAX_EXACT_CI_ESTIMATES
+    # refused before the differences are formed, so the refusal is immediate
     @test_throws HypothesisTests.ComputationTooLarge confint(MannWhitneyUTest(x, y; method=:exact))
     # the approximate interval inverts a closed form, so it is unaffected
     @test confint(MannWhitneyUTest(x, y; method=:approximate)) isa Tuple

@@ -107,8 +107,9 @@ The first bounds the tied-data enumeration a p-value runs, and `method = :approx
 the way past it. The second bounds the set of pairwise estimates, which `confint` and
 `hodgeslehmann` form whichever route the p-value took, so `method` is no help there; it is a
 bound on memory, which is all the approximate interval spends. The third bounds the exact
-interval, which spends time as well, a lattice recursion for every candidate endpoint it
-considers, and so is bounded far below the second.
+Mann-Whitney interval, which spends time as well, a two-sample lattice recursion per
+bisection step, and so is bounded below the second; the exact signed rank interval bisects
+a cheaper recursion and meets only the second.
 
 All three raise `ComputationTooLarge`, which is its own type rather than an `ArgumentError`
 so that `show` can drop a refused interval line without also hiding real errors.
