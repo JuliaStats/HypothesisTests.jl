@@ -43,6 +43,8 @@ KruskalWallisTest
 
 ## Mann-Whitney U test
 
+→ [Mathematical specification](@ref "3. The two-sample procedure (Wilcoxon rank sum, Mann-Whitney U)")
+
 ```@docs
 MannWhitneyUTest
 ExactMannWhitneyUTest
@@ -63,6 +65,8 @@ WaldWolfowitzTest
 
 ## Wilcoxon signed rank test
 
+→ [Mathematical specification](@ref "2. The one-sample procedure (Wilcoxon signed rank)")
+
 ```@docs
 SignedRankTest
 ExactSignedRankTest
@@ -70,6 +74,8 @@ ApproximateSignedRankTest
 ```
 
 ## Rank tests: intervals and point estimates
+
+→ [Mathematical specification](@ref "Rank-based location inference")
 
 The Wilcoxon signed rank and Mann-Whitney U tests share their interval and estimator
 machinery.
@@ -101,6 +107,18 @@ A one-sided interval keeps the endpoint that inverts the test of the same name:
 `tail = :right` a lower one. That is the convention of every other test here that takes a
 `tail`, and of R's `alternative = "less"` and `"greater"`. These four tests returned the
 other endpoint before this change (#368).
+
+On tied data the `Exact*` p-value is computed by enumeration rather than looked up, and it
+is worth knowing that base R will not compute it at all: `wilcox.test` warns that it cannot
+compute an exact p-value with ties, or with zeros, and returns its normal approximation
+instead, even when `exact = TRUE` is asked for. The comparable reference is the contributed
+package [`exactRankTests`](https://cran.r-project.org/package=exactRankTests), whose
+`wilcox.exact` does compute the tied distribution, and which is what the tied p-values here
+are tested against. The two agree on every one-sided value;
+their two-sided values agree for the signed rank tests and can differ slightly for the
+Mann-Whitney ones, where `wilcox.exact` sums the far tail and this package doubles the
+smaller one. See [§2.2.2](@ref "2.2.2 The permutation distribution") and
+[§3.2.2](@ref "3.2.2 The permutation distribution").
 
 Three named bounds apply, and past any of them the tests raise rather than run unbounded.
 The first bounds the tied-data enumeration a p-value runs, and `method = :approximate` is
