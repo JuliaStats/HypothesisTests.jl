@@ -196,15 +196,11 @@ function StatsAPI.pvalue(x::ExactSignedRankTest; tail=:both)
     end
 end
 
-# The Walsh averages that the point estimate is read off.
+# The Walsh averages that the interval and the point estimate are read off.
 #
 # `signedrankstats` drops zero differences before ranking, so the statistic and the
-# p-value describe the non-zero differences, and the estimate must describe the same
-# sample. R's `wilcox.test` drops them likewise.
-#
-# `confint` does not yet use this: it still forms its Walsh averages from every
-# difference, zeros included, so the interval and the estimate can describe
-# different samples. See #362.
+# p-value describe the non-zero differences; the interval and the estimate must
+# describe the same sample. R's `wilcox.test` drops them likewise.
 function signedrank_pairwise_estimates(vals::AbstractVector{<:Real})
     nonzero = filter(!iszero, vals)
     # every difference is zero: nothing to drop, and the pairwise estimates degenerate to
@@ -214,8 +210,23 @@ end
 
 hodgeslehmann(x::ExactSignedRankTest) = median(signedrank_pairwise_estimates(x.vals))
 
-StatsAPI.confint(x::ExactSignedRankTest; level::Real=0.95, tail=:both) =
-    calculate_ci(x.vals, level, tail=tail)
+# Ties are a caveat here rather than a correction: under ties the null distribution of
+# the statistic is no longer the untied one this inverts, so the achieved coverage is
+# approximate. (R declines to compute an exact interval at all in that case and falls
+# back to the normal approximation, which on the samples tested lands on the same order
+# statistics.) `ApproximateSignedRankTest` does account for ties, through its variance.
+function StatsAPI.confint(x::ExactSignedRankTest; level::Real=0.95, tail=:both)
+    alpha = ci_alpha(level, tail)
+    n = length(x.ranks)
+    vals = signedrank_pairwise_estimates(x.vals)
+    # this route still inverts the exact distribution, a lattice recursion per candidate
+    # endpoint, so it keeps the bound the scan it replaces was given
+    check_exact_ci_cost(length(vals),
+        "Pass `method = :approximate` for the normal-approximation interval, which " *
+        "inverts a closed form and is bounded by memory alone.")
+    k = exact_ci_index(length(vals), alpha, i -> signrankcdf(n, i); tail = tail)
+    return ci_from_estimates(vals, k, tail)
+end
 
 
 ## APPROXIMATE SIGNED RANK TEST
@@ -253,8 +264,8 @@ where ``\\mathcal{T}`` is the set of the counts of tied values at each tied posi
 is the pair ``(W^+ - μ_0, σ)``: the statistic centred at its null mean, and the
 tie-corrected standard deviation, not ``μ_0`` itself.
 
-The confidence interval still inverts the exact null distribution, whichever route the
-p-value took (see #361).
+The confidence interval inverts the same approximation, rather than the exact null
+distribution.
 
 Implements: [`pvalue`](@ref), [`confint`](@ref), [`hodgeslehmann`](@ref)
 """
@@ -303,40 +314,13 @@ end
 
 hodgeslehmann(x::ApproximateSignedRankTest) = median(signedrank_pairwise_estimates(x.vals))
 
-# Still the exact interval, on both signed rank types: `calculate_ci` inverts the
-# exact null distribution whichever test it was called on, so selecting the
-# approximate test does not yet produce an approximate interval, and the tie
-# correction this type carries in `sigma` does not reach the interval. See #361.
-StatsAPI.confint(x::ApproximateSignedRankTest; level::Real=0.95, tail=:both) =
-    calculate_ci(x.vals, level, tail=tail)
-
-# implementation method inspired by these notes: http://www.stat.umn.edu/geyer/old03/5102/notes/rank.pdf
-function calculate_ci(x::AbstractVector, level::Real=0.95; tail=:both)
-    # `Float64` for the same reason as in `ci_alpha`: `check_level` is `Float64`-only
-    level = Float64(level)
-    check_level(level)
-    check_tail(tail)
-
-    if tail == :both
-        c = level
-    else
-        c = 1 - 2 * (1-level)
-    end
-    n = length(x)
-    m = div(n * (n + 1), 2)
-    check_estimate_count(m, "Walsh averages")
-    # and bound the k scan below, which runs m/2 lattice recursions and so becomes
-    # unusable at a sample size far short of what materialising the set costs. Both
-    # signed rank types arrive here, since neither has an approximate interval yet.
-    check_exact_ci_cost(m,
-        "Both signed rank tests invert the exact distribution for their interval " *
-        "whichever route their p-value took, so `method` does not reach this (see #361).")
-    k_range = 1:div(m, 2)
-    # A single observation has a single Walsh average, so the only interval is that
-    # point and there is no k to choose between. The scan below was handed the empty
-    # range 1:0 and `argmin` refused it. R's `wilcox.test` returns the point here too.
-    isempty(k_range) && return ci_from_estimates(walsh_averages(x), 0, tail)
-    l = [1 - 2 * signrankcdf(n, i) for i in k_range]
-    k = argmin(abs.(l .- c))
-    return ci_from_estimates(walsh_averages(x), k, tail)
+# The exact null distribution is not consulted here: an approximate test gets an
+# approximate interval, from the same normal approximation (mean, and variance
+# corrected for ties) that its p-value uses.
+function StatsAPI.confint(x::ApproximateSignedRankTest; level::Real=0.95, tail=:both)
+    alpha = ci_alpha(level, tail)
+    vals = signedrank_pairwise_estimates(x.vals)
+    m = length(vals)
+    k = normal_ci_index(m, m / 2, x.sigma, alpha; tail = tail)
+    return ci_from_estimates(vals, k, tail)
 end

@@ -25,7 +25,8 @@ Base.getindex(v::ZeroBasedVector, i::Int) = v.data[i + 1]
     # A sample with zeros, so the two observation counts differ: the statistic, the
     # p-value and the ranks describe the seven non-zero differences, while `n` counts
     # all ten. Both are printed, and the statistic is named for the test that computes
-    # it rather than for the two-sample one.
+    # it rather than for the two-sample one. The interval is read off those same seven
+    # differences (#362), and differs between the two routes (#361).
     d = [0.0, 1.5, -2.5, 0.0, 3.5, -0.5, 4.0, 2.2, -1.1, 0.0]
 
     @test repr(MIME"text/plain"(), ExactSignedRankTest(d)) == """
@@ -35,7 +36,7 @@ Base.getindex(v::ZeroBasedVector, i::Int) = v.data[i + 1]
         parameter of interest:   Location parameter (pseudomedian)
         value under h_0:         0
         point estimate:          1.025
-        95% confidence interval: (-0.55, 2.0)
+        95% confidence interval: (-1.5, 3.5)
 
     Test summary:
         outcome with 95% confidence: fail to reject h_0
@@ -57,7 +58,7 @@ Base.getindex(v::ZeroBasedVector, i::Int) = v.data[i + 1]
         parameter of interest:   Location parameter (pseudomedian)
         value under h_0:         0
         point estimate:          1.025
-        95% confidence interval: (-0.55, 2.0)
+        95% confidence interval: (-1.8, 3.75)
 
     Test summary:
         outcome with 95% confidence: fail to reject h_0
@@ -113,7 +114,9 @@ end
 end
 
 @testset "Exact with ties" begin
-    show(IOBuffer(), ExactSignedRankTest([1:10;], [1:10;]))
+    # every difference is zero here, so the interval shown cannot have 95% coverage and
+    # `show` says so
+    @test_logs (:warn, r"not attainable") show(IOBuffer(), ExactSignedRankTest([1:10;], [1:10;]))
 
     # Two-sided
     for kwargs in ((), (; tail = :both))
@@ -190,10 +193,9 @@ end
     # R: wilcox.test(x, conf.int = TRUE, exact = TRUE)  ->  (3.3, 15.5)
     @test isapprox(@inferred(confint(ExactSignedRankTest(x)))[1], 3.3, atol=1e-4)
     @test isapprox(@inferred(confint(ExactSignedRankTest(x)))[2], 15.5, atol=1e-4)
-    # PENDING #361: the approximate test still reports the exact interval, because
-    # `calculate_ci` inverts the exact null distribution whichever test it is called on.
-    # R with exact = FALSE gives (3.05004, 15.50001).
-    @test isapprox(@inferred(confint(ApproximateSignedRankTest(x)))[1], 3.3, atol=1e-4)
+    # R: wilcox.test(x, conf.int = TRUE, exact = FALSE)  ->  (3.05004, 15.50001).
+    # The approximate test now gets the approximate interval; it used to report the exact one.
+    @test isapprox(@inferred(confint(ApproximateSignedRankTest(x)))[1], 3.05, atol=1e-4)
     @test isapprox(@inferred(confint(ApproximateSignedRankTest(x)))[2], 15.5, atol=1e-4)
     # one-sided, at level 0.95, is the corresponding endpoint of the two-sided 0.90
     # interval, and the tail names the alternative: :left is location below the null, so it
@@ -211,6 +213,23 @@ end
     l = confint(SignedRankTest(x); tail=:right)[1]
     @test pvalue(SignedRankTest(x .- (l + 0.02)); tail=:right) > 0.05
     @test pvalue(SignedRankTest(x .- (l - 0.02)); tail=:right) < 0.05
+
+    # one-sided p-values on the same sample, against R:
+    # wilcox.test(x, alternative = "less")    -> 0.9986877441
+    # wilcox.test(x, alternative = "greater") -> 0.001678466797
+    @test isapprox(pvalue(ExactSignedRankTest(x); tail=:left), 0.9986877441, atol=1e-9)
+    @test isapprox(pvalue(ExactSignedRankTest(x); tail=:right), 0.001678466797, atol=1e-9)
+    # and the approximate route, R with exact = FALSE, correct = TRUE:
+    # "less" -> 0.9975337639, "greater" -> 0.002938062707
+    @test isapprox(pvalue(ApproximateSignedRankTest(x); tail=:left), 0.9975337639, atol=1e-9)
+    @test isapprox(pvalue(ApproximateSignedRankTest(x); tail=:right), 0.002938062707, atol=1e-9)
+
+    # approximate one-sided intervals: R solves numerically for (-Inf, 14.45001612) and
+    # (4.450022698, Inf); these are the order statistics it lands beside
+    @test confint(ApproximateSignedRankTest(x); tail=:left)[1] == -Inf
+    @test isapprox(confint(ApproximateSignedRankTest(x); tail=:left)[2], 14.45, atol=1e-4)
+    @test isapprox(confint(ApproximateSignedRankTest(x); tail=:right)[1], 4.45, atol=1e-4)
+    @test confint(ApproximateSignedRankTest(x); tail=:right)[2] == Inf
 
     # the sample from #368, all three tails against R:
     # wilcox.test(z, conf.int = TRUE, alternative = "less")    -> (-Inf, 0.95)
@@ -259,61 +278,85 @@ end
 
 @testset "One observation" begin
     # One difference gives one Walsh average, so the only interval is that point, and
-    # the scan that picks an order statistic has nothing to pick between: it was handed
-    # the empty range 1:0 and `argmin` raised. R's `wilcox.test` returns (1.5, 1.5).
+    # the index rule has nothing to choose between: the scan this bisection replaced was
+    # handed the empty range 1:0 and `argmin` raised. R's `wilcox.test` returns (1.5, 1.5).
+    #
+    # Every interval here warns, and should: one observation cannot cover 95% by either
+    # route. The exact route names the coverage it does reach, 0 two-sided and 0.5
+    # one-sided; the approximate route reports its endpoint falling outside the set
+    # instead, since unattainability is not what its rule establishes.
     t = SignedRankTest([1.5])
-    @test confint(t) == (1.5, 1.5)
-    @test confint(t; level=0.99) == (1.5, 1.5)
+    @test (@test_logs (:warn, r"not attainable") confint(t)) == (1.5, 1.5)
+    @test (@test_logs (:warn, r"not attainable") confint(t; level=0.99)) == (1.5, 1.5)
     # `tail = :left` keeps the endpoint inverting the test of the same name (#368)
-    @test confint(t; tail=:left) == (-Inf, 1.5)
-    @test confint(t; tail=:right) == (1.5, Inf)
+    @test (@test_logs (:warn, r"not attainable") confint(t; tail=:left)) == (-Inf, 1.5)
+    @test (@test_logs (:warn, r"not attainable") confint(t; tail=:right)) == (1.5, Inf)
     @test hodgeslehmann(t) == 1.5
     @test pvalue(t) == 1.0
-    @test confint(ApproximateSignedRankTest([1.5])) == (1.5, 1.5)
+    @test (@test_logs (:warn, r"outside the set of pairwise estimates") confint(ApproximateSignedRankTest([1.5]))) == (1.5, 1.5)
     # and through the two-sample form
-    @test confint(SignedRankTest([4.0], [2.5])) == (1.5, 1.5)
+    @test (@test_logs (:warn, r"not attainable") confint(SignedRankTest([4.0], [2.5]))) == (1.5, 1.5)
     # the two-sample tests already agreed: one against one is the one difference
     @test (@test_logs (:warn, r"not attainable") confint(MannWhitneyUTest([4.0], [2.5]))) == (1.5, 1.5)
 end
 
-@testset "Zero differences" begin
+@testset "Zero differences are dropped consistently" begin
+    # the statistic already ignores zeros; the interval and the estimate now do too
     d = [0.0, 0, 0, 0.5, 0.5, 1, -0.5, -1, 1.5, -1.5, 0.5, 0, 1, -0.5, 2, 0, 0.5, -1, 1, 0.5]
     nz = d[d .!= 0]
-    # the statistic and the p-value already ignore zeros
     @test SignedRankTest(d).W == SignedRankTest(nz).W
     @test pvalue(SignedRankTest(d)) == pvalue(SignedRankTest(nz))
-    # and so does the estimate, which is formed from the same pairwise estimates
-    @test hodgeslehmann(SignedRankTest(d)) == hodgeslehmann(SignedRankTest(nz)) == 0.5
-
-    # PENDING #362: the interval does not. It is built from the Walsh averages of all
-    # 20 differences rather than the 15 non-zero ones, so it describes a different
-    # sample from the p-value beside it. R gives (-0.24999, 0.75005) at this level.
-    @test confint(SignedRankTest(d); level=0.9) != confint(SignedRankTest(nz); level=0.9)
-    @test confint(SignedRankTest(d); level=0.9) == (0.0, 0.5)
+    @test confint(SignedRankTest(d); level=0.9) == confint(SignedRankTest(nz); level=0.9)
+    @test hodgeslehmann(SignedRankTest(d)) == hodgeslehmann(SignedRankTest(nz))
+    # R: wilcox.test(d, conf.int = TRUE, conf.level = 0.9) -> (-0.24999, 0.75005), est 0.5
+    @test confint(SignedRankTest(d); level=0.9) == (-0.25, 0.75)
+    @test hodgeslehmann(SignedRankTest(d)) == 0.5
+    # the interval is read off the 120 Walsh averages of the 15 non-zero differences,
+    # not the 210 of all 20
     @test length(HypothesisTests.walsh_averages(d)) == 210
     @test length(HypothesisTests.signedrank_pairwise_estimates(d)) == 120
-
-    # PENDING #362: and so the estimate can fall outside the interval printed beside it.
-    # Here the p-value and the estimate describe the seven non-zero differences while the
-    # interval is built from all fourteen, so it lands entirely below the estimate. The
-    # interval of the sample the estimate does describe contains it. This happens on
-    # roughly a tenth of samples that contain zeros, so it is worth a sample of its own.
+    # the estimate now always lies inside the interval printed beside it: on this sample
+    # the p-value and the estimate describe the seven non-zero differences, and before
+    # #362 the interval was built from all fourteen and landed entirely below it
     e = [0.0, 3, 2, 0, 0, 3, 0, -1, 0, 0, 3, 0, 3, 3]
     enz = e[e .!= 0]
     @test pvalue(SignedRankTest(e)) == pvalue(SignedRankTest(enz))
     @test hodgeslehmann(SignedRankTest(e)) == hodgeslehmann(SignedRankTest(enz)) == 3.0
     lo, hi = confint(SignedRankTest(e))
-    @test (lo, hi) == (0.0, 1.5)
-    @test !(lo <= hodgeslehmann(SignedRankTest(e)) <= hi)
-    @test confint(SignedRankTest(enz)) == (1.0, 3.0)
+    @test (lo, hi) == confint(SignedRankTest(enz)) == (1.0, 3.0)
+    @test lo <= hodgeslehmann(SignedRankTest(e)) <= hi
+    # all-zero input still yields the degenerate interval rather than an error, and says
+    # that the level was not met
+    @test (@test_logs (:warn, r"not attainable") confint(SignedRankTest(zeros(6)))) == (0.0, 0.0)
 end
 
 @testset "Unattainable levels warn" begin
     # The widest interval this construction admits is (V_(1), V_(m)); where even that
     # falls short of the requested level, it is returned with a warning naming the
-    # coverage actually attained, rather than as though it met the request. Only the
-    # Mann-Whitney intervals reach these index rules today; the signed rank route
-    # still inverts through its own scan and gains the same warnings with #361.
+    # coverage actually attained, rather than as though it met the request. Both
+    # procedures reach these rules now that #361 routes the signed rank interval
+    # through them.
+    #
+    # For an untied signed rank sample the widest coverage is 1 - 2^(1-n), so 0.95 is
+    # out of reach below n = 6 and 0.99 below n = 8.
+    small = [1.4, -0.6, 2.3, 0.8, -1.9]                       # n = 5, widest is 0.9375
+    ci = @test_logs (:warn, r"not attainable") confint(ExactSignedRankTest(small))
+    walsh = sort([(small[i] + small[j]) / 2 for i in eachindex(small) for j in i:length(small)])
+    @test ci == (first(walsh), last(walsh))                   # the widest available
+    # R returns the same interval, (-1.9, 2.3), but silently: its conf.level attribute
+    # still claims 0.95, and it warns only once the shortfall exceeds alpha/2, as at
+    # the 2 v 2 case below
+    @test ci == (-1.9, 2.3)
+    @test_logs (:warn, r"not attainable") confint(ExactSignedRankTest(small); level=0.99)
+    # the approximate route warns for its own reason, and does not claim unattainability:
+    # at n = 8, level = 0.99 it asks for k = -1 while the exact route reaches 0.9922
+    @test_logs (:warn, r"outside the set of pairwise estimates") confint(ApproximateSignedRankTest(small))
+    @test_logs (:warn, r"outside the set of pairwise estimates") confint(
+        ApproximateSignedRankTest([1.4, -0.6, 2.3, 0.8, -1.9, 3.1, 2.7, -0.3]); level=0.99)
+    # and no warning once the level is attainable
+    @test_logs confint(ExactSignedRankTest([1.4, -0.6, 2.3, 0.8, -1.9, 3.1]))
+    @test_logs confint(ExactSignedRankTest(collect(1.0:15)); level=0.99)
+
     # R returns (-3, -1) with an achieved conf.level attribute of 2/3, which is the
     # attainable coverage the warning here names: 1 - 2 P(U <= 0) = 1 - 2/6
     logs, ci22 = Test.collect_test_logs() do
@@ -382,8 +425,8 @@ end
     # than raising a MethodError from inside the constructor
     @test_throws ArgumentError SignedRankTest(x; method = (a, b) -> :exact)
 
-    # PENDING #361: the choice reaches the type but not yet the interval
-    @test confint(SignedRankTest(x; method=:exact)) ==
+    # the choice reaches the interval, not just the type
+    @test confint(SignedRankTest(x; method=:exact)) !=
           confint(SignedRankTest(x; method=:approximate))
 
     # the callable is handed the documented fields
@@ -397,6 +440,29 @@ end
     # and zeros are excluded from n_nonzero but not from n
     SignedRankTest([0.0, 1, 2, 3]; method = s -> (seen[] = s; :exact))
     @test (seen[].n, seen[].n_nonzero, seen[].ties) == (4, 3, false)
+end
+
+@testset "Interval invariants" begin
+    for n in (8, 13, 21, 34), seed in (1, 2)
+        v = [sin(seed * 1.7 + i * 0.9) * 3 + cos(i * 0.31) for i in 1:n]
+        for t in (SignedRankTest(v; method=:exact), SignedRankTest(v; method=:approximate))
+            # the estimate the interval is built around lies inside it
+            lo, hi = confint(t)
+            @test lo <= hodgeslehmann(t) <= hi
+            # raising the level cannot narrow the interval (the approximate route warns at
+            # n = 8, where its rule wants an endpoint outside the pairwise estimates)
+            wide = n == 8 && t isa ApproximateSignedRankTest ?
+                (@test_logs (:warn, r"outside the set of pairwise estimates") confint(t; level=0.99)) :
+                confint(t; level=0.99)
+            @test wide[1] <= lo && wide[2] >= hi
+            # one-sided bounds are the corresponding two-sided endpoints, and open on the
+            # side the tail's alternative allows (#368)
+            @test confint(t; tail=:left)[1] == -Inf
+            @test confint(t; tail=:right)[2] == Inf
+            @test confint(t; tail=:left)[2] <= hi
+            @test confint(t; tail=:right)[1] >= lo
+        end
+    end
 end
 
 @testset "Element types other than Float64" begin
@@ -544,10 +610,62 @@ end
     @test HypothesisTests.tiedrank_adj(fill(1.0, nz))[2] ≈ Float64(big(nz)^3 - nz) rtol = 1e-12
 end
 
+@testset "Attainable levels do not warn" begin
+    small = [1.4, -0.6, 2.3, 0.8, -1.9]              # n = 5: P(W <= 0) = 1/32
+    # alpha/2 = 1/32 exactly: k = 0 attains the request, so there is nothing to warn
+    # about. R returns the same (-1.9, 2.3) at conf.level = 0.9375, silently.
+    @test (@test_logs confint(ExactSignedRankTest(small); level = 1 - 2/32)) == (-1.9, 2.3)
+end
+
+@testset "One-sided warnings name the one-sided request" begin
+    small = [1.4, -0.6, 2.3, 0.8, -1.9]
+    logs, ci = Test.collect_test_logs() do
+        confint(ExactSignedRankTest(small); level = 0.99, tail = :left)
+    end
+    @test ci == (-Inf, 2.3)
+    @test length(logs) == 1
+    # the request was 0.99, not the two-sided 0.98 this used to report, and the bound
+    # misses by its one overshooting tail only: 1 - 1/32, not 1 - 2/32
+    @test logs[1].kwargs[:requested] == 0.99
+    @test logs[1].kwargs[:attainable] == 1 - 1/32
+end
+
+@testset "One-sided intervals on the tied routes against R" begin
+    h = [1, 2, 3, 4, 5, 6, 7, 10, 10, 10, 10, 10, 13, 14, 15] .- 10.1
+    # base R falls back to the normal approximation under ties and lands on the same
+    # order statistics as this route, which inverts the untied lattice:
+    # wilcox.test(h, conf.int = TRUE, alternative = "less") -> (-Inf, -0.09997),
+    # "greater" -> (-4.10001, Inf). exactRankTests::wilcox.exact, which inverts the
+    # tied conditional distribution instead, gives (-4.6, Inf) for "greater".
+    te = ExactSignedRankTest(h)
+    @test confint(te; tail = :left)[1] == -Inf
+    @test isapprox(confint(te; tail = :left)[2], -0.1, atol = 1e-9)
+    @test isapprox(confint(te; tail = :right)[1], -4.1, atol = 1e-9)
+    @test confint(te; tail = :right)[2] == Inf
+
+    # the approximate test's tie-corrected sigma reaches one order statistic further
+    # on the left: R gives (-4.60008, -0.09997) with exact = FALSE
+    ta = ApproximateSignedRankTest(h)
+    @test all(isapprox.(confint(ta), (-4.6, -0.1); atol = 1e-9))
+end
+
+@testset "Levels at the edges of (0.5, 1)" begin
+    x = [-7.8, -6.9, -4.7, 3.7, 6.5, 8.7, 9.1, 10.1, 10.8, 13.6, 14.4, 16.6, 20.2, 22.4, 23.5]
+    t = ExactSignedRankTest(x)
+    @test_throws ArgumentError confint(t; level = 0.5)
+    @test_throws ArgumentError confint(t; level = 1.0)
+    # R: wilcox.test(x, conf.int = TRUE, conf.level = 0.51) -> (7.85, 11.75)
+    @test all(isapprox.(confint(t; level = 0.51), (7.85, 11.75); atol = 1e-9))
+    # R: alternative = "less", conf.level = 0.99 -> (-Inf, 16.3)
+    @test confint(t; level = 0.99, tail = :left)[1] == -Inf
+    @test isapprox(confint(t; level = 0.99, tail = :left)[2], 16.3, atol = 1e-9)
+end
+
 @testset "Reflection under negation" begin
     # The two-sample reflection is swapping the samples; the one-sample one is negating
     # the sample, which negates the location the test is about. Exact for the same
     # reason: negation is exact, and the index rules see only n and the tie adjustment.
+    warned = 0
     for x in ([1.4, -2.6, 3.1, -0.7, 5.2, -4.8, 2.9],        # no ties, no zeros
               [1.0, -1.0, 2.0, 2.0, -2.0, 3.0, 3.0, -3.0],   # tied absolute values
               [0.0, 1.5, -2.5, 0.0, 3.5, -0.5, 4.0, 0.0])    # zeros, which are dropped
@@ -563,8 +681,18 @@ end
             @test pvalue(a) == pvalue(b)
             @test pvalue(a; tail=:left) == pvalue(b; tail=:right)
             for level in (0.90, 0.95, 0.99)
-                lo_a, hi_a = confint(a; level=level)
-                lo_b, hi_b = confint(b; level=level)
+                # These samples are small enough that the higher levels are out of
+                # reach on some of them, and both routes say so now that #361 routes
+                # the signed rank interval through the shared rules. Capture rather
+                # than silence, as in the two-sample reflection: every record has to be
+                # one of those warnings naming the level actually asked for, so an
+                # unexpected message fails here instead of scrolling past.
+                logs, ((lo_a, hi_a), (lo_b, hi_b)) = Test.collect_test_logs() do
+                    confint(a; level=level), confint(b; level=level)
+                end
+                @test all(r -> r.level == Base.CoreLogging.Warn &&
+                               r.kwargs[:requested] == level, logs)
+                warned += length(logs)
                 @test lo_a == -hi_b
                 @test hi_a == -lo_b
             end
@@ -573,5 +701,8 @@ end
             @test confint(a; tail=:left)[2] == -confint(b; tail=:right)[1]
         end
     end
+    # and they do fire: the eight-value sample with zeros, whose five non-zero
+    # differences cannot reach 0.95 or 0.99, on both routes and both signs
+    @test warned == 14
 end
 end
