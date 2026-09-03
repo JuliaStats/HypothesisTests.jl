@@ -21,9 +21,60 @@ Base.axes(v::ZeroBasedVector) = (Base.IdentityUnitRange(0:(length(v.data) - 1)),
 Base.getindex(v::ZeroBasedVector, i::Int) = v.data[i + 1]
 
 @testset "Wilcoxon" begin
+@testset "show output" begin
+    # A sample with zeros, so the two observation counts differ: the statistic, the
+    # p-value and the ranks describe the seven non-zero differences, while `n` counts
+    # all ten. Both are printed, and the statistic is named for the test that computes
+    # it rather than for the two-sample one.
+    d = [0.0, 1.5, -2.5, 0.0, 3.5, -0.5, 4.0, 2.2, -1.1, 0.0]
+
+    @test repr(MIME"text/plain"(), ExactSignedRankTest(d)) == """
+    Exact Wilcoxon signed rank test
+    -------------------------------
+    Population details:
+        parameter of interest:   Location parameter (pseudomedian)
+        value under h_0:         0
+        point estimate:          1.025
+        95% confidence interval: (-0.55, 2.0)
+
+    Test summary:
+        outcome with 95% confidence: fail to reject h_0
+        two-sided p-value:           0.3750
+
+    Details:
+        number of observations:         10
+        non-zero observations:          7
+        Wilcoxon signed rank statistic: 20.0
+        rank sums:                      [20.0, 8.0]
+        adjustment for ties:            0.0
+    """
+
+    # the approximate type prints one line more, the centred statistic beside sigma
+    @test repr(MIME"text/plain"(), ApproximateSignedRankTest(d)) == """
+    Approximate Wilcoxon signed rank test
+    -------------------------------------
+    Population details:
+        parameter of interest:   Location parameter (pseudomedian)
+        value under h_0:         0
+        point estimate:          1.025
+        95% confidence interval: (-0.55, 2.0)
+
+    Test summary:
+        outcome with 95% confidence: fail to reject h_0
+        two-sided p-value:           0.3525
+
+    Details:
+        number of observations:         10
+        non-zero observations:          7
+        Wilcoxon signed rank statistic: 20.0
+        rank sums:                      [20.0, 8.0]
+        adjustment for ties:            0.0
+        normal approximation (μ, σ):    (6.0, 5.91608)
+    """
+end
+
 @testset "Basic exact test" begin
     @test default_tail(ExactSignedRankTest([1:10;], [2:2:20;])) == :both
-	show(IOBuffer(), ExactSignedRankTest([1:10;], [2:2:20;]))
 
     # Two-sided
     for kwargs in ((), (; tail = :both))
@@ -222,7 +273,7 @@ end
     # and through the two-sample form
     @test confint(SignedRankTest([4.0], [2.5])) == (1.5, 1.5)
     # the two-sample tests already agreed: one against one is the one difference
-    @test confint(MannWhitneyUTest([4.0], [2.5])) == (1.5, 1.5)
+    @test (@test_logs (:warn, r"not attainable") confint(MannWhitneyUTest([4.0], [2.5]))) == (1.5, 1.5)
 end
 
 @testset "Zero differences" begin
@@ -255,6 +306,50 @@ end
     @test (lo, hi) == (0.0, 1.5)
     @test !(lo <= hodgeslehmann(SignedRankTest(e)) <= hi)
     @test confint(SignedRankTest(enz)) == (1.0, 3.0)
+end
+
+@testset "Unattainable levels warn" begin
+    # The widest interval this construction admits is (V_(1), V_(m)); where even that
+    # falls short of the requested level, it is returned with a warning naming the
+    # coverage actually attained, rather than as though it met the request. Only the
+    # Mann-Whitney intervals reach these index rules today; the signed rank route
+    # still inverts through its own scan and gains the same warnings with #361.
+    # R returns (-3, -1) with an achieved conf.level attribute of 2/3, which is the
+    # attainable coverage the warning here names: 1 - 2 P(U <= 0) = 1 - 2/6
+    logs, ci22 = Test.collect_test_logs() do
+        confint(ExactMannWhitneyUTest([1.0, 2.0], [3.0, 4.0]))
+    end
+    @test ci22 == (-3.0, -1.0)
+    @test length(logs) == 1
+    @test logs[1].level == Base.CoreLogging.Warn
+    @test occursin("not attainable", logs[1].message)
+    # the payload is the point of the warning: what was asked for, and what this
+    # construction can actually cover, which is R's achieved conf.level attribute
+    @test logs[1].kwargs[:requested] == 0.95
+    @test logs[1].kwargs[:attainable] ≈ 1 - 2/6   # 1 - 2 P(U <= 0), to the last ulp
+
+    # a one-sided caller asked for `level`, not the two-sided `2 level - 1` the index
+    # rule works in, and only its one overshooting tail can miss
+    logs1, ci1 = Test.collect_test_logs() do
+        confint(ExactMannWhitneyUTest([1.0, 2.0], [3.0, 4.0]); tail = :left)
+    end
+    @test ci1 == (-Inf, -1.0)
+    @test length(logs1) == 1
+    @test logs1[1].kwargs[:requested] == 0.95
+    @test logs1[1].kwargs[:attainable] ≈ 1 - 1/6
+
+    # the approximate rule warns for its own, weaker reason, and claims nothing about
+    # coverage: it names the request only
+    logsa, _ = Test.collect_test_logs() do
+        confint(ApproximateMannWhitneyUTest([1.0, 2.0], [3.0, 4.0]))
+    end
+    @test length(logsa) == 1
+    @test occursin("outside the set of pairwise estimates", logsa[1].message)
+    @test logsa[1].kwargs[:requested] == 0.95
+    @test !haskey(logsa[1].kwargs, :attainable)
+
+    # and no warning once the level is attainable
+    @test_logs confint(ExactMannWhitneyUTest([1.0, 2.0, 5.0, 6.0], [3.0, 4.0, 7.0, 9.0]); level = 0.9)
 end
 
 @testset "method keyword" begin
@@ -434,6 +529,19 @@ end
     tied16 = repeat([1.0, -1.0, 2.5, 3.5], 4)        # 16 non-zero, tied
     @test SignedRankTest(tied16) isa ApproximateSignedRankTest
     @test SignedRankTest(tied16[1:15]) isa ExactSignedRankTest
+end
+
+@testset "No Int64 overflow at two million observations" begin
+    # nz(nz+1)(2nz+1) wrapped in Int64 from nz = 2^21, making sigma three orders of
+    # magnitude too small with no error raised; t^3 in the tie adjustment wrapped the
+    # same way for a single group of 2^21 equal values. Both now compute in Float64,
+    # which is exact for the powers of two here and within an ulp elsewhere: the
+    # tie adjustment is bit-identical to `big(t)^3 - t` at t = 2^20, 2^21 and 2^21 + 1,
+    # and its worst relative error over t up to 10^7 is 6.4e-17.
+    nz = 2^21
+    t = ApproximateSignedRankTest(collect(1.0:nz))
+    @test t.sigma ≈ Float64(sqrt(big(nz) * (nz + 1) * (2 * nz + 1) // 24)) rtol = 1e-12
+    @test HypothesisTests.tiedrank_adj(fill(1.0, nz))[2] ≈ Float64(big(nz)^3 - nz) rtol = 1e-12
 end
 
 @testset "Reflection under negation" begin

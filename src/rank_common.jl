@@ -221,7 +221,7 @@ function last_true(H::Integer, pred)
 end
 
 """
-    exact_ci_index(m, alpha, cdf) -> Int
+    exact_ci_index(m, alpha, cdf; tail = :both) -> Int
 
 Invert the exact null distribution conservatively: the largest `k` whose interval
 still attains at least `1 - alpha`. `cdf(k)` is the null probability of a statistic
@@ -229,14 +229,38 @@ at most `k`.
 
 This is the rule R's `wilcox.test` uses, where the lower endpoint is
 `diffs[qsignrank(alpha/2, n)]`; taking `k = qsignrank(alpha/2, n) - 1` reproduces it.
+
+Small samples cannot reach every level: the widest interval this form admits,
+`k = 0`, has coverage `1 - 2 cdf(0)`, which is `1 - 2^(1-n)` for an untied signed rank
+sample, so `0.95` is out of reach below `n = 6` and `0.99` below `n = 8`. That interval
+is still the best available and is returned, with a warning naming the coverage it
+actually has, rather than being returned as though it met the request. R returns the same
+interval, but silently: its `conf.level` attribute still claims the level that was asked
+for, and it warns only once the shortfall exceeds `alpha/2`, as at two observations
+against two.
+
+`tail` only shapes that warning: `alpha` is already the two-sided mass whichever tail
+the interval keeps, but the level a one-sided caller asked for is `1 - alpha/2`, not
+`1 - alpha`, and the coverage its single overshooting tail costs is `cdf(0)` once,
+not twice.
 """
-function exact_ci_index(m::Integer, alpha::Real, cdf)
+function exact_ci_index(m::Integer, alpha::Real, cdf; tail::Symbol = :both)
     half = alpha / 2
-    return last_true(div(m, 2), k -> cdf(k) < half)
+    p0 = cdf(0)
+    if p0 > half
+        # `1 - 2 p0` double-counts the atom at 0 when the null distribution is degenerate,
+        # so it can come out negative; the coverage is nowhere below zero.
+        sides = tail === :both ? 2 : 1
+        @warn "the requested confidence level is not attainable for a sample this small; " *
+              "returning the widest interval this construction admits" requested = 1 - sides * half attainable =
+              max(0.0, 1 - sides * p0)
+        return 0
+    end
+    return last_true(div(m - 1, 2), k -> cdf(k) < half)
 end
 
 """
-    normal_ci_index(m, mu, sigma, alpha) -> Int
+    normal_ci_index(m, mu, sigma, alpha; tail = :both) -> Int
 
 Invert the normal approximation to the null distribution, `mu` and `sigma` being its
 mean and (tie-corrected) standard deviation.
@@ -254,16 +278,35 @@ default. Dropping it makes the interval narrower than the exact one for 7 of 66 
 rank sample sizes at `level = 0.95` and 45 of 66 at `level = 0.90`; with it the interval
 is never narrower than exact at `level = 0.95` or above.
 
-Below that it can still be narrower by one order statistic, on strongly unbalanced
-designs: at `level = 0.90` that happens for 131 of the 1444 Mann-Whitney shapes with
-`nx, ny` in `3:40`, concentrated at `nx = 3`. It is the exact rule that is conservative
-there rather than this one that is loose, and coverage stays at nominal rather than
-falling below it: at `(3, 12)`, `(3, 15)` and `(3, 21)` the normal route covers `0.902`,
-`0.901` and `0.900` against the exact route's `0.932`, `0.927` and `0.919`.
+Below that it can still be narrower by one order statistic, in both procedures: at
+`level = 0.90` that happens for 10 of the 66 signed rank sizes `n = 5:70`, and for 131 of
+the 1444 Mann-Whitney shapes with `nx, ny` in `3:40`, where it concentrates on strongly
+unbalanced designs at `nx = 3`. It is the exact rule that is conservative there rather
+than this one that is loose, and coverage stays at nominal rather than falling below it:
+at `(3, 12)`, `(3, 15)` and `(3, 21)` the normal route covers `0.902`, `0.901` and
+`0.900` against the exact route's `0.932`, `0.927` and `0.919`.
+
+A negative `k` means the approximation puts the endpoint outside the pairwise estimates, so
+the widest interval available is returned instead, with a warning. The warning does not
+claim the level is unattainable, because that does not follow: at `n = 8` and `level = 0.99` this
+rule asks for `k = -1` while the exact route reaches `0.9922`, which meets the request.
+What it does mean is that the sample is too small for this route, and `method = :exact` is
+where to go.
+
+As in [`exact_ci_index`](@ref), `tail` only shapes the warning: a one-sided caller asked
+for level `1 - alpha/2`, and that is what the warning should name as the request.
 """
-function normal_ci_index(m::Integer, mu::Real, sigma::Real, alpha::Real)
+function normal_ci_index(m::Integer, mu::Real, sigma::Real, alpha::Real; tail::Symbol = :both)
     q = quantile(Normal(mu, sigma), alpha / 2)
-    return clamp(ceil(Int, q - one(q) / 2) - 1, 0, div(m, 2))
+    k = ceil(Int, q - one(q) / 2) - 1
+    if k < 0
+        sides = tail === :both ? 2 : 1
+        @warn "the normal approximation puts the interval endpoint outside the set of " *
+              "pairwise estimates for a sample this small; returning the widest interval " *
+              "it admits, which may not reach the requested level. The exact test is " *
+              "the way on" requested = 1 - sides * (alpha / 2)
+    end
+    return clamp(k, 0, div(m - 1, 2))
 end
 
 # `level`/`tail` to the two-sided alpha the index rules work in. A one-sided bound

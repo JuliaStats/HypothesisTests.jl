@@ -94,8 +94,8 @@ end
 
 struct ExactSignedRankTest <: HypothesisTest
     vals::Vector{Float64}   # original values
-    W::Float64              # test statistic: Wilcoxon rank-sum statistic
-    ranks::Vector{Float64}           # ranks without ties (zero values)
+    W::Float64              # test statistic: the signed rank statistic W+
+    ranks::Vector{Float64}           # midranks of |d| over the non-zero observations
     signs::BitArray{1}      # signs of input of ranks
     tie_adjustment::Float64 # adjustment for ties
     n::Int                  # number of observations
@@ -130,12 +130,13 @@ population_param_of_interest(x::ExactSignedRankTest) = ("Location parameter (pse
 default_tail(test::ExactSignedRankTest) = :both
 
 function show_params(io::IO, x::ExactSignedRankTest, ident)
-    println(io, ident, "number of observations:      ", x.n)
-    println(io, ident, "Wilcoxon rank-sum statistic: ", x.W)
-    print(io, ident, "rank sums:                   ")
+    println(io, ident, "number of observations:         ", x.n)
+    println(io, ident, "non-zero observations:          ", length(x.ranks))
+    println(io, ident, "Wilcoxon signed rank statistic: ", x.W)
+    print(io, ident, "rank sums:                      ")
     show(io, [sum(x.ranks[x.signs]), sum(x.ranks[map(!, x.signs)])])
     println(io)
-    println(io, ident, "adjustment for ties:         ", x.tie_adjustment)
+    println(io, ident, "adjustment for ties:            ", x.tie_adjustment)
 end
 
 # Enumerate all possible Wilcoxon rank-sum results for a given vector, determining left-
@@ -221,8 +222,8 @@ StatsAPI.confint(x::ExactSignedRankTest; level::Real=0.95, tail=:both) =
 
 struct ApproximateSignedRankTest <: HypothesisTest
     vals::Vector{Float64}   # original values
-    W::Float64              # test statistic: Wilcoxon rank-sum statistic
-    ranks::Vector{Float64} # ranks without ties (zero values)
+    W::Float64              # test statistic: the signed rank statistic W+
+    ranks::Vector{Float64} # midranks of |d| over the non-zero observations
     signs::BitArray{1}      # signs of input of ranks
     tie_adjustment::Float64 # adjustment for ties
     n::Int                  # number of observations
@@ -260,7 +261,8 @@ Implements: [`pvalue`](@ref), [`confint`](@ref), [`hodgeslehmann`](@ref)
 function ApproximateSignedRankTest(x::Vector, W::Float64, ranks::Vector{T}, signs::BitArray{1}, tie_adjustment::Float64, n::Int, median::Real) where T<:Real
     nz = length(ranks) # num non-zeros
     mu = W - nz * (nz + 1)/4
-    std = sqrt(nz * (nz + 1) * (2 * nz + 1) / 24 - tie_adjustment / 48)
+    # avoid integer overflow
+    std = sqrt(float(nz) * (nz + 1) * (2 * nz + 1) / 24 - tie_adjustment / 48)
     ApproximateSignedRankTest(x, W, ranks, signs, tie_adjustment, n, median, mu, std)
 end
 function ApproximateSignedRankTest(x::AbstractVector{T}) where {T<:Real}
@@ -275,13 +277,14 @@ population_param_of_interest(x::ApproximateSignedRankTest) = ("Location paramete
 default_tail(test::ApproximateSignedRankTest) = :both
 
 function show_params(io::IO, x::ApproximateSignedRankTest, ident)
-    println(io, ident, "number of observations:      ", x.n)
-    println(io, ident, "Wilcoxon rank-sum statistic: ", x.W)
-    print(io, ident, "rank sums:                   ")
+    println(io, ident, "number of observations:         ", x.n)
+    println(io, ident, "non-zero observations:          ", length(x.ranks))
+    println(io, ident, "Wilcoxon signed rank statistic: ", x.W)
+    print(io, ident, "rank sums:                      ")
     show(io, [sum(x.ranks[x.signs]), sum(x.ranks[map(!, x.signs)])])
     println(io)
-    println(io, ident, "adjustment for ties:         ", x.tie_adjustment)
-    println(io, ident, "normal approximation (μ, σ): ", (x.mu, x.sigma))
+    println(io, ident, "adjustment for ties:            ", x.tie_adjustment)
+    println(io, ident, "normal approximation (μ, σ):    ", (x.mu, x.sigma))
 end
 
 function StatsAPI.pvalue(x::ApproximateSignedRankTest; tail=:both)

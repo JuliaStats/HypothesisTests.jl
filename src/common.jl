@@ -45,7 +45,8 @@ function tiedrank_adj!(ord::AbstractVector, v::AbstractArray)
         if j > i
             t = j - i + 1
             m = sum(i:j) / t
-            tieadj += t^3 - t
+            # avoid integer overflow
+            tieadj += (float(t)^2 - 1) * t
             for k = i:j
                 ord[place[k]] = m
             end
