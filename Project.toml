@@ -4,7 +4,7 @@ uuid = "09f84164-cd44-5f33-b23f-e6b0d136a0d5"
 # be, but the bump lands with the stacked PR, so nothing between the two can be
 # registered by accident: 0.11.8 is already in General against a different hash,
 # so the registrator refuses it.
-version = "0.11.8"
+version = "0.12.0"
 
 [deps]
 Combinatorics = "861a8166-3701-5b0c-9a16-15d98fcdc6aa"
