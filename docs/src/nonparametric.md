@@ -83,10 +83,18 @@ and `hodgeslehmann` returns its median.
 hodgeslehmann
 ```
 
-The Hodges-Lehmann estimate is the point estimate the interval brackets. It is generally
-not the sample median: exact symmetry makes the two agree, but they can also agree by
-coincidence, as on `[0, 2, 2, 7]`, where both are `2`. Agreement is therefore no evidence
-of symmetry.
+The Hodges-Lehmann estimate is the point estimate the interval brackets, and is what all
+four types report as their parameter of interest. It is generally not the sample median:
+exact symmetry makes the two agree, but they can also agree by coincidence, as on
+`[1, 3, 3, 8]`, where both are `3`. Agreement is therefore no evidence of symmetry.
+
+Which order statistics `confint` returns depends on the test: the `Exact*` types invert
+the exact null distribution, conservatively, and the `Approximate*` types invert the
+normal approximation with a continuity correction and a tie-corrected variance. On untied
+data the `Exact*` interval agrees with R's `wilcox.test` at `exact = TRUE` digit for digit,
+and under ties R declines an exact interval even when asked for one; the
+`Approximate*` interval agrees with `exact = FALSE` to within one order statistic, since
+R solves for its endpoints numerically rather than reading them off the pairwise estimates.
 
 A one-sided interval keeps the endpoint that inverts the test of the same name:
 `tail = :left`, whose alternative is location below the null, gives an upper bound, and
