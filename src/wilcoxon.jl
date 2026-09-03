@@ -260,7 +260,8 @@ Implements: [`pvalue`](@ref), [`confint`](@ref), [`hodgeslehmann`](@ref)
 function ApproximateSignedRankTest(x::Vector, W::Float64, ranks::Vector{T}, signs::BitArray{1}, tie_adjustment::Float64, n::Int, median::Real) where T<:Real
     nz = length(ranks) # num non-zeros
     mu = W - nz * (nz + 1)/4
-    std = sqrt(nz * (nz + 1) * (2 * nz + 1) / 24 - tie_adjustment / 48)
+    # avoid integer overflow
+    std = sqrt(float(nz) * (nz + 1) * (2 * nz + 1) / 24 - tie_adjustment / 48)
     ApproximateSignedRankTest(x, W, ranks, signs, tie_adjustment, n, median, mu, std)
 end
 function ApproximateSignedRankTest(x::AbstractVector{T}) where {T<:Real}

@@ -399,6 +399,19 @@ end
     @test pvalue(SignedRankTest(view(v, 2:5))) == pvalue(SignedRankTest(v[2:5]))
 end
 
+@testset "No Int64 overflow at two million observations" begin
+    # nz(nz+1)(2nz+1) wrapped in Int64 from nz = 2^21, making sigma three orders of
+    # magnitude too small with no error raised; t^3 in the tie adjustment wrapped the
+    # same way for a single group of 2^21 equal values. Both now compute in Float64,
+    # which is exact for the powers of two here and within an ulp elsewhere: the
+    # tie adjustment is bit-identical to `big(t)^3 - t` at t = 2^20, 2^21 and 2^21 + 1,
+    # and its worst relative error over t up to 10^7 is 6.4e-17.
+    nz = 2^21
+    t = ApproximateSignedRankTest(collect(1.0:nz))
+    @test t.sigma ≈ Float64(sqrt(big(nz) * (nz + 1) * (2 * nz + 1) // 24)) rtol = 1e-12
+    @test HypothesisTests.tiedrank_adj(fill(1.0, nz))[2] ≈ Float64(big(nz)^3 - nz) rtol = 1e-12
+end
+
 @testset "Reflection under negation" begin
     # The two-sample reflection is swapping the samples; the one-sample one is negating
     # the sample, which negates the location the test is about. Exact for the same
