@@ -525,20 +525,15 @@ end
     @test HypothesisTests.rank_binomial(10^6, 10^6) === nothing
     @test_throws HypothesisTests.ComputationTooLarge HypothesisTests.check_exact_enumeration(10^6, 10^6)
 
-    # the exact interval is bounded separately and far lower, because choosing an endpoint
-    # costs a lattice recursion per candidate rather than a slot in an array
-    @test HypothesisTests.MAX_EXACT_CI_ESTIMATES == 25_000
-    @test HypothesisTests.MAX_EXACT_CI_ESTIMATES < HypothesisTests.MAX_PAIRWISE_ESTIMATES
-    @test HypothesisTests.check_exact_ci_cost(25_000, "") === nothing
-    @test_throws HypothesisTests.ComputationTooLarge HypothesisTests.check_exact_ci_cost(25_001, "")
-
-    # the scan is what #97 describes, and it is reached by both signed rank types, since
-    # neither has an approximate interval yet. n = 300 forms m = 45,150 Walsh averages,
-    # small enough to materialise, so this refusal is check_exact_ci_cost itself,
-    # reached through `confint`
-    @test_throws HypothesisTests.ComputationTooLarge confint(ExactSignedRankTest(collect(1.0:300)))
-    # while n = 2000, the size #97 reports hanging, is stopped a check earlier, by the
-    # memory bound on materialising the set at all
+    # The signed rank exact interval carries no time bound of its own: the bisection is
+    # cheap enough that the memory bound above is the one it meets. n = 300 forms
+    # m = 45,150 Walsh averages and inverts in about 0.04 s, where the m/2-recursion
+    # scan this replaced took 39 s and was refused past n = 223.
+    # MAX_EXACT_CI_ESTIMATES bounds the two-sample route alone now; its boundary is
+    # asserted in test/mann_whitney.jl.
+    @test confint(ExactSignedRankTest(collect(1.0:300))) isa Tuple
+    # n = 2000, the size #97 reports hanging, is stopped by the memory bound on
+    # materialising the set at all
     big = SignedRankTest(collect(1.0:2000))
     @test_throws HypothesisTests.ComputationTooLarge confint(big)
     # the test is still printable, without its interval line

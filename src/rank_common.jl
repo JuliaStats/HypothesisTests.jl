@@ -115,9 +115,10 @@ See #7 and #97.
 
 The bound is on memory alone, which is what the approximate routes spend: forming this many
 estimates costs about 8 MB, and sorting them about that again. It admits a signed rank
-sample of roughly 1400 observations and a two-sample design of 1000 against 1000. The exact
-routes spend time as well, and are bounded far below this by
-[`MAX_EXACT_CI_ESTIMATES`](@ref).
+sample of roughly 1400 observations and a two-sample design of 1000 against 1000. The
+two-sample exact interval spends time as well and carries its own bound below this,
+[`MAX_EXACT_CI_ESTIMATES`](@ref); the one-sample exact interval bisects a cheap enough
+recursion that this bound is the only one it meets, about 6 s at the boundary.
 """
 const MAX_PAIRWISE_ESTIMATES = 1_000_000
 
@@ -130,28 +131,32 @@ function check_estimate_count(m::Integer, what::AbstractString)
 end
 
 """
-Largest set of pairwise estimates whose *exact* interval will be inverted.
+Largest set of pairwise estimates whose *exact Mann-Whitney* interval will be inverted.
 
-Selecting an endpoint from the exact null distribution costs a lattice recursion for every
-candidate it considers, so this route spends time where the approximate one spends only the
-memory [`MAX_PAIRWISE_ESTIMATES`](@ref) bounds, and it needs a bound of its own, far below.
-Past this one the exact interval is refused; the approximate interval, where the test has
-one, is not.
+Selecting an endpoint from the exact null distribution runs a lattice recursion per
+bisection step, and the two-sample recursion (`wilcoxcdf`) is the expensive one: at this
+bound, a 300-against-300 design, the interval takes about 11 s, from 0.6 s at 158 against
+158, and it grows steeply past it, 35 s at 400 against 400 and 93 s at 500 against 500.
+Past this bound the exact interval is refused; the approximate interval, which inverts a
+closed form, is not.
 
-Sized by the slower of the two procedures. The signed rank interval scans every candidate,
-``m/2`` recursions, and at the bound, a sample of 223, takes about 9 s; the two-sample
-interval bisects instead, about ``\\log_2(m/2)`` of them, and takes under a second at the
-same point. The scan grows steeply past it: a signed rank sample of 250 takes 16 s, one of
-300 takes 39 s, and one of 400 does not finish.
+The one-sample recursion (`signrankcdf`) is cheap enough that the signed rank interval
+carries no time bound at all: it reaches the memory bound
+[`MAX_PAIRWISE_ESTIMATES`](@ref), a sample of 1413, in about 6 s in total.
+
+The number was first 25\\_000, sized against the ``m/2``-recursion endpoint scan that
+inverted the signed rank interval before #361. The bisection that replaced that scan moved
+the cost from the one-sample route to the two-sample one, and the same wall-clock ceiling,
+re-measured, sits at 90\\_000.
 """
-const MAX_EXACT_CI_ESTIMATES = 25_000
+const MAX_EXACT_CI_ESTIMATES = 90_000
 
 function check_exact_ci_cost(m::Integer, escape::AbstractString)
     m <= MAX_EXACT_CI_ESTIMATES && return nothing
     throw(ComputationTooLarge(
         "refusing to invert the exact null distribution over $m pairwise estimates: more " *
-        "than MAX_EXACT_CI_ESTIMATES = $MAX_EXACT_CI_ESTIMATES. Choosing an endpoint costs " *
-        "a lattice recursion per candidate, so this route is bounded well below " *
+        "than MAX_EXACT_CI_ESTIMATES = $MAX_EXACT_CI_ESTIMATES. Choosing an endpoint runs " *
+        "a two-sample lattice recursion per bisection step, so this route is bounded below " *
         "MAX_PAIRWISE_ESTIMATES = $MAX_PAIRWISE_ESTIMATES, which bounds memory alone. " *
         escape))
 end
