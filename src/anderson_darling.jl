@@ -304,7 +304,7 @@ function a2_ksample(samples, modified, method)
     b = (2*g - 4)*k^2 + 8*h*k + (2*g - 14*h - 4)*H - 8*h + 4*g - 6
     c = (6*h + 2*g - 2)*k^2 + (4*h - 4*g + 6)*k + (2*h - 6)*H + 4*h
     d = (2*h + 6)*k^2 - 4*h*k
-    σ² = (a*N^3 + b*N^2 + c*N + d) / ((N - 1.) * (N - 2.) * (N - 3.))
+    σ² = (((a*N + b)*N + c)*N + d) / ((N - 1.) * (N - 2.) * (N - 3.))
 
     KSampleADTest(k, N, sqrt(σ²), (modified ? A²km : A²k), modified, method, pooled, [n...])
 end
