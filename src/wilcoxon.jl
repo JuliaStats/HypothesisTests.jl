@@ -273,7 +273,9 @@ function ApproximateSignedRankTest(x::Vector, W::Float64, ranks::Vector{T}, sign
     nz = length(ranks) # num non-zeros
     mu = W - nz * (nz + 1)/4
     # avoid integer overflow
-    std = sqrt(float(nz) * (nz + 1) * (2 * nz + 1) / 24 - tie_adjustment / 48)
+    # Promote every factor to Float64 before multiplying so Int32 (i686) cannot overflow
+    # nz*(nz+1)*(2nz+1) for nz ≳ 1290.
+    std = sqrt(float(nz) * float(nz + 1) * float(2 * nz + 1) / 24 - tie_adjustment / 48)
     ApproximateSignedRankTest(x, W, ranks, signs, tie_adjustment, n, median, mu, std)
 end
 function ApproximateSignedRankTest(x::AbstractVector{T}) where {T<:Real}
