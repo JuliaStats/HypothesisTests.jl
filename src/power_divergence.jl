@@ -10,9 +10,9 @@ struct PowerDivergenceTest <: HypothesisTest
     lambda::Float64
     theta0::Vector{Float64}
     stat::Float64
-    df::Int64
-    observed::Matrix{Int64}
-    n::Int64
+    df::Int
+    observed::Matrix{Int}
+    n::Int
     thetahat::Vector{Float64}
 
     expected::Matrix{Float64}
@@ -67,7 +67,7 @@ one of the following methods. Possible values for `method` are:
 """
 function StatsAPI.confint(x::PowerDivergenceTest; level::Float64=0.95,
                           tail::Symbol=:both, method::Symbol=:auto, correct::Bool=true,
-                          bootstrap_iters::Int64=10000, GC::Bool=true)
+                          bootstrap_iters::Int=10000, GC::Bool=true)
     check_level(level)
 
     m  = length(x.thetahat)
@@ -99,7 +99,7 @@ function StatsAPI.confint(x::PowerDivergenceTest; level::Float64=0.95,
 end
 
 # Bootstrap
-function ci_bootstrap(x::PowerDivergenceTest,alpha::Float64, iters::Int64)
+function ci_bootstrap(x::PowerDivergenceTest,alpha::Float64, iters::Int)
     m = mapslices(x -> quantile(x, [alpha / 2, 1 - alpha / 2]), rand(Multinomial(x.n, convert(Vector{Float64}, x.thetahat)),iters) / x.n, dims=2)
     Tuple{Float64,Float64}[(boundproportion(m[i,1]), boundproportion(m[i,2])) for i in 1:length(x.thetahat)]
 end
