@@ -74,7 +74,7 @@ population_param_of_interest(x::DieboldMarianoTest) = ("Mean", x.μ0, x.xbar)
 default_tail(test::DieboldMarianoTest) = :both
 
 function show_params(io::IO, x::DieboldMarianoTest, ident)
-    println(io, ident, "number of observations: $(x.n)")
-    println(io, ident, "DM statistic:           $(x.t)")
-    println(io, ident, "degrees of freedom:     $(x.df)")
+    println(io, ident, "number of observations: ", x.n)
+    println(io, ident, "DM statistic:           ", x.t)
+    println(io, ident, "degrees of freedom:     ", x.df)
 end

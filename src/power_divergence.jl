@@ -439,9 +439,9 @@ MultinomialLRTest(x::AbstractVector{T}, theta0::Vector{U} = ones(length(x))/leng
     PowerDivergenceTest(reshape(x, length(x), 1), lambda=0.0, theta0=theta0)
 
 function show_params(io::IO, x::PowerDivergenceTest, ident="")
-    println(io, ident, "Sample size:        $(x.n)")
-    println(io, ident, "statistic:          $(x.stat)")
-    println(io, ident, "degrees of freedom: $(x.df)")
+    println(io, ident, "Sample size:        ", x.n)
+    println(io, ident, "statistic:          ", x.stat)
+    println(io, ident, "degrees of freedom: ", x.df)
     print(io, ident, "residuals:          ")
     show(io, vec(x.residuals))
     println(io)

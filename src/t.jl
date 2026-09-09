@@ -64,10 +64,10 @@ testname(::OneSampleTTest) = "One sample t-test"
 population_param_of_interest(x::OneSampleTTest) = ("Mean", x.μ0, x.xbar) # parameter of interest: name, value under h0, point estimate
 
 function show_params(io::IO, x::OneSampleTTest, ident="")
-    println(io, ident, "number of observations:   $(x.n)")
-    println(io, ident, "t-statistic:              $(x.t)")
-    println(io, ident, "degrees of freedom:       $(x.df)")
-    println(io, ident, "empirical standard error: $(x.stderr)")
+    println(io, ident, "number of observations:   ", x.n)
+    println(io, ident, "t-statistic:              ", x.t)
+    println(io, ident, "degrees of freedom:       ", x.df)
+    println(io, ident, "empirical standard error: ", x.stderr)
 end
 
 """
@@ -131,9 +131,9 @@ end
 
 function show_params(io::IO, x::TwoSampleTTest, ident="")
     println(io, ident, "number of observations:   [$(x.n_x),$(x.n_y)]")
-    println(io, ident, "t-statistic:              $(x.t)")
-    println(io, ident, "degrees of freedom:       $(x.df)")
-    println(io, ident, "empirical standard error: $(x.stderr)")
+    println(io, ident, "t-statistic:              ", x.t)
+    println(io, ident, "degrees of freedom:       ", x.df)
+    println(io, ident, "empirical standard error: ", x.stderr)
 end
 
 testname(::EqualVarianceTTest) = "Two sample t-test (equal variance)"

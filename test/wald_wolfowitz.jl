@@ -29,7 +29,7 @@ using Distributions
 
     Details:
         number of runs:  2
-        z-statistic:     -31.575338477995764
+        z-statistic:     -31.5753
     """
     output = sprint(show, tst)
     @test output == expected_output
@@ -61,7 +61,7 @@ end
 
     Details:
         number of runs:  2
-        z-statistic:     -31.575338477995764
+        z-statistic:     -31.5753
     """
     output = sprint(show, tst)
     @test output == expected_output

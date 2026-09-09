@@ -210,9 +210,9 @@ Test summary:
 
 Details:
     number of observations:   10
-    t-statistic:              3.2836227276929635
+    t-statistic:              3.28362
     degrees of freedom:       9
-    empirical standard error: 0.1674979270186815
+    empirical standard error: 0.167498
 
 
 julia> pvalue(t)
@@ -262,9 +262,9 @@ Test summary:
 
 Details:
     number of observations:   [10,8]
-    t-statistic:              2.9038471071017558
+    t-statistic:              2.90385
     degrees of freedom:       16
-    empirical standard error: 0.210927083076119
+    empirical standard error: 0.210927
 
 
 julia> confint(t)
@@ -299,9 +299,9 @@ Test summary:
 
 Details:
     number of observations:   [10,8]
-    t-statistic:              3.0833130203886516
-    degrees of freedom:       14.684901529359335
-    empirical standard error: 0.19864995735100363
+    t-statistic:              3.08331
+    degrees of freedom:       14.6849
+    empirical standard error: 0.19865
 
 
 julia> confint(t)
@@ -351,9 +351,9 @@ Test summary:
 
 Details:
     number of observations:   10
-    t-statistic:              11.75894243853277
+    t-statistic:              11.7589
     degrees of freedom:       9
-    empirical standard error: 0.022110831935702693
+    empirical standard error: 0.0221108
 
 
 julia> confint(t)
