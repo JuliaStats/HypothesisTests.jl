@@ -45,10 +45,10 @@ testname(::OneSampleADTest) = "One sample Anderson-Darling test"
 default_tail(test::OneSampleADTest) = :right
 
 function show_params(io::IO, x::OneSampleADTest, ident = "")
-    println(io, ident, "number of observations:   $(x.n)")
-    println(io, ident, "sample mean:              $(x.μ)")
-    println(io, ident, "sample SD:                $(x.σ)")
-    println(io, ident, "A² statistic:             $(x.A²)")
+    println(io, ident, "number of observations:   ", x.n)
+    println(io, ident, "sample mean:              ", x.μ)
+    println(io, ident, "sample SD:                ", x.σ)
+    println(io, ident, "A² statistic:             ", x.A²)
 end
 
 ### G. and J. Marsaglia, "Evaluating the Anderson-Darling Distribution", Journal of Statistical Software, 2004
@@ -120,14 +120,14 @@ testname(::KSampleADTest) = "k-sample Anderson-Darling test"
 default_tail(test::KSampleADTest) = :right
 
 function show_params(io::IO, x::KSampleADTest, ident = "")
-    println(io, ident, "number of samples:        $(x.k)")
-    println(io, ident, "number of observations:   $(x.n)")
-    println(io, ident, "SD of A²k:                $(x.σ)")
-    println(io, ident, "A²k statistic:            $(x.A²k)")
-    println(io, ident, "standardized statistic:   $((x.A²k - x.k + 1) / x.σ)")
-    println(io, ident, "modified test:            $(x.modified)")
-    println(io, ident, "p-value calculation:      $(x.nsim == 0 ? "asymptotic" : "simulation" )")
-    x.nsim != 0 && println(io, ident, "number of simulations:    $(x.nsim)")
+    println(io, ident, "number of samples:        ", x.k)
+    println(io, ident, "number of observations:   ", x.n)
+    println(io, ident, "SD of A²k:                ", x.σ)
+    println(io, ident, "A²k statistic:            ", x.A²k)
+    println(io, ident, "standardized statistic:   ", (x.A²k - x.k + 1) / x.σ)
+    println(io, ident, "modified test:            ", x.modified)
+    println(io, ident, "p-value calculation:      ", x.nsim == 0 ? "asymptotic" : "simulation" )
+    x.nsim != 0 && println(io, ident, "number of simulations:    ", x.nsim)
 end
 
 """Monte-Carlo simulation of the p-value for AD test"""

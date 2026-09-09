@@ -70,7 +70,7 @@ population_param_of_interest(x::ClarkWestTest) = ("Mean", x.μ0, x.xbar)
 default_tail(::ClarkWestTest) = :both
 
 function show_params(io::IO, x::ClarkWestTest, ident)
-    println(io, ident, "number of observations:    $(x.n)")
-    println(io, ident, "CW statistic:              $(x.z)")
-    println(io, ident, "population standard error: $(x.stderr)")
+    println(io, ident, "number of observations:    ", x.n)
+    println(io, ident, "CW statistic:              ", x.z)
+    println(io, ident, "population standard error: ", x.stderr)
 end

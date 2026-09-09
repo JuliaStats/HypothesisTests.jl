@@ -21,7 +21,7 @@ m = PowerDivergenceTest(d)
 
     Details:
         Sample size:        2757
-        statistic:          30.070149095754687
+        statistic:          30.0701
         degrees of freedom: 2
         residuals:          [2.19886, -2.50467, 0.41137, -0.468583, -2.84324, 3.23867]
         std. residuals:     [4.50205, -4.50205, 0.699452, -0.699452, -5.31595, 5.31595]
@@ -52,9 +52,7 @@ m = PowerDivergenceTest(d)
         std. residuals:     [0.0, -1.36931, 1.36931]
     """
 
-# based on t.jl tests. The two full-precision floats are interpolated rather than
-# spelled out: `std(-5:10)` moves by one ulp between Statistics 1.11.1 and 1.11.4,
-# and layout is what this test is for
+# based on t.jl tests
 tst = OneSampleTTest(-5:10)
 
 @test sprint(show, tst) ==
@@ -73,9 +71,9 @@ tst = OneSampleTTest(-5:10)
 
     Details:
         number of observations:   16
-        t-statistic:              $(tst.t)
+        t-statistic:              2.10042
         degrees of freedom:       15
-        empirical standard error: $(tst.stderr)
+        empirical standard error: 1.19024
     """
 
 # issue #248
@@ -135,8 +133,8 @@ tst = UnequalVarianceTTest(x, y)
 
     Details:
         number of observations:   [17,17]
-        t-statistic:              3.3767280623082523
-        degrees of freedom:       19.363987783845342
-        empirical standard error: 4.610162387563106e-8
+        t-statistic:              3.37673
+        degrees of freedom:       19.364
+        empirical standard error: 4.61016e-8
     """
 end

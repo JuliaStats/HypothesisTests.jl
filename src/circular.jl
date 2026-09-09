@@ -56,8 +56,8 @@ population_param_of_interest(x::RayleighTest) = ("Mean resultant length", 0, x.R
 default_tail(test::RayleighTest) = :both
 
 function show_params(io::IO, x::RayleighTest, ident="")
-    println(io, ident, "number of observations: $(x.n)")
-    println(io, ident, "test statistic:         $(x.Rbar^2 * x.n)")
+    println(io, ident, "number of observations: ", x.n)
+    println(io, ident, "test statistic:         ", x.Rbar^2 * x.n)
 end
 
 function StatsAPI.pvalue(x::RayleighTest)
@@ -215,7 +215,7 @@ population_param_of_interest(x::JammalamadakaCircularCorrelation) = ("Circular-c
 default_tail(test::JammalamadakaCircularCorrelation) = :both
 
 function show_params(io::IO, x::JammalamadakaCircularCorrelation, ident="")
-    println(io, ident, "test statistic: $(x.Z)")
+    println(io, ident, "test statistic: ", x.Z)
 end
 
 StatsAPI.pvalue(x::JammalamadakaCircularCorrelation; tail=:both) = pvalue(Normal(), x.Z; tail=tail)
