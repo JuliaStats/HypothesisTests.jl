@@ -141,7 +141,7 @@ function ci_sison_glaz(x::PowerDivergenceTest, alpha::Float64; skew_correct::Boo
     for _c in 1:x.n
         #run truncpoi
         for i in 1:k
-            lambda = x.observed[i]
+            lambda = float(x.observed[i])
             #run moments
             a = lambda + _c
             b = max(lambda - _c, 0)
@@ -297,7 +297,7 @@ function PowerDivergenceTest(x::AbstractMatrix{T}; lambda::U=1.0, theta0::Vector
         colsums = sum(x, dims=1)
         df = (nrows - 1) * (ncols - 1)
         thetahat = x ./ n
-        xhat = rowsums * colsums / n
+        xhat = rowsums .* (colsums ./ n)
         theta0 = xhat / n
         V = Float64[(colsums[j]/n) * (rowsums[i]/n) * (1 - rowsums[i]/n) * (n - colsums[j]) for i in 1:nrows, j in 1:ncols]
     elseif nrows == 1 || ncols == 1
