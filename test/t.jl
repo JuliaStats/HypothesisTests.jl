@@ -11,7 +11,7 @@ using HypothesisTests: default_tail
 	@test abs(pvalue(tst; tail=:left) - 0.9735) <= 1e-4
 	@test abs(pvalue(tst; tail=:right) - 0.0265) <= 1e-4
 	@test default_tail(tst) == :both
-	show(IOBuffer(), tst)
+	show(IOBuffer(), MIME("text/plain"), tst)
 
 	tst = OneSampleTTest(mean(-5:10), std(-5:10), 16)
 	@test abs(pvalue(tst) - 0.0530) <= 1e-4
@@ -24,7 +24,7 @@ using HypothesisTests: default_tail
 	c = confint(tst; tail=:right)
 	@test abs(c[1] - 0.4135) .<= 1e-4
 	@test c[2] == Inf
-	show(IOBuffer(), tst)
+	show(IOBuffer(), MIME("text/plain"), tst)
 
 	tst = OneSampleTTest(-10:5)
 	@test abs(pvalue(tst) - 0.0530) <= 1e-4
@@ -33,7 +33,7 @@ using HypothesisTests: default_tail
 	@test all(abs.([confint(tst)...] - [-5.0369, 0.0369]) .<= 1e-4)
 	@test abs.(confint(tst; tail=:left)[2] - (-0.4135)) .<= 1e-4
 	@test abs.(confint(tst; tail=:right)[1] - (-4.5865)) .<= 1e-4
-	show(IOBuffer(), tst)
+	show(IOBuffer(), MIME("text/plain"), tst)
 end
 
 @testset "Paired" begin
@@ -52,7 +52,7 @@ end
 	@test abs(pvalue(tst) - 0.078) <= 1e-3
 	@test all(abs.([confint(tst)...] - [-0.0131, 0.2031]) .<= 1e-4)
 	@test default_tail(tst) == :both
-	show(IOBuffer(), tst)
+	show(IOBuffer(), MIME("text/plain"), tst)
 
 	n1 = length(a1)
 	n2 = length(a2)
@@ -72,7 +72,7 @@ end
 	@test abs(pvalue(tst) - 0.091) <= 1e-3
 	@test all(abs.([confint(tst)...] - [-0.0196, 0.2096]) .<= 1e-4)
 	@test default_tail(tst) == :both
-	show(IOBuffer(), tst)
+	show(IOBuffer(), MIME("text/plain"), tst)
 
 end
 end

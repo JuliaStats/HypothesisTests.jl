@@ -31,7 +31,7 @@ using Distributions
         number of runs:  2
         z-statistic:     -31.5753
     """
-    output = sprint(show, tst)
+    output = sprint(show, MIME("text/plain"), tst)
     @test output == expected_output
 end
 
@@ -63,7 +63,7 @@ end
         number of runs:  2
         z-statistic:     -31.5753
     """
-    output = sprint(show, tst)
+    output = sprint(show, MIME("text/plain"), tst)
     @test output == expected_output
 end
 

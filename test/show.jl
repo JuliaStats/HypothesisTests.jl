@@ -5,7 +5,10 @@ using HypothesisTests, Test
 d = [[762,484] [327,239] [468,477]]
 m = PowerDivergenceTest(d)
 
-@test sprint(show, m, context=:compact => true) ==
+# the two-argument form is the one-line summary Julia uses inside containers
+@test repr(m) == "PowerDivergenceTest(p-value = <1e-06)"
+
+@test sprint(show, MIME("text/plain"), m, context=:compact => true) ==
     """
     Pearson's Chi-square Test
     -------------------------
@@ -30,7 +33,7 @@ m = PowerDivergenceTest(d)
 d = [ 20, 15, 25 ]
 m = PowerDivergenceTest(d)
 
-@test sprint(show, m, context=:compact => true) ==
+@test sprint(show, MIME("text/plain"), m, context=:compact => true) ==
     """
     Pearson's Chi-square Test
     -------------------------
@@ -55,7 +58,10 @@ m = PowerDivergenceTest(d)
 # based on t.jl tests
 tst = OneSampleTTest(-5:10)
 
-@test sprint(show, tst) ==
+@test repr(tst) == "OneSampleTTest(p-value = 0.0530)"
+@test repr([tst, tst]) == "OneSampleTTest[OneSampleTTest(p-value = 0.0530), OneSampleTTest(p-value = 0.0530)]"
+
+@test sprint(show, MIME("text/plain"), tst) ==
     """
     One sample t-test
     -----------------
@@ -117,7 +123,7 @@ y = [
 ]
 tst = UnequalVarianceTTest(x, y)
 
-@test sprint(show, tst) ==
+@test sprint(show, MIME("text/plain"), tst) ==
     """
     Two sample t-test (unequal variance)
     ------------------------------------

@@ -116,7 +116,7 @@ end
 @testset "Exact with ties" begin
     # every difference is zero here, so the interval shown cannot have 95% coverage and
     # `show` says so
-    @test_logs (:warn, r"not attainable") show(IOBuffer(), ExactSignedRankTest([1:10;], [1:10;]))
+    @test_logs (:warn, r"not attainable") show(IOBuffer(), MIME("text/plain"), ExactSignedRankTest([1:10;], [1:10;]))
 
     # Two-sided
     for kwargs in ((), (; tail = :both))
@@ -148,7 +148,7 @@ end
     @test abs(@inferred(pvalue(ApproximateSignedRankTest([1:10;], [2:2:16; -1; 1]))) - 0.4148) <= 1e-4
     @test abs(@inferred(pvalue(ApproximateSignedRankTest([2:2:16; -1; 1], [1:10;]))) - 0.4148) <= 1e-4
 	@test default_tail(ApproximateSignedRankTest([1:10;], [2:2:20;])) == :both
-	show(IOBuffer(), ApproximateSignedRankTest([1:10;], [2:2:20;]))
+	show(IOBuffer(), MIME("text/plain"), ApproximateSignedRankTest([1:10;], [2:2:20;]))
 end
 
 @testset "Approximate with ties" begin
@@ -157,7 +157,7 @@ end
     @test abs(@inferred(pvalue(ApproximateSignedRankTest([2:11;], [1:10;]))) - 0.001904) <= 1e-6
     @test abs(@inferred(pvalue(ApproximateSignedRankTest([1:10;], [1:5; ones(5)]))) - 0.05906) <= 1e-5
     @test abs(@inferred(pvalue(ApproximateSignedRankTest([1:5; ones(5)], 1:10))) - 0.05906) <= 1e-5
-	show(IOBuffer(), ApproximateSignedRankTest([1:10;], [1:10;]))
+	show(IOBuffer(), MIME("text/plain"), ApproximateSignedRankTest([1:10;], [1:10;]))
 end
 
 @testset "Tests for automatic selection" begin
@@ -166,7 +166,7 @@ end
     # 0.0019042, which an atol of 1e-4 against 0.0020 would also have accepted
     @test @inferred(pvalue(SignedRankTest([1:10;], [2:11;]))) == 0.001953125
 	@test default_tail(SignedRankTest([1:10;], [2:2:20;])) == :both
-	show(IOBuffer(), SignedRankTest([1:10;], [2:2:20;]))
+	show(IOBuffer(), MIME("text/plain"), SignedRankTest([1:10;], [2:2:20;]))
 end
 
 @testset "One Sample tests" begin
@@ -537,7 +537,7 @@ end
     big = SignedRankTest(collect(1.0:2000))
     @test_throws HypothesisTests.ComputationTooLarge confint(big)
     # the test is still printable, without its interval line
-    out = sprint(show, big)
+    out = sprint(show, MIME("text/plain"), big)
     @test occursin("Wilcoxon signed rank", out) || occursin("Wilcoxon", out)
     @test !occursin("confidence interval", out)
     # and a sample inside the bound still gets one

@@ -21,7 +21,7 @@ using DelimitedFiles
         @test nobs(t) == fill(6, 3)
         @test dof(t) == (2,15)
         @test pvalue(t) ≈ 0.002 atol=1e-3
-        @test occursin("reject h_0", sprint(show, t))
+        @test occursin("reject h_0", sprint(show, MIME("text/plain"), t))
 
         # test splatting version
         t2 = OneWayANOVATest(groups...)
@@ -29,7 +29,7 @@ using DelimitedFiles
         @test dof(t2) == dof(t)
         @test pvalue(t2) == pvalue(t)
         @test HypothesisTests.teststatistic(t2) == HypothesisTests.teststatistic(t)
-        @test repr(t2) == repr(t)
+        @test repr("text/plain", t2) == repr("text/plain", t)
 
         # test tuple version
         t3 = OneWayANOVATest((groups...))
@@ -37,7 +37,7 @@ using DelimitedFiles
         @test dof(t3) == dof(t)
         @test pvalue(t3) == pvalue(t)
         @test HypothesisTests.teststatistic(t3) == HypothesisTests.teststatistic(t)
-        @test repr(t3) == repr(t)
+        @test repr("text/plain", t3) == repr("text/plain", t)
 
         # test generator version
         t4 = OneWayANOVATest(g for g in groups)
@@ -45,10 +45,10 @@ using DelimitedFiles
         @test dof(t4) == dof(t)
         @test pvalue(t4) == pvalue(t)
         @test HypothesisTests.teststatistic(t4) == HypothesisTests.teststatistic(t)
-        @test repr(t4) == repr(t)
+        @test repr("text/plain", t4) == repr("text/plain", t)
 
-        show(IOContext(IOBuffer(), :table => true), t)
-        show(IOBuffer(), t)
+        show(IOContext(IOBuffer(), :table => true), MIME("text/plain"), t)
+        show(IOBuffer(), MIME("text/plain"), t)
 
         # http://www.real-statistics.com/one-way-analysis-of-variance-anova/confidence-interval-anova/
         groups = [
@@ -62,7 +62,7 @@ using DelimitedFiles
         @test dof(t) == (3, 25)
         @test pvalue(t) ≈ 0.07276 atol=1e-6
         @test HypothesisTests.teststatistic(t) ≈ 2.62311 atol=1e-6
-        @test occursin("reject h_0", sprint(show, t))
+        @test occursin("reject h_0", sprint(show, MIME("text/plain"), t))
     end
 
     # http://www.real-statistics.com/one-way-analysis-of-variance-anova/homogeneity-variances/levenes-test/
@@ -84,7 +84,7 @@ using DelimitedFiles
         @test dof(l2) == dof(l)
         @test pvalue(l2) == pvalue(l)
         @test HypothesisTests.teststatistic(l2) == HypothesisTests.teststatistic(l)
-        @test repr(l2) == repr(l)
+        @test repr("text/plain", l2) == repr("text/plain", l)
 
         # with medians
         l = LeveneTest(groups; statistic=median)
@@ -100,7 +100,7 @@ using DelimitedFiles
         @test dof(t) == 3
         @test pvalue(t) ≈ 0.9878 atol=1e-4
         @test HypothesisTests.teststatistic(t) ≈ 0.1311 atol=1e-5
-        @test occursin("reject h_0", sprint(show, t))
+        @test occursin("reject h_0", sprint(show, MIME("text/plain"), t))
 
         # test splatting version
         t2 = FlignerKilleenTest(groups...)
@@ -108,7 +108,7 @@ using DelimitedFiles
         @test dof(t2) == dof(t)
         @test pvalue(t2) == pvalue(t)
         @test HypothesisTests.teststatistic(t2) == HypothesisTests.teststatistic(t)
-        @test repr(t2) == repr(t)
+        @test repr("text/plain", t2) == repr("text/plain", t)
     end
 
     @testset "Brown-Forsythe" begin
@@ -122,13 +122,13 @@ using DelimitedFiles
         @test dof(l) == (9, 90)
         @test HypothesisTests.teststatistic(l) ≈ 1.705910 atol=1e-5
         @test pvalue(l) ≈ 0.0991 atol=1e-4
-        @test occursin("reject h_0", sprint(show, l))
+        @test occursin("reject h_0", sprint(show, MIME("text/plain"), l))
 
         l2 = BrownForsytheTest(eachcol(samples)...)
         @test nobs(l2) == nobs(l)
         @test dof(l2) == dof(l)
         @test HypothesisTests.teststatistic(l2) == HypothesisTests.teststatistic(l)
         @test pvalue(l2) == pvalue(l)
-        @test repr(l2) == repr(l)
+        @test repr("text/plain", l2) == repr("text/plain", l)
     end
 end

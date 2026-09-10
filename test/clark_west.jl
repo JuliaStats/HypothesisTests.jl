@@ -21,7 +21,7 @@ using HypothesisTests, Test
     @test pvalue(cw_test) ≈ 0.0157 atol=atol
     @test pvalue(cw_test, tail=:right) ≈ 0.0079 atol=atol
 
-    show(IOBuffer(), cw_test)
+    show(IOBuffer(), MIME("text/plain"), cw_test)
 
     @test_throws DimensionMismatch ClarkWestTest(rand(3), rand(4))
 

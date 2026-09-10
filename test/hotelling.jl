@@ -46,7 +46,7 @@ end
     @test pvalue(t) ≈ 0.0 atol=eps()
     @test t.T² ≈ 1758.5413137 atol=1e-6
     @test t.F ≈ 349.7968048 atol=1e-6
-    let out = sprint(show, t)
+    let out = sprint(show, MIME("text/plain"), t)
         @test occursin("reject h_0", out) && !occursin("fail to", out)
     end
 
@@ -60,7 +60,7 @@ end
     @test pvalue(p) ≈ 0.039369144 atol=1e-6
     @test p.T² ≈ 13.127840261 atol=1e-6
     @test p.F ≈ 2.942446955 atol=1e-6
-    let out = sprint(show, p)
+    let out = sprint(show, MIME("text/plain"), p)
         @test occursin("reject h_0", out) && !occursin("fail to", out)
     end
 end
@@ -77,7 +77,7 @@ end
     @test pvalue(eq) ≈ 0.0 atol=eps()
     @test eq.T² ≈ 2412.4506855 atol=1e-6
     @test eq.F ≈ 391.9217023 atol=1e-6
-    @test occursin("reject h_0", sprint(show, eq))
+    @test occursin("reject h_0", sprint(show, MIME("text/plain"), eq))
 
     un = UnequalCovHotellingT2Test(genuine, counterfeit)
     @test nobs(un) == (100, 100)
@@ -85,5 +85,5 @@ end
     @test pvalue(un) ≈ 0.0 atol=eps()
     @test un.T² ≈ 2412.4506855 atol=1e-6
     @test un.F ≈ 391.9217023 atol=1e-6
-    @test occursin("reject h_0", sprint(show, un))
+    @test occursin("reject h_0", sprint(show, MIME("text/plain"), un))
 end

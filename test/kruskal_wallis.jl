@@ -16,7 +16,7 @@ t = HypothesisTests.KruskalWallisTest(u5, u250, u2500, more)
 @test t.tie_adjustment == 1
 @test pvalue(t) ≈ 0.6638608922384397
 @test default_tail(t) == :right
-show(IOBuffer(), t)
+show(IOBuffer(), MIME("text/plain"), t)
 
 # http://www.brightstat.com/index.php?option=com_content&task=view&id=41&Itemid=1&limit=1&limitstart=2
 city1 = [68, 93, 123, 83, 108, 122]
@@ -31,7 +31,7 @@ t = HypothesisTests.KruskalWallisTest(city1, city2, city3, city4)
 @test t.H ≈ 16.028783253379856
 @test t.tie_adjustment ≈ 0.9969565217391304
 @test pvalue(t) ≈ 0.0011186794961869423
-show(IOBuffer(), t)
+show(IOBuffer(), MIME("text/plain"), t)
 
 # example with non-integer rank sum
 t1 = [1.2,1.9,2.1]
@@ -44,5 +44,5 @@ t = KruskalWallisTest(t1, t2, t3)
 @test t.H ≈ 2.039215686274513
 @test t.tie_adjustment ≈ 0.9916666666666667
 @test pvalue(t) ≈ 0.3607363776845705
-show(IOBuffer(), t)
+show(IOBuffer(), MIME("text/plain"), t)
 end

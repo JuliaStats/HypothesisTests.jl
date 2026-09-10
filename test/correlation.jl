@@ -6,7 +6,7 @@ using DelimitedFiles
     # Columns are line number, calcium, iron
     nutrient = readdlm(joinpath(@__DIR__, "data", "nutrient.txt"))[:, 1:3]
     w = CorrelationTest(nutrient[:,2], nutrient[:,3])
-    let out = sprint(show, w)
+    let out = sprint(show, MIME("text/plain"), w)
         @test occursin("reject h_0", out) && !occursin("fail to", out)
     end
     let ci = confint(w)
@@ -18,7 +18,7 @@ using DelimitedFiles
     @test pvalue(w) < 1e-25
 
     x = CorrelationTest(nutrient[:,1], nutrient[:,2])
-    @test occursin("fail to reject", sprint(show, x))
+    @test occursin("fail to reject", sprint(show, MIME("text/plain"), x))
     let ci = confint(x)
         @test first(ci) ≈ -0.1105478 atol=1e-6
         @test last(ci) ≈ 0.0336730 atol=1e-6
@@ -30,7 +30,7 @@ end
     # Columns are information, similarities, arithmetic, picture completion
     wechsler = readdlm(joinpath(@__DIR__, "data", "wechsler.txt"))[:,2:end]
     w = CorrelationTest(wechsler[:,1], wechsler[:,2], wechsler[:,3:4])
-    let out = sprint(show, w)
+    let out = sprint(show, MIME("text/plain"), w)
         @test occursin("reject h_0", out) && !occursin("fail to", out)
     end
     let ci = confint(w)
@@ -46,7 +46,7 @@ end
          15 3 1
          20 4 1]
     x = CorrelationTest(view(X,:,1), view(X,:,2), view(X,:,3))
-    @test occursin("fail to reject", sprint(show, x))
+    @test occursin("fail to reject", sprint(show, MIME("text/plain"), x))
     @test confint(x) == (-1.0, 1.0)
     @test nobs(x) == 4
     @test dof(x) == 1
