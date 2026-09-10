@@ -91,13 +91,7 @@ end
 show_confint(test::HypothesisTest) =
     applicable(confint, test) ? show_or_nothing(confint, test) : nothing
 
-# Pretty-print. The full report is the `text/plain` display, which is what the REPL,
-# notebooks and Documenter request. The two-argument `show` is the short form Julia uses
-# for elements of containers, struct fields and `string`, so it stays on one line.
-function Base.show(io::IO, test::HypothesisTest)
-    print(io, nameof(typeof(test)), "(p-value = ", StatsBase.PValue(pvalue(test)), ")")
-end
-
+# Pretty-print
 function Base.show(_io::IO, ::MIME"text/plain", test::T) where T<:HypothesisTest
     io = IOContext(_io, :compact=>get(_io, :compact, true))
     println(io, testname(test))

@@ -537,7 +537,7 @@ end
     big = SignedRankTest(collect(1.0:2000))
     @test_throws HypothesisTests.ComputationTooLarge confint(big)
     # the test is still printable, without its interval line
-    out = sprint(show, MIME("text/plain"), big)
+    out = repr("text/plain", big)
     @test occursin("Wilcoxon signed rank", out) || occursin("Wilcoxon", out)
     @test !occursin("confidence interval", out)
     # and a sample inside the bound still gets one

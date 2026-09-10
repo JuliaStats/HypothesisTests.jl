@@ -5,10 +5,11 @@ using HypothesisTests, Test
 d = [[762,484] [327,239] [468,477]]
 m = PowerDivergenceTest(d)
 
-# the two-argument form is the one-line summary Julia uses inside containers
-@test repr(m) == "PowerDivergenceTest(p-value = <1e-06)"
+# the two-argument form is Julia's default one-line struct display, not the report
+@test startswith(repr(m), "PowerDivergenceTest(")
+@test !occursin("Population details", repr(m))
 
-@test sprint(show, MIME("text/plain"), m, context=:compact => true) ==
+@test repr("text/plain", m; context=:compact => true) ==
     """
     Pearson's Chi-square Test
     -------------------------
@@ -33,7 +34,7 @@ m = PowerDivergenceTest(d)
 d = [ 20, 15, 25 ]
 m = PowerDivergenceTest(d)
 
-@test sprint(show, MIME("text/plain"), m, context=:compact => true) ==
+@test repr("text/plain", m; context=:compact => true) ==
     """
     Pearson's Chi-square Test
     -------------------------
@@ -58,10 +59,11 @@ m = PowerDivergenceTest(d)
 # based on t.jl tests
 tst = OneSampleTTest(-5:10)
 
-@test repr(tst) == "OneSampleTTest(p-value = 0.0530)"
-@test repr([tst, tst]) == "OneSampleTTest[OneSampleTTest(p-value = 0.0530), OneSampleTTest(p-value = 0.0530)]"
+@test startswith(repr(tst), "OneSampleTTest(")
+@test !occursin('\n', repr(tst))
+@test !occursin("Population details", repr([tst, tst]))
 
-@test sprint(show, MIME("text/plain"), tst) ==
+@test repr("text/plain", tst) ==
     """
     One sample t-test
     -----------------
@@ -123,7 +125,7 @@ y = [
 ]
 tst = UnequalVarianceTTest(x, y)
 
-@test sprint(show, MIME("text/plain"), tst) ==
+@test repr("text/plain", tst) ==
     """
     Two sample t-test (unequal variance)
     ------------------------------------

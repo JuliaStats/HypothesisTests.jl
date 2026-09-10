@@ -58,7 +58,7 @@ using StableRNGs
 
         @test_throws ArgumentError("censored samples not implemented yet") pvalue(ShapiroWilkTest(1:4, censored=1))
 
-        str = sprint(show, MIME("text/plain"), t)
+        str = repr("text/plain", t)
         @test str ==
               """Shapiro-Wilk normality test
               ---------------------------

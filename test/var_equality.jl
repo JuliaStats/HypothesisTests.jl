@@ -21,7 +21,7 @@ using DelimitedFiles
         @test nobs(t) == fill(6, 3)
         @test dof(t) == (2,15)
         @test pvalue(t) ≈ 0.002 atol=1e-3
-        @test occursin("reject h_0", sprint(show, MIME("text/plain"), t))
+        @test occursin("reject h_0", repr("text/plain", t))
 
         # test splatting version
         t2 = OneWayANOVATest(groups...)
@@ -62,7 +62,7 @@ using DelimitedFiles
         @test dof(t) == (3, 25)
         @test pvalue(t) ≈ 0.07276 atol=1e-6
         @test HypothesisTests.teststatistic(t) ≈ 2.62311 atol=1e-6
-        @test occursin("reject h_0", sprint(show, MIME("text/plain"), t))
+        @test occursin("reject h_0", repr("text/plain", t))
     end
 
     # http://www.real-statistics.com/one-way-analysis-of-variance-anova/homogeneity-variances/levenes-test/
@@ -100,7 +100,7 @@ using DelimitedFiles
         @test dof(t) == 3
         @test pvalue(t) ≈ 0.9878 atol=1e-4
         @test HypothesisTests.teststatistic(t) ≈ 0.1311 atol=1e-5
-        @test occursin("reject h_0", sprint(show, MIME("text/plain"), t))
+        @test occursin("reject h_0", repr("text/plain", t))
 
         # test splatting version
         t2 = FlignerKilleenTest(groups...)
@@ -122,7 +122,7 @@ using DelimitedFiles
         @test dof(l) == (9, 90)
         @test HypothesisTests.teststatistic(l) ≈ 1.705910 atol=1e-5
         @test pvalue(l) ≈ 0.0991 atol=1e-4
-        @test occursin("reject h_0", sprint(show, MIME("text/plain"), l))
+        @test occursin("reject h_0", repr("text/plain", l))
 
         l2 = BrownForsytheTest(eachcol(samples)...)
         @test nobs(l2) == nobs(l)

@@ -385,7 +385,7 @@ end
     # #363 made the reported estimate the Hodges-Lehmann one, read off the same set,
     # so past the bound the point estimate goes the same way the interval does
     @test_throws HypothesisTests.ComputationTooLarge hodgeslehmann(t)
-    out = sprint(show, MIME("text/plain"), t)
+    out = repr("text/plain", t)
     @test occursin("Approximate Mann-Whitney U test", out)
     @test occursin("two-sided p-value", out)
     @test occursin("number of observations in each group", out)
@@ -395,7 +395,7 @@ end
 
     # and where it can afford one it still prints it
     @test occursin("95% confidence interval",
-                   sprint(show, MIME("text/plain"), MannWhitneyUTest([1.0, 3, 5, 7], [2.0, 4, 6, 8])))
+                   repr("text/plain", MannWhitneyUTest([1.0, 3, 5, 7], [2.0, 4, 6, 8])))
 end
 
 @testset "The exact interval is bounded in time" begin
