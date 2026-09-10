@@ -18,7 +18,7 @@ x = [0.3500, 0.1966, 0.2511, 0.6160, 0.4733,
      @test pvalue(t; tail=:left) ≈ 0.849573771973747
      @test pvalue(t; tail=:right) ≈ 0.3545875485608989
      @test default_tail(t) == :both
-     show(IOBuffer(), t)
+     show(IOBuffer(), MIME("text/plain"), t)
 
      t = ApproximateTwoSampleKSTest(x, [(0:24)/25...])
      @test t.δ ≈ 0.12
@@ -28,7 +28,7 @@ x = [0.3500, 0.1966, 0.2511, 0.6160, 0.4733,
      @test pvalue(t; tail=:left) ≈ 0.8521437889662113
      @test pvalue(t; tail=:right) ≈ 0.697676326071031
      @test default_tail(t) == :both
-     show(IOBuffer(), t)
+     show(IOBuffer(), MIME("text/plain"), t)
 
      t = ExactOneSampleKSTest(x, Uniform())
      @test t.δ ≈ 0.1440
@@ -38,7 +38,7 @@ x = [0.3500, 0.1966, 0.2511, 0.6160, 0.4733,
      @test pvalue(t; tail=:left) ≈ 0.8195705417998183
      @test pvalue(t; tail=:right) ≈ 0.32350648882777194
      @test default_tail(t) == :both
-     show(IOBuffer(), t)
+     show(IOBuffer(), MIME("text/plain"), t)
 end
 
 @testset "check fit to normal distribution" begin

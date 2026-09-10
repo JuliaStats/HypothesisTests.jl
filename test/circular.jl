@@ -16,7 +16,7 @@ end
         *pi/180)
     @test abs(pvalue(t) - 0.20) <= 0.01
     @test default_tail(t) == :both
-    show(IOBuffer(), t)
+    show(IOBuffer(), MIME("text/plain"), t)
 end
 
 wind_direction_6am =
@@ -33,7 +33,7 @@ wind_direction_12pm =
     @test abs(t.rho_t- 0.191) < 0.001
     @test abs(pvalue(t) - 0.01) < 0.01
     @test default_tail(t) == :both
-    show(IOBuffer(), t)
+    show(IOBuffer(), MIME("text/plain"), t)
 end
 
 @testset "Jammaladak, 2001 example 8.1" begin
@@ -41,6 +41,6 @@ end
     @test abs(t.r - 0.2704648) < 1e-7
     @test abs(pvalue(t) - 0.2247383) < 1e-7
     @test default_tail(t) == :both
-    show(IOBuffer(), t)
+    show(IOBuffer(), MIME("text/plain"), t)
 end
 end

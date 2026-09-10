@@ -37,9 +37,9 @@ function show_params(io::IO, t::VarianceEqualityTest{TD},
     println(io, indent, "degrees of freedom:     ", dof(t))
 end
 
-function Base.show(io::IOContext, t::VarianceEqualityTest)
+function Base.show(io::IO, ::MIME"text/plain", t::VarianceEqualityTest)
     if !get(io, :table, false) # No table
-        show(io.io, t)
+        invoke(show, Tuple{IO, MIME"text/plain", HypothesisTest}, io, MIME("text/plain"), t)
     else
         println(io, testname(t))
         println(io, repeat("-", 55))

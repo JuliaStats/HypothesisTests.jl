@@ -13,7 +13,7 @@ t = @inferred(HypothesisTests.FisherExactTest(1, 1, 1, 1))
 @test_ci_approx confint(t; tail=:right) (0.013114894621608135, Inf)
 @test_ci_approx confint(t; method=:central) (0.006400016357911029, 156.2496006379585)
 #@test_approx_eq [confint(t; method=:minlike)...] [0.0131, 76.2492]
-show(IOBuffer(), t)
+show(IOBuffer(), MIME("text/plain"), t)
 
 # http://en.wikipedia.org/wiki/Fisher%27s_exact_test
 t = HypothesisTests.FisherExactTest(1, 9, 11, 3)
@@ -26,7 +26,7 @@ t = HypothesisTests.FisherExactTest(1, 9, 11, 3)
 @test_ci_approx confint(t; tail=:right) (0.0012948958389639856, Inf)
 @test_ci_approx confint(t; method=:central) (0.0006360029488751071, 0.42586647569637387)
 #@test_approx_eq [confint(t; method=:minlike)...] [0.0013, 0.3567]
-show(IOBuffer(), t)
+show(IOBuffer(), MIME("text/plain"), t)
 
 # http://www.physics.csbsju.edu/stats/exact.html
 t = HypothesisTests.FisherExactTest(7, 12, 0, 5)
@@ -39,7 +39,7 @@ t = HypothesisTests.FisherExactTest(7, 12, 0, 5)
 @test_ci_approx confint(t; tail=:right) (0.539859556284207, Inf)
 @test_ci_approx confint(t; method=:central) (0.39239937500428096, Inf)
 #@test_approx_eq [confint(t; method=:minlike)...] [0.5171, Inf]
-show(IOBuffer(), t)
+show(IOBuffer(), MIME("text/plain"), t)
 
 t = HypothesisTests.FisherExactTest(12, 7, 5, 0)
 @test t.ω ≈ 0.0
@@ -51,7 +51,7 @@ t = HypothesisTests.FisherExactTest(12, 7, 5, 0)
 @test_ci_approx confint(t; tail=:right) (0.0, Inf)
 @test_ci_approx confint(t; method=:central) (0.0, 2.5484240386190433)
 #@test_approx_eq [confint(t; method=:minlike)...] [0.0, 1.9338]
-show(IOBuffer(), t)
+show(IOBuffer(), MIME("text/plain"), t)
 
 t = HypothesisTests.FisherExactTest(0, 5, 7, 12)
 @test t.ω ≈ 0.0
@@ -63,7 +63,7 @@ t = HypothesisTests.FisherExactTest(0, 5, 7, 12)
 @test_ci_approx confint(t; tail=:right) (0.0, Inf)
 @test_ci_approx confint(t; method=:central) (0.0, 2.5484240386190433)
 #@test_approx_eq [confint(t; method=:minlike)...] [0.0, 1.9338]
-show(IOBuffer(), t)
+show(IOBuffer(), MIME("text/plain"), t)
 
 t = HypothesisTests.FisherExactTest(5, 0, 12, 7)
 @test t.ω ≈ Inf
@@ -75,7 +75,7 @@ t = HypothesisTests.FisherExactTest(5, 0, 12, 7)
 @test_ci_approx confint(t; tail=:right) (0.5398595562842079, Inf)
 @test_ci_approx confint(t; method=:central) (0.39239937500428096, Inf)
 #@test_approx_eq [confint(t; method=:minlike)...] [0.5171, Inf]
-show(IOBuffer(), t)
+show(IOBuffer(), MIME("text/plain"), t)
 
 # http://www.stata.com/support/faqs/statistics/fishers-exact-test/
 t = HypothesisTests.FisherExactTest(2, 31, 136, 15532)
@@ -88,7 +88,7 @@ t = HypothesisTests.FisherExactTest(2, 31, 136, 15532)
 @test_ci_approx confint(t; tail=:right) (1.2436262312601785, Inf)
 @test_ci_approx confint(t; method=:central) (0.8458141614657836, 29.44434308524672)
 #@test_approx_eq [confint(t; method=:minlike)...] [1.2436, 28.3557]
-show(IOBuffer(), t)
+show(IOBuffer(), MIME("text/plain"), t)
 
 # http://www.utstat.toronto.edu/~brunner/oldclass/312f12/lectures/312f12FisherWithR.pdf
 # http://vassarstats.net/odds2x2.html
@@ -102,7 +102,7 @@ t = HypothesisTests.FisherExactTest(4, 1, 20, 1)
 @test_ci_approx confint(t; tail=:right) (0.004963263361921223, Inf)
 @test_ci_approx confint(t; method=:central) (0.002430190787475382, 19.59477744071154)
 #@test_approx_eq [confint(t; method=:minlike)...] [0.005, 9.5943]
-show(IOBuffer(), t)
+show(IOBuffer(), MIME("text/plain"), t)
 
 # Corner cases gh #276
 t = HypothesisTests.FisherExactTest(5, 0, 5, 0)
@@ -125,5 +125,5 @@ t = HypothesisTests.FisherExactTest(0, 5, 0, 5)
 
 t = HypothesisTests.FisherExactTest(1, 1, 1, 1)
 @test HypothesisTests.pvalue(t, tail=:both) <= 1
-show(IOBuffer(), t)
+show(IOBuffer(), MIME("text/plain"), t)
 end

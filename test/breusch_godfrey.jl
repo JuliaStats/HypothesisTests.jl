@@ -116,7 +116,7 @@ t = BreuschGodfreyTest(data_h1[:,2:end],res_vec,4)
 @test t.BG ≈ 31.39810637185552
 @test pvalue(t) ≈ 2.5390992557054064e-6
 @test default_tail(t) == :right
-show(IOBuffer(), t)
+show(IOBuffer(), MIME("text/plain"), t)
 
 t = BreuschGodfreyTest(data_h1[:,2:end],res_vec,2,false)
 
@@ -124,7 +124,7 @@ t = BreuschGodfreyTest(data_h1[:,2:end],res_vec,2,false)
 @test t.lag == 2
 @test t.BG ≈ 27.71445552148237
 @test pvalue(t) ≈ 9.591409846298036e-7
-show(IOBuffer(), t)
+show(IOBuffer(), MIME("text/plain"), t)
 
 coeff_vec = data_h1[:,3:end]\data_h1[:,1] # no constant
 res_vec = data_h1[:,1] - data_h1[:,3:end]*coeff_vec
@@ -135,7 +135,7 @@ t = BreuschGodfreyTest(data_h1[:,3:end],res_vec,10)
 @test t.lag == 10
 @test t.BG ≈ 34.562955523063515
 @test pvalue(t) ≈ 0.0001482189344859451
-show(IOBuffer(), t)
+show(IOBuffer(), MIME("text/plain"), t)
 
 # data simulated under H_0
 data_h0 = [
@@ -250,7 +250,7 @@ t = BreuschGodfreyTest(data_h0[:,2:end],res_vec,4)
 @test t.lag == 4
 @test t.BG ≈ 1.9781996740849623
 @test pvalue(t) ≈ 0.7397687483602012
-show(IOBuffer(), t)
+show(IOBuffer(), MIME("text/plain"), t)
 
 t = BreuschGodfreyTest(data_h0[:,2:end],res_vec,2,false)
 
@@ -258,7 +258,7 @@ t = BreuschGodfreyTest(data_h0[:,2:end],res_vec,2,false)
 @test t.lag == 2
 @test t.BG ≈ 0.03720525092311448
 @test pvalue(t) ≈ 0.9815693354165801
-show(IOBuffer(), t)
+show(IOBuffer(), MIME("text/plain"), t)
 
 coeff_vec = data_h0[:,3:end]\data_h0[:,1] # no constant
 res_vec = data_h0[:,1] - data_h0[:,3:end]*coeff_vec
@@ -269,5 +269,5 @@ t = BreuschGodfreyTest(data_h0[:,3:end],res_vec,10)
 @test t.lag == 10
 @test t.BG ≈ 11.156984521656943
 @test pvalue(t) ≈ 0.3454190353708124
-show(IOBuffer(), t)
+show(IOBuffer(), MIME("text/plain"), t)
 end

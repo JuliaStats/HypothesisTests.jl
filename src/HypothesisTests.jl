@@ -92,7 +92,7 @@ show_confint(test::HypothesisTest) =
     applicable(confint, test) ? show_or_nothing(confint, test) : nothing
 
 # Pretty-print
-function Base.show(_io::IO, test::T) where T<:HypothesisTest
+function Base.show(_io::IO, ::MIME"text/plain", test::T) where T<:HypothesisTest
     io = IOContext(_io, :compact=>get(_io, :compact, true))
     println(io, testname(test))
     println(io, repeat("-", length(testname(test))))

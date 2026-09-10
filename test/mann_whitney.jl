@@ -19,7 +19,7 @@ end
     @test test.median == -5.6
 
     @test default_tail(test) == :both
-    @test repr(test) == """
+    @test repr("text/plain", test) == """
     Exact Mann-Whitney U test
     -------------------------
     Population details:
@@ -62,7 +62,7 @@ end
 end
 
 @testset "Exact with ties" begin
-    show(IOBuffer(), ExactMannWhitneyUTest([1:10;], [1:10;]))
+    show(IOBuffer(), MIME("text/plain"), ExactMannWhitneyUTest([1:10;], [1:10;]))
 
     # Two-sided
     for kwargs in ((), (; tail = :both))
@@ -99,7 +99,7 @@ end
     @test test1.U + test2.U == 120
     @test test1.median == -test2.median
 
-    @test repr(test1) == """
+    @test repr("text/plain", test1) == """
     Exact Mann-Whitney U test
     -------------------------
     Population details:
@@ -118,7 +118,7 @@ end
         rank sums:                            [77.5, 175.5]
         adjustment for ties:                  30.0
     """
-    @test repr(test2) == """
+    @test repr("text/plain", test2) == """
     Exact Mann-Whitney U test
     -------------------------
     Population details:
@@ -159,7 +159,7 @@ end
     @test abs(@inferred(pvalue(ApproximateMannWhitneyUTest([1.5:10:100;], [2.1:2:21;]))) - 0.0091) <= 1e-4
     @test abs(@inferred(pvalue(ApproximateMannWhitneyUTest([2.1:2:21;], [1.5:10:100;]))) - 0.0091) <= 1e-4
     @test default_tail(ApproximateMannWhitneyUTest([1:10;], [2.1:2:21;])) == :both
-	show(IOBuffer(), ApproximateMannWhitneyUTest([1:10;], [2.1:2:21;]))
+	show(IOBuffer(), MIME("text/plain"), ApproximateMannWhitneyUTest([1:10;], [2.1:2:21;]))
 end
 
 @testset "Approximate with ties" begin
@@ -168,13 +168,13 @@ end
     @test abs(@inferred(pvalue(ApproximateMannWhitneyUTest([2:11;], [1:10;]))) - 0.4948) <= 1e-4
     @test abs(@inferred(pvalue(ApproximateMannWhitneyUTest([1:10;], [1:5; ones(5)]))) - 0.0076) <= 1e-4
     @test abs(@inferred(pvalue(ApproximateMannWhitneyUTest([1:5; ones(5)], [1:10;]))) - 0.0076) <= 1e-4
-	show(IOBuffer(), ApproximateMannWhitneyUTest([1:10;], [1:10;]))
+	show(IOBuffer(), MIME("text/plain"), ApproximateMannWhitneyUTest([1:10;], [1:10;]))
 end
 
 @testset "Tests for automatic selection" begin
     @test abs(@inferred(pvalue(MannWhitneyUTest([1:10;], [2.1:2:21;]))) - 0.0232) <= 1e-4
     @test abs(@inferred(pvalue(MannWhitneyUTest([1:10;], [2:11;]))) - 0.4948) <= 1e-4
-	show(IOBuffer(), MannWhitneyUTest([1:10;], [2.1:2:21;]))
+	show(IOBuffer(), MIME("text/plain"), MannWhitneyUTest([1:10;], [2.1:2:21;]))
 end
 
 @testset "Issue #39" begin
@@ -385,7 +385,7 @@ end
     # #363 made the reported estimate the Hodges-Lehmann one, read off the same set,
     # so past the bound the point estimate goes the same way the interval does
     @test_throws HypothesisTests.ComputationTooLarge hodgeslehmann(t)
-    out = sprint(show, t)
+    out = repr("text/plain", t)
     @test occursin("Approximate Mann-Whitney U test", out)
     @test occursin("two-sided p-value", out)
     @test occursin("number of observations in each group", out)
@@ -395,7 +395,7 @@ end
 
     # and where it can afford one it still prints it
     @test occursin("95% confidence interval",
-                   sprint(show, MannWhitneyUTest([1.0, 3, 5, 7], [2.0, 4, 6, 8])))
+                   repr("text/plain", MannWhitneyUTest([1.0, 3, 5, 7], [2.0, 4, 6, 8])))
 end
 
 @testset "The exact interval is bounded in time" begin
