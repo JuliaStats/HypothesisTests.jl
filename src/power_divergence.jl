@@ -10,9 +10,9 @@ struct PowerDivergenceTest <: HypothesisTest
     lambda::Float64
     theta0::Vector{Float64}
     stat::Float64
-    df::Int64
-    observed::Matrix{Int64}
-    n::Int64
+    df::Int
+    observed::Matrix{Int}
+    n::Int
     thetahat::Vector{Float64}
 
     expected::Matrix{Float64}
@@ -67,7 +67,7 @@ one of the following methods. Possible values for `method` are:
 """
 function StatsAPI.confint(x::PowerDivergenceTest; level::Float64=0.95,
                           tail::Symbol=:both, method::Symbol=:auto, correct::Bool=true,
-                          bootstrap_iters::Int64=10000, GC::Bool=true)
+                          bootstrap_iters::Int=10000, GC::Bool=true)
     check_level(level)
 
     m  = length(x.thetahat)
@@ -99,7 +99,7 @@ function StatsAPI.confint(x::PowerDivergenceTest; level::Float64=0.95,
 end
 
 # Bootstrap
-function ci_bootstrap(x::PowerDivergenceTest,alpha::Float64, iters::Int64)
+function ci_bootstrap(x::PowerDivergenceTest,alpha::Float64, iters::Int)
     m = mapslices(x -> quantile(x, [alpha / 2, 1 - alpha / 2]), rand(Multinomial(x.n, convert(Vector{Float64}, x.thetahat)),iters) / x.n, dims=2)
     Tuple{Float64,Float64}[(boundproportion(m[i,1]), boundproportion(m[i,2])) for i in 1:length(x.thetahat)]
 end
@@ -141,7 +141,7 @@ function ci_sison_glaz(x::PowerDivergenceTest, alpha::Float64; skew_correct::Boo
     for _c in 1:x.n
         #run truncpoi
         for i in 1:k
-            lambda = x.observed[i]
+            lambda = float(x.observed[i])
             #run moments
             a = lambda + _c
             b = max(lambda - _c, 0)
@@ -297,7 +297,7 @@ function PowerDivergenceTest(x::AbstractMatrix{T}; lambda::U=1.0, theta0::Vector
         colsums = sum(x, dims=1)
         df = (nrows - 1) * (ncols - 1)
         thetahat = x ./ n
-        xhat = rowsums * colsums / n
+        xhat = rowsums .* (colsums ./ n)
         theta0 = xhat / n
         V = Float64[(colsums[j]/n) * (rowsums[i]/n) * (1 - rowsums[i]/n) * (n - colsums[j]) for i in 1:nrows, j in 1:ncols]
     elseif nrows == 1 || ncols == 1
