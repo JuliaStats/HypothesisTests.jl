@@ -143,6 +143,11 @@ testname(m)
 pvalue(m)
 show(IOBuffer(), MIME("text/plain"), m)
 
+#Yates's correction
+mat = [8 404; 12 212]
+m = PowerDivergenceTest(mat, lambda=1.0)
+@test pvalue(m) ≈ 0.034041225309689796
+
 m = ChisqTest(d)
 m = MultinomialLRTest(d)
 
