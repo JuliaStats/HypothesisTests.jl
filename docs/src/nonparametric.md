@@ -43,6 +43,8 @@ KruskalWallisTest
 
 ## Mann-Whitney U test
 
+→ [Mathematical specification](@ref "3. The two-sample procedure (Wilcoxon rank sum, Mann-Whitney U)")
+
 ```@docs
 MannWhitneyUTest
 ExactMannWhitneyUTest
@@ -63,10 +65,78 @@ WaldWolfowitzTest
 
 ## Wilcoxon signed rank test
 
+→ [Mathematical specification](@ref "2. The one-sample procedure (Wilcoxon signed rank)")
+
 ```@docs
 SignedRankTest
 ExactSignedRankTest
 ApproximateSignedRankTest
+```
+
+## Rank tests: intervals and point estimates
+
+→ [Mathematical specification](@ref "Rank-based location inference")
+
+The Wilcoxon signed rank and Mann-Whitney U tests share their interval and estimator
+machinery.
+
+Both are built on a set of pairwise estimates: the Walsh averages ``(dᵢ + dⱼ)/2`` for the
+signed rank tests, the cross-group differences ``xᵢ - yⱼ`` for the Mann-Whitney tests.
+`confint` returns a pair of order statistics of that set, chosen by inverting the test,
+and `hodgeslehmann` returns its median.
+
+```@docs
+hodgeslehmann
+```
+
+The Hodges-Lehmann estimate is the point estimate the interval brackets, and is what all
+four types report as their parameter of interest. It is generally not the sample median:
+exact symmetry makes the two agree, but they can also agree by coincidence, as on
+`[1, 3, 3, 8]`, where both are `3`. Agreement is therefore no evidence of symmetry.
+
+Which order statistics `confint` returns depends on the test: the `Exact*` types invert
+the exact null distribution, conservatively, and the `Approximate*` types invert the
+normal approximation with a continuity correction and a tie-corrected variance. On untied
+data the `Exact*` interval agrees with R's `wilcox.test` at `exact = TRUE` digit for digit,
+and under ties R declines an exact interval even when asked for one; the
+`Approximate*` interval agrees with `exact = FALSE` to within one order statistic, since
+R solves for its endpoints numerically rather than reading them off the pairwise estimates.
+
+A one-sided interval keeps the endpoint that inverts the test of the same name:
+`tail = :left`, whose alternative is location below the null, gives an upper bound, and
+`tail = :right` a lower one. That is the convention of every other test here that takes a
+`tail`, and of R's `alternative = "less"` and `"greater"`. These four tests returned the
+other endpoint before this change (#368).
+
+On tied data the `Exact*` p-value is computed by enumeration rather than looked up, and it
+is worth knowing that base R will not compute it at all: `wilcox.test` warns that it cannot
+compute an exact p-value with ties, or with zeros, and returns its normal approximation
+instead, even when `exact = TRUE` is asked for. The comparable reference is the contributed
+package [`exactRankTests`](https://cran.r-project.org/package=exactRankTests), whose
+`wilcox.exact` does compute the tied distribution, and which is what the tied p-values here
+are tested against. The two agree on every one-sided value;
+their two-sided values agree for the signed rank tests and can differ slightly for the
+Mann-Whitney ones, where `wilcox.exact` sums the far tail and this package doubles the
+smaller one. See [§2.2.2](@ref "2.2.2 The permutation distribution") and
+[§3.2.2](@ref "3.2.2 The permutation distribution").
+
+Three named bounds apply, and past any of them the tests raise rather than run unbounded.
+The first bounds the tied-data enumeration a p-value runs, and `method = :approximate` is
+the way past it. The second bounds the set of pairwise estimates, which `confint` and
+`hodgeslehmann` form whichever route the p-value took, so `method` is no help there; it is a
+bound on memory, which is all the approximate interval spends. The third bounds the exact
+Mann-Whitney interval, which spends time as well, a two-sample lattice recursion per
+bisection step, and so is bounded below the second; the exact signed rank interval bisects
+a cheaper recursion and meets only the second.
+
+All three raise `ComputationTooLarge`, which is its own type rather than an `ArgumentError`
+so that `show` can drop a refused interval line without also hiding real errors.
+
+```@docs
+HypothesisTests.MAX_EXACT_ENUMERATION_N
+HypothesisTests.MAX_PAIRWISE_ESTIMATES
+HypothesisTests.MAX_EXACT_CI_ESTIMATES
+HypothesisTests.ComputationTooLarge
 ```
 
 ## Permutation test

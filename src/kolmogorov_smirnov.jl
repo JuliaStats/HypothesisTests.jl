@@ -85,7 +85,7 @@ end
 testname(::ExactOneSampleKSTest) = "Exact one sample Kolmogorov-Smirnov test"
 
 function show_params(io::IO, x::ExactOneSampleKSTest, ident="")
-    println(io, ident, "number of observations:   $(x.n)")
+    println(io, ident, "number of observations:   ", x.n)
 end
 
 function StatsAPI.pvalue(x::ExactKSTest; tail=:both)
@@ -125,8 +125,8 @@ end
 testname(::ApproximateOneSampleKSTest) = "Approximate one sample Kolmogorov-Smirnov test"
 
 function show_params(io::IO, x::ApproximateOneSampleKSTest, ident="")
-    println(io, ident, "number of observations:   $(x.n)")
-    println(io, ident, "KS-statistic:             $(sqrt(x.n)*x.δ)")
+    println(io, ident, "number of observations:   ", x.n)
+    println(io, ident, "KS-statistic:             ", sqrt(x.n)*x.δ)
 end
 
 # one-sided: http://www.encyclopediaofmath.org/index.php/Kolmogorov-Smirnov_test
@@ -179,7 +179,7 @@ testname(::ApproximateTwoSampleKSTest) = "Approximate two sample Kolmogorov-Smir
 function show_params(io::IO, x::ApproximateTwoSampleKSTest, ident="")
     n = x.n_x*x.n_y/(x.n_x+x.n_y)
     println(io, ident, "number of observations:   [$(x.n_x),$(x.n_y)]")
-    println(io, ident, "KS-statistic:              $(sqrt(n)*x.δ)")
+    println(io, ident, "KS-statistic:              ", sqrt(n)*x.δ)
 end
 
 function StatsAPI.pvalue(x::ApproximateTwoSampleKSTest; tail=:both)

@@ -21,7 +21,7 @@ null = Normal(0.0, 1.0)
 	@test pvalue(tst; tail=:left) ≈ cdf(null, z)
 	@test pvalue(tst; tail=:right) ≈ ccdf(null, z)
 	@test default_tail(tst) == :both
-	show(IOBuffer(), tst)
+	show(IOBuffer(), MIME("text/plain"), tst)
 
 	tst = OneSampleZTest(m, s, n)
 	@test pvalue(tst) ≈ 2 * min(cdf(null, z), ccdf(null, z))
@@ -34,7 +34,7 @@ null = Normal(0.0, 1.0)
 	@test confint(tst; tail=:right)[1] ≈ m + quantile(null, 0.05) * se
 	@test confint(tst; tail=:right)[2] ≈ Inf
 	@test_throws ArgumentError confint(tst; tail=2)
-	show(IOBuffer(), tst)
+	show(IOBuffer(), MIME("text/plain"), tst)
 
 	x = -10:5
 	m, s, n = mean(x), std(x), length(x)
@@ -45,7 +45,7 @@ null = Normal(0.0, 1.0)
 	@test pvalue(tst) ≈ 2 * min(cdf(null, z), ccdf(null, z))
 	@test pvalue(tst; tail=:left) ≈ cdf(null, z)
 	@test pvalue(tst; tail=:right) ≈ ccdf(null, z)
-	show(IOBuffer(), tst)
+	show(IOBuffer(), MIME("text/plain"), tst)
 
 	tst = OneSampleZTest(m, s, n)
 	@test pvalue(tst) ≈ 2 * min(cdf(null, z), ccdf(null, z))
@@ -57,7 +57,7 @@ null = Normal(0.0, 1.0)
 	@test confint(tst; tail=:left)[2] ≈ m + cquantile(null, 0.05) * se
 	@test confint(tst; tail=:right)[1] ≈ m + quantile(null, 0.05) * se
 	@test confint(tst; tail=:right)[2] ≈ Inf
-	show(IOBuffer(), tst)
+	show(IOBuffer(), MIME("text/plain"), tst)
 end
 
 @testset "Paired samples" begin
@@ -88,7 +88,7 @@ end
 	@test default_tail(tst) == :both
 	@test confint(tst)[1] ≈ xbar + quantile(null, 0.05 / 2) * se
 	@test confint(tst)[2] ≈ xbar + cquantile(null, 0.05 / 2) * se
-	show(IOBuffer(), tst)
+	show(IOBuffer(), MIME("text/plain"), tst)
 
 	tst = UnequalVarianceZTest(a1, a2)
 	se = sqrt(s1sq / n1 + s2sq / n2)
@@ -99,6 +99,6 @@ end
 	@test pvalue(tst; tail=:right) ≈ ccdf(null, z)
 	@test confint(tst)[1] ≈ xbar + quantile(null, 0.05 / 2) * se
 	@test confint(tst)[2] ≈ xbar + cquantile(null, 0.05 / 2) * se
-	show(IOBuffer(), tst)
+	show(IOBuffer(), MIME("text/plain"), tst)
 end
 end

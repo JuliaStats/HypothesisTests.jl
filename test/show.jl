@@ -5,7 +5,11 @@ using HypothesisTests, Test
 d = [[762,484] [327,239] [468,477]]
 m = PowerDivergenceTest(d)
 
-@test sprint(show, m, context=:compact => true) ==
+# the two-argument form is Julia's default one-line struct display, not the report
+@test startswith(repr(m), "PowerDivergenceTest(")
+@test !occursin("Population details", repr(m))
+
+@test repr("text/plain", m; context=:compact => true) ==
     """
     Pearson's Chi-square Test
     -------------------------
@@ -21,7 +25,7 @@ m = PowerDivergenceTest(d)
 
     Details:
         Sample size:        2757
-        statistic:          30.070149095754687
+        statistic:          30.0701
         degrees of freedom: 2
         residuals:          [2.19886, -2.50467, 0.41137, -0.468583, -2.84324, 3.23867]
         std. residuals:     [4.50205, -4.50205, 0.699452, -0.699452, -5.31595, 5.31595]
@@ -30,7 +34,7 @@ m = PowerDivergenceTest(d)
 d = [ 20, 15, 25 ]
 m = PowerDivergenceTest(d)
 
-@test sprint(show, m, context=:compact => true) ==
+@test repr("text/plain", m; context=:compact => true) ==
     """
     Pearson's Chi-square Test
     -------------------------
@@ -55,7 +59,11 @@ m = PowerDivergenceTest(d)
 # based on t.jl tests
 tst = OneSampleTTest(-5:10)
 
-@test sprint(show, tst) ==
+@test startswith(repr(tst), "OneSampleTTest(")
+@test !occursin('\n', repr(tst))
+@test !occursin("Population details", repr([tst, tst]))
+
+@test repr("text/plain", tst) ==
     """
     One sample t-test
     -----------------
@@ -71,9 +79,9 @@ tst = OneSampleTTest(-5:10)
 
     Details:
         number of observations:   16
-        t-statistic:              2.100420126042015
+        t-statistic:              2.10042
         degrees of freedom:       15
-        empirical standard error: 1.1902380714238083
+        empirical standard error: 1.19024
     """
 
 # issue #248
@@ -117,7 +125,7 @@ y = [
 ]
 tst = UnequalVarianceTTest(x, y)
 
-@test sprint(show, tst) ==
+@test repr("text/plain", tst) ==
     """
     Two sample t-test (unequal variance)
     ------------------------------------
@@ -133,8 +141,8 @@ tst = UnequalVarianceTTest(x, y)
 
     Details:
         number of observations:   [17,17]
-        t-statistic:              3.3767280623082523
-        degrees of freedom:       19.363987783845342
-        empirical standard error: 4.610162387563106e-8
+        t-statistic:              3.37673
+        degrees of freedom:       19.364
+        empirical standard error: 4.61016e-8
     """
 end

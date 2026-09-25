@@ -29,7 +29,7 @@ using HypothesisTests: default_tail
     @test_ci_approx confint(t, tail=:left, method=:arcsine) (0.0,0.4235046425920888)
     @test_ci_approx confint(t, tail=:right, method=:arcsine) (0.2489264087216164,1.0)
 
-    show(IOBuffer(), t)
+    show(IOBuffer(), MIME("text/plain"), t)
 
     t = BinomialTest([trues(6); falses(3)])
     @test pvalue(t) ≈ 0.5078125000000002
@@ -56,15 +56,15 @@ using HypothesisTests: default_tail
     @test_ci_approx confint(t, method=:arcsine) (0.345812446615087,0.9188773496172281)
     @test_ci_approx confint(t, tail=:left, method=:arcsine) (0.0,0.8879439981269358)
     @test_ci_approx confint(t, tail=:right, method=:arcsine) (0.3965293068864491,1.0)
-    show(IOBuffer(), t)
+    show(IOBuffer(), MIME("text/plain"), t)
 
     t = BinomialTest(0, 100, 0.01)
     @test pvalue(t) ≈ 0.7320646825464591
-    show(IOBuffer(), t)
+    show(IOBuffer(), MIME("text/plain"), t)
 
     t = BinomialTest(100, 100, 0.99)
     @test pvalue(t) ≈ 0.7320646825464584
-    show(IOBuffer(), t)
+    show(IOBuffer(), MIME("text/plain"), t)
 
     # from issue #295
     # without clamping: (-0.05457239484968546, 0.4890548596328611)
@@ -92,13 +92,13 @@ end
     @test default_tail(SignTest(x)) == :both
     @test_ci_approx confint(SignTest(x, 70)) (62, 69)
     @test_ci_approx confint(SignTest(x, 70), level=0.9998) (61, 71)
-    show(IOBuffer(), SignTest(x, 70))
+    show(IOBuffer(), MIME("text/plain"), SignTest(x, 70))
 
     x = [9, 2, 7, 5]
     y = [7, 2, 6, 4]
     @test pvalue(SignTest(x, y)) ≈ 0.25
     @test_ci_approx confint(SignTest(x, y)) (0, 2)
-    show(IOBuffer(), SignTest(x, y))
+    show(IOBuffer(), MIME("text/plain"), SignTest(x, y))
 
     # www.stat.umn.edu/geyer/old03/5102/notes/rank.pdf
     x = [-4.7, 3.7, 22.4, 13.6, 8.7, 9.1, -7.8, 10.8, 15.6, 23.5, 14.4, 20.2, 6.5, 10.1, -6.9]
@@ -112,5 +112,5 @@ end
     @test_ci_approx confint(SignTest(x), level=0.882) (6.5, 14.4)
     @test_ci_approx confint(SignTest(x), level=0.7) (8.7, 13.6)
     @test_ci_approx confint(SignTest(x), level=0.6) (9.1, 10.8)
-    show(IOBuffer(), SignTest(x))
+    show(IOBuffer(), MIME("text/plain"), SignTest(x))
 end

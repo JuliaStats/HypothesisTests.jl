@@ -63,9 +63,9 @@ testname(::OneSampleZTest) = "One sample z-test"
 population_param_of_interest(x::OneSampleZTest) = ("Mean", x.μ0, x.xbar) # parameter of interest: name, value under h0, point estimate
 
 function show_params(io::IO, x::OneSampleZTest, ident="")
-    println(io, ident, "number of observations:   $(x.n)")
-    println(io, ident, "z-statistic:              $(x.z)")
-    println(io, ident, "population standard error: $(x.stderr)")
+    println(io, ident, "number of observations:   ", x.n)
+    println(io, ident, "z-statistic:              ", x.z)
+    println(io, ident, "population standard error: ", x.stderr)
 end
 
 """
@@ -123,8 +123,8 @@ end
 
 function show_params(io::IO, x::TwoSampleZTest, ident="")
     println(io, ident, "number of observations:   [$(x.n_x),$(x.n_y)]")
-    println(io, ident, "z-statistic:              $(x.z)")
-    println(io, ident, "population standard error: $(x.stderr)")
+    println(io, ident, "z-statistic:              ", x.z)
+    println(io, ident, "population standard error: ", x.stderr)
 end
 
 testname(::EqualVarianceZTest) = "Two sample z-test (equal variance)"

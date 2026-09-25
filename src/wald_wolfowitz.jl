@@ -16,8 +16,8 @@ StatsAPI.pvalue(test::WaldWolfowitzTest; tail=:both) = pvalue(Normal(0.0, 1.0), 
 
 
 function show_params(io::IO, x::WaldWolfowitzTest, ident="")
-    println(io, ident, "number of runs:  $(x.nruns)")
-    println(io, ident, "z-statistic:     $(x.z)")
+    println(io, ident, "number of runs:  ", x.nruns)
+    println(io, ident, "z-statistic:     ", x.z)
 end
 
 """

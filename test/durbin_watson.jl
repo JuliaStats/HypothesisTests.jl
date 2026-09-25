@@ -75,7 +75,7 @@ t = DurbinWatsonTest(X, resid) # asymptotic p-values
 @test pvalue(t, tail = :left) ≈ 0.9999999999999998
 @test pvalue(t, tail = :right) ≈ 2.5794821462271485e-16
 @test default_tail(t) == :both
-show(IOBuffer(), t)
+show(IOBuffer(), MIME("text/plain"), t)
 
 t = DurbinWatsonTest(X, resid; p_compute = :exact) # exact p-values
 
@@ -86,7 +86,7 @@ t = DurbinWatsonTest(X, resid; p_compute = :exact) # exact p-values
 @test pvalue(t, tail = :left) ≈ 1.00
 @test pvalue(t, tail = :right) ≈ 1.8497207710325893e-24
 @test default_tail(t) == :both
-show(IOBuffer(), t)
+show(IOBuffer(), MIME("text/plain"), t)
 
 y_m1_sim = [ # simulated with -0.9 error correlation
     -1.3910099248613454, -1.5236862020915085, 4.097936666328973, -1.8511224691327444,
@@ -132,7 +132,7 @@ t = DurbinWatsonTest(X, resid) # asymptotic p-values
 @test pvalue(t, tail = :left) ≈ 6.8459641815325715e-9
 @test pvalue(t, tail = :right) ≈ 0.9999999931540359
 @test default_tail(t) == :both
-show(IOBuffer(), t)
+show(IOBuffer(), MIME("text/plain"), t)
 
 t = DurbinWatsonTest(X, resid; p_compute = :exact) # exact p-values
 
@@ -143,7 +143,7 @@ t = DurbinWatsonTest(X, resid; p_compute = :exact) # exact p-values
 @test pvalue(t, tail = :left) ≈ 3.304349016630681e-10
 @test pvalue(t, tail = :right) ≈ 0.9999999996695651
 @test default_tail(t) == :both
-show(IOBuffer(), t)
+show(IOBuffer(), MIME("text/plain"), t)
 
 y_0_sim = [ # simulated with 0 error correlation
     -1.7961754992652044, -2.5510957528383353, 3.2525339877180928, 0.19231575061789374,
@@ -189,7 +189,7 @@ t = DurbinWatsonTest(X, resid)
 @test pvalue(t, tail = :left) ≈ 0.43970842766166635
 @test pvalue(t, tail = :right) ≈ 0.5602915723383337
 @test default_tail(t) == :both
-show(IOBuffer(), t)
+show(IOBuffer(), MIME("text/plain"), t)
 
 t = DurbinWatsonTest(X, resid; p_compute = :exact) # exact p-values
 
@@ -200,7 +200,7 @@ t = DurbinWatsonTest(X, resid; p_compute = :exact) # exact p-values
 @test pvalue(t, tail = :left) ≈ 0.43970842766166635
 @test pvalue(t, tail = :right) ≈ 0.5602915723383337
 @test default_tail(t) == :both
-show(IOBuffer(), t)
+show(IOBuffer(), MIME("text/plain"), t)
 
 # test corner cases
 t1 = DurbinWatsonTest(X, size(X,1), 0.00, :exact)
@@ -208,12 +208,12 @@ t1 = DurbinWatsonTest(X, size(X,1), 0.00, :exact)
 @test pvalue(t1) == 0.00
 @test pvalue(t1, tail = :left) == 1.00
 @test pvalue(t1, tail = :right) == 0.00
-show(IOBuffer(), t1)
+show(IOBuffer(), MIME("text/plain"), t1)
 
 t1 = DurbinWatsonTest(X, size(X,1), 4.00, :exact)
 
 @test pvalue(t1) == 0.00
 @test pvalue(t1, tail = :left) == 0.00
 @test pvalue(t1, tail = :right) == 1.00
-show(IOBuffer(), t1)
+show(IOBuffer(), MIME("text/plain"), t1)
 end

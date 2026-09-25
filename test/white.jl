@@ -234,7 +234,7 @@ e = [ 5.19346;
     """
 
     buffer = IOBuffer()
-    show(buffer, w_test)
+    show(buffer, MIME("text/plain"), w_test)
     str = String(take!(buffer))
     @test str == refstr
 
@@ -248,5 +248,5 @@ e = [ 5.19346;
 
     bp_test = BreuschPaganTest(X, e)
     @test pvalue(bp_test) ≈ 0.1287 atol=atol
-    show(IOBuffer(), bp_test)
+    show(IOBuffer(), MIME("text/plain"), bp_test)
 end

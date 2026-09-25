@@ -27,7 +27,7 @@ using HypothesisTests: default_tail
     @test pvalue(dm_test) ≈ 0.7818 atol=atol
     @test pvalue(dm_test, tail=:right) ≈ 0.3909 atol=atol
     @test pvalue(dm_test, tail=:left) ≈ 0.6091 atol=atol
-    show(IOBuffer(), dm_test)
+    show(IOBuffer(), MIME("text/plain"), dm_test)
 
     @test_throws DimensionMismatch DieboldMarianoTest(rand(3), rand(4))
 end

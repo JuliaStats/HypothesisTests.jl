@@ -39,13 +39,13 @@ t = JarqueBeraTest(sim_data_h0)
 @test t.kurt ≈ 2.5117242352057993
 @test pvalue(t) ≈ 0.6003695680393418
 @test default_tail(t) == :right
-show(IOBuffer(), t)
+show(IOBuffer(), MIME("text/plain"), t)
 
 t = JarqueBeraTest(sim_data_h0; adjusted=true)
 
 @test t.JB ≈ 0.9170583190120135
 @test pvalue(t) ≈ 0.6322128462414497
-show(IOBuffer(), t)
+show(IOBuffer(), MIME("text/plain"), t)
 
 sim_data_h1 = [
     0, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1,
@@ -62,12 +62,12 @@ t = JarqueBeraTest(sim_data_h1)
 @test t.kurt ≈ 1.0138888888888888
 @test pvalue(t) ≈ 0.00020338498134114293
 @test default_tail(t) == :right
-show(IOBuffer(), t)
+show(IOBuffer(), MIME("text/plain"), t)
 
 t = JarqueBeraTest(sim_data_h1; adjusted=true)
 
 @test t.JB ≈ 18.529299970269175
 @test pvalue(t) ≈ 9.471388144608105e-5
-show(IOBuffer(), t)
+show(IOBuffer(), MIME("text/plain"), t)
 
 end

@@ -40,7 +40,7 @@ sim_data_h0 = [
     @test t.coef ≈ -0.009972855420884913
     @test t.cv ≈ [ -2.5882321870404863, -1.9439589708250309, -1.614431731329 ]
     @test pvalue(t) ≈ 0.4525095990064268
-    show(IOBuffer(), t)
+    show(IOBuffer(), MIME("text/plain"), t)
 end
 
 @testset "Constant term" begin
@@ -53,7 +53,7 @@ end
     @test t.coef ≈ -0.034891024784937275
     @test t.cv ≈ [ -3.49681816639021, -2.8906107514600103, -2.5822770483285953 ]
     @test pvalue(t) ≈ 0.6091721848538273
-    show(IOBuffer(), t)
+    show(IOBuffer(), MIME("text/plain"), t)
 end
 
 @testset "Linear trend term" begin
@@ -66,7 +66,7 @@ end
     @test t.coef ≈ -0.06200340824254233
     @test t.cv ≈ [ -4.051321648595895, -3.4548891419983088, -3.1530564880069027 ]
     @test pvalue(t) ≈ 0.7747580288456625
-    show(IOBuffer(), t)
+    show(IOBuffer(), MIME("text/plain"), t)
 end
 
 @testset "Quadratic trend term" begin
@@ -79,7 +79,7 @@ end
     @test t.coef ≈ -0.11370011315231617
     @test t.cv ≈ [ -4.489700198611862, -3.8922014722784897, -3.5900742238045 ]
     @test pvalue(t) ≈ 0.8095687207005545
-    show(IOBuffer(), t)
+    show(IOBuffer(), MIME("text/plain"), t)
 end
 
 sim_data_h1 = [
@@ -121,7 +121,7 @@ sim_data_h1 = [
     @test t.coef ≈ -0.5258695197499671
     @test t.cv ≈ [ -2.5882321870404863, -1.9439589708250309, -1.614431731329 ]
     @test pvalue(t) ≈ 2.011399607967822e-6
-    show(IOBuffer(), t)
+    show(IOBuffer(), MIME("text/plain"), t)
 end
 
 @testset "Constant term" begin
@@ -134,7 +134,7 @@ end
     @test t.coef ≈ -0.45433645147215723
     @test t.cv ≈ [ -3.49681816639021, -2.8906107514600103, -2.5822770483285953 ]
     @test pvalue(t) ≈ 3.8937264616617045e-6
-    show(IOBuffer(), t)
+    show(IOBuffer(), MIME("text/plain"), t)
 end
 
 @testset "Linear trend term" begin
@@ -147,7 +147,7 @@ end
     @test t.coef ≈ -0.4407260538688699
     @test t.cv ≈ [ -4.051321648595895, -3.4548891419983088, -3.1530564880069027 ]
     @test pvalue(t) ≈ 0.2634673926249714
-    show(IOBuffer(), t)
+    show(IOBuffer(), MIME("text/plain"), t)
 end
 
 @testset "Quadratic trend term" begin
@@ -160,6 +160,6 @@ end
     @test t.coef ≈ -0.6759438045021552
     @test t.cv ≈ [ -4.489700198611862, -3.8922014722784897, -3.5900742238045 ]
     @test pvalue(t) ≈ 0.012662962461719612
-    show(IOBuffer(), t)
+    show(IOBuffer(), MIME("text/plain"), t)
 end
 end

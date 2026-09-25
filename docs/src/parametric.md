@@ -21,6 +21,9 @@ MultinomialLRTest
 ```
 
 ## t-test
+
+→ [Mathematical specification](@ref "The t-tests")
+
 ```@docs
 OneSampleTTest
 EqualVarianceTTest

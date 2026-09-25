@@ -62,8 +62,8 @@ population_param_of_interest(x::BinomialTest) = ("Probability of success", x.p, 
 default_tail(test::BinomialTest) = :both
 
 function show_params(io::IO, x::BinomialTest, ident="")
-    println(io, ident, "number of observations: $(x.n)")
-    println(io, ident, "number of successes:    $(x.x)")
+    println(io, ident, "number of observations: ", x.n)
+    println(io, ident, "number of successes:    ", x.x)
 end
 
 StatsAPI.pvalue(x::BinomialTest; tail=:both) = pvalue(Binomial(x.n, x.p), x.x; tail=tail)

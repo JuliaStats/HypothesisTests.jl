@@ -39,7 +39,7 @@ sim_data_h0=[
     @test t.Q ≈ 1.233942980734545
     @test pvalue(t) ≈ 0.2666415904008932
     @test default_tail(t) == :right
-    show(IOBuffer(), t)
+    show(IOBuffer(), MIME("text/plain"), t)
 end
 
 @testset "Ljung-Box" begin
@@ -51,7 +51,7 @@ end
     @test t.Q ≈ 3.2090126519163626
     @test pvalue(t) ≈ 0.36050846449240337
     @test default_tail(t) == :right
-    show(IOBuffer(), t)
+    show(IOBuffer(), MIME("text/plain"), t)
 end
 
 sim_data_h1 = [
@@ -90,7 +90,7 @@ sim_data_h1 = [
     @test t.dof == 0
     @test t.Q ≈ 176.16899390632153
     @test pvalue(t) ≈ 5.925682677971866e-38
-    show(IOBuffer(), t)
+    show(IOBuffer(), MIME("text/plain"), t)
 end
 
 @testset "Ljung-Box" begin
@@ -101,6 +101,6 @@ end
     @test t.dof == 0
     @test t.Q ≈ 271.8894095341075
     @test pvalue(t) ≈ 3.6622231247462687e-51
-    show(IOBuffer(), t)
+    show(IOBuffer(), MIME("text/plain"), t)
 end
 end

@@ -51,28 +51,72 @@ function check_tail(tail::Symbol)
     end
 end
 
+"""
+    ComputationTooLarge <: Exception
+
+Thrown where a test refuses a computation whose cost this package bounds, rather than
+run for an unbounded time or exhaust memory. See [`MAX_EXACT_ENUMERATION_N`](@ref),
+[`MAX_PAIRWISE_ESTIMATES`](@ref) and [`MAX_EXACT_CI_ESTIMATES`](@ref) for the three bounds
+and the way past each.
+
+It is deliberately not an `ArgumentError`: the argument is not wrong, the cost of
+answering for it is refused, and `show` needs to tell that apart from a genuine
+argument bug in a `confint` method it knows nothing about.
+"""
+struct ComputationTooLarge <: Exception
+    msg::String
+end
+
+Base.showerror(io::IO, err::ComputationTooLarge) = print(io, "ComputationTooLarge: ", err.msg)
+
+# `show` asks a test for two things it may not be able to give for the sample it was
+# handed: its point estimate and its interval. For the rank tests both are read off a
+# pairwise set bounded by `MAX_PAIRWISE_ESTIMATES`, so past that bound each raises. A
+# test that cannot afford one still has a name, a statistic and a p-value worth seeing,
+# so what cannot be computed is dropped rather than the whole display.
+#
+# Only `ComputationTooLarge` is caught. These functions are generic over
+# `HypothesisTest`, so catching `ArgumentError` here would also swallow a genuine
+# argument bug in any downstream package's method and print a test with a line missing
+# instead of raising, which is a hard thing to debug.
+function show_or_nothing(f, test::HypothesisTest)
+    try
+        return f(test)
+    catch err
+        err isa ComputationTooLarge || rethrow()
+        return nothing
+    end
+end
+
+show_confint(test::HypothesisTest) =
+    applicable(confint, test) ? show_or_nothing(confint, test) : nothing
+
 # Pretty-print
-function Base.show(_io::IO, test::T) where T<:HypothesisTest
+function Base.show(_io::IO, ::MIME"text/plain", test::T) where T<:HypothesisTest
     io = IOContext(_io, :compact=>get(_io, :compact, true))
     println(io, testname(test))
     println(io, repeat("-", length(testname(test))))
 
     # population details
-    has_ci = applicable(confint, test)
-    (param_name, param_under_h0, param_estimate) = population_param_of_interest(test)
+    ci = show_confint(test)
+    params = show_or_nothing(population_param_of_interest, test)
     println(io, "Population details:")
-    println(io, "    parameter of interest:   $param_name")
-    print(io, "    value under h_0:         ")
-    show(io, param_under_h0)
-    println(io)
-    print(io, "    point estimate:          ")
-    show(io, param_estimate)
-    println(io)
+    if params === nothing
+        println(io, "    parameter of interest:   not computed (over MAX_PAIRWISE_ESTIMATES)")
+    else
+        (param_name, param_under_h0, param_estimate) = params
+        println(io, "    parameter of interest:   $param_name")
+        print(io, "    value under h_0:         ")
+        show(io, param_under_h0)
+        println(io)
+        print(io, "    point estimate:          ")
+        show(io, param_estimate)
+        println(io)
+    end
 
-    if has_ci
-        ci = map(x -> round.(x; sigdigits=4, base=10), confint(test))
+    if ci !== nothing
         print(io, "    95% confidence interval: ")
-        show(io, ci)
+        show(io, map(x -> round.(x; sigdigits=4, base=10), ci))
         println(io)
     end
     println(io)
@@ -127,6 +171,7 @@ include("circular.jl")
 include("fisher.jl")
 include("kolmogorov_smirnov.jl")
 include("kruskal_wallis.jl")
+include("rank_common.jl")
 include("mann_whitney.jl")
 include("t.jl")
 include("z.jl")
