@@ -703,10 +703,8 @@ end
 
 @testset "Issue 365" begin
     # Non-Float64 real element types should construct without a MethodError
-    ref = pvalue(SignedRankTest([3.0, -1, 4, -1, 5, 9, -2, 6, 5, 3]))
-    for x in (Float32[3, -1, 4, -1, 5, 9, -2, 6, 5, 3],
-              Float16[3, -1, 4, -1, 5, 9, -2, 6, 5, 3],
-              Rational{Int}[3, -1, 4, -1, 5, 9, -2, 6, 5, 3])
+    ref = pvalue(SignedRankTest(Float64[3, -1, 4, -1, 5, 9, -2, 6, 5, 3]))
+    for x in (Float32.(ref), Float16.(ref), Rational{Int}.(ref))
         @test SignedRankTest(x).median isa Float64
         @test pvalue(SignedRankTest(x)) ≈ ref rtol=1e-3
         @test pvalue(ExactSignedRankTest(x)) ≈ ref rtol=1e-3
