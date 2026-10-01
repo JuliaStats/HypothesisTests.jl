@@ -700,4 +700,15 @@ end
     # differences cannot reach 0.95 or 0.99, on both routes and both signs
     @test warned == 14
 end
+
+@testset "Issue 365" begin
+    # Non-Float64 real element types should construct without a MethodError
+    ref = Float64[3, -1, 4, -1, 5, 9, -2, 6, 5, 3]
+	pref = pvalue(SignedRankTest(ref))
+    for x in (Float32.(ref), Float16.(ref), Rational{Int}.(ref))
+        @test SignedRankTest(x).median isa Float64
+        @test pvalue(SignedRankTest(x)) ≈ pref rtol=1e-3
+        @test pvalue(ExactSignedRankTest(x)) ≈ pref rtol=1e-3
+    end
+end
 end
