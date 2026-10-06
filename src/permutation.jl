@@ -20,9 +20,10 @@ that `f(x)` is equal to `f(y)`.  All possible permutations are sampled.
 """
 function ExactPermutationTest(x::AbstractVector{R}, y::AbstractVector{S},
                               f::Function) where {R<:Real,S<:Real}
-    xy, rx, ry = ptstats(x,y)
-    P = permutations(xy)
-    samples = [f(view(p,rx)) - f(view(p,ry)) for p in P]
+    xy = vcat(x, y)
+    n, nx = length(xy), length(x)
+    samples = [f(view(xy, ix)) - f(view(xy, setdiff(1:n, ix)))
+               for ix in combinations(1:n, nx)]
     PermutationTest(f(x) - f(y), samples)
 end
 
