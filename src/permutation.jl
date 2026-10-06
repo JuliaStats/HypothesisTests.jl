@@ -16,7 +16,9 @@ end
     ExactPermutationTest(x::Vector, y::Vector, f::Function)
 
 Perform a permutation test (a.k.a. randomization test) of the null hypothesis
-that `f(x)` is equal to `f(y)`.  All possible permutations are sampled.
+that `f(x)` is equal to `f(y)`. Every way of splitting the pooled data into
+groups of the original sizes is tried, so this gets slow for larger samples.
+All unique combinations are tried (not all permutations)
 """
 function ExactPermutationTest(x::AbstractVector{R}, y::AbstractVector{S},
                               f::Function) where {R<:Real,S<:Real}
