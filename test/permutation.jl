@@ -6,7 +6,8 @@ using HypothesisTests, Test, Statistics, StableRNGs
         @test pvalue(ExactPermutationTest([4,5,6], [1,2,3], mean), tail=:both) ≈ 0.1
         @test pvalue(ExactPermutationTest([1,2,3], [4,5,6], mean), tail=:left) ≈ 0.05
         @test pvalue(ExactPermutationTest([4,5,6], [1,2,3], mean), tail=:right) ≈ 0.05
-    end
+        @test pvalue(ExactPermutationTest([0.1, 0.2, 0.3], [0.0, 0.0, 0.0], mean), tail=:right) ≈ 0.05    
+end
 
     @testset "ApproximatePermutationTest" begin
         rng = StableRNG(12345)
