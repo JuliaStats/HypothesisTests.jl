@@ -16,15 +16,18 @@ StatsFuns = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
 
 [compat]
 Combinatorics = "1"
-DelimitedFiles = "<0.0.1, 1"
+DelimitedFiles = "1"
 Distributions = "0.25.90"
+LinearAlgebra = "1"
+Printf = "1"
+Random = "1"
 Roots = "3"
 StableRNGs = "1"
 Statistics = "1"
 StatsAPI = "1.6"
 StatsBase = "0.27, 0.28, 0.29, 0.30, 0.31, 0.32, 0.33, 0.34"
 StatsFuns = "1.5.3, 2.2.1"
-Test = "<0.0.1, 1"
+Test = "1"
 julia = "1.10"
 
 [extras]
