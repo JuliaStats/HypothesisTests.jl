@@ -112,5 +112,7 @@ end
     @test_ci_approx confint(SignTest(x), level=0.882) (6.5, 14.4)
     @test_ci_approx confint(SignTest(x), level=0.7) (8.7, 13.6)
     @test_ci_approx confint(SignTest(x), level=0.6) (9.1, 10.8)
+    @test_ci_approx confint(SignTest(x), tail=:left, level=0.9825) (-Inf, 15.6)
+    @test_ci_approx confint(SignTest(x), tail=:right, level=0.9825) (3.7, Inf)
     show(IOBuffer(), MIME("text/plain"), SignTest(x))
 end

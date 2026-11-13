@@ -237,10 +237,10 @@ function StatsAPI.confint(x::SignTest; level::Float64=0.95, tail=:both)
 
     if tail == :left
         q = Int(quantile(Binomial(x.n, 0.5), 1-level))
-        (x.data[q+1], x.median)
+        (-Inf, x.data[end-q])
     elseif tail == :right
         q = Int(quantile(Binomial(x.n, 0.5), 1-level))
-        (x.median, x.data[end-q])
+        (x.data[q+1], Inf)
     elseif tail == :both
         q = Int(quantile(Binomial(x.n, 0.5), (1-level)/2))
         (x.data[q+1], x.data[end-q])
