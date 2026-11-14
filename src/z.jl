@@ -118,7 +118,7 @@ struct EqualVarianceZTest <: TwoSampleZTest
     xbar::Real   # estimated mean difference
     stderr::Real # population standard error
     z::Real      # z-statistic
-    μ0::Real     # mean difference under h_0
+    Δμ0::Real    # mean difference under h_0
 end
 
 function show_params(io::IO, x::TwoSampleZTest, ident="")
@@ -128,24 +128,29 @@ function show_params(io::IO, x::TwoSampleZTest, ident="")
 end
 
 testname(::EqualVarianceZTest) = "Two sample z-test (equal variance)"
-population_param_of_interest(x::TwoSampleZTest) = ("Mean difference", x.μ0, x.xbar) # parameter of interest: name, value under h0, point estimate
+population_param_of_interest(x::TwoSampleZTest) = ("Mean difference", x.Δμ0, x.xbar) # parameter of interest: name, value under h0, point estimate
 
 """
-    EqualVarianceZTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real})
+    EqualVarianceZTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real}, Δμ0::Real=0)
 
 Perform a two-sample z-test of the null hypothesis that `x` and `y` come from distributions
-with equal means and variances against the alternative hypothesis that the distributions
-have different means but equal variances.
+with equal variances and a difference between their means equal to `Δμ0`
+(i.e. `mean(X) - mean(Y) == Δμ0`) against the alternative hypothesis that
+the distributions have equal variances and a difference between their means
+different from `Δμ0`. By default `Δμ0 = 0`, that is the null hypothesis
+is that means are equal.
+
+See also:  [`VarianceFTest`](@ref) to test whether two datasets have equal variance.
 
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
-function EqualVarianceZTest(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0) where {T<:Real,S<:Real}
+function EqualVarianceZTest(x::AbstractVector{T}, y::AbstractVector{S}, Δμ0::Real=0) where {T<:Real,S<:Real}
     nx, ny = length(x), length(y)
     xbar = mean(x) - mean(y)
     stddev = sqrt(((nx - 1) * var(x) + (ny - 1) * var(y)) / (nx + ny - 2))
     stderr = stddev * sqrt(1/nx + 1/ny)
-    z = (xbar - μ0) / stderr
-    EqualVarianceZTest(nx, ny, xbar, stderr, z, μ0)
+    z = (xbar - Δμ0) / stderr
+    EqualVarianceZTest(nx, ny, xbar, stderr, z, Δμ0)
 end
 
 
@@ -157,25 +162,30 @@ struct UnequalVarianceZTest <: TwoSampleZTest
     xbar::Real   # estimated mean
     stderr::Real # empirical standard error
     z::Real      # z-statistic
-    μ0::Real     # mean under h_0
+    Δμ0::Real    # mean under h_0
 end
 
 testname(::UnequalVarianceZTest) = "Two sample z-test (unequal variance)"
 
 """
-    UnequalVarianceZTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real})
+    UnequalVarianceZTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real}, Δμ0::Real=0)
 
-Perform an unequal variance two-sample z-test of the null hypothesis that `x` and `y` come
-from distributions with equal means against the alternative hypothesis that the
-distributions have different means.
+Perform a two-sample z-test of the null hypothesis that `x` and `y` come from distributions
+with different variances and a difference between their means equal to `Δμ0`
+(i.e. `mean(X) - mean(Y) == Δμ0`) against the alternative hypothesis that
+the distributions have different variances and a difference between their means
+different from `Δμ0`. By default `Δμ0 = 0`, that is the null hypothesis
+is that means are equal.
 
+See also: [`VarianceFTest`](@ref) to test whether two datasets have equal variance.
+    
 Implements: [`pvalue`](@ref), [`confint`](@ref)
 """
-function UnequalVarianceZTest(x::AbstractVector{T}, y::AbstractVector{S}, μ0::Real=0) where {T<:Real,S<:Real}
+function UnequalVarianceZTest(x::AbstractVector{T}, y::AbstractVector{S}, Δμ0::Real=0) where {T<:Real,S<:Real}
     nx, ny = length(x), length(y)
     xbar = mean(x)-mean(y)
     varx, vary = var(x), var(y)
     stderr = sqrt(varx/nx + vary/ny)
-    z = (xbar-μ0)/stderr
-    UnequalVarianceZTest(nx, ny, xbar, stderr, z, μ0)
+    z = (xbar-Δμ0)/stderr
+    UnequalVarianceZTest(nx, ny, xbar, stderr, z, Δμ0)
 end
