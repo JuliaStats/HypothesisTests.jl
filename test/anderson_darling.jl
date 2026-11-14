@@ -95,4 +95,22 @@ end
     @test pvalue(KSampleADTest(x,x,x,x,x,x)) ≈ 1.0
 end
 
+# An `AbstractVector` whose `vcat` is not a `Vector`, like `SentinelArrays.ChainedVector`
+struct WrappedVector{T} <: AbstractVector{T}
+    data::Vector{T}
+end
+Base.size(x::WrappedVector) = size(x.data)
+Base.getindex(x::WrappedVector, i::Int) = x.data[i]
+Base.vcat(xs::WrappedVector...) = WrappedVector(reduce(vcat, map(x -> x.data, xs)))
+
+@testset "non-Vector AbstractVector inputs (#344)" begin
+    rng = StableRNG(344)
+    x, y = rand(rng, Normal(), 40), rand(rng, Normal(0.5), 30)
+    t = KSampleADTest(x, y)
+    tw = KSampleADTest(WrappedVector(x), WrappedVector(y))
+    @test tw.samples isa Vector{Float64}
+    @test tw.A²k == t.A²k
+    @test pvalue(tw) == pvalue(t)
+end
+
 end
