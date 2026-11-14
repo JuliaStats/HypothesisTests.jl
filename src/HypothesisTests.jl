@@ -122,7 +122,7 @@ function Base.show(_io::IO, ::MIME"text/plain", test::T) where T<:HypothesisTest
     println(io)
 
     # test summary
-    p = pvalue(test)
+    p = pvalue(test, tail=:both)
     outcome = if p > 0.05 "fail to reject" else "reject" end
     tail = default_tail(test)
     pval = StatsBase.PValue(p)
