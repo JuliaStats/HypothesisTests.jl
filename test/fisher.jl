@@ -126,4 +126,19 @@ t = HypothesisTests.FisherExactTest(0, 5, 0, 5)
 t = HypothesisTests.FisherExactTest(1, 1, 1, 1)
 @test HypothesisTests.pvalue(t, tail=:both) <= 1
 show(IOBuffer(), MIME("text/plain"), t)
+
+# confint when the p-value is numerically flat around ω = 1, gh #122 and #307
+for (a, b, c, d) in ((4, 362, 69, 125), (75, 285, 1, 1140))
+    t = HypothesisTests.FisherExactTest(a, b, c, d)
+    dist(ω) = FisherNoncentralHypergeometric(a + b, c + d, a + c, ω)
+    lo, hi = confint(t)
+    @test lo < t.ω < hi
+    @test pvalue(dist(lo), a; tail=:right) ≈ 0.025
+    @test pvalue(dist(hi), a; tail=:left) ≈ 0.025
+    @test confint(t; level=0.975, tail=:right)[1] ≈ lo
+    @test confint(t; level=0.975, tail=:left)[2] ≈ hi
+    show(IOBuffer(), MIME("text/plain"), t)
+end
+@test_ci_approx confint(HypothesisTests.FisherExactTest(4, 362, 69, 125)) (0.005235523312478257, 0.05564002915759609)
+@test_ci_approx confint(HypothesisTests.FisherExactTest(75, 285, 1, 1140)) (51.556768770247004, 12015.23396257066)
 end

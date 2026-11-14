@@ -186,14 +186,16 @@ function StatsAPI.confint(x::FisherExactTest; level::Float64=0.95, tail=:both, m
         if (x.a == maximum(dist(1.0)))
             (0.0, Inf)
         else
-            lower, upper = find_brackets(obj)
+            # P(X ≤ a) is decreasing in ω
+            lower, upper = find_brackets(obj, false)
             (0.0, lower == upper ? lower : find_zero(obj, (lower, upper)))
         end
     elseif tail == :right # lower bound
         if (x.a == minimum(dist(1.0)))
             (0.0, Inf)
         else
-            lower, upper = find_brackets(obj)
+            # P(X ≥ a) is increasing in ω
+            lower, upper = find_brackets(obj, true)
             (lower == upper ? lower : find_zero(obj, (lower, upper)), Inf)
         end
     elseif tail == :both
@@ -220,25 +222,25 @@ function reorder(a,b,c,d)
     (a, b, c, d)
 end
 
-# find values x_lower and x_upper, s.t. f(x_lower) < 0 and f(x_upper) > 0 or vice versa
-function find_brackets(f::Function, x_init::Float64=1.0)
-    f_init = f(x_init)
-
-    if f_init > f(x_init + 1.0)
-        find_brackets(x -> -f(x), x_init)
-    else
-        x_upper = x_lower = x_init
-        if f_init > 0.0
-            while x_lower > eps(0.0) && f(x_lower) > 0.0
-                x_lower /= 2
-            end
-        else
-            while f(x_upper) < 0.0
-                x_upper *= 2
-            end
-        end
-        (x_lower, x_upper)
+# find values x_lower and x_upper, s.t. f(x_lower) < 0 and f(x_upper) > 0 or vice versa,
+# for a function f that is monotonically increasing (or decreasing if `increasing=false`).
+# The direction is passed in rather than inferred from f, since f can be numerically flat
+# (e.g. a p-value that is 0 or 1 to machine precision) far away from its root.
+function find_brackets(f::Function, increasing::Bool, x_init::Float64=1.0)
+    if !increasing
+        return find_brackets(x -> -f(x), true, x_init)
     end
+    x_upper = x_lower = x_init
+    if f(x_init) > 0.0
+        while x_lower > eps(0.0) && f(x_lower) > 0.0
+            x_lower /= 2
+        end
+    else
+        while f(x_upper) < 0.0
+            x_upper *= 2
+        end
+    end
+    (x_lower, x_upper)
 end
 
 # find odds ratio ω that maximizes the (conditional) likelihood;
@@ -256,7 +258,7 @@ function cond_mle_odds_ratio(a::Int, b::Int, c::Int, d::Int)
         Inf
     else
         obj(ω) = mean(dist(ω))-a
-        lower, upper = find_brackets(obj)
+        lower, upper = find_brackets(obj, true)
         lower == upper ? lower : find_zero(obj, (lower, upper))
     end
 end
