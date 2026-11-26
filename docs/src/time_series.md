@@ -24,6 +24,11 @@ JarqueBeraTest
 ADFTest
 ```
 
+## Phillips-Perron test
+```@docs
+PhillipsPerronTest
+```
+
 ## Clark-West test
 ```@docs
 ClarkWestTest
