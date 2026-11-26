@@ -90,7 +90,7 @@ using StableRNGs
                 sample size in regression:          199
                 lags in long-run variance:          4
                 Z_t statistic:                      -0.825738
-                Critical values at 1%, 5%, and 10%: [-3.46364, -2.87618, -2.57457]
+                Critical values at 1%, 5%, and 10%: -3.46364, -2.87618, -2.57457
             """
     end
 end

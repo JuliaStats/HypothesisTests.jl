@@ -123,7 +123,7 @@ function show_params(io::IO, x::PhillipsPerronTest, ident)
     println(io, ident, "lags in long-run variance:          ", x.lag)
     println(io, ident, "Z_t statistic:                      ", x.stat)
     print(io, ident, "Critical values at 1%, 5%, and 10%: ")
-    show(io, x.cv)
+    join(io, x.cv, ", ")
     println(io)
 end
 
