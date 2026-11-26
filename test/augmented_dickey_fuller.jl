@@ -162,4 +162,27 @@ end
     @test pvalue(t) ≈ 0.012662962461719612
     show(IOBuffer(), MIME("text/plain"), t)
 end
+
+@testset "Show" begin
+    t = ADFTest(sim_data_h0, :constant, 4)
+    @test repr("text/plain", t; context=:compact => true) ==
+        """
+        Augmented Dickey-Fuller unit root test
+        --------------------------------------
+        Population details:
+            parameter of interest:   coefficient on lagged non-differenced variable
+            value under h_0:         0
+            point estimate:          -0.034891
+
+        Test summary:
+            outcome with 95% confidence: fail to reject h_0
+            p-value:                     0.6092
+
+        Details:
+            sample size in regression:          96
+            number of lags:                     4
+            ADF statistic:                      -1.34323
+            Critical values at 1%, 5%, and 10%: -3.49682, -2.89061, -2.58228
+        """
+end
 end
