@@ -211,7 +211,7 @@ function show_params(io::IO, x::ADFTest, ident)
     println(io, ident, "number of lags:                     ", x.lag)
     println(io, ident, "ADF statistic:                      ", x.stat)
     print(io, ident, "Critical values at 1%, 5%, and 10%: ")
-    show(io, x.cv')
+    join(io, x.cv, ", ")
     println(io)
 end
 
